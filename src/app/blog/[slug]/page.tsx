@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getPostBySlug, getPosts } from '@/lib/posts';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
+import rehypeHighlight from 'rehype-highlight';
 
 interface PageProps {
     params: Promise<{
@@ -72,9 +73,24 @@ export default async function BlogPost({ params }: PageProps) {
                     </header>
 
                     {/* Post Content */}
-                    <div className="px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline">
+                    <div className="px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none 
+                        prose-headings:font-bold prose-headings:tracking-tight
+                        prose-h1:text-[3rem] prose-h1:leading-[1.2] prose-h1:mb-6 prose-h1:tracking-[-0.025em]
+                        prose-h2:text-[2.25rem] prose-h2:leading-[1.3] prose-h2:tracking-[-0.02em] prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-gray-200 dark:prose-h2:border-gray-700
+                        prose-h3:text-[1.875rem] prose-h3:leading-[1.4] prose-h3:tracking-[-0.015em] prose-h3:mt-8 prose-h3:mb-3
+                        prose-h4:text-[1.5rem] prose-h4:leading-[1.5] prose-h4:mt-6 prose-h4:mb-2
+                        prose-p:text-lg prose-p:leading-relaxed prose-p:mb-8
+                        prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
+                        prose-strong:font-bold prose-strong:text-gray-900 dark:prose-strong:text-white
+                        prose-li:text-lg prose-li:mb-2
+                        prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50/50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
+                        prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl">
                         {/* MDXRemote handles the rendering of the markdown string */}
-                        <MDXRemote source={post.content} />
+                        <MDXRemote source={post.content} options={{
+                            mdxOptions: {
+                                rehypePlugins: [rehypeHighlight]
+                            }
+                        }} />
                     </div>
                 </div>
 

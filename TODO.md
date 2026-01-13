@@ -7,7 +7,6 @@
 
 ## 📋 Next Up
 
-- [ ] Write first blog post: "Next.js 15 Server Components Tutorial"
 - [ ] Write second blog post: "AI-Powered Code Generation Tools"
 - [ ] Write third blog post: "TypeScript Best Practices for Full-Stack Apps"
 - [ ] Create Contact page with email/form
@@ -28,6 +27,7 @@
 
 ## ✅ Completed (2026-01-14)
 
+- [x] Write first blog post: "Next.js 16 Server Components Tutorial"
 - [x] Create reusable BlogPostTemplate component
 - [x] Add automatic reading time calculation
 - [x] Conduct keyword research for top 10 blog topics

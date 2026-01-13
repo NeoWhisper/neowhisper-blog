@@ -1,7 +1,9 @@
 import { getPosts } from '@/lib/posts';
 import ArticleCard from '@/components/ArticleCard';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+
+// NOTE: notFound from 'next/navigation' was removed because we now
+// show a custom "No articles found" UI instead of a 404 page.
 
 interface PageProps {
     params: Promise<{
@@ -19,6 +21,15 @@ export async function generateStaticParams() {
     }));
 }
 
+const CATEGORY_NAMES: Record<string, string> = {
+    'software-development': 'Software Development',
+    'game-development': 'Game Development',
+    'translation': 'Translation',
+    'next.js': 'Next.js Tutorials',
+    'tech-tips': 'Tech Tips',
+    'アート＆デザイン': 'アート＆デザイン',
+};
+
 export default async function CategoryPage({ params }: PageProps) {
     const { slug } = await params;
     const posts = getPosts();
@@ -31,12 +42,10 @@ export default async function CategoryPage({ params }: PageProps) {
         return postSlug === decodedSlug;
     });
 
-    if (categoryPosts.length === 0) {
-        notFound();
-    }
-
-    // Get the original category name from the first match for display
-    const categoryName = categoryPosts[0].category;
+    // Get the original category name
+    const categoryName = categoryPosts.length > 0
+        ? categoryPosts[0].category
+        : (CATEGORY_NAMES[decodedSlug] || decodedSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '));
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -72,9 +81,20 @@ export default async function CategoryPage({ params }: PageProps) {
                 </header>
 
                 <div className="grid gap-8">
-                    {categoryPosts.map((post) => (
-                        <ArticleCard key={post.slug} post={post} />
-                    ))}
+                    {categoryPosts.length > 0 ? (
+                        categoryPosts.map((post) => (
+                            <ArticleCard key={post.slug} post={post} />
+                        ))
+                    ) : (
+                        <div className="text-center py-20 bg-white/40 dark:bg-white/5 backdrop-blur-lg rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
+                            <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
+                                No articles found in this category yet.
+                            </p>
+                            <p className="text-sm text-gray-400">
+                                Check back soon for new content about {categoryName}!
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

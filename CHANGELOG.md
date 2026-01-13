@@ -23,6 +23,8 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Refactored blog post page to use `BlogPostTemplate` (123 lines → 38 lines)
 - Blog posts now display reading time, category badges, and hero images
 - Updated `.gitignore` to exclude private planning tools
+- Updated project to Next.js 16 to sync with `package.json` version
+- Refreshed tutorial content and images for Next.js 16
 
 ## [1.3.0] - 2026-01-13
 

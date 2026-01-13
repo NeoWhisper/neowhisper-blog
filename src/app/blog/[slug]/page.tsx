@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 
 // 2. The Page Component
 export default async function BlogPost({ params }: PageProps) {
-    // In Next.js 15, params is a Promise that must be awaited
+    // In Next.js 16, params is a Promise that must be awaited
     const { slug } = await params;
 
     const post = getPostBySlug(slug);

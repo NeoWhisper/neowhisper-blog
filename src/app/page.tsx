@@ -1,6 +1,6 @@
-
 import { getPosts } from '@/lib/posts';
 import ArticleCard from '@/components/ArticleCard';
+import CategoryNav from '@/components/CategoryNav';
 
 export default async function Home() {
   const posts = getPosts();
@@ -16,6 +16,8 @@ export default async function Home() {
             Full-stack development with trilingual support (日本語・English・العربية).
           </p>
         </header>
+
+        <CategoryNav />
 
         <section className="mb-16 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white/40 dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-lg hover:shadow-xl transition-shadow">

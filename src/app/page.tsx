@@ -1,5 +1,6 @@
-import Link from 'next/link';
+
 import { getPosts } from '@/lib/posts';
+import ArticleCard from '@/components/ArticleCard';
 
 export default async function Home() {
   const posts = getPosts();
@@ -39,44 +40,7 @@ export default async function Home() {
           {posts.length > 0 ? (
             <div className="grid gap-8">
               {posts.map((post) => (
-                <article
-                  key={post.slug}
-                  className="relative overflow-hidden p-8 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(124,58,237,0.1)] transition-all duration-300 group"
-                >
-                  <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-4 gap-3">
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
-                      >
-                        {post.title}
-                      </Link>
-                      <time className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 px-3 py-1 rounded-full whitespace-nowrap">
-                        {new Date(post.date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </time>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed line-clamp-3">
-                      {post.excerpt}
-                    </p>
-
-                    <div className="flex items-center">
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="inline-flex items-center text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
-                      >
-                        Read Article
-                        <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </article>
+                <ArticleCard key={post.slug} post={post} />
               ))}
             </div>
           ) : (

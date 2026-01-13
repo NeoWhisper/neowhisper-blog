@@ -5,13 +5,7 @@ import matter from "gray-matter";
 // Define the path to your content directory
 const postsDirectory = path.join(process.cwd(), "src/content/posts");
 
-export interface Post {
-    slug: string;
-    title: string;
-    date: string;
-    excerpt: string;
-    content: string;
-}
+import { Post } from "@/types";
 
 // Function to retrieve all posts, sorted by date
 export function getPosts(): Post[] {
@@ -41,6 +35,9 @@ export function getPosts(): Post[] {
                 ? new Date(data.date).toISOString()
                 : new Date().toISOString(),
             excerpt: data.excerpt || "",
+            coverImage: data.coverImage || null,
+            category: data.category || null,
+            readTime: data.readTime || null,
             content,
         } as Post;
     });
@@ -69,6 +66,9 @@ export function getPostBySlug(slug: string): Post | null {
             ? new Date(data.date).toISOString()
             : new Date().toISOString(),
         excerpt: data.excerpt || "",
+        coverImage: data.coverImage || null,
+        category: data.category || null,
+        readTime: data.readTime || null,
         content,
     } as Post;
 }

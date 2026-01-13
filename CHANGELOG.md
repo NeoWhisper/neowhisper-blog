@@ -8,6 +8,32 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Contact page (coming soon)
 - About page (coming soon)
 
+## [1.3.0] - 2026-01-13
+
+### Added
+
+- Google Analytics (GA4) integration with secure environment variable configuration
+- Google AdSense setup with conditional loading
+- Helper library (`src/lib/gtag.ts`) for type-safe analytics tracking
+- Client-side `GoogleAnalytics` component for App Router compatibility
+- Environment variable support (`NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_URL`)
+- TypeScript declarations for gtag API
+
+### Changed
+
+- Updated blog tutorial from Next.js 14 to Next.js 15
+- Switched primary font from Geist to Outfit for improved readability
+- Enhanced blog post typography with larger headings (H1: 48px, H2: 36px with borders)
+- Improved spacing and visual hierarchy in blog content
+- Refactored analytics implementation to use dedicated components
+- Updated cover image for tutorial post
+
+### Security
+
+- Removed hardcoded API keys and tracking IDs from source code
+- Implemented environment variable-based configuration for all sensitive data
+- Ensured `.env.local` is properly gitignored
+
 ## [1.2.0] - 2026-01-10
 
 ### Added

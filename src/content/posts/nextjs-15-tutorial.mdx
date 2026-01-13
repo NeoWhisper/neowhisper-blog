@@ -1,0 +1,334 @@
+---
+title: "Building Your First Next.js 15 Blog with App Router and MDX"
+date: "2026-01-13"
+excerpt: "A comprehensive guide to creating a modern, performant blog using Next.js 15's App Router, MDX for content management, and Tailwind CSS for styling. Perfect for developers looking to build their first Next.js project."
+category: "Next.js"
+coverImage: "/images/nextjs-15-blog-tutorial.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+# Building Your First Next.js 15 Blog
+
+So, you want to build a blog? In 2026, we're not just throwing some HTML on a server anymore. We want speed, we want great SEO, and honestly? We want it to be fun to build.
+
+That's where **Next.js 15** comes in.
+
+In this guide, I'm going to walk you through building a blog that actually feels modern. We're talking Next.js 15, the App Router, MDX for your content, and Tailwind CSS to make it look sharp.
+
+> **Version Note**: This tutorial uses Next.js 15 (the current LTS version). If you're on Next.js 16+, the patterns remain the same, but check the [official upgrade guide](https://nextjs.org/docs/app/guides/upgrading) for any breaking changes.
+
+## 🚀 Why Next.js 15?
+
+You might be asking, "Why not just use WordPress?" And look, WordPress is fine. But if you're a developer (or becoming one), you want full control.
+
+Here's why Next.js 15 is the move:
+
+1.  **It's Fast (Like, Really Fast)**: Thanks to **Server Components**, your blog posts render on the server. This means less JavaScript for the user's browser to churn through, which equals instant load times.
+2.  **The App Router Rules**: The App Router uses folders for routes, making layouts and loading states incredibly intuitive.
+3.  **Performance for Free**: Images? Optimized. Fonts? Optimized. It does the heavy lifting so you don't have to.
+4.  **TypeScript**: It just works. You get type safety right out of the box, which saves you from so many "undefined is not a function" headaches.
+
+## 🛠️ Let's Get Set Up
+
+Alright, let's get your hands dirty. First things first, make sure you've got Node.js installed (version 18.18 or newer).
+
+Open up your terminal and run this:
+
+```bash
+npx create-next-app@latest neowhisper-blog
+```
+
+It's going to ask you a few questions. Here's my recommended setup:
+
+-   **TypeScript?** Yes (Trust me on this one)
+-   **Tailwind CSS?** Yes (Standard in 2026)
+-   **App Router?** Yes (The default now)
+-   **Import Alias?** Yes (Use `@/*`, it's cleaner)
+
+### Adding the Secret Sauce (MDX)
+
+We want to write our posts in Markdown but have the power of React components. That's what MDX does. Let's install the dependencies we need:
+
+```bash
+npm install @next/mdx @mdx-js/loader @mdx-js/react gray-matter date-fns
+npm install -D @types/mdx
+```
+
+### Configuring MDX
+
+Create or update `next.config.js` to enable MDX support:
+
+```js
+import createMDX from '@next/mdx'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)
+```
+
+Create `mdx-components.tsx` in your root directory to customize MDX rendering:
+
+```tsx
+import type { MDXComponents } from 'mdx/types'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-3xl font-bold mb-3 mt-8">{children}</h2>,
+    a: ({ href, children }) => (
+      <a href={href} className="text-purple-600 hover:underline">
+        {children}
+      </a>
+    ),
+    ...components,
+  }
+}
+```
+
+## 📂 Project Structure
+
+Keep it clean. Here's how I organize my projects:
+
+```text
+src/
+├── app/              # Your pages live here
+│   ├── blog/
+│   │   └── [slug]/
+│   │       └── page.tsx
+│   └── page.tsx
+├── components/       # Reusable UI bits (like buttons and cards)
+├── content/          # Your MDX blog posts go here
+│   └── posts/
+│       └── first-post.mdx
+└── lib/              # Helper functions (like fetching posts)
+    └── posts.ts
+```
+
+### Example MDX Post
+
+Create a post at `src/content/posts/first-post.mdx`:
+
+```mdx
+***
+title: "My First Post"
+date: "2026-01-13"
+excerpt: "This is my first blog post using Next.js 15 and MDX"
+coverImage: "/images/first-post.png"
+***
+
+# My First Post
+
+This is **awesome**! I can write Markdown and use React components.
+```
+
+## 📝 Fetching Your Content
+
+One of the coolest things about the App Router is that you can just... fetch data. You don't need `useEffect` or complex state management for simple data fetching.
+
+### Setting up the Posts Library
+
+Create `src/lib/posts.ts`:
+
+```tsx
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+
+const postsDirectory = path.join(process.cwd(), 'src/content/posts')
+
+export type Post = {
+  slug: string
+  title: string
+  date: string
+  excerpt: string
+  coverImage: string
+  content: string
+}
+
+export async function getAllPosts(): Promise<Post[]> {
+  const fileNames = fs.readdirSync(postsDirectory)
+  const allPostsData = fileNames
+    .filter((fileName) => fileName.endsWith('.mdx'))
+    .map((fileName) => {
+      const slug = fileName.replace(/\.mdx$/, '')
+      const fullPath = path.join(postsDirectory, fileName)
+      const fileContents = fs.readFileSync(fullPath, 'utf8')
+      const { data, content } = matter(fileContents)
+
+      return {
+        slug,
+        content,
+        title: data.title,
+        date: data.date,
+        excerpt: data.excerpt,
+        coverImage: data.coverImage,
+      } as Post
+    })
+
+  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1))
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.mdx`)
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data, content } = matter(fileContents)
+
+    return {
+      slug,
+      content,
+      title: data.title,
+      date: data.date,
+      excerpt: data.excerpt,
+      coverImage: data.coverImage,
+    } as Post
+  } catch {
+    return null
+  }
+}
+```
+
+### The Home Page
+
+In `src/app/page.tsx`, we can just grab our posts and render them.
+
+```tsx
+import { getAllPosts } from '@/lib/posts'
+import ArticleCard from '@/components/ArticleCard'
+
+export default async function Home() {
+  const posts = await getAllPosts()
+
+  return (
+    <main className="container mx-auto px-4 py-12">
+      <h1 className="text-4xl font-bold mb-8">Latest Thoughts</h1>
+      <div className="grid md:grid-cols-2 gap-8">
+        {posts.map((post) => (
+          <ArticleCard key={post.slug} post={post} />
+        ))}
+      </div>
+    </main>
+  )
+}
+```
+
+### The Blog Post Page
+
+For the individual posts at `src/app/blog/[slug]/page.tsx`, we want them to be static. Why? Because blog posts don't change every second. We can build them once and serve them instantly.
+
+```tsx
+import { getPostBySlug, getAllPosts } from '@/lib/posts'
+import { notFound } from 'next/navigation'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+
+// This tells Next.js to build these pages in advance
+export async function generateStaticParams() {
+  const posts = await getAllPosts()
+  return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) return { title: 'Post Not Found' }
+  
+  return {
+    title: post.title,
+    description: post.excerpt,
+  }
+}
+
+export default async function BlogPost({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) {
+    notFound()
+  }
+
+  return (
+    <article className="max-w-3xl mx-auto py-12 px-4">
+      <h1 className="text-5xl font-bold mb-4">{post.title}</h1>
+      <time className="text-gray-500 block mb-8">{post.date}</time>
+      <div className="prose lg:prose-xl dark:prose-invert max-w-none">
+        <MDXRemote source={post.content} />
+      </div>
+    </article>
+  )
+}
+```
+
+### Custom 404 Page (Optional)
+
+Create `src/app/blog/[slug]/not-found.tsx`:
+
+```tsx
+export default function NotFound() {
+  return (
+    <div className="max-w-3xl mx-auto py-12 px-4 text-center">
+      <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
+      <p className="text-gray-600">The blog post you're looking for doesn't exist.</p>
+    </div>
+  )
+}
+```
+
+## 🎨 Making It Look Good
+
+Let's build a simple card component for your post previews.
+
+```tsx
+// src/components/ArticleCard.tsx
+import Link from 'next/link'
+import Image from 'next/image'
+import type { Post } from '@/lib/posts'
+
+export default function ArticleCard({ post }: { post: Post }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="group block">
+      <article className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+        <div className="relative h-48 w-full">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors">
+            {post.title}
+          </h2>
+          <p className="text-gray-500 line-clamp-2">{post.excerpt}</p>
+          <time className="text-sm text-gray-400 mt-2 block">{post.date}</time>
+        </div>
+      </article>
+    </Link>
+  )
+}
+```
+
+## ✨ Wrapping Up
+
+And there you have it. You've just built a high-performance blog using the latest and greatest web tech in 2026.
+
+**Where to go from here?**
+
+*   **Dark Mode**: Add a theme toggle using `next-themes` so your readers can save their eyes at night.
+*   **Search**: As you write more, add a search bar using a library like `fuse.js`.
+*   **Code Highlighting**: Add `rehype-highlight` or `rehype-pretty-code` to your MDX config for beautiful code blocks.
+*   **SEO**: Set up a sitemap.xml and robots.txt for better discoverability.
+*   **Deploy**: Push it to Vercel and show the world.
+
+Thanks for reading! Now go build something awesome.

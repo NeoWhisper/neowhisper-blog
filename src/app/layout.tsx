@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import "highlight.js/styles/github-dark.css"; // Syntax highlighting theme
 import Script from "next/script";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -24,7 +25,7 @@ export default function RootLayout({
       <head>
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR-REAL-ID"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} font-sans antialiased`}
       >
+        <GoogleAnalytics />
         {children}
       </body>
     </html>

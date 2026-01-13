@@ -2,11 +2,14 @@
 
 ## 🚀 In Progress
 
-- [ ] Write 15-20 SEO-focused blog posts
+- [ ] Write 15-20 SEO-focused blog posts (based on keyword research)
 - [ ] Create Services page with detailed offerings
 
 ## 📋 Next Up
 
+- [ ] Write first blog post: "Next.js 15 Server Components Tutorial"
+- [ ] Write second blog post: "AI-Powered Code Generation Tools"
+- [ ] Write third blog post: "TypeScript Best Practices for Full-Stack Apps"
 - [ ] Create Contact page with email/form
 - [ ] Create About page with company info
 - [ ] Add navigation menu to header
@@ -22,6 +25,14 @@
 - [ ] Add lang metadata to all MDX files
 - [ ] Configure Arabic RTL support
 - [ ] Set up automatic language detection based on user location
+
+## ✅ Completed (2026-01-14)
+
+- [x] Create reusable BlogPostTemplate component
+- [x] Add automatic reading time calculation
+- [x] Conduct keyword research for top 10 blog topics
+- [x] Create content planning dashboard (dev-only)
+- [x] Secure private planning tools with .gitignore
 
 ## ✅ Completed (2026-01-13)
 

@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# These files exist locally but won't be committed:
+src/app/content-planning/page.tsx
+src/lib/keyword-research.ts

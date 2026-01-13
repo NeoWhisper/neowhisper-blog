@@ -8,6 +8,22 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Contact page (coming soon)
 - About page (coming soon)
 
+## [1.3.1] - 2026-01-14
+
+### Added
+
+- Reusable `BlogPostTemplate` component for consistent blog styling
+- Automatic reading time calculation using `reading-time` package
+- `formatDate` utility function for consistent date formatting
+- Keyword research data structure (`keyword-research.ts`, gitignored)
+- Content planning dashboard (development-only, gitignored)
+
+### Changed
+
+- Refactored blog post page to use `BlogPostTemplate` (123 lines → 38 lines)
+- Blog posts now display reading time, category badges, and hero images
+- Updated `.gitignore` to exclude private planning tools
+
 ## [1.3.0] - 2026-01-13
 
 ### Added

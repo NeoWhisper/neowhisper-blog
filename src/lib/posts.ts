@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import readingTime from "reading-time";
 
 // Define the path to your content directory
 const postsDirectory = path.join(process.cwd(), "src/content/posts");
@@ -27,6 +28,8 @@ export function getPosts(): Post[] {
         // Use gray-matter to parse the post metadata section
         const { data, content } = matter(fileContents);
 
+        const stats = readingTime(content);
+
         return {
             slug,
             title: data.title || "Untitled Post",
@@ -37,7 +40,7 @@ export function getPosts(): Post[] {
             excerpt: data.excerpt || "",
             coverImage: data.coverImage || null,
             category: data.category || null,
-            readTime: data.readTime || null,
+            readTime: stats.text,
             content,
         } as Post;
     });
@@ -59,6 +62,8 @@ export function getPostBySlug(slug: string): Post | null {
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const { data, content } = matter(fileContents);
 
+    const stats = readingTime(content);
+
     return {
         slug,
         title: data.title,
@@ -68,7 +73,7 @@ export function getPostBySlug(slug: string): Post | null {
         excerpt: data.excerpt || "",
         coverImage: data.coverImage || null,
         category: data.category || null,
-        readTime: data.readTime || null,
+        readTime: stats.text,
         content,
     } as Post;
 }

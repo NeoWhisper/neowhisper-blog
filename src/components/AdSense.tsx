@@ -13,7 +13,7 @@ export default function AdSense({
     adSlot,
     adFormat = 'auto',
     fullWidthResponsive = true,
-    style = { display: 'block' }
+    style = { display: 'block' },
 }: AdSenseProps) {
     useEffect(() => {
         try {
@@ -28,7 +28,7 @@ export default function AdSense({
         <ins
             className="adsbygoogle"
             style={style}
-            data-ad-client="ca-pub-XXXXXXXXXX" // Replace with your AdSense client ID
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_ID ?? ''}
             data-ad-slot={adSlot}
             data-ad-format={adFormat}
             data-full-width-responsive={fullWidthResponsive.toString()}

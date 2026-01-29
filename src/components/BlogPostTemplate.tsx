@@ -3,6 +3,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
 import rehypeHighlight from 'rehype-highlight';
 import { formatDate } from '@/lib/utils';
+import { AdSenseAd } from '@/components/AdSenseAd';
 
 interface BlogPostTemplateProps {
     title: string;
@@ -96,6 +97,11 @@ export default function BlogPostTemplate({
                         </div>
                     </header>
 
+                    {/* Top Ad Unit */}
+                    <div className="px-6 sm:px-12 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <AdSenseAd slot="5462294096" />
+                    </div>
+
                     {/* Post Content */}
                     <div className="px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none 
             prose-headings:font-bold prose-headings:tracking-tight
@@ -118,6 +124,11 @@ export default function BlogPostTemplate({
                             }}
                         />
                     </div>
+                </div>
+
+                {/* Bottom Ad Unit */}
+                <div className="mt-8">
+                    <AdSenseAd slot="5462294096" />
                 </div>
 
                 {/* Bottom Back Button (for long posts) */}

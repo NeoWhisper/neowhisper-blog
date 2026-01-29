@@ -1,6 +1,7 @@
 import { getPosts } from '@/lib/posts';
 import ArticleCard from '@/components/ArticleCard';
 import CategoryNav from '@/components/CategoryNav';
+import { AdSenseAd } from '@/components/AdSenseAd';
 
 export default async function Home() {
   const posts = getPosts();
@@ -35,6 +36,10 @@ export default async function Home() {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Translation Services</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">JP・EN・AR technical translation</p>
           </div>
+        </section>
+
+        <section className="mb-16">
+          <AdSenseAd slot="5462294096" />
         </section>
 
         <section>

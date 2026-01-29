@@ -8,6 +8,27 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Contact page (coming soon)
 - About page (coming soon)
 
+## [1.4.0] - 2026-01-29
+
+### Added
+
+- **Multilingual Support**: Added support for 3 language variants per post (English, Japanese, Arabic) with suffix-based routing (`-ja`, `-ar`).
+- **Language Switcher**: New glassmorphism `LanguageSwitcher` component to toggle between languages on blog posts.
+- **RTL Support**: Full Right-to-Left layout support for Arabic posts, including flipped icons and text alignment.
+- **New Content**: Added "TypeScript Best Practices for Full-Stack Apps" in EN, AR, and JA.
+- **Dynamic Categories**: Refactored `CategoryNav` to automatically generate categories based on available posts in the current language.
+- **Cover Image**: Generated custom cover image for TypeScript post.
+
+### Changed
+
+- **Post Layout Spacing**: Significantly increased vertical spacing for `<h2>`, `<hr>`, and `<ol>` elements within blog posts for better readability.
+- **MDX Rendering**: Updated `BlogPostTemplate` to explicitly pass custom components to `MDXRemote`, ensuring consistent styling.
+
+### Fixed
+
+- **Arabic Layout**: Resolved text alignment and direction issues for Arabic content (`dir="rtl"`).
+- **Japanese Content Leakage**: Fixed issue where English posts (`desert-geometry.mdx`) were incorrectly tagged as "Art & Design" in Japanese views by standardizing naming conventions.
+
 ## [1.3.1] - 2026-01-14
 
 ### Added

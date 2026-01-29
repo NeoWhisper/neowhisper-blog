@@ -8,7 +8,6 @@
 ## 📋 Next Up
 
 - [ ] Write second blog post: "AI-Powered Code Generation Tools"
-- [ ] Write third blog post: "TypeScript Best Practices for Full-Stack Apps"
 - [ ] Create Contact page with email/form
 - [ ] Create About page with company info
 - [ ] Add navigation menu to header
@@ -17,13 +16,20 @@
 
 ## 🌐 Future: Multi-language Support
 
-- [ ] Set up Next.js i18n routing ([lang]/...)
-- [ ] Create translation files (en.json, ja.json, ar.json)
-- [ ] Add language switcher component to header
-- [ ] Organize posts by language (content/posts/en, ja, ar)
-- [ ] Add lang metadata to all MDX files
-- [ ] Configure Arabic RTL support
+- [ ] Upgrade to Next.js i18n routing ([lang]/blog/[slug]) for cleaner URLs
+- [ ] Create translation files (en.json, ja.json, ar.json) for UI elements
 - [ ] Set up automatic language detection based on user location
+- [ ] Organize posts by language (content/posts/en, ja, ar)
+
+## ✅ Completed (2026-01-29)
+
+- [x] Write third blog post: "TypeScript Best Practices for Full-Stack Apps" (EN, AR, JA)
+- [x] Add Language Switcher component to blog posts
+- [x] Configure Arabic RTL support (automatic detection via slug)
+- [x] Implement suffix-based multilingual routing logic
+- [x] Refactor Category Navigation to be fully dynamic based on visible posts
+- [x] Increase blog post vertical spacing (H2, HR, OL) for better legibility
+- [x] Fix Japanese category leakage by renaming `desert-geometry.mdx` to standard `-ja` suffix
 
 ## ✅ Completed (2026-01-14)
 

@@ -1,0 +1,168 @@
+---
+title: "TypeScript ベストプラクティス：コンパイラと戦うのはもうやめよう"
+date: "2026-01-29"
+excerpt: "TypeScript は敵ではありません。Next.js + Node.js のフルスタック開発において、TypeScript を「ただの足枷」から「最強の武器」に変えるための実践的なパターンを紹介します。"
+category: "TypeScript"
+coverImage: "/images/typescript-best-practices-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+
+正直に言うと、昔は TypeScript が嫌いでした。
+
+機能を作る時間よりも、コンパイラを納得させるためにコードを書いている時間の方が長い気がしていたからです。
+
+でも、**Next.js** と **Node.js** でいくつかのアプリを作って運用していくうちに、ある事実に気づきました。
+
+**「TypeScript がないと、僕はただ推測でコードを書いているだけだ」**
+
+`user.id` は文字列なのか数値なのか？ この API は配列を返すのか、それともオブジェクトの中に `data` プロパティがあるのか？
+
+推測はやめましょう。TypeScript を味方につけるための、シンプルで強力なルールを紹介します。
+
+<br className="my-8 block" />
+
+---
+
+## 1. 型定義を共有する（DRY：Don't Repeat Yourself）
+
+フロントエンドのフォルダに `User` 型があり、バックエンドのフォルダにも全く同じ `User` 型がある……。
+
+これは間違いのもとです。
+
+片方を変更してもう片方の更新を忘れると、バグがそのまま本番環境にデプロイされてしまいます。
+
+**解決策：**
+コアとなるデータモデルは、共有パッケージかフォルダにまとめましょう。
+
+```ts
+// モノレポ構成の例：packages/types/src/user.ts
+export interface User {
+  id: string;
+  email: string;
+  role: 'admin' | 'user';
+}
+```
+
+これをすべての場所でインポートします。
+フロントエンドでも、バックエンドでも。
+
+もし `role` の定義を変更すれば、プロジェクト全体のコードが赤くエラー表示されます。
+
+**それが狙いです。** エラーが出ることは、素晴らしいことなんです。
+
+---
+
+## 2. API レスポンスの「無法地帯」をなくす
+
+「このエンドポイント、何を返すんだっけ？」
+
+もし答えが「たしかユーザーの配列が入ったオブジェクト……だったかな？」なら、危険信号です。
+
+API のレスポンス形式を統一しましょう。すべてのエンドポイントが、必ず同じ「形」でデータを返すように強制します。
+
+**ラッパー（Wrapper）の定義:**
+
+```ts
+// types/api.ts
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  error?: string;
+}
+```
+
+**バックエンドでの使用:**
+
+```ts
+app.get('/users', async (req, res) => {
+  const users = await db.users.findMany();
+  
+  // TypeScript がこの構造を強制します
+  const response: ApiResponse<User[]> = {
+    data: users,
+    success: true
+  };
+  
+  res.json(response);
+});
+```
+
+これで、フロントエンドは推測する必要がなくなります。「何が返ってくるのか」を **100% 正確に** 知ることができるからです。
+
+---
+
+## 3. React Hooks で `any` を使わない
+
+よく見かけるコードです：
+
+```ts
+// 悪い例
+const { data } = useQuery(['user'], fetchUser);
+// data は 'any' または 'unknown' になってしまう
+```
+
+これでは、せっかくの TypeScript の恩恵をドブに捨てているようなものです。
+
+**こう書きましょう:**
+
+```ts
+// 良い例
+function useUser(id: string) {
+  return useQuery<User>({
+    queryKey: ['user', id],
+    queryFn: () => fetchUser(id)
+  });
+}
+```
+
+これで、`data.` とタイプするだけで、VS Code が正しいプロパティを教えてくれます。
+
+---
+
+## 4. 実行時の安全も確保する (Zod)
+
+TypeScript は素晴らしいですが、コードが実行されると消えてしまいます。
+
+ユーザーがいいかげんな JSON データを送ってきたら、TypeScript は守ってくれません。そこで **Zod** の出番です。
+
+API の境界線（入り口）では、必ず Zod を使って検証します。
+
+```ts
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  email: z.string().email(),
+  age: z.number().min(18)
+});
+
+// スキーマから TS の型を自動生成
+type UserInput = z.infer<typeof UserSchema>;
+
+app.post('/users', (req, res) => {
+  // データが不正ならここでエラーを投げる
+  const body = UserSchema.parse(req.body);
+  
+  // ここまで来れば、body は実行時でも絶対に正しい型だと保証される
+  saveUser(body);
+});
+```
+
+これが「コンパイル時の安全性（TypeScript）」と「実行時の安全性（Zod）」のスイートスポットです。
+
+---
+
+## 5. まとめ
+
+良い TypeScript コードを書くのに、複雑な型パズルは必要ありません。
+
+必要なのはこれだけです：
+
+- ✅ 1. データのための **共有された型**
+- ✅ 2. 統一された **API レスポンス**
+- ✅ 3. フロントエンドでの **型付き React Hooks**
+- ✅ 4. 制御できない入力に対する **Zod**
+
+この4つを守れば、コンパイラと戦う日々は終わり、機能開発に集中できるようになります。

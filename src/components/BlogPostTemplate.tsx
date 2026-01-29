@@ -4,6 +4,7 @@ import Link from 'next/link';
 import rehypeHighlight from 'rehype-highlight';
 import { formatDate } from '@/lib/utils';
 import { AdSenseAd } from '@/components/AdSenseAd';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface BlogPostTemplateProps {
     title: string;
@@ -12,6 +13,7 @@ interface BlogPostTemplateProps {
     coverImage?: string;
     category?: string;
     readTime?: string;
+    isRTL?: boolean;
 }
 
 export default function BlogPostTemplate({
@@ -20,18 +22,19 @@ export default function BlogPostTemplate({
     content,
     coverImage,
     category,
-    readTime
+    readTime,
+    isRTL = false
 }: BlogPostTemplateProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-            <article className="max-w-3xl mx-auto">
+            <article className="max-w-3xl mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
                 {/* Back Button */}
                 <Link
                     href="/"
-                    className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors"
+                    className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                     <svg
-                        className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1"
+                        className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? 'ml-2 rotate-180 group-hover:translate-x-1' : 'mr-2'}`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -43,7 +46,7 @@ export default function BlogPostTemplate({
                             d="M10 19l-7-7m0 0l7-7m-7 7h18"
                         />
                     </svg>
-                    Back to Home
+                    {isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
                 </Link>
 
                 {/* Post Card with Glassmorphism */}
@@ -63,13 +66,18 @@ export default function BlogPostTemplate({
                     )}
 
                     {/* Post Header */}
-                    <header className="px-6 sm:px-12 py-8 border-b border-gray-200 dark:border-gray-700">
+                    <header className={`px-6 sm:px-12 py-8 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {/* Language Switcher - Top Right/Left depending on LTR/RTL */}
+                        <div className={`flex mb-6 ${isRTL ? 'justify-start' : 'justify-end'}`}>
+                            <LanguageSwitcher />
+                        </div>
+
                         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
                             {title}
                         </h1>
 
                         {/* Metadata */}
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className={`flex flex-wrap items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <time
                                 dateTime={date}
                                 className="inline-block text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-100/50 dark:bg-purple-900/20 px-4 py-2 rounded-full border border-purple-200/50 dark:border-purple-800/30"
@@ -103,20 +111,27 @@ export default function BlogPostTemplate({
                     </div>
 
                     {/* Post Content */}
-                    <div className="px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none 
-            prose-headings:font-bold prose-headings:tracking-tight
-            prose-h1:text-[3rem] prose-h1:leading-[1.2] prose-h1:mb-6 prose-h1:tracking-[-0.025em]
-            prose-h2:text-[2.25rem] prose-h2:leading-[1.3] prose-h2:tracking-[-0.02em] prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-gray-200 dark:prose-h2:border-gray-700
-            prose-h3:text-[1.875rem] prose-h3:leading-[1.4] prose-h3:tracking-[-0.015em] prose-h3:mt-8 prose-h3:mb-3
-            prose-h4:text-[1.5rem] prose-h4:leading-[1.5] prose-h4:mt-6 prose-h4:mb-2
-            prose-p:text-lg prose-p:leading-relaxed prose-p:mb-8
+                    <div className={`px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none 
+            prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
+            prose-h1:text-[3rem] prose-h1:leading-[1.2] prose-h1:mb-10 prose-h1:tracking-[-0.025em]
+            prose-h2:text-4xl prose-h2:mt-32 prose-h2:mb-16 prose-h2:font-bold
+            prose-h3:text-2xl prose-h3:mt-20 prose-h3:mb-10
+            prose-p:text-lg prose-p:leading-[2.5] prose-p:mb-16
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
             prose-strong:font-bold prose-strong:text-gray-900 dark:prose-strong:text-white
-            prose-li:text-lg prose-li:mb-2
-            prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50/50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
-            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl">
+            prose-li:text-lg prose-li:mb-16 prose-li:leading-[2.5] marker:text-purple-500
+            prose-ul:my-16 prose-ol:my-16
+            prose-hr:my-32 prose-hr:border-gray-200 dark:prose-hr:border-gray-800
+            prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50/50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:mb-16
+            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl prose-pre:mb-16 
+            ${isRTL ? 'text-right' : 'text-left'}`}>
                         <MDXRemote
                             source={content}
+                            components={{
+                                h2: (props) => <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />,
+                                hr: (props) => <hr className="my-24 border-gray-200 dark:border-gray-800" {...props} />,
+                                ol: (props) => <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />,
+                            }}
                             options={{
                                 mdxOptions: {
                                     rehypePlugins: [rehypeHighlight]
@@ -135,10 +150,10 @@ export default function BlogPostTemplate({
                 <div className="mt-12 text-center">
                     <Link
                         href="/"
-                        className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 group transition-colors"
+                        className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 group transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                         <svg
-                            className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1"
+                            className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? 'ml-2 rotate-180 group-hover:translate-x-1' : 'mr-2'}`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -150,7 +165,7 @@ export default function BlogPostTemplate({
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        Back to Home
+                        {isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
                     </Link>
                 </div>
             </article>

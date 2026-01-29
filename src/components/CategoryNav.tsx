@@ -10,16 +10,12 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-const categories = [
-    { name: 'Software Development', slug: 'software-development' },
-    { name: 'Game Development', slug: 'game-development' },
-    { name: 'Translation', slug: 'translation' },
-    { name: 'Next.js Tutorials', slug: 'next.js' },
-    { name: 'Tech Tips', slug: 'tech-tips' },
-    { name: 'アート＆デザイン', slug: 'アート＆デザイン' },
-];
+interface Category {
+    name: string;
+    slug: string;
+}
 
-export default function CategoryNav() {
+export default function CategoryNav({ categories }: { categories: Category[] }) {
     const pathname = usePathname();
 
     return (

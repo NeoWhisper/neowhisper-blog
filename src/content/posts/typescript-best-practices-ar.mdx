@@ -1,0 +1,165 @@
+---
+title: "أفضل ممارسات TypeScript (بعيدًا عن التعقيد)"
+date: "2026-01-29"
+excerpt: "توقف عن مصارعة الـ Compiler. إليك كيف أجعل TypeScript يعمل لصالحي فعليًا في تطبيقات الـ Full-Stack."
+category: "TypeScript"
+coverImage: "/images/typescript-best-practices-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+
+بصراحة، كنت أكره TypeScript.
+
+كنت أشعر أنني أكتب كودًا إضافيًا فقط "لإرضاء" المترجم، بدلًا من بناء الميزات التي أحتاجها.
+
+لكن بعد بناء عدة تطبيقات Full-Stack باستخدام **Next.js** و **Node.js**، أدركت الحقيقة:
+
+**بدون TypeScript، أنت تعتمد على التخمين.**
+
+تخمن هل `user.id` رقم أم نص؟ تخمن هل الـ API يرجع مصفوفة مباشرة أم كائن بداخله `data`؟
+
+إليك كيف تتوقف عن التخمين وتجعل TypeScript يعمل لصالحك، وليس ضدك.
+
+<br className="my-8 block" />
+
+---
+
+## ١. لا تكرر نفسك (DRY: Don't Repeat Yourself)
+
+إذا كان لديك `User Interface` في مجلد الفرونت-إند، ونسخة طبق الأصل منها في الباك-إند، فأنت تفعل ذلك بشكل خاطئ.
+
+بمجرد أن يتغير أحدهما، سينكسر الآخر (غالبًا بصمت)، وسترسل Bug للإنتاج.
+
+**الحل:**
+ضع نماذج البيانات الأساسية في مجلد أو حزمة مشتركة (Shared Package).
+
+```ts
+// مثال على هيكلية Monorepo: packages/types/src/user.ts
+export interface User {
+  id: string;
+  email: string;
+  role: 'admin' | 'user';
+}
+```
+
+الآن استورد هذا الملف في كل مكان.
+الفرونت-إند يستخدمه. الباك-إند يستخدمه.
+
+إذا غيرت الـ `role`، سيتحول الكود للون الأحمر في المشروع كاملًا.
+
+هذا شيء ممتاز، بالمناسبة.
+
+---
+
+## ٢. ردود الـ API ليست "ساحة عشوائية"
+
+"ماذا يرجع هذا الرابط (Endpoint)؟"
+
+إذا كانت إجابتك "أعتقد أنه يرجع كائنًا فيه مصفوفة مستخدمين"، فأنت في خطر.
+
+وحّد شكل استجابات الـ API. اجبر كل Endpoint على إرجاع نفس الهيكل تمامًا.
+
+**الغلاف (The Wrapper):**
+
+```ts
+// types/api.ts
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  error?: string;
+}
+```
+
+**الاستخدام (Backend):**
+
+```ts
+app.get('/users', async (req, res) => {
+  const users = await db.users.findMany();
+  
+  // TypeScript سيجبرك على الالتزام بهذا الهيكل
+  const response: ApiResponse<User[]> = {
+    data: users,
+    success: true
+  };
+  
+  res.json(response);
+});
+```
+
+الآن الفرونت-إند لا يحتاج للتخمين. هو يعرف **بالضبط** ما سيصله.
+
+---
+
+## ٣. لا تستخدم `any` في الـ React Hooks
+
+أرى هذا الخطأ طوال الوقت:
+
+```ts
+// خطأ
+const { data } = useQuery(['user'], fetchUser);
+// الآن data يعتبر 'any' أو 'unknown'
+```
+
+أنت بهذا الشكل تخليت عن كل فوائد TypeScript في اللحظة الأخيرة.
+
+**افعل هذا بدلًا من ذلك:**
+
+```ts
+// صحيح
+function useUser(id: string) {
+  return useQuery<User>({
+    queryKey: ['user', id],
+    queryFn: () => fetchUser(id)
+  });
+}
+```
+
+الآن عندما تكتب `data.`، المحرر سيكمل لك الكود بشكل صحيح.
+
+---
+
+## ٤. ثق، ولكن تحقق (Zod)
+
+TypeScript عظيم، لكنه يختفي بمجرد تشغيل الكود (Runtime).
+
+إذا أرسل المستخدم بيانات JSON خاطئة، TypeScript لن ينقذك. **Zod** سينقذك.
+
+أنا أستخدم Zod للتحقق من أي شيء يدخل حدود الـ API الخاصة بي.
+
+```ts
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  email: z.string().email(),
+  age: z.number().min(18)
+});
+
+// استخراج نوع الـ TS تلقائيًا من المخطط
+type UserInput = z.infer<typeof UserSchema>;
+
+app.post('/users', (req, res) => {
+  // سيرمي خطأ إذا كانت البيانات غير مطابقة
+  const body = UserSchema.parse(req.body);
+  
+  // الآن أنت متأكد 100% أن البيانات صحيحة أثناء التشغيل
+  saveUser(body);
+});
+```
+
+هذه هي المنطقة المثالية: أمان أثناء التشغيل (Zod) وأمان أثناء الكتابة (TypeScript).
+
+---
+
+## ٥. الخلاصة
+
+لا تحتاج لتعقيدات الـ Generics المتقدمة لتكتب TypeScript جيد.
+
+تحتاج فقط:
+- ✅ ١. **أنواع مشتركة** لبياناتك.
+- ✅ ٢. **استجابات موحدة** للـ API.
+- ✅ ٣. **React Hooks محددة النوع** في الفرونت-إند.
+- ✅ ٤. **Zod** للأشياء التي لا تملك السيطرة عليها (مدخلات المستخدم).
+
+طبق هذه القواعد الأربع، وستتوقف عن مصارعة المترجم وتبدأ في بناء منتجك بسرعة أكبر.

@@ -22,6 +22,7 @@ export default async function BlogPost({ params }: PageProps) {
     const { slug } = await params;
 
     const post = getPostBySlug(slug);
+    const isRTL = slug.endsWith('-ar');
 
     if (!post) {
         notFound();
@@ -35,6 +36,7 @@ export default async function BlogPost({ params }: PageProps) {
             coverImage={post.coverImage}
             category={post.category}
             readTime={post.readTime}
+            isRTL={isRTL}
         />
     );
 }

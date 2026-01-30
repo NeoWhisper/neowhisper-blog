@@ -1,8 +1,45 @@
+import type { Metadata } from 'next';
 import { getPosts } from '@/lib/posts';
 import Link from 'next/link';
 import ArticleCard from '@/components/ArticleCard';
 import CategoryNav from '@/components/CategoryNav';
 import { AdSenseAd } from '@/components/AdSenseAd';
+
+const siteUrl = 'https://www.neowhisper.net';
+
+export const metadata: Metadata = {
+  title: 'NeoWhisper - Tech Blog | Next.js, React, TypeScript Tutorials',
+  description:
+    '日本語とEnglishの技術ブログ。Next.js、React、TypeScriptのチュートリアルとWeb開発のベストプラクティスを紹介。Bilingual tech tutorials and web development guides.',
+  authors: [{ name: 'NeoWhisper Team' }],
+  openGraph: {
+    title: 'NeoWhisper Tech Blog',
+    description: 'Bilingual tech tutorials and web development guides',
+    url: siteUrl,
+    siteName: 'NeoWhisper',
+    images: [
+      {
+        url: `${siteUrl}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'NeoWhisper Tech Blog',
+      },
+    ],
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NeoWhisper Tech Blog',
+    description: 'Bilingual tech tutorials and web development',
+    images: [`${siteUrl}/og-image.jpg`],
+  },
+  other: {
+    keywords:
+      'Next.js, React, TypeScript, Web Development, JavaScript, 技術ブログ, チュートリアル',
+  },
+};
+
 
 export default async function Home({
   searchParams,
@@ -37,6 +74,28 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'NeoWhisper',
+            description:
+              'Tech blog with tutorials on Next.js, React, and TypeScript',
+            url: siteUrl,
+            inLanguage: ['ja', 'en', 'ar'],
+            publisher: {
+              '@type': 'Organization',
+              name: 'NeoWhisper',
+              logo: {
+                '@type': 'ImageObject',
+                url: `${siteUrl}/logo.png`,
+              },
+            },
+          }),
+        }}
+      />
       <div className="max-w-4xl mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
         <header className="mb-16 text-center">
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 sm:text-6xl mb-4">

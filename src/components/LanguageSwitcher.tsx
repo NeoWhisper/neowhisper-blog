@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
@@ -12,41 +13,63 @@ const LANGUAGES = [
 
 export function LanguageSwitcher() {
     const pathname = usePathname();
+    const [isMounted, setIsMounted] = useState(false);
 
-    // Guard: if pathname is not string or doesn't look like a blog post, just return null or default
-    if (!pathname || !pathname.startsWith('/blog/')) {
-        return null;
-    }
+    useEffect(() => {
+        // ESLint disable is intentional: this pattern is used for hydration detection
+        // and only triggers one render after mount to avoid hydration mismatches
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsMounted(true);
+    }, []);
 
-    // Detect current active language from suffix
-    // Regex to remove optional -ar or -ja from the end of string
-    // It handles:
-    // /blog/slug-ar -> /blog/slug
-    // /blog/slug-ja -> /blog/slug
-    // /blog/slug    -> /blog/slug
-    const baseSlugPath = pathname.replace(/(-ar|-ja)$/, "");
+    // Guard: only show on blog post pages
+    const isValidPath = pathname?.startsWith('/blog/') ?? false;
 
-    return (
-        <div className="flex items-center gap-2 p-1 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
-            {LANGUAGES.map((lang) => {
-                const targetHref = `${baseSlugPath}${lang.suffix}`;
-                const isActive = pathname === targetHref;
+    // Render nothing for non-blog pages
+    const shouldRender = isValidPath;
 
-                return (
-                    <Link
-                        key={lang.code}
-                        href={targetHref}
-                        className={cn(
-                            "px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200",
-                            isActive
-                                ? "bg-white text-purple-700 shadow-sm dark:bg-gray-800 dark:text-purple-300"
-                                : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/5"
-                        )}
-                    >
-                        {lang.label}
-                    </Link>
-                );
-            })}
-        </div>
+    // Render placeholder during SSR and initial client render to avoid hydration mismatch
+    const showPlaceholder = !isMounted;
+
+    // Early return patterns using logical operators
+    const renderContent = () => (
+        shouldRender ? (
+            showPlaceholder ? (
+                <div className="h-8 w-32" />
+            ) : (
+                (() => {
+                    // Detect current active language from suffix
+                    // Regex cleanup: handles path with or without trailing slashes
+                    // Example: /blog/post-ar/ -> /blog/post
+                    const baseSlugPath = pathname.replace(/\/$/, "").replace(/(-ar|-ja)$/, "");
+
+                    return (
+                        <div className="flex items-center gap-2 p-1 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+                            {LANGUAGES.map((lang) => {
+                                const targetHref = `${baseSlugPath}${lang.suffix}`;
+                                const isActive = pathname === targetHref;
+
+                                return (
+                                    <Link
+                                        key={lang.code}
+                                        href={targetHref}
+                                        className={cn(
+                                            "px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200",
+                                            isActive
+                                                ? "bg-white text-purple-700 shadow-sm dark:bg-gray-800 dark:text-purple-300"
+                                                : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        {lang.label}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    );
+                })()
+            )
+        ) : null
     );
+
+    return renderContent();
 }

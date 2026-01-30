@@ -1,0 +1,318 @@
+---
+title: "بناء أول مدونة لك باستخدام Next.js 16 و App Router و MDX"
+date: "2026-01-13"
+excerpt: "دليل شامل لإنشاء مدونة حديثة وعالية الأداء باستخدام Next.js 16 App Router، و MDX لإدارة المحتوى، و Tailwind CSS للتصميم. مثالي للمطورين المتطلعين لبناء مشروعهم الأول في Next.js."
+category: "Next.js"
+coverImage: "/images/nextjs-16-tutorial-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+# بناء أول مدونة لك باستخدام Next.js 16
+
+هل ترغب في بناء مدونة؟ في عام 2026، لم نعد نكتفي بمجرد وضع بعض أكواد HTML على خادم. نحن نبحث عن السرعة، وتحسين محركات البحث الممتاز (SEO)، وبصراحة؟ نريد أن تكون عملية البناء ممتعة.
+
+هنا يأتي دور **Next.js 16**.
+
+في هذا الدليل، سأصحبك في رحلة لبناء مدونة تبدو حديثة حقًا. سنتحدث عن Next.js 16، و App Router، و MDX لمحتواك، و Tailwind CSS لجعلها تبدو أنيقة.
+
+> **ملاحظة الإصدار**: يستخدم هذا البرنامج التعليمي Next.js 16 (الإصدار الحالي المستقر طويل الأمد LTS). إذا كنت تستخدم Next.js 17+، تظل الأنماط كما هي، ولكن راجع [دليل الترقية الرسمي](https://nextjs.org/docs/app/guides/upgrading) لأي تغييرات جوهرية.
+
+## 🚀 لماذا Next.js 16؟
+
+قد تسأل، "لماذا لا أكتفي باستخدام WordPress؟" وانظر، WordPress جيد. ولكن إذا كنت مطورًا (أو في طريقك لتصبح كذلك)، فأنت تريد السيطرة الكاملة.
+
+إليك سبب كون Next.js 16 هو الخيار الأمثل:
+
+1.  **سرعة مذهلة**: بفضل **Server Components**، يتم تقديم تدويناتك على الخادم. هذا يعني جافا سكريبت أقل لمتصفح المستخدم، مما يعني أوقات تحميل فورية.
+2.  **قواعد App Router**: يستخدم App Router المجلدات للمسارات، مما يجعل التخطيطات وحالات التحميل واضحة بشكل لا يصدق.
+3.  **أداء مجاني**: الصور؟ محسنة. الخطوط؟ محسنة. إنه يقوم بالعمل الشاق نيابة عنك.
+4.  **TypeScript**: يعمل ببساطة. تحصل على أمان الأنواع (type safety) مباشرة، مما يوفر عليك الكثير من صداع "undefined is not a function".
+
+## 🛠️ لنبدأ العمل
+
+حسناً، لنبدأ في التنفيذ. أولاً، تأكد من تثبيت Node.js (الإصدار 18.18 أو أحدث).
+
+افتح الطرفية (Terminal) وقم بتشغيل هذا الأمر:
+
+```bash
+npx create-next-app@latest neowhisper-blog
+```
+
+سيسألك بعض الأسئلة. إليك الإعداد الموصى به:
+
+-   **TypeScript?** Yes (ثق بي في هذا)
+-   **Tailwind CSS?** Yes (معياري في عام 2026)
+-   **App Router?** Yes (الافتراضي الآن)
+-   **Import Alias?** Yes (استخدم `@/*` لجعل الكود أنظف)
+
+### إضافة MDX
+
+نريد كتابة تدويناتنا باستخدام Markdown ولكن مع قوة مكونات React. هذا ما يفعله MDX. لنقم بتثبيت التبعيات التي نحتاجها:
+
+```bash
+npm install @next/mdx @mdx-js/loader @mdx-js/react gray-matter date-fns
+npm install -D @types/mdx
+```
+
+### إعداد MDX
+
+قم بإنشاء أو تحديث `next.config.js` لتمكين دعم MDX:
+
+```js
+import createMDX from '@next/mdx'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)
+```
+
+قم بإنشاء `mdx-components.tsx` في المجلد الرئيسي لتخصيص عرض MDX:
+
+```tsx
+import type { MDXComponents } from 'mdx/types'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-3xl font-bold mb-3 mt-8">{children}</h2>,
+    a: ({ href, children }) => (
+      <a href={href} className="text-purple-600 hover:underline">
+        {children}
+      </a>
+    ),
+    ...components,
+  }
+}
+```
+
+## 📂 هيكل المشروع
+
+حافظ على نظافة الكود. إليك كيف أنظم مشاريعي:
+
+```text
+src/
+├── app/              # صفحاتك تعيش هنا
+│   ├── blog/
+│   │   └── [slug]/
+│   │       └── page.tsx
+│   └── page.tsx
+├── components/       # قطع واجهة المستخدم القابلة لإعادة الاستخدام
+├── content/          # تدويناتك بتنسيق MDX تذهب هنا
+│   └── posts/
+│       └── first-post.mdx
+└── lib/              # وظائف مساعدة (مثل جلب التدوينات)
+    └── posts.ts
+```
+
+### مثال على تدوينة MDX
+
+أنشئ تدوينة في `src/content/posts/first-post.mdx`:
+
+```mdx
+---
+title: "تدوينتي الأولى"
+date: "2026-01-13"
+excerpt: "هذه أول تدوينة لي باستخدام Next.js 16 و MDX"
+coverImage: "/images/first-post.png"
+---
+
+# تدوينتي الأولى
+
+هذا **رائع**! يمكنني كتابة Markdown واستخدام مكونات React.
+```
+
+## 📝 جلب المحتوى الخاص بك
+
+أحد أروع الأشياء في App Router هو أنه يمكنك ببساطة... جلب البيانات. لا تحتاج إلى `useEffect` أو إدارة حالة معقدة لجلب البيانات البسيط.
+
+### إعداد مكتبة التدوينات
+
+أنشئ `src/lib/posts.ts`:
+
+```tsx
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+
+const postsDirectory = path.join(process.cwd(), 'src/content/posts')
+
+export type Post = {
+  slug: string
+  title: string
+  date: string
+  excerpt: string
+  coverImage: string
+  content: string
+}
+
+export async function getAllPosts(): Promise<Post[]> {
+  const fileNames = fs.readdirSync(postsDirectory)
+  const allPostsData = fileNames
+    .filter((fileName) => fileName.endsWith('.mdx'))
+    .map((fileName) => {
+      const slug = fileName.replace(/\.mdx$/, '')
+      const fullPath = path.join(postsDirectory, fileName)
+      const fileContents = fs.readFileSync(fullPath, 'utf8')
+      const { data, content } = matter(fileContents)
+
+      return {
+        slug,
+        content,
+        title: data.title,
+        date: data.date,
+        excerpt: data.excerpt,
+        coverImage: data.coverImage,
+      } as Post
+    })
+
+  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1))
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.mdx`)
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data, content } = matter(fileContents)
+
+    return {
+      slug,
+      content,
+      title: data.title,
+      date: data.date,
+      excerpt: data.excerpt,
+      coverImage: data.coverImage,
+    } as Post
+  } catch {
+    return null
+  }
+}
+```
+
+### الصفحة الرئيسية
+
+في `src/app/page.tsx` ، يمكننا فقط أخذ تدويناتنا وعرضها.
+
+```tsx
+import { getAllPosts } from '@/lib/posts'
+import ArticleCard from '@/components/ArticleCard'
+
+export default async function Home() {
+  const posts = await getAllPosts()
+
+  return (
+    <main className="container mx-auto px-4 py-12">
+      <h1 className="text-4xl font-bold mb-8">آخر الأفكار</h1>
+      <div className="grid md:grid-cols-2 gap-8">
+        {posts.map((post) => (
+          <ArticleCard key={post.slug} post={post} />
+        ))}
+      </div>
+    </main>
+  )
+}
+```
+
+### صفحة التدوينة
+
+بالنسبة للتدوينات الفردية في `src/app/blog/[slug]/page.tsx` ، نريدها أن تكون ثابتة (Static). لماذا؟ لأن تدوينات المدونة لا تتغير كل ثانية. يمكننا بناؤها مرة واحدة وتقديمها على الفور.
+
+```tsx
+import { getPostBySlug, getAllPosts } from '@/lib/posts'
+import { notFound } from 'next/navigation'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+
+// هذا يخبر Next.js ببناء هذه الصفحات مسبقًا
+export async function generateStaticParams() {
+  const posts = await getAllPosts()
+  return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) return { title: 'Post Not Found' }
+  
+  return {
+    title: post.title,
+    description: post.excerpt,
+  }
+}
+
+export default async function BlogPost({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) {
+    notFound()
+  }
+
+  return (
+    <article className="max-w-3xl mx-auto py-12 px-4">
+      <h1 className="text-5xl font-bold mb-4">{post.title}</h1>
+      <time className="text-gray-500 block mb-8">{post.date}</time>
+      <div className="prose lg:prose-xl dark:prose-invert max-w-none">
+        <MDXRemote source={post.content} />
+      </div>
+    </article>
+  )
+}
+```
+
+## 🎨 جعلها تبدو جيدة
+
+لنقم ببناء مكون بطاقة بسيط لمعاينات تدويناتك.
+
+```tsx
+// src/components/ArticleCard.tsx
+import Link from 'next/link'
+import Image from 'next/image'
+import type { Post } from '@/lib/posts'
+
+export default function ArticleCard({ post }: { post: Post }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="group block">
+      <article className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+        <div className="relative h-48 w-full">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors">
+            {post.title}
+          </h2>
+          <p className="text-gray-500 line-clamp-2">{post.excerpt}</p>
+          <time className="text-sm text-gray-400 mt-2 block">{post.date}</time>
+        </div>
+      </article>
+    </Link>
+  )
+}
+```
+
+## ✨ الخلاصة
+
+وها هو الأمر. لقد قمت للتو ببناء مدونة عالية الأداء باستخدام أحدث وأفضل تقنيات الويب في عام 2026.
+
+**إلى أين نذهب من هنا؟**
+
+*   **الوضع الليلي (Dark Mode)**: أضف تبديل المظهر باستخدام `next-themes`.
+*   **البحث**: أضف شريط بحث باستخدام مكتبة مثل `fuse.js`.
+*   **تمييز الكود (Code Highlighting)**: أضف `rehype-highlight` لمربعات كود جميلة.
+*   **النشر (Deploy)**: ارفعها على Vercel وأظهرها للعالم.
+
+شكراً للقراءة! الآن اذهب وابنِ شيئاً رائعاً.

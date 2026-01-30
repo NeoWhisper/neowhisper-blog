@@ -23,8 +23,12 @@ export default function CategoryNav({ categories }: { categories: Category[] }) 
             <div className="flex flex-wrap justify-center gap-3 px-2">
                 {categories.map((cat) => {
                     const categoryPath = `/category/${cat.slug}`;
+                    const normalizedPathname = pathname.replace(/\/$/, "");
+                    const normalizedCategoryPath = categoryPath.replace(/\/$/, "");
+
                     // Handle encoded paths for Japanese categories
-                    const isActive = pathname === categoryPath || pathname === encodeURI(categoryPath);
+                    const isActive = normalizedPathname === normalizedCategoryPath ||
+                        normalizedPathname === encodeURI(normalizedCategoryPath);
 
                     return (
                         <Link

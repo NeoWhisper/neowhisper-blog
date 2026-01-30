@@ -131,6 +131,31 @@ export default function BlogPostTemplate({
                                 h2: (props) => <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />,
                                 hr: (props) => <hr className="my-24 border-gray-200 dark:border-gray-800" {...props} />,
                                 ol: (props) => <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />,
+                                a: ({ href, children, ...props }) => {
+                                    const isExternal = href?.startsWith('http');
+                                    return (
+                                        <a
+                                            href={href}
+                                            className="animated-link text-purple-600 dark:text-purple-400 font-medium inline-flex items-center group"
+                                            {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                            {...props}
+                                        >
+                                            <span className="relative">
+                                                {children}
+                                            </span>
+                                            {isExternal && (
+                                                <svg
+                                                    className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            )}
+                                        </a>
+                                    );
+                                },
                             }}
                             options={{
                                 mdxOptions: {

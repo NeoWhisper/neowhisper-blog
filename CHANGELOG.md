@@ -7,6 +7,20 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Services page (coming soon)
 - Contact page (coming soon)
 - About page (coming soon)
+- Code quality: Remove if statements from remaining components
+
+## [1.4.1] - 2026-01-30
+
+### Fixed
+
+- **Hydration Error**: Resolved React hydration mismatch in `LanguageSwitcher` component that was causing "Can't find variable: usePathname" errors
+- **Server Errors**: Fixed 500 errors caused by corrupted Turbopack cache
+- **Dev Server Conflicts**: Resolved issues with multiple Next.js dev servers running simultaneously
+
+### Changed
+
+- **Code Quality**: Refactored `LanguageSwitcher` to eliminate if statements, using functional patterns with ternary operators and logical operators
+- **Error Handling**: Added ESLint disable comments with detailed explanations for legitimate React patterns
 
 ## [1.4.0] - 2026-01-29
 

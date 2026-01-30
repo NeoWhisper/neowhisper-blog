@@ -41,6 +41,7 @@ export function AdSenseAd({ slot }: Props) {
             data-ad-slot={slot}
             data-ad-format="auto"
             data-full-width-responsive="true"
+            suppressHydrationWarning
         />
     );
 }

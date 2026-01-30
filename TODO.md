@@ -2,6 +2,12 @@
 
 ## 🚀 In Progress
 
+- [ ] Remove if statements from entire codebase (functional programming refactor)
+  - [x] LanguageSwitcher.tsx
+  - [ ] ArticleCard.tsx
+  - [ ] CategoryNav.tsx
+  - [ ] BlogPostTemplate.tsx
+  - [ ] Page components
 - [ ] Write 15-20 SEO-focused blog posts (based on keyword research)
 - [ ] Create Services page with detailed offerings
 
@@ -20,6 +26,15 @@
 - [ ] Create translation files (en.json, ja.json, ar.json) for UI elements
 - [ ] Set up automatic language detection based on user location
 - [ ] Organize posts by language (content/posts/en, ja, ar)
+
+## ✅ Completed (2026-01-30)
+
+- [x] Fix React hydration mismatch in LanguageSwitcher component
+- [x] Resolve "Can't find variable: usePathname" error
+- [x] Debug and fix 500 server errors (corrupted Turbopack cache)
+- [x] Refactor LanguageSwitcher to eliminate if statements
+- [x] Clear multiple conflicting dev servers
+- [x] Add ESLint disable comments with explanations for legitimate patterns
 
 ## ✅ Completed (2026-01-29)
 

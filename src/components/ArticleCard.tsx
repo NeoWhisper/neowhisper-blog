@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
+import { formatDate } from '@/lib/utils';
 
 const categoryColors: Record<string, string> = {
     'Next.js': 'bg-black text-white',
@@ -44,11 +45,7 @@ export default function ArticleCard({ post }: ArticleCardProps) {
                         </Link>
                     )}
                     <time className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 px-3 py-1 rounded-full whitespace-nowrap ml-auto">
-                        {new Date(post.date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })}
+                        {formatDate(post.date)}
                     </time>
                 </div>
 

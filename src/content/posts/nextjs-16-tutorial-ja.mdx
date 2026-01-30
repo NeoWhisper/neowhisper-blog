@@ -1,0 +1,318 @@
+---
+title: "App RouterとMDXで作る、初めてのNext.js 16ブログ"
+date: "2026-01-13"
+excerpt: "Next.js 16のApp Router、コンテンツ管理のためのMDX、そしてスタイリングにTailwind CSSを使用した、モダンでパフォーマンスの高いブログ作成の包括的ガイド。初めてのNext.jsプロジェクトに最適です。"
+category: "Next.js"
+coverImage: "/images/nextjs-16-tutorial-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+# 初めてのNext.js 16ブログを構築する
+
+ブログを作りたいですか？2026年現在、ただサーバーにHTMLを置くだけでは不十分です。スピード、優れたSEO、そして何より作っていて楽しいことが求められます。
+
+そこで登場するのが **Next.js 16** です。
+
+このガイドでは、本当にモダンだと感じられるブログの構築手順を説明します。Next.js 16、App Router、コンテンツ用のMDX、そして見た目を整えるためのTailwind CSSについて解説します。
+
+> **バージョンに関する注意**: このチュートリアルではNext.js 16（現在のLTSバージョン）を使用しています。Next.js 17以降を使用している場合も基本的なパターンは同じですが、変更点については[公式アップグレードガイド](https://nextjs.org/docs/app/guides/upgrading)を確認してください。
+
+## 🚀 なぜNext.js 16なのか？
+
+「なぜWordPressを使わないのか？」と思うかもしれません。WordPressも悪くありません。しかし、あなたが開発者（またはそれを目指している人）であれば、完全な制御を望むはずです。
+
+Next.js 16が最適な理由は以下の通りです：
+
+1.  **とにかく速い**: **Server Components**のおかげで、ブログ記事はサーバー側でレンダリングされます。つまり、ブラウザが処理するJavaScriptが減り、読み込み時間が短縮されます。
+2.  **App Routerが便利**: フォルダーでルートを管理するため、レイアウトやローディング状態の設定が非常に直感的です。
+3.  **最初から高いパフォーマンス**: 画像やフォントの最適化が組み込まれています。面倒な作業はNext.jsがやってくれます。
+4.  **TypeScript**: すぐに動きます。型安全性が確保されるため、「undefined is not a function」といったエラーに悩まされることが大幅に減ります。
+
+## 🛠️ セットアップを始めよう
+
+では、実際に始めてみましょう。まず、Node.js（バージョン18.18以降）がインストールされていることを確認してください。
+
+ターミナルを開き、以下のコマンドを実行します：
+
+```bash
+npx create-next-app@latest neowhisper-blog
+```
+
+いくつか質問が表示されます。おすすめの設定は以下の通りです：
+
+-   **TypeScript?** Yes（強くおすすめします）
+-   **Tailwind CSS?** Yes（2026年の標準です）
+-   **App Router?** Yes（現在はデフォルトです）
+-   **Import Alias?** Yes（`@/*`を使うとコードがスッキリします）
+
+### MDXの追加
+
+Markdownで記事を書きつつ、Reactコンポーネントの力も使いたい。それを実現するのがMDXです。必要な依存関係をインストールしましょう：
+
+```bash
+npm install @next/mdx @mdx-js/loader @mdx-js/react gray-matter date-fns
+npm install -D @types/mdx
+```
+
+### MDXの設定
+
+MDXを有効にするために、`next.config.js`を作成または更新します：
+
+```js
+import createMDX from '@next/mdx'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)
+```
+
+ルートディレクトリに `mdx-components.tsx` を作成し、MDXのレンダリングをカスタマイズします：
+
+```tsx
+import type { MDXComponents } from 'mdx/types'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-3xl font-bold mb-3 mt-8">{children}</h2>,
+    a: ({ href, children }) => (
+      <a href={href} className="text-purple-600 hover:underline">
+        {children}
+      </a>
+    ),
+    ...components,
+  }
+}
+```
+
+## 📂 プロジェクト構造
+
+コードは綺麗に保ちましょう。私のプロジェクト構成は以下の通りです：
+
+```text
+src/
+├── app/              # ページ関連
+│   ├── blog/
+│   │   └── [slug]/
+│   │       └── page.tsx
+│   └── page.tsx
+├── components/       # 再利用可能なUIパーツ
+├── content/          # MDXブログ記事
+│   └── posts/
+│       └── first-post.mdx
+└── lib/              # ヘルパー関数（記事取得など）
+    └── posts.ts
+```
+
+### MDX記事の例
+
+`src/content/posts/first-post.mdx` に記事を作成します：
+
+```mdx
+---
+title: "初めての投稿"
+date: "2026-01-13"
+excerpt: "Next.js 16とMDXを使った最初のブログ記事です"
+coverImage: "/images/first-post.png"
+---
+
+# 初めての投稿
+
+これは**素晴らしい**です！Markdownを書きながらReactコンポーネントも使えます。
+```
+
+## 📝 コンテンツの取得
+
+App Routerの素晴らしい点の一つは、データを簡単に取得できることです。単純なデータ取得に `useEffect` や複雑な状態管理は必要ありません。
+
+### 記事ライブラリのセットアップ
+
+`src/lib/posts.ts` を作成します：
+
+```tsx
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+
+const postsDirectory = path.join(process.cwd(), 'src/content/posts')
+
+export type Post = {
+  slug: string
+  title: string
+  date: string
+  excerpt: string
+  coverImage: string
+  content: string
+}
+
+export async function getAllPosts(): Promise<Post[]> {
+  const fileNames = fs.readdirSync(postsDirectory)
+  const allPostsData = fileNames
+    .filter((fileName) => fileName.endsWith('.mdx'))
+    .map((fileName) => {
+      const slug = fileName.replace(/\.mdx$/, '')
+      const fullPath = path.join(postsDirectory, fileName)
+      const fileContents = fs.readFileSync(fullPath, 'utf8')
+      const { data, content } = matter(fileContents)
+
+      return {
+        slug,
+        content,
+        title: data.title,
+        date: data.date,
+        excerpt: data.excerpt,
+        coverImage: data.coverImage,
+      } as Post
+    })
+
+  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1))
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.mdx`)
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data, content } = matter(fileContents)
+
+    return {
+      slug,
+      content,
+      title: data.title,
+      date: data.date,
+      excerpt: data.excerpt,
+      coverImage: data.coverImage,
+    } as Post
+  } catch {
+    return null
+  }
+}
+```
+
+### ホームページ
+
+`src/app/page.tsx` で記事を取得してレンダリングします。
+
+```tsx
+import { getAllPosts } from '@/lib/posts'
+import ArticleCard from '@/components/ArticleCard'
+
+export default async function Home() {
+  const posts = await getAllPosts()
+
+  return (
+    <main className="container mx-auto px-4 py-12">
+      <h1 className="text-4xl font-bold mb-8">最新の投稿</h1>
+      <div className="grid md:grid-cols-2 gap-8">
+        {posts.map((post) => (
+          <ArticleCard key={post.slug} post={post} />
+        ))}
+      </div>
+    </main>
+  )
+}
+```
+
+### ブログ記事ページ
+
+`src/app/blog/[slug]/page.tsx` の個別記事は静的にビルドします。ブログ記事は頻繁に変わるものではないため、事前にビルドしておくことで高速に表示できます。
+
+```tsx
+import { getPostBySlug, getAllPosts } from '@/lib/posts'
+import { notFound } from 'next/navigation'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+
+// Next.jsにこれらのページを事前にビルドするよう指示
+export async function generateStaticParams() {
+  const posts = await getAllPosts()
+  return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) return { title: 'Post Not Found' }
+  
+  return {
+    title: post.title,
+    description: post.excerpt,
+  }
+}
+
+export default async function BlogPost({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
+  
+  if (!post) {
+    notFound()
+  }
+
+  return (
+    <article className="max-w-3xl mx-auto py-12 px-4">
+      <h1 className="text-5xl font-bold mb-4">{post.title}</h1>
+      <time className="text-gray-500 block mb-8">{post.date}</time>
+      <div className="prose lg:prose-xl dark:prose-invert max-w-none">
+        <MDXRemote source={post.content} />
+      </div>
+    </article>
+  )
+}
+```
+
+## 🎨 見た目を整える
+
+記事プレビュー用のシンプルなカードコンポーネントを作ります。
+
+```tsx
+// src/components/ArticleCard.tsx
+import Link from 'next/link'
+import Image from 'next/image'
+import type { Post } from '@/lib/posts'
+
+export default function ArticleCard({ post }: { post: Post }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="group block">
+      <article className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+        <div className="relative h-48 w-full">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors">
+            {post.title}
+          </h2>
+          <p className="text-gray-500 line-clamp-2">{post.excerpt}</p>
+          <time className="text-sm text-gray-400 mt-2 block">{post.date}</time>
+        </div>
+      </article>
+    </Link>
+  )
+}
+```
+
+## ✨ まとめ
+
+これで完了です。2026年の最新Web技術を使って、高パフォーマンスなブログを構築しました。
+
+**次は何をすればいい？**
+
+*   **ダークモード**: `next-themes` を追加して、ユーザーがテーマを切り替えられるようにしましょう。
+*   **検索**: 記事が増えてきたら、 `fuse.js` などのライブラリを使って検索機能を追加しましょう。
+*   **コードハイライト**: `rehype-highlight` を追加して、コードブロックを綺麗に表示しましょう。
+*   **デプロイ**: Vercelにプッシュして、世界に公開しましょう。
+
+読んでくれてありがとうございました！素晴らしいものを作ってください。

@@ -1,5 +1,7 @@
 # NeoWhisper - Modern Tech Blog
 
+> Current version: **v1.5.0**
+
 A high-performance, SEO-optimized tech blog built with **Next.js 16**, **App Router**, and **MDX**.
 
 Features trilingual support (**English**, **日本語**, **العربية**) and a premium, modern aesthetic.
@@ -13,6 +15,10 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
 - **Syntax Highlighting**: Beautiful code blocks with `rehype-highlight` and `highlight.js`.
 - **Google Analytics (GA4)**: Robust tracking with secure environment variable configuration.
 - **SEO Optimized**: Built-in metadata, semantic HTML, and structured content strategy.
+- **Multilingual SEO**: Automatic hreflang tags for English, Japanese, and Arabic, plus Open Graph alternateLocale support.
+- **Related Posts**: Smart content discovery with category and language-aware recommendations.
+- **Performance Optimized**: Responsive image optimization, efficient font loading, and layout tuned for Core Web Vitals.
+- **Sitemap & Robots**: Pre-generated `sitemap.xml` and `robots.txt` to guide search engine crawlers.
 
 ## 🛠️ Getting Started
 

@@ -77,3 +77,56 @@ export function getPostBySlug(slug: string): Post | null {
         content,
     } as Post;
 }
+
+// Helper function to get the base slug (without language suffix)
+export function getBaseSlug(slug: string): string {
+    return slug.replace(/(-ar|-ja)$/, '');
+}
+
+// Helper function to get all language variants of a post slug
+export function getLanguageVariants(baseSlug: string): { lang: string; slug: string }[] {
+    const variants = [
+        { lang: 'en', slug: baseSlug },
+        { lang: 'ja', slug: `${baseSlug}-ja` },
+        { lang: 'ar', slug: `${baseSlug}-ar` },
+    ];
+
+    // Filter to only include variants that actually exist
+    return variants.filter((variant) => {
+        const fullPath = path.join(postsDirectory, `${variant.slug}.mdx`);
+        return fs.existsSync(fullPath);
+    });
+}
+
+// Helper function to determine the language of a post from its slug
+export function getPostLanguage(slug: string): string {
+    if (slug.endsWith('-ar')) return 'ar';
+    if (slug.endsWith('-ja')) return 'ja';
+    return 'en';
+}
+
+// Function to get related posts (same category, same language, excluding current post)
+export function getRelatedPosts(currentSlug: string, limit: number = 3): Post[] {
+    const currentPost = getPostBySlug(currentSlug);
+    
+    if (!currentPost || !currentPost.category) {
+        return [];
+    }
+
+    const currentLanguage = getPostLanguage(currentSlug);
+    const allPosts = getPosts();
+
+    // Filter posts by same category and language, exclude current post
+    const related = allPosts
+        .filter((post) => {
+            const postLanguage = getPostLanguage(post.slug);
+            return (
+                post.slug !== currentSlug &&
+                post.category === currentPost.category &&
+                postLanguage === currentLanguage
+            );
+        })
+        .slice(0, limit);
+
+    return related;
+}

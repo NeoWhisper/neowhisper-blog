@@ -10,6 +10,26 @@ All notable changes to the NeoWhisper blog will be documented here.
 - About page (coming soon)
 - Code quality: Remove if statements from remaining components
 
+## [1.5.0] - 2026-01-31
+
+### Added
+
+- **Hreflang Tags**: Added proper hreflang tags to all blog posts for SEO, supporting all language variants (en, ja, ar) with `x-default` pointing to English version
+- **Related Posts Section**: Implemented "Related Posts" section below each article showing up to 3 posts from the same category and language, excluding the current post
+- **Clickable Category Links**: Made category badges clickable links in both header metadata and footer sections, pointing to category pages with proper URL encoding
+- **Language-Aware Language Switcher**: Enhanced language switcher to only display available language variants for each post
+
+### Changed
+
+- **Performance Optimization**: Optimized Core Web Vitals by adding `sizes` prop to hero images to prevent Cumulative Layout Shift (CLS)
+- **Font Loading**: Added `display: "swap"` and `preload: true` to font configuration to minimize Flash of Unstyled Text (FOUT)
+- **Image Optimization**: Enhanced Next.js image configuration with proper device sizes, image sizes, and cache TTL settings
+- **Code Cleanup**: Removed unused UI components (`Badge`, `Button`) and unused CSS variables (sidebar, chart, popover) to reduce bundle size
+
+### Fixed
+
+- **Layout Shift**: Fixed potential layout shift issues by adding proper `sizes` attribute to all `next/image` components
+
 ## [1.4.2] - 2026-01-31
 
 ### Fixed

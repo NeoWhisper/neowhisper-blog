@@ -11,7 +11,11 @@ const LANGUAGES = [
     { code: "ja", label: "日本語", suffix: "-ja" },
 ] as const;
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+    availableLanguages?: string[];
+}
+
+export function LanguageSwitcher({ availableLanguages }: LanguageSwitcherProps = {}) {
     const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
 
@@ -43,9 +47,14 @@ export function LanguageSwitcher() {
                     // Example: /blog/post-ar/ -> /blog/post
                     const baseSlugPath = pathname.replace(/\/$/, "").replace(/(-ar|-ja)$/, "");
 
+                    // Filter languages to only show available ones if provided
+                    const languagesToShow = availableLanguages
+                        ? LANGUAGES.filter((lang) => availableLanguages.includes(lang.code))
+                        : LANGUAGES;
+
                     return (
                         <div className="flex items-center gap-2 p-1 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
-                            {LANGUAGES.map((lang) => {
+                            {languagesToShow.map((lang) => {
                                 const targetHref = `${baseSlugPath}${lang.suffix}`;
                                 const isActive = pathname === targetHref;
 

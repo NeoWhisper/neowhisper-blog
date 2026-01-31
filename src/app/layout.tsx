@@ -8,6 +8,8 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

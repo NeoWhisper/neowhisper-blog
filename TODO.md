@@ -13,9 +13,10 @@
 
 ## 📋 Next Up
 
-- [ ] Submit sitemap to Google Search Console
-- [ ] Monitor Core Web Vitals and page speed
+- [ ] Submit sitemap to Google Search Console (after v1.5.0 deployment)
+- [ ] Monitor Core Web Vitals and page speed (optimizations completed)
 - [ ] Validate structured data with Rich Results Test
+- [ ] Test hreflang tags in Google Search Console
 
 - [ ] Write second blog post: "AI-Powered Code Generation Tools"
 - [ ] Create Contact page with email/form
@@ -30,6 +31,15 @@
 - [ ] Create translation files (en.json, ja.json, ar.json) for UI elements
 - [ ] Set up automatic language detection based on user location
 - [ ] Organize posts by language (content/posts/en, ja, ar)
+
+## ✅ Completed (2026-01-31)
+
+- [x] **Add hreflang tags for SEO** - Implemented proper hreflang tags for all blog posts with language variants
+- [x] **Add Related Posts section** - Shows 3 related posts from same category and language
+- [x] **Make category badges clickable** - Added clickable category links in header and footer
+- [x] **Performance optimization** - Optimized images, fonts, and removed unused code for Core Web Vitals
+- [x] **Remove unused components** - Deleted unused Badge and Button UI components
+- [x] **Clean up unused CSS** - Removed sidebar, chart, and popover CSS variables
 
 ## ✅ Completed (2026-01-30)
 

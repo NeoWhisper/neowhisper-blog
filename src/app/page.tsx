@@ -69,7 +69,7 @@ export default async function Home({
     .filter((category): category is string => Boolean(category))
     .map(category => ({
       name: category,
-      slug: category === 'Next.js' ? 'next.js' : category.toLowerCase().replace(/ /g, '-')
+      slug: category === 'Next.js' ? 'next.js' : category.toLowerCase().replace(/\s+/g, '-')
     }));
 
   return (

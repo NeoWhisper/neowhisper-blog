@@ -11,14 +11,26 @@ interface PageProps {
     }>;
 }
 
+// Helper function to create a slug from a category name (matches sitemap.ts)
+function createCategorySlug(category: string): string {
+    if (category === 'Next.js') {
+        return 'next.js';
+    }
+    return category.toLowerCase().replace(/\s+/g, '-');
+}
+
 // 1. Generate Static Params for all known categories
 export async function generateStaticParams() {
     const posts = getPosts();
     const categories = new Set(posts.map((post) => post.category).filter(Boolean));
 
-    return Array.from(categories).map((category) => ({
-        slug: category!.toLowerCase().replace(/\s+/g, '-'),
-    }));
+    return Array.from(categories).map((category) => {
+        const slug = createCategorySlug(category!);
+        // URL-encode the slug to match what we do in the sitemap
+        return {
+            slug: encodeURIComponent(slug),
+        };
+    });
 }
 
 const CATEGORY_NAMES: Record<string, string> = {
@@ -38,7 +50,7 @@ export default async function CategoryPage({ params }: PageProps) {
     // Filter posts that match the category slug
     const categoryPosts = posts.filter((post) => {
         if (!post.category) return false;
-        const postSlug = post.category.toLowerCase().replace(/\s+/g, '-');
+        const postSlug = createCategorySlug(post.category);
         return postSlug === decodedSlug;
     });
 

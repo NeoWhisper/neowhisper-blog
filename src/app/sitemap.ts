@@ -3,6 +3,14 @@ import { getPosts } from '@/lib/posts';
 
 const baseUrl = 'https://www.neowhisper.net';
 
+// Helper function to create a slug from a category name
+function createCategorySlug(category: string): string {
+    if (category === 'Next.js') {
+        return 'next.js';
+    }
+    return category.toLowerCase().replace(/\s+/g, '-');
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
     const posts = getPosts();
 
@@ -19,12 +27,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         .filter((category): category is string => Boolean(category))
         .map((category) => ({
             name: category,
-            slug: category === 'Next.js' ? 'next.js' : category.toLowerCase().replace(/ /g, '-'),
+            slug: createCategorySlug(category),
         }));
 
-    // Generate category URLs
+    // Generate category URLs - URL-encode the slug to handle special characters
     const categoryUrls = uniqueCategories.map((category) => ({
-        url: `${baseUrl}/category/${category.slug}`,
+        url: `${baseUrl}/category/${encodeURIComponent(category.slug)}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.5,

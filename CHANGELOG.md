@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Changelog
 
 All notable changes to the NeoWhisper blog will be documented here.
@@ -8,6 +9,18 @@ All notable changes to the NeoWhisper blog will be documented here.
 - Contact page (coming soon)
 - About page (coming soon)
 - Code quality: Remove if statements from remaining components
+
+## [1.4.2] - 2026-01-31
+
+### Fixed
+
+- **Sitemap XML Parsing Error**: Fixed XML parsing error (`xmlParseEntityRef: no name`) caused by unescaped `&` characters in category URLs. Category slugs with special characters (like `＆` in Japanese) are now properly URL-encoded using `encodeURIComponent`, ensuring valid XML output.
+- **Double Encoding Issue**: Resolved double-encoding problem where category URLs were being encoded twice, resulting in `%25` instead of `%` in the sitemap.
+
+### Changed
+
+- **Sitemap Generation**: Refactored sitemap generation to properly URL-encode category slugs while maintaining consistency with `generateStaticParams` in category pages.
+- **Category Slug Consistency**: Standardized category slug generation across sitemap, category pages, and homepage to use the same `createCategorySlug` helper function.
 
 ## [1.4.1] - 2026-01-30
 

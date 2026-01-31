@@ -1,3 +1,9 @@
+/**
+ * NeoWhisper - Modern Tech Blog
+ * Copyright (c) 2026 Yousif Alqadi
+ * Licensed under the MIT License
+ */
+
 import type { Metadata } from 'next';
 import { getPosts } from '@/lib/posts';
 import Link from 'next/link';

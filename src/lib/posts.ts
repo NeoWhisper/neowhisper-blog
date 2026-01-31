@@ -1,3 +1,9 @@
+/**
+ * NeoWhisper - Modern Tech Blog
+ * Copyright (c) 2026 Yousif Alqadi
+ * Licensed under the MIT License
+ */
+
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";

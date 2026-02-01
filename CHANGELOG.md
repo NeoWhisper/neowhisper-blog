@@ -10,6 +10,22 @@ All notable changes to the NeoWhisper blog will be documented here.
 - About page (coming soon)
 - Code quality: Remove if statements from remaining components
 
+## [1.5.1] - 2026-02-02
+
+### Added
+
+- Playwright E2E tests and configuration (`tests/` and `playwright.config.ts`).
+- GitHub Actions workflow to run Playwright E2E on push and PRs (`.github/workflows/e2e.yml`).
+
+### Fixed
+
+- Canonicalized and redirected non-canonical/encoded category slugs to avoid duplicate pages (fixes empty-state for encoded variants).
+
+### Chore
+
+- Updated `README.md` with E2E instructions and `.gitignore` to ignore Playwright artifacts and IDE files.
+
+
 ## [1.5.0] - 2026-01-31
 
 ### Added

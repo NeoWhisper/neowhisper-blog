@@ -79,6 +79,27 @@ author:
 
 Push to your main branch and connect to [Vercel](https://vercel.com/new) for automatic deployments.
 
+## 🧪 End-to-end tests (Playwright) ✅
+
+There are two ways to run the Playwright E2E tests locally:
+
+1. **Playwright-managed server** (recommended for CI / fresh runs)
+
+   - Install Playwright browsers: `npx playwright install`
+   - Run tests: `npm run test:e2e`
+   - Playwright will start `npm run dev`, run the tests, then stop the server. The Playwright config also allows reusing an existing server if one is already running.
+
+2. **Use an existing dev server** (recommended for iterative local development)
+
+   - Start dev in one terminal: `npm run dev`
+   - In another terminal run: `npm run test:e2e`
+   - Because `playwright.config.ts` is configured with `reuseExistingServer: true`, Playwright will use the running server instead of starting a new one.
+
+**Troubleshooting:**
+
+- If you see "port 3000 is already used" or Next's lock error, ensure no other `next dev` instances are running (`lsof -i :3000` helps identify listeners).
+- First-time setup: after installing dependencies, run `npx playwright install` to download browser binaries.
+
 ---
 
 Built with ❤️ by **NeoWhisper**

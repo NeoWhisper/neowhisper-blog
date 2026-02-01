@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# Playwright / test artifacts
+/playwright-report
+/test-results
+/.playwright
+/playwright/.local-browsers
+
 # next.js
 /.next/
 /out/
@@ -23,6 +29,12 @@
 # misc
 .DS_Store
 *.pem
+
+# IDEs and editor project files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
 
 # debug
 npm-debug.log*

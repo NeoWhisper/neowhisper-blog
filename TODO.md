@@ -54,6 +54,7 @@
   - [x] Implement JSON-LD structured data (WebSite + Organization schemas)
   - [x] Create dynamic XML sitemap with all blog posts and categories
   - [x] Configure robots.txt
+  - [x] Hardened CORS for robots/sitemap (removed Access-Control-Allow-Origin)
   - [x] Generate professional OG image for social sharing
 - [x] Deploy v1.4.1 to production
 

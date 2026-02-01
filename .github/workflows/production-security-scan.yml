@@ -1,0 +1,99 @@
+name: Production Security Scan
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # Weekly on Monday at 00:00 UTC
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run production security checks
+        id: run_scan
+        run: |
+          set -euo pipefail
+          BASE="https://www.neowhisper.net"
+          mkdir -p artifacts
+          LOG=artifacts/scan.log
+          echo "Production security scan: $(date -u)" > "$LOG"
+
+          failures=0
+
+          echo "\n-- Checking root (/) headers --" | tee -a "$LOG"
+          curl -s -D - -o /dev/null -L -H "Origin: https://example.com" "$BASE/" | tee -a "$LOG" > /tmp/headers_root.txt
+
+          grep -iq "x-content-type-options: *nosniff" /tmp/headers_root.txt || { echo "Missing or incorrect X-Content-Type-Options" | tee -a "$LOG"; failures=$((failures+1)); }
+          grep -iq "x-frame-options: *deny" /tmp/headers_root.txt || { echo "Missing or incorrect X-Frame-Options" | tee -a "$LOG"; failures=$((failures+1)); }
+          grep -iq "content-security-policy:.*default-src 'self'" /tmp/headers_root.txt || { echo "Missing or weak Content-Security-Policy (default-src 'self' not present)" | tee -a "$LOG"; failures=$((failures+1)); }
+
+          echo "\n-- Checking /robots.txt (ACAO absent) --" | tee -a "$LOG"
+          curl -s -D - -o /dev/null -L -H "Origin: https://example.com" "$BASE/robots.txt" | tee -a "$LOG" > /tmp/headers_robots.txt
+          if grep -iq "access-control-allow-origin" /tmp/headers_robots.txt; then echo "Unexpected Access-Control-Allow-Origin header on robots.txt" | tee -a "$LOG"; failures=$((failures+1)); fi
+
+          echo "\n-- Checking /sitemap.xml (ACAO absent) --" | tee -a "$LOG"
+          curl -s -D - -o /dev/null -L -H "Origin: https://example.com" "$BASE/sitemap.xml" | tee -a "$LOG" > /tmp/headers_sitemap.txt
+          if grep -iq "access-control-allow-origin" /tmp/headers_sitemap.txt; then echo "Unexpected Access-Control-Allow-Origin header on sitemap.xml" | tee -a "$LOG"; failures=$((failures+1)); fi
+
+          echo "\n-- Summary --" | tee -a "$LOG"
+          if [ "$failures" -gt 0 ]; then
+            echo "Scan completed with $failures failures" | tee -a "$LOG"
+            echo "::set-output name=success::false"
+            exit 1
+          else
+            echo "All checks passed" | tee -a "$LOG"
+            echo "::set-output name=success::true"
+          fi
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-security-scan-log
+          path: artifacts/
+
+      - name: Open (or update) GitHub issue on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('artifacts/scan.log', 'utf8');
+            const title = `Production security scan failed - ${new Date().toISOString().slice(0,10)}`;
+            const label = 'security-scan';
+
+            // Ensure label exists (create if missing)
+            try {
+              await github.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label });
+            } catch (err) {
+              await github.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label, color: 'b60205', description: 'Automated production security scan failures' });
+            }
+
+            // Find existing open issue with our label and matching title prefix
+            const issues = await github.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: label });
+            const existing = issues.data.find(i => i.title && i.title.startsWith('Production security scan failed -'));
+
+            if (existing) {
+              // Append a comment to the existing issue with fresh logs
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `Automated security scan detected regressions on ${new Date().toISOString()}.\n\nLogs:\n\n\`\`\`\n${body}\n\`\`\``
+              });
+            } else {
+              // Create a new issue with the label
+              await github.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body: `Automated security scan detected regressions.\n\nLogs:\n\n\`\`\`\n${body}\n\`\`\``,
+                labels: [label],
+              });
+            }

@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Powered-By", value: "" },
         ],
       },
     ];

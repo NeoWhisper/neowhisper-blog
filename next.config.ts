@@ -14,10 +14,12 @@ const nextConfig: NextConfig = {
   // Add `X-Content-Type-Options: nosniff` globally to ensure the browser
   // only treats responses as the declared MIME type.
   async headers() {
+    const csp = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
     return [
       {
         source: '/(.*)',
         headers: [
+          { key: 'Content-Security-Policy', value: csp },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'DENY' },
         ],

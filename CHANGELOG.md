@@ -21,6 +21,7 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 - Canonicalized and redirected non-canonical/encoded category slugs to avoid duplicate pages (fixes empty-state for encoded variants).
 - Removed `Access-Control-Allow-Origin` header for `/robots.txt` and `/sitemap.xml` (security hardening).
+- Added security headers: `Content-Security-Policy`, `X-Frame-Options: DENY`, and `X-Content-Type-Options: nosniff`.
 
 ### Chore
 

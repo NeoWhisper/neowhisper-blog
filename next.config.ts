@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       {
         source: '/(robots\.txt|sitemap\.xml)',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: 'https://neowhisper.net' },
+          { key: 'Access-Control-Allow-Origin', value: 'https://www.neowhisper.net' },
           { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
         ],

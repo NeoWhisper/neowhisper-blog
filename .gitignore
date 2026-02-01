@@ -55,3 +55,10 @@ next-env.d.ts
 # These files exist locally but won't be committed:
 src/app/content-planning/page.tsx
 src/lib/keyword-research.ts
+
+# Security audit reports (contains vulnerability details - keep private until fixed)
+AUDIT_REPORT.md
+IMMEDIATE_ACTIONS.md
+
+# Business strategy and planning (keep private for competitive advantage)
+TODO.md

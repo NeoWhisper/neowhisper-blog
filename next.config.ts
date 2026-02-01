@@ -10,21 +10,9 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
 
-  // Explicit headers for static resources: avoid reflecting arbitrary Origins.
-  // For robots.txt and sitemap.xml we don't need broad CORS, so set a
-  // restrictive Access-Control-Allow-Origin to the canonical site origin.
-  async headers() {
-    return [
-      {
-        source: '/(robots\.txt|sitemap\.xml)',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: 'https://www.neowhisper.net' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
-        ],
-      },
-    ];
-  },
+  // No CORS headers for robots.txt and sitemap.xml: removed to reduce attack surface.
+  // (Previously set to https://www.neowhisper.net)
+
 };
 
 const withMDX = createMDX({});

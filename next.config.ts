@@ -10,8 +10,19 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
 
-  // No CORS headers for robots.txt and sitemap.xml: removed to reduce attack surface.
-  // (Previously set to https://www.neowhisper.net)
+  // Security headers: prevent MIME type sniffing in browsers.
+  // Add `X-Content-Type-Options: nosniff` globally to ensure the browser
+  // only treats responses as the declared MIME type.
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
+    ];
+  },
 
 };
 

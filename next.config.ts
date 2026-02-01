@@ -9,6 +9,22 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
+
+  // Explicit headers for static resources: avoid reflecting arbitrary Origins.
+  // For robots.txt and sitemap.xml we don't need broad CORS, so set a
+  // restrictive Access-Control-Allow-Origin to the canonical site origin.
+  async headers() {
+    return [
+      {
+        source: '/(robots\.txt|sitemap\.xml)',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: 'https://neowhisper.net' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
+        ],
+      },
+    ];
+  },
 };
 
 const withMDX = createMDX({});

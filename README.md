@@ -100,6 +100,10 @@ There are two ways to run the Playwright E2E tests locally:
 - If you see "port 3000 is already used" or Next's lock error, ensure no other `next dev` instances are running (`lsof -i :3000` helps identify listeners).
 - First-time setup: after installing dependencies, run `npx playwright install` to download browser binaries.
 
+## 🔒 Production security scan (weekly)
+
+A scheduled GitHub Action runs weekly (and on pushes to `main`) to verify critical security headers and static asset configuration (CSP, `X-Frame-Options`, `X-Content-Type-Options`, and absence of `Access-Control-Allow-Origin` on `robots.txt`/`sitemap.xml`). If the scan detects regressions, it uploads logs as workflow artifacts and **automatically opens a GitHub issue** with the scan output so regressions are visible and tracked. To change this behavior edit `.github/workflows/production-security-scan.yml` (it uses `GITHUB_TOKEN`); you can also redirect alerts to Slack or email instead of creating issues.
+
 ---
 
 Built with ❤️ by **NeoWhisper**

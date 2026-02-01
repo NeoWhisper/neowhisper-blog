@@ -10,6 +10,7 @@ import Link from 'next/link';
 import ArticleCard from '@/components/ArticleCard';
 import CategoryNav from '@/components/CategoryNav';
 import { AdSenseAd } from '@/components/AdSenseAd';
+import { buildCategorySlug } from '@/lib/categories';
 
 const siteUrl = 'https://www.neowhisper.net';
 
@@ -75,7 +76,7 @@ export default async function Home({
     .filter((category): category is string => Boolean(category))
     .map(category => ({
       name: category,
-      slug: category === 'Next.js' ? 'next.js' : category.toLowerCase().replace(/\s+/g, '-')
+      slug: buildCategorySlug(category)
     }));
 
   return (

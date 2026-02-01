@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { buildCategorySlug } from '@/lib/categories';
 
 const categoryColors: Record<string, string> = {
     'Next.js': 'bg-black text-white',
@@ -38,7 +39,7 @@ export default function ArticleCard({ post }: ArticleCardProps) {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-4 gap-3">
                     {post.category && (
                         <Link
-                            href={`/category/${post.category.toLowerCase().replace(/\s+/g, '-')}`}
+                            href={`/category/${buildCategorySlug(post.category)}`}
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${categoryColors[post.category] || 'bg-gray-500 text-white'} hover:opacity-80 transition-opacity`}
                         >
                             {post.category}

@@ -142,13 +142,13 @@ jobs:
 
             // Ensure label exists (create if missing)
             try {
-              await github.issues.getLabel({
+              await github.rest.issues.getLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: label,
               });
             } catch (err) {
-              await github.issues.createLabel({
+              await github.rest.issues.createLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: label,
@@ -158,7 +158,7 @@ jobs:
             }
 
             // Find existing open issue with our label and matching title prefix
-            const issues = await github.issues.listForRepo({
+            const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
@@ -178,7 +178,7 @@ jobs:
               'If you need full diagnostic logs, contact repository admins to request them.';
 
             if (existing) {
-              await github.issues.createComment({
+              await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existing.number,
@@ -190,7 +190,7 @@ jobs:
                   '\n```',
               });
             } else {
-              await github.issues.create({
+              await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,

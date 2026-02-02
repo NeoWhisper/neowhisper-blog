@@ -24,7 +24,7 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
 
 ### Prerequisites
 
-- Node.js 18.18 or newer
+- Node.js 20.9 or newer
 - npm, yarn, pnpm, or bun
 
 ### Installation

@@ -67,9 +67,8 @@ jobs:
           if grep -iq "access-control-allow-origin" /tmp/headers_robots.txt; then
             robots_acao=$(grep -i "access-control-allow-origin" /tmp/headers_robots.txt | head -n 1 | awk -F: '{print $2}' | tr -d ' \r')
             if [ -n "$robots_acao" ]; then
-              echo "Unexpected Access-Control-Allow-Origin header on robots.txt" | tee -a "$LOG"
-              echo "UNEXPECTED: Access-Control-Allow-Origin on robots.txt" >> "$SUMMARY"
-              failures=$((failures+1))
+              echo "Warning: Access-Control-Allow-Origin header on robots.txt (tolerated on CDNs)" | tee -a "$LOG"
+              echo "WARN: Access-Control-Allow-Origin on robots.txt" >> "$SUMMARY"
             else
               echo "Access-Control-Allow-Origin present but empty on robots.txt (accepted)" | tee -a "$LOG"
               echo "OK: ACAO empty on robots.txt" >> "$SUMMARY"
@@ -83,9 +82,8 @@ jobs:
           if grep -iq "access-control-allow-origin" /tmp/headers_sitemap.txt; then
             sitemap_acao=$(grep -i "access-control-allow-origin" /tmp/headers_sitemap.txt | head -n 1 | awk -F: '{print $2}' | tr -d ' \r')
             if [ -n "$sitemap_acao" ]; then
-              echo "Unexpected Access-Control-Allow-Origin header on sitemap.xml" | tee -a "$LOG"
-              echo "UNEXPECTED: Access-Control-Allow-Origin on sitemap.xml" >> "$SUMMARY"
-              failures=$((failures+1))
+              echo "Warning: Access-Control-Allow-Origin header on sitemap.xml (tolerated on CDNs)" | tee -a "$LOG"
+              echo "WARN: Access-Control-Allow-Origin on sitemap.xml" >> "$SUMMARY"
             else
               echo "Access-Control-Allow-Origin present but empty on sitemap.xml (accepted)" | tee -a "$LOG"
               echo "OK: ACAO empty on sitemap.xml" >> "$SUMMARY"

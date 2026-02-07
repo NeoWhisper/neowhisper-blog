@@ -22,8 +22,8 @@ type ContactCopy = {
   placeholderDetails: string;
   emailDirect: string;
   options: {
-    projectType: string[];
-    budget: string[];
+    projectType: readonly string[];
+    budget: readonly string[];
   };
 };
 

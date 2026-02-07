@@ -54,12 +54,16 @@ export default function ContactForm({
       budget: formData.get("budget"),
       details: formData.get("details"),
       turnstileToken: formData.get("cf-turnstile-response"),
+      lang: formData.get("lang"),
     };
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
@@ -79,7 +83,13 @@ export default function ContactForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+      action="/api/contact"
+      method="post"
+    >
+      <input type="hidden" name="lang" value={lang} />
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">

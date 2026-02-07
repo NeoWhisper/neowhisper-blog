@@ -1,7 +1,7 @@
 # NeoWhisper Blog - Public Roadmap
 
-**Last Updated:** February 1, 2026  
-**Current Version:** v1.5.0
+**Last Updated:** February 7, 2026  
+**Current Version:** v1.6.0
 
 This roadmap outlines the planned features and improvements for the NeoWhisper Blog. Items are subject to change based on priorities and feedback.
 
@@ -24,9 +24,6 @@ This roadmap outlines the planned features and improvements for the NeoWhisper B
 ## 📋 Next Quarter
 
 ### New Pages
-- [ ] **Services Page** - Detailed showcase of software development, game development, and translation services
-- [ ] **Contact Page** - Professional contact form and communication channels
-- [ ] **About Page** - Company information and team background
 - [ ] **Portfolio/Case Studies** - Showcase of completed projects
 
 ### SEO & Analytics
@@ -36,7 +33,6 @@ This roadmap outlines the planned features and improvements for the NeoWhisper B
 - [ ] Monitor hreflang tag performance
 
 ### Navigation
-- [ ] Enhanced header navigation menu
 - [ ] Breadcrumb navigation for better UX
 - [ ] Search functionality
 
@@ -66,6 +62,15 @@ This roadmap outlines the planned features and improvements for the NeoWhisper B
 ---
 
 ## ✅ Recently Completed
+
+### v1.6.0 (Feb 7, 2026)
+- ✅ Marketing homepage separated from blog hub (`/` vs `/blog`)
+- ✅ Sticky glassmorphism navigation bar
+- ✅ Services page (`/services`)
+- ✅ Projects page (`/projects`)
+- ✅ About page (`/about`)
+- ✅ Contact page (`/contact`)
+- ✅ Multilingual marketing homepage (EN/JA/AR)
 
 ### v1.5.1 (Feb 2, 2026)
 - ✅ End-to-end testing with Playwright

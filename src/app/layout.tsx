@@ -10,6 +10,7 @@ import "./globals.css";
 import "highlight.js/styles/github-dark.css"; // Syntax highlighting theme
 import Script from "next/script";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import SiteHeader from "@/components/SiteHeader";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
+        <SiteHeader />
         <div className="flex-1">
           <GoogleAnalytics />
           {children}

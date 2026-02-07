@@ -2,9 +2,11 @@ import { getPosts } from '@/lib/posts';
 import ArticleCard from '@/components/ArticleCard';
 import { categories, buildCategorySlug } from '@/lib/categories';
 import Link from 'next/link';
+import { normalizeLang } from '@/lib/i18n';
 
 interface PageProps {
     params: Promise<{ slug: string }>;
+    searchParams: Promise<{ lang?: string }>;
 }
 
 /**
@@ -28,8 +30,10 @@ export async function generateStaticParams() {
 // NOTE: pretty names are derived from the canonical `categories` mapping
 // below when available. Any unknown slug will be auto-capitalised.
 
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CategoryPage({ params, searchParams }: PageProps) {
     const { slug } = await params;
+    const { lang } = await searchParams;
+    const currentLang = normalizeLang(lang);
     const posts = getPosts();
     const decoded = decodeURIComponent(slug);
 
@@ -69,7 +73,7 @@ export default async function CategoryPage({ params }: PageProps) {
         <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900">
             <div className="max-w-4xl mx-auto">
                 {/* Back button */}
-                <Link href="/" className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group">
+                <Link href={`/blog?lang=${currentLang}`} className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group">
                     <svg
                         className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1"
                         fill="none"
@@ -78,7 +82,7 @@ export default async function CategoryPage({ params }: PageProps) {
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Home
+                    Back to Blog
                 </Link>
 
                 <header className="text-center mb-12">

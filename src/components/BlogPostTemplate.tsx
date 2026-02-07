@@ -32,6 +32,7 @@ interface BlogPostTemplateProps {
     isRTL?: boolean;
     availableLanguages?: string[];
     relatedPosts?: Post[];
+    lang?: string;
 }
 
 export default function BlogPostTemplate({
@@ -43,7 +44,8 @@ export default function BlogPostTemplate({
     readTime,
     isRTL = false,
     availableLanguages,
-    relatedPosts = []
+    relatedPosts = [],
+    lang = "en"
 }: BlogPostTemplateProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -51,7 +53,7 @@ export default function BlogPostTemplate({
                 <article className="max-w-3xl mx-auto">
                     {/* Back Button */}
                     <Link
-                        href="/"
+                        href={`/blog?lang=${lang}`}
                         className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                         <svg
@@ -67,7 +69,7 @@ export default function BlogPostTemplate({
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        {isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
+                        {isRTL ? 'العودة للمدونة' : 'Back to Blog'}
                     </Link>
 
                     {/* Post Card with Glassmorphism */}
@@ -224,7 +226,7 @@ export default function BlogPostTemplate({
                         </div>
                     )}
                     <Link
-                        href="/"
+                        href={`/blog?lang=${lang}`}
                         className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 group transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                         <svg
@@ -240,7 +242,7 @@ export default function BlogPostTemplate({
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        {isRTL ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
+                        {isRTL ? 'العودة للمدونة' : 'Back to Blog'}
                     </Link>
                 </div>
             </div>

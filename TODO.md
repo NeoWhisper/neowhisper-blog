@@ -9,7 +9,8 @@
   - [ ] BlogPostTemplate.tsx
   - [ ] Page components
 - [ ] Write 15-20 SEO-focused blog posts (based on keyword research)
-- [ ] Create Services page with detailed offerings
+- [ ] Populate Projects page with real case studies and screenshots
+- [ ] Add real download links for apps/music (App Store, Google Play, Spotify, etc.)
 
 ## 📋 Next Up
 
@@ -19,10 +20,9 @@
 - [ ] Test hreflang tags in Google Search Console
 
 - [ ] Write second blog post: "AI-Powered Code Generation Tools"
-- [ ] Create Contact page with email/form
-- [ ] Create About page with company info
-- [ ] Add navigation menu to header
-- [ ] Create portfolio/case studies section
+- [ ] Verify Resend domain and configure `RESEND_FROM`
+- [ ] Add Turnstile keys in Vercel (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`)
+- [ ] Configure `RESEND_TO` with comma-separated recipients if needed
 - [ ] Apply for Google AdSense (after 6 months)
 
 ## 🌐 Future: Multi-language Support
@@ -104,3 +104,13 @@
 - [x] Add TODO.md and CHANGELOG.md
 - [x] Move welcome.mdx to correct folder
 - [x] Delete duplicate src/posts folder
+
+## ✅ Completed (2026-02-07)
+
+- [x] Create Services page with detailed offerings
+- [x] Create Projects page (initial scaffold)
+- [x] Add sticky top navigation bar
+- [x] Split marketing homepage (/) and blog hub (/blog)
+- [x] Add About page
+- [x] Add Contact page with form
+- [x] Add multilingual homepage (EN/JA/AR)

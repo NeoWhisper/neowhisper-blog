@@ -5,10 +5,29 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
-- Services page (coming soon)
 - Contact page (coming soon)
 - About page (coming soon)
 - Code quality: Remove if statements from remaining components
+
+## [1.6.0] - 2026-02-07
+
+### Added
+
+- New marketing homepage with multilingual support (EN/JA/AR).
+- Dedicated `/blog` hub page (previous homepage moved and refined).
+- Sticky glassmorphism top navigation bar with key anchors.
+- `/projects`, `/services`, `/about`, and `/contact` standalone pages.
+- Contact form with API endpoint (ready for email provider integration).
+- Resend email delivery support for contact form.
+- Animated “Visit the Blog” CTA with scroll reveal.
+- Planned/locked styling for future projects and platforms.
+- Localized About/Services/Projects/Contact pages (EN/JA/AR).
+- Contact success page and Turnstile spam protection.
+- Multi-recipient email forwarding via `RESEND_TO`.
+
+### Changed
+
+- Sitemap now includes `/projects` and `/services`.
 
 ## [1.5.1] - 2026-02-02
 

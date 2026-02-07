@@ -72,6 +72,7 @@ export default async function BlogPost({ params }: PageProps) {
 
     const post = getPostBySlug(slug);
     const isRTL = slug.endsWith('-ar');
+    const lang = slug.endsWith('-ar') ? 'ar' : slug.endsWith('-ja') ? 'ja' : 'en';
 
     if (!post) {
         notFound();
@@ -93,6 +94,7 @@ export default async function BlogPost({ params }: PageProps) {
             isRTL={isRTL}
             availableLanguages={availableLanguages}
             relatedPosts={relatedPosts}
+            lang={lang}
         />
     );
 }

@@ -10,19 +10,28 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+import { withLang, type SupportedLang } from "@/lib/i18n";
+
 interface Category {
     name: string;
     slug: string;
 }
 
-export default function CategoryNav({ categories }: { categories: Category[] }) {
+export default function CategoryNav({
+    categories,
+    lang,
+}: {
+    categories: Category[];
+    lang?: SupportedLang;
+}) {
     const pathname = usePathname();
 
     return (
-        <nav className="w-full mb-12">
+        <nav className="w-full mb-12 relative z-10">
             <div className="flex flex-wrap justify-center gap-3 px-2">
                 {categories.map((cat) => {
                     const categoryPath = `/category/${cat.slug}`;
+                    const href = lang ? withLang(categoryPath, lang) : categoryPath;
                     const normalizedPathname = pathname.replace(/\/$/, "");
                     const normalizedCategoryPath = categoryPath.replace(/\/$/, "");
 
@@ -33,9 +42,9 @@ export default function CategoryNav({ categories }: { categories: Category[] }) 
                     return (
                         <Link
                             key={cat.slug}
-                            href={categoryPath}
+                            href={href}
                             className={cn(
-                                "whitespace-nowrap px-6 py-3 rounded-2xl transition-all duration-300 shadow-sm border text-sm font-bold",
+                                "whitespace-nowrap px-6 py-3 rounded-2xl transition-all duration-300 shadow-sm border text-sm font-bold cursor-pointer",
                                 "backdrop-blur-md",
                                 isActive
                                     ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)] scale-105"

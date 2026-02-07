@@ -11,6 +11,7 @@ import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { buildCategorySlug } from "@/lib/categories";
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const siteUrl = "https://www.neowhisper.net";
 
@@ -54,7 +55,7 @@ export default async function BlogHome({
 }) {
   const posts = getPosts();
   const { lang } = await searchParams;
-  const currentLang = lang || "en";
+  const currentLang = normalizeLang(lang) as SupportedLang;
   const isRTL = currentLang === "ar";
 
   const filteredPosts = posts.filter((post) => {

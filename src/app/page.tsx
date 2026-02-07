@@ -369,7 +369,7 @@ export default async function Home({
                     )}
                   </div>
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    {item.desc}
+                    {item.description}
                   </p>
                 </div>
               ))}

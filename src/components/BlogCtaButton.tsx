@@ -18,7 +18,7 @@ export default function BlogCtaButton({
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     const target = buttonRef.current;

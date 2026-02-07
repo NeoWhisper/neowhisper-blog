@@ -49,10 +49,13 @@ export default function BlogCtaButton({
 
     // Subtle page transition when supported
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const startViewTransition = (document as any)?.startViewTransition;
+    const startViewTransition = (document as any)?.startViewTransition as
+      | ((callback: () => void) => unknown)
+      | undefined;
     if (typeof startViewTransition === "function") {
       event.preventDefault();
-      startViewTransition(nav);
+      // DOM methods often require the correct `this` binding.
+      startViewTransition.call(document, nav);
       return;
     }
 

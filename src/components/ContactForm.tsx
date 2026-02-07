@@ -68,7 +68,14 @@ export default function ContactForm({
       });
 
       if (!res.ok) {
-        throw new Error("Request failed");
+        let serverMessage = "";
+        try {
+          const data = (await res.json()) as { message?: string };
+          serverMessage = data?.message ?? "";
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(serverMessage || "Request failed");
       }
 
       setState("success");
@@ -76,9 +83,13 @@ export default function ContactForm({
       event.currentTarget.reset();
       setShowToast(true);
       setTimeout(() => setShowToast(false), 4000);
-    } catch {
+    } catch (err) {
+      const errMessage =
+        err instanceof Error && err.message && err.message !== "Request failed"
+          ? err.message
+          : copy.error;
       setState("error");
-      setMessage(copy.error);
+      setMessage(errMessage);
     }
   };
 

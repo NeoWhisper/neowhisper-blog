@@ -64,8 +64,16 @@ export async function POST(request: Request) {
         }
       );
 
-      const verifyJson = (await verifyRes.json()) as { success?: boolean };
-      if (!verifyJson.success) {
+      const verifyJson = (await verifyRes.json().catch(() => ({}))) as {
+        success?: boolean;
+        "error-codes"?: unknown;
+      };
+
+      if (!verifyRes.ok || !verifyJson.success) {
+        console.error("Turnstile verification failed", {
+          status: verifyRes.status,
+          errorCodes: verifyJson?.["error-codes"],
+        });
         if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
         return NextResponse.json(
           { ok: false, message: "Spam verification failed." },
@@ -104,9 +112,26 @@ export async function POST(request: Request) {
     });
 
     if (!res.ok) {
+      const errorText = await res.text().catch(() => "");
+      console.error("Resend email send failed", {
+        status: res.status,
+        body: errorText.slice(0, 1000),
+      });
+
+      let message = "Email delivery failed.";
+      try {
+        const json = JSON.parse(errorText) as {
+          message?: string;
+          error?: { message?: string };
+        };
+        message = json?.message || json?.error?.message || message;
+      } catch {
+        // ignore parse errors
+      }
+
       if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
       return NextResponse.json(
-        { ok: false, message: "Email delivery failed." },
+        { ok: false, message },
         { status: 502 }
       );
     }

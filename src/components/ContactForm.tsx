@@ -41,11 +41,13 @@ export default function ContactForm({
   const [showToast, setShowToast] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    // Capture the form element early. React synthetic events can be unreliable after `await`.
+    const form = event.currentTarget;
     event.preventDefault();
     setState("submitting");
     setMessage("");
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       name: formData.get("name"),
       email: formData.get("email"),
@@ -80,7 +82,7 @@ export default function ContactForm({
 
       setState("success");
       setMessage(copy.success);
-      event.currentTarget.reset();
+      form.reset();
       setShowToast(true);
       setTimeout(() => setShowToast(false), 4000);
     } catch (err) {

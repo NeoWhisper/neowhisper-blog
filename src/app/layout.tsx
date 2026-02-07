@@ -11,6 +11,7 @@ import "highlight.js/styles/github-dark.css"; // Syntax highlighting theme
 import Script from "next/script";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import SiteHeader from "@/components/SiteHeader";
+import { Suspense } from "react";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -44,7 +45,10 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
-        <SiteHeader />
+        {/* `SiteHeader` reads search params via `useSearchParams`, which must be wrapped in Suspense for SSG/404 prerender. */}
+        <Suspense fallback={null}>
+          <SiteHeader />
+        </Suspense>
         <div className="flex-1">
           <GoogleAnalytics />
           {children}

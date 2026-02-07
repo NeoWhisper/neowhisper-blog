@@ -54,9 +54,19 @@ export default function RootLayout({
           {children}
         </div>
         <footer className="border-t border-white/5 bg-black/40 backdrop-blur-sm">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6 text-xs text-zinc-400">
+          <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-xs text-zinc-300 sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 NeoWhisper. All rights reserved.</span>
-            <span>Built with Next.js and MDX.</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <a className="hover:text-white transition-colors" href="/privacy">
+                Privacy
+              </a>
+              <a className="hover:text-white transition-colors" href="/terms">
+                Terms
+              </a>
+              <a className="hover:text-white transition-colors" href="/contact">
+                Contact
+              </a>
+            </div>
           </div>
         </footer>
       </body>

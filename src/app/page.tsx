@@ -266,7 +266,10 @@ export default async function Home({
             <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
               {copy.heroSubtitle}
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <div
+              className="mt-8 flex flex-wrap justify-center gap-4"
+              dir="ltr"
+            >
               <BlogCtaButton label={copy.visitBlog} lang={currentLang} />
               <Link
                 href={`/projects?lang=${currentLang}`}
@@ -275,7 +278,10 @@ export default async function Home({
                 {copy.viewProjects}
               </Link>
             </div>
-            <div className="mt-10 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+            <div
+              className="mt-10 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400"
+              dir="ltr"
+            >
               <Link
                 href="/?lang=en"
                 className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${

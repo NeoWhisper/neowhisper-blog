@@ -1,0 +1,28 @@
+---
+title: "AdSense 審査を通す多言語 Next.js サイトの作り方"
+date: "2026-02-08"
+excerpt: "「低品質コンテンツ」判定を受けた多言語サイトを、信頼性・UX・SEO を整えて AdSense 承認に近づける 10 日間の実践ガイド。"
+category: "プロダクト戦略"
+coverImage: "/images/adsense-i18n-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+# AdSense 審査を通す多言語 Next.js サイトの作り方
+
+「低価値コンテンツ」の指摘は広告コードよりも、信頼性・コンテンツの厚み・UX が足りないときに出ます。EN/JP/AR を扱うサイトを 10 日で整えるためのチェックリストです。
+
+## 1) 信頼ページを先に整える
+
+- プライバシー、利用規約、問い合わせ、概要ページを用意し、フッターから到達できるようにする。
+- 問い合わせフォームは実際に送信できるか確認。
+- 多言語サイトなら、法務ページにも言語対応の方針を明記。
+
+## 2) 薄いページではなく「軸記事」を量産
+
+800〜1500 字の軸記事を 5〜10 本用意する。技術解説、運用チェックリスト、ミニケーススタディなど、検索意図が明確なテーマを選ぶ。
+
+## 3) 多言語 SEO と UX の両立
+
+- 各ページに `hreflang` を設定し、`sitemap.xml` に言語別 URL を載せる。\n+- ナビや CTA で `?lang=` を保持し、言語が勝手に切り替わらないようにする。\n+- メタタイトル・ディスクリプションは言語ごとに書き分ける（英語の直訳は避ける）。\n+\n+## 4) 広告と CSP を両立させる\n+\n+AdSense/GA/Turnstile が必要とするドメインだけを `script-src` / `connect-src` / `frame-src` に追加する。過剰に緩めない。\n+\n+```\n+script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com;\n+connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com;\n+frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;\n+```\n+\n+## 5) UX/パフォーマンスを政策レベルで担保\n+\n+- 画像に width/height を指定して CLS を抑える。\n+- `next/font` でフォントを配信しつつ、オフラインでもビルドが落ちないようフォールバックを用意。\n+- 重い UI は必要な箇所だけクライアントコンポーネントにする。\n+\n+## 6) コンテンツ運用フロー\n+\n+- MDX を `src/content/posts` に集約し、frontmatter を統一。\n+- 翻訳は機械訳のままにせず、人がトーンを整える。用語集を作りブレを防ぐ。\n+- 各記事チェック：ユニークなタイトル/slug、160 文字以内のメタ説明、内部リンク、代替テキスト付き画像、明確な CTA。\n+\n+## 7) フォームの到達率（Deliverability）\n+\n+- SPF/DKIM/DMARC を設定し、`reply_to` にユーザーのメールを入れる。\n+- Turnstile でスパム対策、サーバー側検証とわかりやすいエラーメッセージ。\n+\n+## 8) 10 日プラン（概要）\n+\n+- Day 1–2: 信頼ページ + フッター + 問い合わせ動作確認。\n+- Day 3–6: 軸記事を 3 本公開（1 日 1 本）。\n+- Day 7: hreflang と sitemap 更新、Lighthouse で CLS/LCP を確認。\n+- Day 8: CSP を最小限のホストだけ許可するよう調整。\n+- Day 9: DMARC/SPF を検証し、テスト送信。\n+- Day 10: AdSense チェックリストを通して審査依頼。\n+\n+## 9) 審査前チェックリスト\n+\n+- 言語ごとに充実した記事が 5 本以上、もしくは単一言語で明確に位置づけ。\n+- プライバシー/規約/問い合わせがフッターから到達可能。\n+- 404 や \"coming soon\" を残さない。\n+- コンソールに CSP エラーやハイドレーションエラーがない。\n+\n+---\n+\n+まとめ: 読者がブックマークしたくなる価値を先に作り、UX と信頼ページを整えれば AdSense 承認は付いてきます。広告は「最後に乗せる」くらいの感覚で。\n*** End Patch

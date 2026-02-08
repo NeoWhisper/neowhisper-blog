@@ -7,19 +7,11 @@ import { AdSenseAd } from '@/components/AdSenseAd';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Post } from '@/types';
 import ArticleCard from '@/components/ArticleCard';
+import { buildCategorySlug } from '@/lib/categories';
 
-// Helper function to create a category slug (matches sitemap.ts and category page)
-function createCategorySlug(category: string): string {
-    if (category === 'Next.js') {
-        return 'next.js';
-    }
-    return category.toLowerCase().replace(/\s+/g, '-');
-}
-
-// Helper function to get category URL
-function getCategoryUrl(category: string): string {
-    const slug = createCategorySlug(category);
-    return `/category/${encodeURIComponent(slug)}`;
+function getCategoryUrl(category: string, lang: string): string {
+    const slug = buildCategorySlug(category);
+    return `/category/${encodeURIComponent(slug)}?lang=${lang}`;
 }
 
 interface BlogPostTemplateProps {
@@ -122,7 +114,7 @@ export default function BlogPostTemplate({
                                     <>
                                         <span className="text-gray-400">•</span>
                                         <Link
-                                            href={getCategoryUrl(category)}
+                                            href={getCategoryUrl(category, lang)}
                                             className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-200/70 dark:hover:bg-blue-900/40 transition-colors"
                                         >
                                             {category}
@@ -207,7 +199,7 @@ export default function BlogPostTemplate({
                         </h2>
                         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                             {relatedPosts.map((post) => (
-                                <ArticleCard key={post.slug} post={post} />
+                                <ArticleCard key={post.slug} post={post} lang={lang} />
                             ))}
                         </div>
                     </section>
@@ -218,7 +210,7 @@ export default function BlogPostTemplate({
                     {category && (
                         <div>
                             <Link
-                                href={getCategoryUrl(category)}
+                                href={getCategoryUrl(category, lang)}
                                 className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-200/70 dark:hover:bg-blue-900/40 transition-colors"
                             >
                                 {category}

@@ -60,6 +60,12 @@ export const categories: Category[] = [
     nameJa: "アート＆デザイン",
     nameAr: "الفن والتصميم",
   },
+  {
+    slug: "product-strategy",
+    nameEn: "Product Strategy",
+    nameJa: "プロダクト戦略",
+    nameAr: "استراتيجية المنتج",
+  },
 ];
 
 export function buildCategorySlug(name: string) {

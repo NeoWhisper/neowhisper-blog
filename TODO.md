@@ -1,5 +1,21 @@
 # NeoWhisper Blog - TODO
 
+## 🔥 Focus Now (AdSense Approval Sprint)
+
+- [ ] Publish 3 more long-form posts (EN) (800–1500+ words each, original screenshots/diagrams if possible)
+- [ ] Add JP/AR versions (or at least localized summaries) for cornerstone posts to avoid “thin/duplicated” signals
+- [ ] Add internal linking on every post (to related posts + Services/Projects/Contact)
+- [ ] Check production with ad blockers OFF: no CSP blocks for required AdSense/GA scripts
+- [ ] Submit `sitemap.xml` in Google Search Console and re-request AdSense review after updates propagate (24–72h)
+
+## 🧰 Quality Checklist (AdSense / SEO / Trust)
+
+- [ ] Footer has working links: Privacy / Terms / Contact (and keeps `?lang=` when navigating)
+- [ ] No “soft 404” pages returning 200 in production (use real `notFound()` for internal/dev-only routes)
+- [ ] No empty category pages in `sitemap.xml` (only categories that actually have posts)
+- [ ] Social previews work (set `metadataBase`, cover image exists for every post)
+- [ ] Contact form works end-to-end (Turnstile ok, Resend delivery ok, clear error messages)
+
 ## 🚀 In Progress
 
 - [ ] Remove if statements from entire codebase (functional programming refactor)
@@ -31,6 +47,13 @@
 - [ ] Create translation files (en.json, ja.json, ar.json) for UI elements
 - [ ] Set up automatic language detection based on user location
 - [ ] Organize posts by language (content/posts/en, ja, ar)
+
+## 🐛 Fixes (Recently Found)
+
+- [x] Fix JP/AR category pages showing 0 articles due to non-canonical slugs
+- [x] Deduplicate category counts (don’t show EN/JA/AR as 3 separate posts in category pages)
+- [x] Stabilize language tabs under RTL so the pill order doesn’t flip
+- [ ] Replace the AdSense playbook cover image with a NeoWhisper-branded cover
 
 ## ✅ Completed (2026-01-31)
 

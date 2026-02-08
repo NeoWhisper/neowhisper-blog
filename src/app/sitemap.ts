@@ -41,8 +41,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Build a union of category slugs derived from posts and the canonical
-  // `src/lib/categories.ts` mapping so the sitemap includes any declared
-  // categories even if no post currently references them.
+  // categories mapping. We intentionally only include categories that
+  // actually have posts to avoid indexing thin/empty category pages.
   const postCategorySlugs = Array.from(
     new Set(
       posts
@@ -51,14 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         .map((c) => createCategorySlug(c!)),
     ),
   );
-
-  const canonicalSlugs = canonicalCategories.map((c) => c.slug);
-
-  const allSlugs = Array.from(
-    new Set([...postCategorySlugs, ...canonicalSlugs]),
-  );
-
-  const categoryUrls = allSlugs.map((slug) => ({
+  const categoryUrls = postCategorySlugs.map((slug) => ({
     url: `${baseUrl}/category/${encodeURIComponent(slug)}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

@@ -11,18 +11,99 @@ author:
 
 # AdSense 審査を通す多言語 Next.js サイトの作り方
 
-「低価値コンテンツ」の指摘は広告コードよりも、信頼性・コンテンツの厚み・UX が足りないときに出ます。EN/JP/AR を扱うサイトを 10 日で整えるためのチェックリストです。
+Google の「低品質コンテンツ」判定は、広告コードの実装ミスというより **信頼性・コンテンツの厚み・一貫した UX** が不足しているときに出がちです。ここでは EN/JP/AR のような多言語 Next.js（App Router）サイトを、10 日で“審査に出せる状態”へ持っていくための実践ガイドをまとめます。
 
-## 1) 信頼ページを先に整える
+## 1) まずは「信頼ページ」を完成させる
 
-- プライバシー、利用規約、問い合わせ、概要ページを用意し、フッターから到達できるようにする。
-- 問い合わせフォームは実際に送信できるか確認。
-- 多言語サイトなら、法務ページにも言語対応の方針を明記。
+AdSense は“サイトの中身”を見ます。最初に土台を整えます。
 
-## 2) 薄いページではなく「軸記事」を量産
+- Privacy / Terms / About / Contact を用意し、フッターから必ず辿れるようにする
+- 問い合わせ導線が実働（フォーム送信→メール到達まで）していることを確認する
+- 会社/スタジオとしての運営者情報（何を提供するのか、連絡手段、方針）を明確にする
 
-800〜1500 字の軸記事を 5〜10 本用意する。技術解説、運用チェックリスト、ミニケーススタディなど、検索意図が明確なテーマを選ぶ。
+多言語サイトの場合、すべてのページを同時に完璧に翻訳できなくても、まずは「言語の方針（どのページがどの言語で提供されるか）」を最低限書いておくと安心感が上がります。
 
-## 3) 多言語 SEO と UX の両立
+## 2) “薄いページ”ではなく「軸記事」を増やす
 
-- 各ページに `hreflang` を設定し、`sitemap.xml` に言語別 URL を載せる。\n+- ナビや CTA で `?lang=` を保持し、言語が勝手に切り替わらないようにする。\n+- メタタイトル・ディスクリプションは言語ごとに書き分ける（英語の直訳は避ける）。\n+\n+## 4) 広告と CSP を両立させる\n+\n+AdSense/GA/Turnstile が必要とするドメインだけを `script-src` / `connect-src` / `frame-src` に追加する。過剰に緩めない。\n+\n+```\n+script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com;\n+connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com;\n+frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;\n+```\n+\n+## 5) UX/パフォーマンスを政策レベルで担保\n+\n+- 画像に width/height を指定して CLS を抑える。\n+- `next/font` でフォントを配信しつつ、オフラインでもビルドが落ちないようフォールバックを用意。\n+- 重い UI は必要な箇所だけクライアントコンポーネントにする。\n+\n+## 6) コンテンツ運用フロー\n+\n+- MDX を `src/content/posts` に集約し、frontmatter を統一。\n+- 翻訳は機械訳のままにせず、人がトーンを整える。用語集を作りブレを防ぐ。\n+- 各記事チェック：ユニークなタイトル/slug、160 文字以内のメタ説明、内部リンク、代替テキスト付き画像、明確な CTA。\n+\n+## 7) フォームの到達率（Deliverability）\n+\n+- SPF/DKIM/DMARC を設定し、`reply_to` にユーザーのメールを入れる。\n+- Turnstile でスパム対策、サーバー側検証とわかりやすいエラーメッセージ。\n+\n+## 8) 10 日プラン（概要）\n+\n+- Day 1–2: 信頼ページ + フッター + 問い合わせ動作確認。\n+- Day 3–6: 軸記事を 3 本公開（1 日 1 本）。\n+- Day 7: hreflang と sitemap 更新、Lighthouse で CLS/LCP を確認。\n+- Day 8: CSP を最小限のホストだけ許可するよう調整。\n+- Day 9: DMARC/SPF を検証し、テスト送信。\n+- Day 10: AdSense チェックリストを通して審査依頼。\n+\n+## 9) 審査前チェックリスト\n+\n+- 言語ごとに充実した記事が 5 本以上、もしくは単一言語で明確に位置づけ。\n+- プライバシー/規約/問い合わせがフッターから到達可能。\n+- 404 や \"coming soon\" を残さない。\n+- コンソールに CSP エラーやハイドレーションエラーがない。\n+\n+---\n+\n+まとめ: 読者がブックマークしたくなる価値を先に作り、UX と信頼ページを整えれば AdSense 承認は付いてきます。広告は「最後に乗せる」くらいの感覚で。\n*** End Patch
+審査を通すために必要なのは、投稿数の水増しではなく「読者の課題を解決する記事」です。
+
+目安:
+
+- まず 5〜10 本（1 本あたり 800〜1500 文字以上を目安）の軸記事
+- 1 本の中に「背景→手順→失敗しがちな点→検証→まとめ」を入れる
+
+NeoWhisper の方向性に合わせるなら、例えばこんなテーマが相性良いです。
+
+1. Next.js の多言語 SEO（hreflang / canonical / sitemap）の実装ガイド
+2. CSP と広告/解析（GA4・AdSense・Turnstile）を両立する設計
+3. 実運用の問い合わせフォーム（スパム対策・配信品質・運用フロー）
+4. 翻訳/ローカライズのワークフロー（用語集・レビュー・品質担保）
+5. 小規模チームのプロダクト開発術（MVP、デザイン、検証、改善）
+
+## 3) 多言語 SEO と UX を同時に守る
+
+多言語は「やり方」を間違えると薄い重複ページに見えやすいので、ここが重要です。
+
+- `hreflang` を全ページに設定し、言語別 URL を `sitemap.xml` に含める
+- ナビ/CTA で `?lang=` を保持して、言語が勝手に切り替わらないようにする
+- メタタイトル/ディスクリプションは直訳せず、文化的に自然な表現へ寄せる
+- 404 や「Coming soon」を放置しない（薄いページ判定の原因になりやすい）
+
+## 4) 広告 + CSP を“壊さずに”通す
+
+AdSense/GA/Turnstile はそれぞれ必要なドメインが違います。CSP は「必要最小限」を許可するのがコツです。
+
+参考（ベースライン例）:
+
+```txt
+script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com;
+connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com;
+frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;
+```
+
+ポイント:
+
+- コンソールでブロックされたホストだけを追加する（`*` で一気に緩めない）
+- `object-src 'none'` と `form-action 'self'` は維持する
+
+## 5) UX/パフォーマンスは“審査項目”だと思う
+
+体感の悪さや壊れた UI は「ユーザーに価値がない」判定につながります。
+
+- 画像の `width/height` を揃えて CLS を抑える（ヒーロー画像は特に）
+- `next/font` を使い、表示遅延を避ける（`display: swap`）
+- 重い UI をむやみにクライアント化しない（Server Components で十分な箇所はサーバー）
+
+## 6) コンテンツ運用の仕組みを作る
+
+「良い記事を継続的に増やせる設計」にすると、審査後も強いです。
+
+- MDX を `src/content/posts` に集約し、frontmatter を統一する
+- 画像（`coverImage`）を全記事に付ける（SNS/OG 的にも有利）
+- 翻訳は機械訳のまま出さず、人がトーンを整える（用語集があるとブレにくい）
+
+## 7) 問い合わせフォームは“届く”までが実装
+
+- SPF/DKIM/DMARC を設定し、`reply_to` に送信者のメールを入れる
+- Turnstile 等でスパム対策し、サーバー側で検証する
+- エラー表示は「何が起きたか」をユーザーに伝える（再送できる状態にする）
+
+## 8) 10 日の現実的な進め方
+
+- Day 1–2: Privacy/Terms/About/Contact を整備、フッターリンク、フォーム検証
+- Day 3–6: 軸記事を 3 本公開（1 日 1 本のペース）
+- Day 7: hreflang + sitemap を整備、Lighthouse で CLS/LCP をチェック
+- Day 8: CSP を必要最小限に調整、コンソールエラーを潰す
+- Day 9: 送信テスト（複数の受信箱）と DMARC 周りの確認
+- Day 10: 最終チェック → 申請
+
+## 9) 審査前チェックリスト
+
+- 記事が「同じことの言い換え」になっていない（薄い重複を避ける）
+- 連絡手段が明確（フッターに Privacy/Terms/Contact）
+- 404/空のカテゴリ/未完成ページが検索に出ない（sitemap/内部リンクを整理）
+- コンソールに致命的なエラーが残っていない（CSP/ハイドレーション/JS 例外）
+
+---
+
+まとめ: 「役に立つ記事が積み上がる運用」と「信頼ページ + 安定 UX」が揃うと、AdSense は通りやすくなります。広告は“最後に自然に載る”くらいの感覚で仕上げるのが近道です。

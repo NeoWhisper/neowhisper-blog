@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
     { code: "en", label: "English", suffix: "" },
-    { code: "ar", label: "العربية", suffix: "-ar" },
     { code: "ja", label: "日本語", suffix: "-ja" },
+    { code: "ar", label: "العربية", suffix: "-ar" },
 ] as const;
 
 interface LanguageSwitcherProps {
@@ -53,7 +53,10 @@ export function LanguageSwitcher({ availableLanguages }: LanguageSwitcherProps =
                         : LANGUAGES;
 
                     return (
-                        <div className="flex items-center gap-2 p-1 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+                        <div
+                            className="flex items-center gap-2 p-1 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm"
+                            dir="ltr"
+                        >
                             {languagesToShow.map((lang) => {
                                 const targetHref = `${baseSlugPath}${lang.suffix}`;
                                 const isActive = pathname === targetHref;

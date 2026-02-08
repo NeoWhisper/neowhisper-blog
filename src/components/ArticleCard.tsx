@@ -17,9 +17,16 @@ const categoryColors: Record<string, string> = {
 
 interface ArticleCardProps {
     post: Post;
+    lang?: string;
 }
 
-export default function ArticleCard({ post }: ArticleCardProps) {
+export default function ArticleCard({ post, lang }: ArticleCardProps) {
+    const categoryHref = post.category
+        ? `/category/${buildCategorySlug(post.category)}${
+              lang ? `?lang=${encodeURIComponent(lang)}` : ''
+          }`
+        : undefined;
+
     return (
         <article className="relative overflow-hidden p-8 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(124,58,237,0.1)] transition-all duration-300 group">
             <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors duration-500" />
@@ -39,7 +46,7 @@ export default function ArticleCard({ post }: ArticleCardProps) {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-4 gap-3">
                     {post.category && (
                         <Link
-                            href={`/category/${buildCategorySlug(post.category)}`}
+                            href={categoryHref!}
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${categoryColors[post.category] || 'bg-gray-500 text-white'} hover:opacity-80 transition-opacity`}
                         >
                             {post.category}

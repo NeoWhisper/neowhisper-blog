@@ -13,6 +13,7 @@ import readingTime from "reading-time";
 const postsDirectory = path.join(process.cwd(), "src/content/posts");
 
 import { Post } from "@/types";
+import { buildCategorySlug } from "@/lib/categories";
 
 // Function to retrieve all posts, sorted by date
 export function getPosts(): Post[] {
@@ -120,15 +121,17 @@ export function getRelatedPosts(currentSlug: string, limit: number = 3): Post[] 
     }
 
     const currentLanguage = getPostLanguage(currentSlug);
+    const currentCategorySlug = buildCategorySlug(currentPost.category);
     const allPosts = getPosts();
 
     // Filter posts by same category and language, exclude current post
     const related = allPosts
         .filter((post) => {
             const postLanguage = getPostLanguage(post.slug);
+            const postCategorySlug = post.category ? buildCategorySlug(post.category) : null;
             return (
                 post.slug !== currentSlug &&
-                post.category === currentPost.category &&
+                postCategorySlug === currentCategorySlug &&
                 postLanguage === currentLanguage
             );
         })

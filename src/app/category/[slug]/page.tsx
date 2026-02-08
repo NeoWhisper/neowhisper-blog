@@ -15,11 +15,18 @@ interface PageProps {
  */
 export async function generateStaticParams() {
     const posts = getPosts();
-    const categories = Array.from(
-        new Set(posts.map((p) => p.category).filter(Boolean))
+    const slugs = Array.from(
+        new Set(
+            posts
+                .map((p) => p.category)
+                .filter(Boolean)
+                .map((c) => buildCategorySlug(c!))
+                .filter(Boolean)
+        )
     );
-    return categories.map((c) => ({
-        slug: encodeURIComponent(buildCategorySlug(c!)),
+
+    return slugs.map((slug) => ({
+        slug: encodeURIComponent(slug),
     }));
 }
 
@@ -34,6 +41,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     const { slug } = await params;
     const { lang } = await searchParams;
     const currentLang = normalizeLang(lang);
+    const isRTL = currentLang === "ar";
     const posts = getPosts();
     const decoded = decodeURIComponent(slug);
 
@@ -50,19 +58,36 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         // `redirect` is a synchronous server helper from `next/navigation`.
         // Import it lazily here to keep top-of-file imports tidy.
         const { redirect } = await import('next/navigation');
-        redirect(`/category/${canonicalCandidate}`);
+        redirect(`/category/${canonicalCandidate}?lang=${currentLang}`);
     }
 
     /* ---- filter posts that belong to this category ---- */
     const matches = (p: ReturnType<typeof getPosts>[0]) =>
         p.category && buildCategorySlug(p.category) === decoded;
 
-    const filtered = posts.filter(matches);
+    const inLang = (p: ReturnType<typeof getPosts>[0]) => {
+        const isAr = p.slug.endsWith("-ar");
+        const isJa = p.slug.endsWith("-ja");
+        const isEn = !isAr && !isJa;
+
+        if (currentLang === "ar") return isAr;
+        if (currentLang === "ja") return isJa;
+        return isEn;
+    };
+
+    const filtered = posts.filter((p) => matches(p) && inLang(p));
 
     /* ---- pick a human‑readable title ---- */
     const canonical = categories.find((c) => c.slug === decoded);
+    const canonicalTitle = canonical
+        ? currentLang === "ja"
+            ? canonical.nameJa ?? canonical.nameEn
+            : currentLang === "ar"
+              ? canonical.nameAr ?? canonical.nameEn
+              : canonical.nameEn
+        : undefined;
     const title =
-        filtered[0]?.category ?? canonical?.nameEn ??
+        filtered[0]?.category ?? canonicalTitle ??
         decoded
             .split('-')
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -70,7 +95,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
     /* ---- UI ---- */
     return (
-        <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900">
+        <div
+            className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900"
+            dir={isRTL ? "rtl" : "ltr"}
+            lang={currentLang}
+        >
             <div className="max-w-4xl mx-auto">
                 {/* Back button */}
                 <Link href={`/blog?lang=${currentLang}`} className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group">
@@ -82,7 +111,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Blog
+                    {currentLang === "ja"
+                        ? "ブログへ戻る"
+                        : currentLang === "ar"
+                          ? "العودة للمدونة"
+                          : "Back to Blog"}
                 </Link>
 
                 <header className="text-center mb-12">
@@ -90,14 +123,20 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                         {title}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300">
-                        {filtered.length} {filtered.length === 1 ? 'article' : 'articles'} in this category
+                        {currentLang === "ja"
+                            ? `${filtered.length} 件の記事`
+                            : currentLang === "ar"
+                              ? `${filtered.length} مقالات في هذا التصنيف`
+                              : `${filtered.length} ${
+                                    filtered.length === 1 ? "article" : "articles"
+                                } in this category`}
                     </p>
                 </header>
 
                 {filtered.length > 0 ? (
                     <div className="grid gap-8">
                         {filtered.map((p) => (
-                            <ArticleCard key={p.slug} post={p} />
+                            <ArticleCard key={p.slug} post={p} lang={currentLang} />
                         ))}
                     </div>
                 ) : (

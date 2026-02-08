@@ -16,6 +16,7 @@ export default function BlogCtaButton({
   lang,
 }: BlogCtaButtonProps) {
   const router = useRouter();
+  const isRTL = lang === "ar";
   const [isNavigating, setIsNavigating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef<HTMLAnchorElement | null>(null);
@@ -73,7 +74,13 @@ export default function BlogCtaButton({
       aria-label={label}
     >
       <span className="relative z-10">{label}</span>
-      <span className="relative z-10 text-base transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+      <span
+        className={`relative z-10 text-base transition-transform duration-300 ${
+          isRTL ? "group-hover:-translate-x-0.5" : "group-hover:translate-x-0.5"
+        }`}
+      >
+        {isRTL ? "←" : "→"}
+      </span>
       <span className="pointer-events-none absolute inset-0 rounded-full bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <span className="pointer-events-none absolute -inset-1 rounded-full bg-pink-500/30 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     </Link>

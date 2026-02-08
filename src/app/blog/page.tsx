@@ -126,7 +126,10 @@ export default async function BlogHome({
             for builders.
           </p>
 
-          <div className="relative z-10 flex flex-wrap justify-center gap-3">
+          <div
+            className="relative z-10 flex flex-wrap justify-center gap-3"
+            dir="ltr"
+          >
             <Link
               href="/blog?lang=en"
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
@@ -181,7 +184,7 @@ export default async function BlogHome({
           {filteredPosts.length > 0 ? (
             <div className="grid gap-8">
               {filteredPosts.map((post) => (
-                <ArticleCard key={post.slug} post={post} />
+                <ArticleCard key={post.slug} post={post} lang={currentLang} />
               ))}
             </div>
           ) : (

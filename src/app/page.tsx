@@ -446,7 +446,7 @@ export default async function Home({
             </div>
             <div className="grid gap-6">
               {posts.map((post) => (
-                <ArticleCard key={post.slug} post={post} />
+                <ArticleCard key={post.slug} post={post} lang={currentLang} />
               ))}
             </div>
           </section>

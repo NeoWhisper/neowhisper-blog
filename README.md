@@ -49,7 +49,7 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
    NEXT_PUBLIC_ADSENSE_ID=your-adsense-id
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    RESEND_API_KEY=your-resend-api-key
-   RESEND_FROM="NeoWhisper <no-reply@yourdomain.com>"
+   RESEND_FROM="Your Name <hello@yourdomain.com>"
    # Inbox that receives contact form submissions (comma-separated supported)
    RESEND_TO=your-inbox@example.com
    NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-turnstile-site-key

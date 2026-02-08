@@ -10,14 +10,16 @@ import "highlight.js/styles/github-dark.css"; // Syntax highlighting theme
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import CookieBanner from "@/components/CookieBanner";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net",
   ),
   title: "NeoWhisper - Tech Blog",
-  description: "Full-stack development with trilingual support (日本語・English・العربية).",
+  description:
+    "Full-stack development with trilingual support (日本語・English・العربية).",
 };
 
 export default function RootLayout({
@@ -36,9 +38,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body
-        className="font-sans antialiased min-h-screen flex flex-col"
-      >
+      <body className="font-sans antialiased min-h-screen flex flex-col">
         {/* `SiteHeader` reads search params via `useSearchParams`, which must be wrapped in Suspense for SSG/404 prerender. */}
         <Suspense fallback={null}>
           <SiteHeader />
@@ -50,6 +50,10 @@ export default function RootLayout({
         {/* `SiteFooter` reads search params via `useSearchParams` for language persistence. */}
         <Suspense fallback={null}>
           <SiteFooter />
+        </Suspense>
+        {/* Cookie consent banner */}
+        <Suspense fallback={null}>
+          <CookieBanner />
         </Suspense>
       </body>
     </html>

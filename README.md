@@ -81,6 +81,26 @@ author:
 ---
 ```
 
+## 🔒 Content Security Policy (CSP) for AdSense
+
+This site uses a Content Security Policy to allow Google AdSense, Analytics, and Cloudflare Turnstile while maintaining security. The CSP is configured in `next.config.ts`.
+
+**Required domains for AdSense:**
+- `script-src`: Inline scripts for Next.js hydration, plus Google Tag Manager, Analytics, AdSense, and Turnstile
+- `connect-src`: API calls to Google Analytics, AdSense verification, and Turnstile
+- `frame-src`: iframes for AdSense ads, Turnstile challenges, and Google ad serving
+
+**If you see CSP errors in DevTools:**
+1. Open DevTools Console with ad blockers disabled
+2. Look for "Content Security Policy" errors
+3. Add only the blocked domain to the appropriate directive in `next.config.ts`
+4. Never use wildcard `*` - always specify exact domains
+
+**Current allowed domains:**
+- Google Analytics: `www.google-analytics.com`, `www.googletagmanager.com`
+- AdSense: `pagead2.googlesyndication.com`, `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `*.google.com`, `adtrafficquality.google`, `*.adtrafficquality.google`, `fundingchoicesmessages.google.com`
+- Turnstile: `challenges.cloudflare.com`
+
 ## 🚀 Deploy on Vercel
 
 Push to your main branch and connect to [Vercel](https://vercel.com/new) for automatic deployments.

@@ -9,61 +9,45 @@ author:
   picture: "/images/author.png"
 ---
 
-
 正直に言うと、昔は TypeScript が嫌いでした。
-
 機能を作る時間よりも、コンパイラを納得させるためにコードを書いている時間の方が長い気がしていたからです。
 
-でも、**Next.js** と **Node.js** でいくつかのアプリを作って運用していくうちに、ある事実に気づきました。
+でも、**Next.js** と **Node.js** で本番アプリを運用していくうちに、ある事実に気づきました。
 
-**「TypeScript がないと、僕はただ推測でコードを書いているだけだ」**
+**TypeScript は、あなたと「深夜 3 時のデータベース崩壊」の間に立ちはだかる唯一の壁です。**
 
-`user.id` は文字列なのか数値なのか？ この API は配列を返すのか、それともオブジェクトの中に `data` プロパティがあるのか？
+問題は TypeScript ではありません。多くのチュートリアルが「型の書き方」だけを教えて、「アプリケーションの書き方」を教えていないことが問題なのです。
 
-推測はやめましょう。TypeScript を味方につけるための、シンプルで強力なルールを紹介します。
-
-<br className="my-8 block" />
+ここでは、TypeScript をただのお飾りではなく、強力な武器にするための方法を紹介します。
 
 ---
 
-## 1. 型定義を共有する（DRY：Don't Repeat Yourself）
+<Step number="1" title="型定義を共有する (DRY)">
 
-フロントエンドのフォルダに `User` 型があり、バックエンドのフォルダにも全く同じ `User` 型がある……。
-
-これは間違いのもとです。
-
+フロントエンドのフォルダに `User` 型があり、バックエンドのフォルダにも全く同じ `User` 型がある……これは間違いのもとです。
 片方を変更してもう片方の更新を忘れると、バグがそのまま本番環境にデプロイされてしまいます。
 
 **解決策：**
 コアとなるデータモデルは、共有パッケージかフォルダにまとめましょう。
 
 ```ts
-// モノレポ構成の例：packages/types/src/user.ts
+// packages/types/src/user.ts
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
 }
 ```
 
-これをすべての場所でインポートします。
-フロントエンドでも、バックエンドでも。
+これをすべての場所でインポートします。もし `role` の定義を変更すれば、プロジェクト全体のコードが赤くエラー表示されます。それが狙いです。
 
-もし `role` の定義を変更すれば、プロジェクト全体のコードが赤くエラー表示されます。
+</Step>
 
-**それが狙いです。** エラーが出ることは、素晴らしいことなんです。
-
----
-
-## 2. API レスポンスの「無法地帯」をなくす
+<Step number="2" title="API レスポンスの形式を統一する">
 
 「このエンドポイント、何を返すんだっけ？」
 
-もし答えが「たしかユーザーの配列が入ったオブジェクト……だったかな？」なら、危険信号です。
-
-API のレスポンス形式を統一しましょう。すべてのエンドポイントが、必ず同じ「形」でデータを返すように強制します。
-
-**ラッパー（Wrapper）の定義:**
+もし答えが「たしかオブジェクトだったかな……」なら、危険信号です。すべてのエンドポイントが、必ず同じ「形」でデータを返すように強制しましょう。
 
 ```ts
 // types/api.ts
@@ -74,99 +58,91 @@ export interface ApiResponse<T> {
 }
 ```
 
-**バックエンドでの使用:**
+**使用例:**
 
 ```ts
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   const users = await db.users.findMany();
-  
+
   // TypeScript がこの構造を強制します
   const response: ApiResponse<User[]> = {
     data: users,
-    success: true
+    success: true,
   };
-  
+
   res.json(response);
 });
 ```
 
-これで、フロントエンドは推測する必要がなくなります。「何が返ってくるのか」を **100% 正確に** 知ることができるからです。
+</Step>
 
----
+<Step number="3" title="React Hooks でデータを厳密に型付けする">
 
-## 3. React Hooks で `any` を使わない
-
-よく見かけるコードです：
+よく見かける「犯罪的」なコードです：
 
 ```ts
 // 悪い例
-const { data } = useQuery(['user'], fetchUser);
+const { data } = useQuery(["user"], fetchUser);
 // data は 'any' または 'unknown' になってしまう
 ```
 
-これでは、せっかくの TypeScript の恩恵をドブに捨てているようなものです。
-
-**こう書きましょう:**
+これでは、TypeScript の恩恵を最後の最後で捨てているようなものです。こう書きましょう：
 
 ```ts
 // 良い例
 function useUser(id: string) {
   return useQuery<User>({
-    queryKey: ['user', id],
-    queryFn: () => fetchUser(id)
+    queryKey: ["user", id],
+    queryFn: () => fetchUser(id),
   });
 }
 ```
 
 これで、`data.` とタイプするだけで、VS Code が正しいプロパティを教えてくれます。
 
----
+</Step>
 
-## 4. 実行時の安全も確保する (Zod)
+<Step number="4" title="実行時の安全も確保する (Zod)">
 
-TypeScript は素晴らしいですが、コードが実行されると消えてしまいます。
+TypeScript は素晴らしいですが、実行時には消えてしまいます。ユーザーがいいかげんな JSON データを送ってきたら、TypeScript は無力です。**Zod** が必要です。
 
-ユーザーがいいかげんな JSON データを送ってきたら、TypeScript は守ってくれません。そこで **Zod** の出番です。
-
-API の境界線（入り口）では、必ず Zod を使って検証します。
+API の境界線では、必ず Zod を使って検証しましょう。
 
 ```ts
-import { z } from 'zod';
+import { z } from "zod";
 
 const UserSchema = z.object({
   email: z.string().email(),
-  age: z.number().min(18)
+  age: z.number().min(18),
 });
 
-// スキーマから TS の型を自動生成
 type UserInput = z.infer<typeof UserSchema>;
 
-app.post('/users', (req, res) => {
-  // データが不正ならここでエラーを投げる
+app.post("/users", (req, res) => {
+  // 不正ならエラーを投げ、正しいなら型付きデータを返す
   const body = UserSchema.parse(req.body);
-  
-  // ここまで来れば、body は実行時でも絶対に正しい型だと保証される
+
   saveUser(body);
 });
 ```
 
 これが「コンパイル時の安全性（TypeScript）」と「実行時の安全性（Zod）」のスイートスポットです。
 
----
-
-## 5. まとめ
-
-良い TypeScript コードを書くのに、複雑な型パズルは必要ありません。
-
-必要なのはこれだけです：
-
-- ✅ 1. データのための **共有された型**
-- ✅ 2. 統一された **API レスポンス**
-- ✅ 3. フロントエンドでの **型付き React Hooks**
-- ✅ 4. 制御できない入力に対する **Zod**
-
-この4つを守れば、コンパイラと戦う日々は終わり、機能開発に集中できるようになります。
+</Step>
 
 ---
 
-**型安全なフルスタックアプリの開発支援が必要ですか？** NeoWhisperでは、TypeScript、Next.js、モダンなベストプラクティスを使った本番環境対応のアプリを開発しています。[サービス詳細](/services?lang=ja)をご覧いただくか、[お問い合わせ](/contact?lang=ja)からプロジェクトについてご相談ください。
+## 4つのチェックリスト
+
+良いコードを書くのに、複雑な型パズルは必要ありません。
+
+<Checklist>
+  <CheckItem>データモデルの型を共有する (DRY)</CheckItem>
+  <CheckItem>すべてのAPIレスポンスを `ApiResponse<T>` でラップする</CheckItem>
+  <CheckItem>Hooksを型付けする（`useQuery` をラップする）</CheckItem>
+  <CheckItem>実行時の入力をすべて **Zod** で検証する</CheckItem>
+</Checklist>
+
+---
+
+**型安全なフルスタックアプリの開発支援が必要ですか？** NeoWhisperでは、TypeScript、Next.js、モダンなベストプラクティスを使った本番環境対応のアプリを開発しています。[サービス詳細](/services?lang=ja)をご覧いただくか、[お問い合わせ](/contact?lang=ja)からご相談ください。

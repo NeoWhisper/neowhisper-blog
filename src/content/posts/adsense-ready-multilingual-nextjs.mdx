@@ -9,90 +9,103 @@ author:
   picture: "/images/author.png"
 ---
 
-# Shipping an AdSense-Ready, Multilingual Next.js Site: A 2026 Playbook
+AdSense doesn't reject you because of your code. It rejects you because your site looks like a ghost town.
 
-Google’s “low value content” rejection usually isn’t about ads code—it’s about trust, depth, and consistency. Here’s the exact playbook we use to turn a multilingual Next.js 16 site into something AdSense will approve and readers will keep open.
+"Low value content" is Google's polite way of saying your site lacks trust, depth, and consistency.
 
-## 1) Build Real Trust Pages First
+Here is the exact playbook we use to turn a multilingual Next.js 16 site into something AdSense approves and humans actually read.
 
-- **Privacy, Terms, Contact, About**: These are non-negotiable. Link them in the footer and make sure the [contact path](/contact) actually works (mail + form).
-- **Consistent brand voice**: Even legal pages should sound like you. Don’t leave lorem ipsum; write two or three clear paragraphs.
-- **Language parity**: If you offer JP/AR toggles, every legal page should at least acknowledge the languages (even if the canonical language is EN).
+---
 
-## 2) Publish Depth, Not Stubs
+<Step number="1" title="Build Real Trust Pages First">
 
-Aim for 5–10 anchor articles (800–1500 words) that solve real problems. A good starter set for a studio like NeoWhisper:
+This is non-negotiable. Before you write a single blog post, build these pages and link them in your footer:
 
-1. ["How to localize a Next.js App Router site for JP/AR without breaking SEO"](/blog/nextjs-16-tutorial)
-2. “Designing privacy-first analytics: GA4, CSP, and consent in 2026”
-3. “Shipping production contact forms: Turnstile, Resend, deliverability, and DX”
-4. “Multilingual content ops: playbooks for writers, translators, and engineers”
-5. “AdSense readiness checklist for single-founder studios”
+- **Privacy Policy & Terms**: Don't use lorem ipsum.
+- **About Us**: Write three clear paragraphs about who you are.
+- **Contact**: Make sure the [contact form](/contact) actually works.
 
-Each article should include: problem statement, step-by-step fixes, screenshots or diagrams, and a short CTA pointing to your services.
+If you have a language toggle (EN/JA/AR), these pages must be localized too. A broken link in a translated footer is an immediate trust killer.
 
-## 3) Multilingual SEO That Doesn’t Break UX
+</Step>
 
-- **hreflang** for every locale and page; include alternates in `sitemap.xml`.
-- **Language persistence**: carry `?lang=` in nav/CTA links so users don’t bounce between languages.
-- **Meta/OG per locale**: don’t reuse English meta everywhere—write culturally appropriate summaries.
-- **Canonical strategy**: keep a single canonical per page (usually EN), but never canonicalize different languages to the same URL.
+<Step number="2" title="Publish Depth, Not Stubs">
 
-## 4) Ads + CSP Without Breaking the App
+You need 5–10 "anchor articles" (800–1500 words) that solve real problems. Don't publish 50 thin pages; publish 5 great ones.
 
-AdSense, GA, and Turnstile all need script/connect/frame allowances. A safe baseline:
+**A good starter set for a tech studio:**
 
-```
+1.  ["Localized Next.js App Router without breaking SEO"](/blog/nextjs-16-tutorial)
+2.  "Privacy-first analytics with GA4 and CSP"
+3.  "Production contact forms with Turnstile and Resend"
+
+Each article needs a problem statement, a solution, code snippets, and a clear call to action.
+
+</Step>
+
+<Step number="3" title="Multilingual SEO That Doesn’t Break UX">
+
+Multilingual sites often fail because they confuse search engines.
+
+<Callout type="warning">
+
+**Critical SEO Tags:**
+
+- **hreflang**: Required for every locale.
+- **Canonical**: Keep a single canonical per page (usually EN), or self-localize if the content is fully distinct.
+- **Meta/OG**: Translate your meta descriptions. Don't show English descriptions on a Japanese page.
+
+</Callout>
+
+Also, persist the `?lang=` query or path preference. Bouncing a user back to English when they click a link is a UX failure.
+
+</Step>
+
+<Step number="4" title="Ads + CSP Without Breaking the App">
+
+AdSense, GA4, and Turnstile all require specific Content Security Policy (CSP) allowances. A strict policy will block them by default.
+
+Use this baseline for `next.config.ts`:
+
+```txt
 script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com;
 connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com;
 frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com;
 ```
 
-Keep `object-src 'none'` and `form-action 'self'`. If a script is still blocked, read the console and add only the required host—don’t go wild with `*`.
+</Step>
 
-## 5) Performance Hygiene (because UX is a policy signal)
+<Step number="5" title="Performance as a Policy Signal">
 
-- **Fonts**: self-host or use `next/font` with fallbacks so builds don’t fail offline. Set `display: swap`.
-- **Images**: provide width/height to avoid CLS; compress hero images; lazy-load below the fold.
-- **JS budget**: keep heavy components client-only; prefer Server Components for content pages.
+Google uses Core Web Vitals as a proxy for site quality.
 
-## 6) Content Operations That Scale
+- **Fonts**: Self-host or use `next/font`.
+- **Images**: Always define `width` and `height` to prevent Cumulative Layout Shift (CLS).
+- **JS Budget**: Keep heavy interactivity off the main thread.
 
-- **Source of truth**: keep posts in `src/content/posts` (MDX) with consistent frontmatter. Add `coverImage` for every post.
-- **Localization workflow**: translate from EN to JP/AR with glossaries; avoid raw machine translation; have a reviewer pass for tone.
-- **Review checklist** (per article): title/slug unique, meta description < 160 chars, at least one internal link, one external credible link, hero image with alt text, CTA link to services/contact.
-
-## 7) Deliverability for Contact Forms
-
-- Use a verified domain (SPF + DKIM + DMARC). Set DMARC to `p=quarantine` or `p=reject`.
-- Friendly `from`: `hello@yourdomain.com`, `reply_to` set to the user’s email.
-- Spam protection: Turnstile on the form, server-side verification, and clear error messages to users.
-
-## 8) A 10-Day Ship Plan
-
-- **Day 1–2**: Write Privacy, Terms, About; wire footer links; verify contact form end-to-end.
-- **Day 3–6**: Publish 3 anchor articles (one per day). Include localized summaries.
-- **Day 7**: Add hreflang, update sitemap, check CLS/LCP with Lighthouse.
-- **Day 8**: Tighten CSP to only the hosts you need; verify no console CSP errors.
-- **Day 9**: DMARC/SPF deliverability check; send test emails to multiple inboxes (Gmail/Outlook).
-- **Day 10**: Run a full AdSense readiness audit and request review.
-
-## 9) AdSense Review Prep Checklist
-
-- At least 5 substantial articles per locale (or one locale plus clear “single-language” positioning).
-- Privacy/Terms/Contact visible in footer; working nav links; no 404s.
-- No “coming soon” or empty sections; remove placeholder lorem.
-- Ads code optional before approval—consider disabling until approved to reduce noise.
-- Clean console: no CSP blocks for AdSense/analytics; no hydration errors.
-
-## 10) Proof of Quality
-
-Include tangible value: code snippets, diagrams, downloadable checklists, or mini case studies (“Reduced CLS from 0.25 to 0.04 by pre-sizing hero images”). The more specific, the less likely Google will consider it “low value.”
+</Step>
 
 ---
 
-**Bottom line:** AdSense approval follows naturally when the site is something you'd bookmark yourself—useful content, trustworthy pages, solid UX, and a frictionless contact path. Ship depth first; ads second.
+## The 10-Day Ship Plan
+
+Don't drag this out. Content velocity matters.
+
+<Checklist>
+  <CheckItem>
+    **Day 1-2**: Ship Privacy, Terms, and About pages. Verify the Contact form.
+  </CheckItem>
+  <CheckItem>
+    **Day 3-6**: Publish 3 deep anchor articles (one per day). Localize them.
+  </CheckItem>
+  <CheckItem>**Day 7**: Implement `hreflang` and `sitemap.xml`.</CheckItem>
+  <CheckItem>**Day 8**: Tighten CSP. Ensure zero console errors.</CheckItem>
+  <CheckItem>**Day 9**: Verify email deliverability (DMARC/SPF).</CheckItem>
+  <CheckItem>
+    **Day 10**: Run a full audit and request AdSense review.
+  </CheckItem>
+</Checklist>
 
 ---
 
-**Ready to get your site AdSense-approved?** At NeoWhisper, we build multilingual Next.js sites with SEO, performance, and monetization in mind. Check out our [services](/services) or [contact us](/contact) to discuss your project.
+**Ready to ship?** AdSense approval follows naturally when you build a site you'd actually bookmark. Check out our [services](/services) if you need a hand getting there.

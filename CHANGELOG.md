@@ -6,7 +6,6 @@ All notable changes to the NeoWhisper blog will be documented here.
 ## [Unreleased]
 
 - Code quality: Remove if statements from remaining components
-- Add JA/AR translations for Post #6 (CSP debugging)
 
 ## [1.7.0] - 2026-02-09
 
@@ -18,7 +17,7 @@ This release completes all critical requirements for Google AdSense approval.
 
 - **Blog Posts (2 new, bringing total to 6):**
   - "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
-  - "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN)
+  - "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN/JA/AR)
 - **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
 - **CookieBanner component** with GDPR compliance and multilingual support
 - **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
@@ -91,7 +90,6 @@ This release completes all critical requirements for Google AdSense approval.
 ### Chore
 
 - Updated `README.md` with E2E instructions and `.gitignore` to ignore Playwright artifacts and IDE files.
-
 
 ## [1.5.0] - 2026-01-31
 

@@ -1,7 +1,7 @@
 ---
 title: "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense"
 date: "2026-02-09"
-excerpt: "AdSense scripts blocked by CSP? Console full of frame-src errors? Here's how I debugged and fixed 6 Content Security Policy violations in production—step by step, with real error messages and solutions."
+excerpt: "AdSense scripts blocked by CSP? Console full of frame-src errors? Here's how I debugged and fixed 6 Content Security Policy violations in production—step by step."
 category: "Next.js"
 coverImage: "/images/csp-debugging-cover.png"
 author:
@@ -9,149 +9,110 @@ author:
   picture: "/images/author.png"
 ---
 
-I thought our site was AdSense-ready. Clean code, proper setup, everything by the book.
-
-Then I opened DevTools with ad blockers disabled.
+I thought our site was AdSense-ready. Clean code, proper setup, everything by the book. Then I opened DevTools with ad blockers disabled.
 
 **Six bright red CSP errors stared back at me.**
 
 Every single AdSense script was blocked. The ads wouldn't load. The tracking wouldn't work. And I had no idea which domains Google actually needed until I saw them fail in real-time.
 
-Here's exactly how I debugged it, what I learned, and the CSP configuration that finally worked.
-
 ---
 
 ## The Problem: CSP Blocks Everything Google Needs
 
-Content Security Policy is supposed to protect your users. But if you're too strict, it breaks legitimate scripts—including AdSense.
+Content Security Policy (CSP) is a security header that tells browsers: "Only load resources from domains I explicitly allow." In Next.js, a basic policy might look like this:
 
-Here's what I saw in the console when I first tested:
-
-```
-Refused to load the script 'https://pagead2.googlesyndication.com/...' 
-because it violates the following Content Security Policy directive: "script-src 'self'"
-
-Refused to frame 'https://www.google.com/...' 
-because it violates the following Content Security Policy directive: "frame-src 'self'"
-
-Refused to frame 'https://ep2.adtrafficquality.google/...'
-because an ancestor violates the following Content Security Policy directive: "frame-src 'self'"
+```tsx
+const csp = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "frame-src 'self'",
+].join("; ");
 ```
 
-Six different domains. Six different violations. Zero ads showing.
-
-If you're building an [AdSense-ready site](/blog/adsense-ready-multilingual-nextjs), this is the part that trips everyone up.
+This is very secure. It's also why AdSense breaks—Google needs to load external scripts and frames from multiple domains.
 
 ---
 
-## Step 1: Understand What CSP Actually Does
+<Step number="1" title="Reproduce the Problem">
 
-CSP is a security header that tells browsers: "Only load resources from domains I explicitly allow."
+Don't guess what's blocked. See it fail in real-time by following these steps:
 
-In Next.js, you define it in `next.config.ts`:
+1. **Disable ad blockers** (they hide the real CSP errors).
+2. Open DevTools → **Console**.
+3. Load your page and look for the red "Refused to load..." errors.
+4. **Write down every blocked domain.**
+
+</Step>
+
+<Step number="2" title="The Development Environment Trap">
+
+If you just look at production errors, you'll miss the development-only requirements.
+
+**In development (Next.js `npm run dev`), you need two extra permissions:**
+
+1.  **`unsafe-eval`**: Next.js uses `eval()` for Hot Module Replacement (HMR).
+2.  **`ws://localhost`**: Extensions like Console Ninja and HMR use WebSockets.
+
+If you block these, your local dev environment will break.
+
+<Callout type="info">
+
+**The Fix:** Conditionally allow these **only** in development mode.
+
+```ts
+const isDev = process.env.NODE_ENV === "development";
+
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  isDev ? "'unsafe-eval'" : "", // Allow eval in dev
+  "https://www.googletagmanager.com",
+  // ... other domains
+]
+  .filter(Boolean)
+  .join(" ");
+
+const connectSrc = [
+  "'self'",
+  isDev ? "ws://localhost:* ws://127.0.0.1:*" : "", // Allow WebSockets in dev
+  "https://www.google-analytics.com",
+  // ... other domains
+]
+  .filter(Boolean)
+  .join(" ");
+```
+
+</Callout>
+
+</Step>
+
+<Step number="3" title="The AdSense Allowlist">
+
+Through trial and error, here is the list of domains Google AdSense actually needs for production:
+
+- **script-src:** `googletagmanager.com`, `google-analytics.com`, `pagead2.googlesyndication.com`
+- **connect-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `*.google.com`
+- **frame-src:** `adtrafficquality.google`, `*.adtrafficquality.google`, `fundingchoicesmessages.google.com`
+
+_Note: The wildcard `*.google.com` is necessary because Google uses unpredictable subdomains._
+
+</Step>
+
+<Step number="4" title="Final Clean Configuration">
+
+Here is the final configuration in `next.config.ts` that handles both Development (HMR) and Production (AdSense):
 
 ```tsx
 async headers() {
+  const isDev = process.env.NODE_ENV === "development";
+
   const csp = [
     "default-src 'self'",
-    "script-src 'self'",
-    "frame-src 'self'",
-  ].join("; ");
-  
-  return [
-    {
-      source: "/(.*)",
-      headers: [
-        { key: "Content-Security-Policy", value: csp },
-      ],
-    },
-  ];
-}
-```
-
-This says: "Only load scripts and frames from my own domain."
-
-That's secure. It's also why AdSense doesn't work.
-
----
-
-## Step 2: Open DevTools and Reproduce the Problem
-
-Don't guess what's blocked. See it fail in real-time.
-
-**Here's how:**
-
-1. **Disable ad blockers** (they hide the real errors)
-2. Open DevTools → Console
-3. Load your page
-4. Look for red CSP errors
-
-You'll see lines like:
-
-```
-Refused to execute inline script because it violates the following 
-Content Security Policy directive: "script-src 'self'"
-```
-
-Or:
-
-```
-Refused to load the script 'https://pagead2.googlesyndication.com/...' 
-because it violates the following Content Security Policy directive: 
-"script-src 'self'"
-```
-
-**Write down every blocked domain.** You'll need to allowlist them.
-
----
-
-## Step 3: Identify What AdSense Actually Needs
-
-Through trial and error (and reading those console errors), here's what Google AdSense requires:
-
-### script-src (JavaScript execution)
-- `https://www.googletagmanager.com` (Google Tag Manager)
-- `https://www.google-analytics.com` (Analytics)
-- `https://pagead2.googlesyndication.com` (AdSense ads)
-- `https://adtrafficquality.google` (Ad verification)
-- `https://fundingchoicesmessages.google.com` (Consent messages)
-
-### connect-src (API calls, fetch requests)
-- All of the above, plus:
-- `https://googleads.g.doubleclick.net` (Ad serving)
-- `https://tpc.googlesyndication.com` (Third-party content)
-- `https://*.google.com` (Various Google services)
-
-### frame-src (iframes, embedded content)
-- `https://googleads.g.doubleclick.net`
-- `https://tpc.googlesyndication.com`
-- `https://*.google.com`
-- `https://adtrafficquality.google`
-- `https://*.adtrafficquality.google`
-- `https://fundingchoicesmessages.google.com`
-
-**The wildcard `*.google.com` is necessary** because Google uses multiple subdomains you can't predict.
-
----
-
-## Step 4: Update Your CSP Configuration
-
-Here's the working configuration that fixed all 6 errors:
-
-```tsx
-// next.config.ts
-async headers() {
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://*.google.com",
+    `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com`,
+    `connect-src 'self' ${isDev ? "ws://localhost:* ws://127.0.0.1:*" : ""} https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://*.google.com`,
     "frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
-    "img-src 'self' data: https:",
-    "font-src 'self' https://fonts.gstatic.com data:",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
   ].join("; ");
 
   return [
@@ -159,148 +120,26 @@ async headers() {
       source: "/(.*)",
       headers: [
         { key: "Content-Security-Policy", value: csp },
-        { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "X-Frame-Options", value: "DENY" },
+        // ... other headers
       ],
     },
   ];
 }
 ```
 
-**Key changes:**
-- Added `'unsafe-inline'` to `script-src` (Next.js hydration needs it)
-- Added all Google domains to `script-src`, `connect-src`, and `frame-src`
-- Used `*.google.com` wildcard for subdomains
-- Kept `object-src 'none'` (important for security)
+</Step>
 
 ---
 
-## Step 5: Test Again (The Right Way)
+## Final Checklist
 
-After deploying:
-
-1. **Hard refresh** (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
-2. Open DevTools → Console
-3. Check for CSP errors
-4. Look for green "PASS" messages in network tab
-
-If you still see errors, check:
-- Did you redeploy? (changes only apply after deployment)
-- Is your browser cache cleared?
-- Are ad blockers still disabled?
+<Checklist>
+  <CheckItem>Verify `unsafe-eval` is ONLY allowed in development</CheckItem>
+  <CheckItem>Check the Console in Production for any red errors</CheckItem>
+  <CheckItem>Confirm `object-src` is 'none'</CheckItem>
+  <CheckItem>Test AdSense loading with ad blockers disabled</CheckItem>
+</Checklist>
 
 ---
 
-## Common Mistakes (And How I Made Them)
-
-### Mistake #1: Forgetting 'unsafe-inline'
-**Error:** `Refused to execute inline script`
-
-**Why:** Next.js uses inline scripts for hydration. Without `'unsafe-inline'`, your app breaks.
-
-**Fix:** Add `'unsafe-inline'` to `script-src`.
-
-### Mistake #2: Missing *.google.com
-**Error:** `Refused to frame 'https://ep2.adtrafficquality.google/'`
-
-**Why:** Google uses random subdomains you can't predict.
-
-**Fix:** Add `https://*.google.com` to `frame-src` and `connect-src`.
-
-### Mistake #3: Only Adding to script-src
-**Error:** `Refused to connect to 'https://pagead2.googlesyndication.com'`
-
-**Why:** Scripts need to make API calls (connect-src) and load iframes (frame-src).
-
-**Fix:** Add domains to **all three** directives.
-
-### Mistake #4: Testing with Ad Blockers On
-**Error:** No errors shown, but ads still don't load.
-
-**Why:** Ad blockers hide the real CSP errors.
-
-**Fix:** Disable all extensions and test in incognito mode.
-
----
-
-## What About Security?
-
-"Isn't allowing Google domains a security risk?"
-
-Not really. You're explicitly trusting Google to serve ads. That's the entire point of AdSense.
-
-**What you're NOT doing:**
-- Allowing arbitrary inline scripts
-- Opening your site to XSS attacks
-- Disabling CSP entirely
-
-**What you ARE doing:**
-- Allowing specific, trusted Google domains
-- Keeping `object-src 'none'` (blocks Flash, etc.)
-- Maintaining `form-action 'self'` (prevents form hijacking)
-
-This is the **minimum required CSP** for AdSense while maintaining reasonable security.
-
----
-
-## Step 6: Document Your CSP (Future You Will Thank You)
-
-I added this to our README:
-
-```markdown
-## Content Security Policy (CSP) for AdSense
-
-Required domains:
-- script-src: Google Tag Manager, Analytics, AdSense, Ad Quality
-- connect-src: All of the above plus DoubleClick, Syndication
-- frame-src: All ad-serving domains plus *.google.com
-
-If you see CSP errors:
-1. Check DevTools Console
-2. Add the blocked domain to the appropriate directive
-3. Never use wildcard * for everything
-```
-
-This saved me hours when I had to debug a new CSP issue later.
-
----
-
-## The Result
-
-After these fixes:
-- ✅ Zero CSP errors in console
-- ✅ AdSense scripts load correctly
-- ✅ Ads can render (when approved)
-- ✅ Analytics tracking works
-- ✅ No security compromises
-
-Total time to debug and fix: **About 1 hour** (most of it was trial and error).
-
----
-
-## Going Further
-
-Once your CSP is working:
-
-1. **Monitor for new errors** (check console regularly)
-2. **Test on multiple browsers** (Chrome, Firefox, Safari)
-3. **Check mobile** (CSP works the same, but test anyway)
-4. **Document changes** (future you will forget why you added a domain)
-
-And when AdSense adds a new domain? You'll see it in the console immediately.
-
----
-
-## Tools That Helped
-
-- [CSP Evaluator](https://csp-evaluator.withgoogle.com/) - Check your policy for weaknesses
-- Browser DevTools - See exactly what's blocked
-- [Report-URI CSP Builder](https://report-uri.com/home/generate) - Generate CSP policies
-
----
-
-**Need help getting your site AdSense-ready?** From CSP configuration to email deliverability, we handle all the technical details so you can focus on content. Check out our [services](/services) or [get in touch](/contact) to discuss your project.
-
----
-
-**Related:** For a complete AdSense readiness checklist, see our guide on [shipping AdSense-ready multilingual Next.js sites](/blog/adsense-ready-multilingual-nextjs).
+**Need help securing your Next.js site?** We handle the tricky parts of CSP, headers, and security so you don't have to. Check out our [services](/services) or [get in touch](/contact).

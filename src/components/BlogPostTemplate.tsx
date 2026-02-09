@@ -1,4 +1,5 @@
 import Image from "next/image";
+import React, { ReactNode } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import rehypeHighlight from "rehype-highlight";
@@ -198,6 +199,46 @@ export default function BlogPostTemplate({
                       </a>
                     );
                   },
+                  // Professional block components for MDX
+                  Step: ({ number, title, children }: { number: string | number, title?: string, children: ReactNode }) => (
+                    <div className="flex gap-6 mb-16 group items-start">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-110">
+                        {number}
+                      </div>
+                      <div className="flex-1">
+                        {title && <h3 className="text-2xl font-bold mb-4 mt-0">{title}</h3>}
+                        <div className="text-gray-600 dark:text-gray-300 leading-[2.2]">{children}</div>
+                      </div>
+                    </div>
+                  ),
+                  Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
+                    const styles = {
+                      info: 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
+                      warning: 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
+                      success: 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300',
+                    }[type] || 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700';
+
+                    return (
+                      <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>
+                        {children}
+                      </div>
+                    );
+                  },
+                  Checklist: ({ children }: { children: ReactNode }) => (
+                    <div className="my-16 space-y-4 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
+                      {children}
+                    </div>
+                  ),
+                  CheckItem: ({ children }: { children: ReactNode }) => (
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1-5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700 dark:text-gray-200">{children}</span>
+                    </div>
+                  ),
                 }}
                 options={{
                   mdxOptions: {

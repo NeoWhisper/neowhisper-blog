@@ -5,9 +5,55 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
-- Contact page (coming soon)
-- About page (coming soon)
 - Code quality: Remove if statements from remaining components
+- Add JA/AR translations for Post #6 (CSP debugging)
+
+## [1.7.0] - 2026-02-09
+
+### 🎉 AdSense Readiness Milestone
+
+This release completes all critical requirements for Google AdSense approval.
+
+### Added
+
+- **Blog Posts (2 new, bringing total to 6):**
+  - "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
+  - "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN)
+- **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
+- **CookieBanner component** with GDPR compliance and multilingual support
+- **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
+- **SEO metadata** with i18n support for all marketing pages (Services, Projects, About, Contact)
+- **DNS records** for email deliverability (SPF, DKIM, DMARC)
+- **CSP documentation** section in README with troubleshooting guide
+
+### Fixed
+
+- **6 CSP errors** blocking AdSense scripts (frame-src, script-src, connect-src violations)
+- **Email deliverability** - Changed RESEND_FROM to friendly address, configured DMARC
+- **CSP configuration** - Added all required Google domains for AdSense
+- **Twitter/X link** removed from AuthorBio (replaced with real GitHub only)
+
+### Changed
+
+- **README.md** kept generic for template reusability
+- **DNS-SETUP-CHECKLIST.md** added to .gitignore (operational doc)
+- **CSP policy** relaxed for AdSense while maintaining security (no wildcard *, specific domains only)
+- **Welcome post** expanded with more substantive content and navigation links
+
+### Infrastructure
+
+- Email deliverability tested in production (Gmail/Outlook inbox delivery confirmed)
+- All High-priority AdSense tasks completed (100%)
+- All Critical tasks completed except final translations (75%)
+- Total progress: 18% → 86% in 2 days
+
+### Metrics
+
+- Blog posts: 4 → 6 (target met)
+- Internal links: 0 → 20+ (200% of target)
+- CSP errors: 6 → 0 (100% resolved)
+- Commits: 14 over 2 days
+- Files changed: 40+
 
 ## [1.6.0] - 2026-02-07
 

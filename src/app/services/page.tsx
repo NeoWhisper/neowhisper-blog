@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const translations = {
   en: {
     label: "Services",
     title: "What We Deliver",
-    subtitle: "Premium engineering, creative direction, and multilingual delivery.",
+    subtitle:
+      "Premium engineering, creative direction, and multilingual delivery.",
     back: "Back to Home",
     cards: [
       {
@@ -24,7 +26,11 @@ const translations = {
         title: "Localization & Translation",
         description:
           "Native-level EN/JA/AR translation with technical accuracy.",
-        bullets: ["Product UI copy", "Docs and tutorials", "Launch localization"],
+        bullets: [
+          "Product UI copy",
+          "Docs and tutorials",
+          "Launch localization",
+        ],
       },
       {
         title: "Content & Growth Systems",
@@ -48,8 +54,7 @@ const translations = {
       },
       {
         title: "ゲーム開発",
-        description:
-          "試作からリリースまで、プレイ感を重視した制作を行います。",
+        description: "試作からリリースまで、プレイ感を重視した制作を行います。",
         bullets: ["Unity / Godot", "モバイル + PC", "UI/UX最適化"],
       },
       {
@@ -73,31 +78,93 @@ const translations = {
     cards: [
       {
         title: "تطوير المنتجات الرقمية",
-        description:
-          "نحوّل الأفكار إلى منصات ويب ومنتجات داخلية قابلة للنمو.",
+        description: "نحوّل الأفكار إلى منصات ويب ومنتجات داخلية قابلة للنمو.",
         bullets: ["Next.js + TypeScript", "من MVP إلى التوسع", "تهيئة SEO"],
       },
       {
         title: "تطوير الألعاب",
-        description:
-          "نماذج أولية وتجارب لعب متقنة جاهزة للإطلاق.",
+        description: "نماذج أولية وتجارب لعب متقنة جاهزة للإطلاق.",
         bullets: ["Unity / Godot", "موبايل وكمبيوتر", "واجهة وتجربة عالية"],
       },
       {
         title: "الترجمة والتعريب",
-        description:
-          "تعريب احترافي للمنتجات والمحتوى بدقة تقنية عالية.",
+        description: "تعريب احترافي للمنتجات والمحتوى بدقة تقنية عالية.",
         bullets: ["نصوص الواجهة", "الوثائق", "تحضير الإطلاق"],
       },
       {
         title: "نمو المحتوى والسيو",
-        description:
-          "استراتيجية تحرير وتحسين الظهور لضمان نتائج مستمرة.",
+        description: "استراتيجية تحرير وتحسين الظهور لضمان نتائج مستمرة.",
         bullets: ["أبحاث الكلمات", "عمليات المحتوى", "تحليلات GA4"],
       },
     ],
   },
 } as const;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+
+  const meta = {
+    en: {
+      title: "Services - NeoWhisper | Full-Stack Development & Localization",
+      description:
+        "Premium full-stack development, game development, EN/JA/AR localization, and content strategy. Next.js experts delivering SEO-first web platforms and multilingual products.",
+    },
+    ja: {
+      title: "サービス - NeoWhisper | フルスタック開発・多言語対応",
+      description:
+        "フルスタック開発、ゲーム開発、EN/JA/AR翻訳・ローカライズ、コンテンツ戦略。Next.jsの専門家がSEO重視のWebプラットフォームと多言語製品を提供します。",
+    },
+    ar: {
+      title: "الخدمات - NeoWhisper | تطوير متكامل وتعريب احترافي",
+      description:
+        "تطوير مواقع وتطبيقات متكاملة، تطوير ألعاب، ترجمة وتعريب EN/JA/AR، واستراتيجية محتوى. خبراء Next.js في تقديم منصات ويب محسّنة لمحركات البحث ومنتجات متعددة اللغات.",
+    },
+  };
+
+  const { title, description } = meta[currentLang];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale:
+        currentLang === "ja"
+          ? "ja_JP"
+          : currentLang === "ar"
+            ? "ar_SA"
+            : "en_US",
+      alternateLocale: ["en_US", "ja_JP", "ar_SA"].filter(
+        (loc) =>
+          loc !==
+          (currentLang === "ja"
+            ? "ja_JP"
+            : currentLang === "ar"
+              ? "ar_SA"
+              : "en_US"),
+      ),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      languages: {
+        en: "/services?lang=en",
+        ja: "/services?lang=ja",
+        ar: "/services?lang=ar",
+      },
+    },
+  };
+}
 
 export default async function ServicesPage({
   searchParams,
@@ -108,7 +175,11 @@ export default async function ServicesPage({
   const currentLang = normalizeLang(lang) as SupportedLang;
   const t = translations[currentLang];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8" dir={currentLang === "ar" ? "rtl" : "ltr"} lang={currentLang}>
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8"
+      dir={currentLang === "ar" ? "rtl" : "ltr"}
+      lang={currentLang}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex items-center justify-between">
           <div>

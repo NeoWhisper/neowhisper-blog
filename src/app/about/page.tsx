@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const translations = {
@@ -85,6 +86,72 @@ const translations = {
   },
 } as const;
 
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+
+  const meta = {
+    en: {
+      title: "About - NeoWhisper | Multilingual Product Studio",
+      description:
+        "NeoWhisper builds premium web platforms, games, and multilingual products across English, Japanese, and Arabic. Full-stack development with SEO-first approach and kaizen mindset.",
+    },
+    ja: {
+      title: "概要 - NeoWhisper | 多言語プロダクト開発スタジオ",
+      description:
+        "NeoWhisperは、英語・日本語・アラビア語に対応したプレミアムなWebプラットフォーム、ゲーム、多言語製品を構築します。SEO重視のフルスタック開発と改善マインドを持つスタジオです。",
+    },
+    ar: {
+      title: "عن NeoWhisper | استوديو منتجات متعددة اللغات",
+      description:
+        "NeoWhisper يبني منصات ويب وألعاب ومنتجات متعددة اللغات بجودة عالية عبر الإنجليزية واليابانية والعربية. تطوير متكامل مع نهج يركز على SEO وعقلية التحسين المستمر.",
+    },
+  };
+
+  const { title, description } = meta[currentLang];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale:
+        currentLang === "ja"
+          ? "ja_JP"
+          : currentLang === "ar"
+            ? "ar_SA"
+            : "en_US",
+      alternateLocale: ["en_US", "ja_JP", "ar_SA"].filter(
+        (loc) =>
+          loc !==
+          (currentLang === "ja"
+            ? "ja_JP"
+            : currentLang === "ar"
+              ? "ar_SA"
+              : "en_US"),
+      ),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      languages: {
+        en: "/about?lang=en",
+        ja: "/about?lang=ja",
+        ar: "/about?lang=ar",
+      },
+    },
+  };
+}
+
 export default async function AboutPage({
   searchParams,
 }: {
@@ -94,7 +161,11 @@ export default async function AboutPage({
   const currentLang = normalizeLang(lang) as SupportedLang;
   const t = translations[currentLang];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8" dir={currentLang === "ar" ? "rtl" : "ltr"} lang={currentLang}>
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8"
+      dir={currentLang === "ar" ? "rtl" : "ltr"}
+      lang={currentLang}
+    >
       <div className="mx-auto max-w-5xl">
         <div className="mb-10 flex items-center justify-between">
           <div>

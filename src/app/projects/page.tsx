@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
 
@@ -7,7 +8,8 @@ const copy = {
   en: {
     label: "Projects",
     title: "Selected Work",
-    subtitle: "Product experiments, client builds, and multi-platform releases.",
+    subtitle:
+      "Product experiments, client builds, and multi-platform releases.",
     back: "Back to Home",
     planned: "Planned",
   },
@@ -27,6 +29,72 @@ const copy = {
   },
 } as const;
 
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+
+  const meta = {
+    en: {
+      title: "Projects - NeoWhisper | Portfolio & Case Studies",
+      description:
+        "Explore our portfolio of web platforms, games, and multilingual products. Real-world projects built with Next.js, TypeScript, Unity, and modern tools.",
+    },
+    ja: {
+      title: "プロジェクト - NeoWhisper | ポートフォリオ・実績",
+      description:
+        "Webプラットフォーム、ゲーム、多言語製品のポートフォリオ。Next.js、TypeScript、Unityなどのモダンツールで構築された実績をご覧ください。",
+    },
+    ar: {
+      title: "المشاريع - NeoWhisper | معرض الأعمال ودراسات الحالة",
+      description:
+        "استكشف معرض أعمالنا من منصات الويب والألعاب والمنتجات متعددة اللغات. مشاريع واقعية مبنية بـ Next.js وTypeScript وUnity وأدوات حديثة.",
+    },
+  };
+
+  const { title, description } = meta[currentLang];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale:
+        currentLang === "ja"
+          ? "ja_JP"
+          : currentLang === "ar"
+            ? "ar_SA"
+            : "en_US",
+      alternateLocale: ["en_US", "ja_JP", "ar_SA"].filter(
+        (loc) =>
+          loc !==
+          (currentLang === "ja"
+            ? "ja_JP"
+            : currentLang === "ar"
+              ? "ar_SA"
+              : "en_US"),
+      ),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      languages: {
+        en: "/projects?lang=en",
+        ja: "/projects?lang=ja",
+        ar: "/projects?lang=ar",
+      },
+    },
+  };
+}
+
 export default async function ProjectsPage({
   searchParams,
 }: {
@@ -43,7 +111,11 @@ export default async function ProjectsPage({
     }),
   }));
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8" dir={currentLang === "ar" ? "rtl" : "ltr"} lang={currentLang}>
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8"
+      dir={currentLang === "ar" ? "rtl" : "ltr"}
+      lang={currentLang}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex items-center justify-between">
           <div>
@@ -126,7 +198,9 @@ export default async function ProjectsPage({
                       key={link.label}
                       href={link.href}
                       className="rounded-full bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      {...(isExternal
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
                     >
                       {link.label}
                     </a>

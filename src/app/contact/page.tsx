@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Script from "next/script";
+import { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
@@ -7,7 +8,8 @@ const translations = {
   en: {
     label: "Contact",
     title: "Start a Project",
-    subtitle: "Tell us what you're building. We'll respond within 1-2 business days.",
+    subtitle:
+      "Tell us what you're building. We'll respond within 1-2 business days.",
     back: "Back to Home",
     form: {
       name: "Name",
@@ -24,7 +26,8 @@ const translations = {
       placeholderName: "Your full name",
       placeholderEmail: "you@email.com",
       placeholderCompany: "Company or brand",
-      placeholderDetails: "Tell us about your goals, timeline, and any references.",
+      placeholderDetails:
+        "Tell us about your goals, timeline, and any references.",
       emailDirect: "Email Directly",
       options: {
         projectType: [
@@ -68,7 +71,13 @@ const translations = {
           "コンテンツ戦略",
           "その他",
         ],
-        budget: ["〜10万円", "10〜50万円", "50〜150万円", "150万円以上", "未定"],
+        budget: [
+          "〜10万円",
+          "10〜50万円",
+          "50〜150万円",
+          "150万円以上",
+          "未定",
+        ],
       },
     },
   },
@@ -102,11 +111,83 @@ const translations = {
           "استراتيجية محتوى",
           "أخرى",
         ],
-        budget: ["أقل من 3,000 ر.س", "3,000 - 15,000 ر.س", "15,000 - 60,000 ر.س", "أكثر من 60,000 ر.س", "غير محدد"],
+        budget: [
+          "أقل من 3,000 ر.س",
+          "3,000 - 15,000 ر.س",
+          "15,000 - 60,000 ر.س",
+          "أكثر من 60,000 ر.س",
+          "غير محدد",
+        ],
       },
     },
   },
 } as const;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+
+  const meta = {
+    en: {
+      title: "Contact - NeoWhisper | Start Your Project",
+      description:
+        "Ready to build your next web platform, game, or multilingual product? Contact NeoWhisper for full-stack development, localization, and content strategy. We respond within 1-2 business days.",
+    },
+    ja: {
+      title: "お問い合わせ - NeoWhisper | プロジェクトを始める",
+      description:
+        "Webプラットフォーム、ゲーム、多言語製品の開発をお考えですか？フルスタック開発、ローカライズ、コンテンツ戦略についてNeoWhisperにご相談ください。1-2営業日以内に返信いたします。",
+    },
+    ar: {
+      title: "تواصل معنا - NeoWhisper | ابدأ مشروعك",
+      description:
+        "هل أنت مستعد لبناء منصة الويب أو اللعبة أو المنتج متعدد اللغات القادم؟ تواصل مع NeoWhisper للتطوير المتكامل والتعريب واستراتيجية المحتوى. نرد خلال 1-2 يوم عمل.",
+    },
+  };
+
+  const { title, description } = meta[currentLang];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale:
+        currentLang === "ja"
+          ? "ja_JP"
+          : currentLang === "ar"
+            ? "ar_SA"
+            : "en_US",
+      alternateLocale: ["en_US", "ja_JP", "ar_SA"].filter(
+        (loc) =>
+          loc !==
+          (currentLang === "ja"
+            ? "ja_JP"
+            : currentLang === "ar"
+              ? "ar_SA"
+              : "en_US"),
+      ),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      languages: {
+        en: "/contact?lang=en",
+        ja: "/contact?lang=ja",
+        ar: "/contact?lang=ar",
+      },
+    },
+  };
+}
 
 export default async function ContactPage({
   searchParams,
@@ -118,7 +199,11 @@ export default async function ContactPage({
   const t = translations[currentLang];
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8" dir={currentLang === "ar" ? "rtl" : "ltr"} lang={currentLang}>
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8"
+      dir={currentLang === "ar" ? "rtl" : "ltr"}
+      lang={currentLang}
+    >
       <div className="mx-auto max-w-5xl">
         <div className="mb-10 flex items-center justify-between">
           <div>

@@ -96,13 +96,21 @@ export async function POST(request: Request) {
       .map((entry) => entry.trim())
       .filter(Boolean);
 
+    // Safe handling of the "From" address
+    let finalFrom = RESEND_FROM.trim();
+    if (!finalFrom.includes("<") && finalFrom.includes("@")) {
+      finalFrom = `NeoWhisper <${finalFrom}>`;
+    }
+
     const emailPayload = {
-      from: RESEND_FROM,
+      from: finalFrom,
       to: recipients.length ? recipients : ["neowhisperhq@gmail.com"],
       subject: `New inquiry from ${name}`,
       reply_to: email,
       text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || "-"}\nProject Type: ${projectType || "-"}\nBudget: ${budget || "-"}\n\nDetails:\n${details}`,
     };
+
+    console.log("Sending email with payload:", JSON.stringify({ ...emailPayload, text: "(omitted)" }));
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

@@ -18,22 +18,24 @@ export async function POST(request: Request) {
   const toStr = (value: unknown) => (typeof value === "string" ? value : undefined);
 
   try {
-    const body =
-      contentType.includes("application/json")
-        ? ((await request.json()) as Record<string, unknown>)
-        : (Object.fromEntries(
-            (await request.formData()).entries()
-          ) as Record<string, unknown>);
+    let body: Record<string, unknown>;
 
-    const name = toStr(body?.name);
-    const email = toStr(body?.email);
-    const details = toStr(body?.details);
-    const company = toStr(body?.company);
-    const projectType = toStr(body?.projectType);
-    const budget = toStr(body?.budget);
-    const lang = normalizeLang(toStr(body?.lang));
-    const turnstileToken =
-      toStr(body?.turnstileToken) ?? toStr(body?.["cf-turnstile-response"]);
+    if (contentType.includes("application/json")) {
+      body = (await request.json()) as Record<string, unknown>;
+    } else {
+      const formData = await request.formData();
+      body = Object.fromEntries(formData.entries());
+    }
+
+    const name = toStr(body.name);
+    const email = toStr(body.email);
+    const details = toStr(body.details);
+    const company = toStr(body.company);
+    const projectType = toStr(body.projectType);
+    const budget = toStr(body.budget);
+    const lang = normalizeLang(toStr(body.lang));
+    // Check both possible keys for the token
+    const turnstileToken = toStr(body.turnstileToken) ?? toStr(body["cf-turnstile-response"]);
 
     if (!name || !email || !details) {
       if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);

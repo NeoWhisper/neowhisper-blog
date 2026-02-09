@@ -1,3 +1,41 @@
+# [1.6.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.5.1...v1.6.0) (2026-02-09)
+
+
+### Bug Fixes
+
+* **api:** add robust validation for RESEND_FROM with fallback to onboarding email ([f8bc64b](https://github.com/NeoWhisper/neowhisper-blog/commit/f8bc64b64fdad79853dd1b498d8b9a5ec7bafcdd))
+* **api:** improve request body parsing for Turnstile token and lang handling ([3e9af2b](https://github.com/NeoWhisper/neowhisper-blog/commit/3e9af2ba8541d1a9273fde1a1a1624a454cd55ce))
+* **api:** improve Resend 'from' address handling and logging ([9bc85c5](https://github.com/NeoWhisper/neowhisper-blog/commit/9bc85c55706abba81bdb590b5edcea586e30d4ef))
+* **ci:** update Node.js version to 22 for semantic-release ([1304342](https://github.com/NeoWhisper/neowhisper-blog/commit/13043427920999bb48553044277bfe301abb08dd))
+* **contact:** avoid form reset crash after async submit ([4acd745](https://github.com/NeoWhisper/neowhisper-blog/commit/4acd7457fd4a3bf011c9385411a35c6e31fa96cf))
+* **contact:** make form submit work without JS (no query params) ([ebb3472](https://github.com/NeoWhisper/neowhisper-blog/commit/ebb34720c1b2e7c55c20adef6ee28898cd53db3d))
+* **csp:** add missing Google AdSense domains to eliminate console warnings ([45c936e](https://github.com/NeoWhisper/neowhisper-blog/commit/45c936e815ae63c1ae867f7ef3b85ade5ef8b663))
+* resolve AdSense CSP errors by adding required Google domains ([d09bc9d](https://github.com/NeoWhisper/neowhisper-blog/commit/d09bc9d925717dac573cf79162b935af3526b3eb))
+* resolve homepage build errors ([9c5bf71](https://github.com/NeoWhisper/neowhisper-blog/commit/9c5bf713c933b6efaa4869ea6c52bf7a06b5a6e0))
+* **security:** relax CSP for hydration, Turnstile, and AdSense ([56d4296](https://github.com/NeoWhisper/neowhisper-blog/commit/56d4296c2ad456b6a3b211e17a55d625f0dcbb4d))
+* **security:** restrict Access-Control-Allow-Origin for robots.txt and sitemap.xml ([7229175](https://github.com/NeoWhisper/neowhisper-blog/commit/722917520bf6c6090c449def95e8c6f6931907d2))
+* **security:** set Access-Control-Allow-Origin to https://www.neowhisper.net for robots/sitemap ([436d61c](https://github.com/NeoWhisper/neowhisper-blog/commit/436d61cadfcd00a84d216cd5814918c6823a0065))
+* **ui:** correct active tab highlighting in mobile and desktop navigation ([1ca33ca](https://github.com/NeoWhisper/neowhisper-blog/commit/1ca33ca937b916bf1b63a10756532204c4c47b4b))
+* **ui:** prevent illegal invocation in Blog CTA; improve contact errors ([2091c1c](https://github.com/NeoWhisper/neowhisper-blog/commit/2091c1c3fb2b193236ec486bf7169b9c9b6b9067))
+* update github-script action to v7 for better API compatibility ([94c51e1](https://github.com/NeoWhisper/neowhisper-blog/commit/94c51e16bf948ad7ac787b0932b06af483f86439))
+* update Node.js version to 20+ and fix GitHub Actions workflows ([8c80ee3](https://github.com/NeoWhisper/neowhisper-blog/commit/8c80ee314ea4d6cc07f3fbb14b97d43de7af29cd))
+* wrap SiteHeader in Suspense for prerender ([11f3814](https://github.com/NeoWhisper/neowhisper-blog/commit/11f3814a20a0273d1076a50511c606bd280247e4))
+
+
+### Features
+
+* add Author Bio component for E-E-A-T signals (AdSense H2) ([2fbd4fc](https://github.com/NeoWhisper/neowhisper-blog/commit/2fbd4fc3444a4692d02c687bc56997fc10b72a55))
+* add blog post about production contact forms (Post [#5](https://github.com/NeoWhisper/neowhisper-blog/issues/5)) ([789209f](https://github.com/NeoWhisper/neowhisper-blog/commit/789209f40868334b363d4029360ae5d4654e0d48))
+* add final blog post [#6](https://github.com/NeoWhisper/neowhisper-blog/issues/6) about CSP debugging (EN only for now) ([a764787](https://github.com/NeoWhisper/neowhisper-blog/commit/a7647878579b5da80fc24bb817a31892fd98c93b))
+* add GDPR-compliant Cookie Banner (AdSense H3) ([9e6bc13](https://github.com/NeoWhisper/neowhisper-blog/commit/9e6bc138254150f0bf6d3bddd09d469f73216c31))
+* add internal links to all blog posts for AdSense compliance ([cb81d6e](https://github.com/NeoWhisper/neowhisper-blog/commit/cb81d6ecee48e516afd90d71525894b5ff35bfff))
+* add JA/AR translations for contact forms post (Post [#5](https://github.com/NeoWhisper/neowhisper-blog/issues/5) complete) ([ed92043](https://github.com/NeoWhisper/neowhisper-blog/commit/ed920435b2874d8bd1cb45b3f0fae2096397a478))
+* add JA/AR translations for Post [#6](https://github.com/NeoWhisper/neowhisper-blog/issues/6) - ALL POSTS NOW TRILINGUAL! ([f82e095](https://github.com/NeoWhisper/neowhisper-blog/commit/f82e095e1e97758aec2002699887f6e0b51626e3))
+* add SEO metadata with i18n support to all marketing pages (AdSense H4) ([f95a849](https://github.com/NeoWhisper/neowhisper-blog/commit/f95a849a0b94a9d6e80fc51bbeba3aec81d0becb)), closes [Hi#priority](https://github.com/Hi/issues/priority)
+* **ci:** add semantic-release with commitlint, husky, and dependabot ([1a3e774](https://github.com/NeoWhisper/neowhisper-blog/commit/1a3e774fb3f59c0a1227caee1de7c0f08aa8f2ee))
+* **csp:** finalize AdSense & Turnstile readiness ([7be1d61](https://github.com/NeoWhisper/neowhisper-blog/commit/7be1d6146ad4d44c520ae2ed226af7b34c5a3d2f))
+* **site:** add multilingual marketing pages, contact form, and project system ([3b59837](https://github.com/NeoWhisper/neowhisper-blog/commit/3b59837ad5b1873a4a8713a6fb1b1f44338fc20a))
+
 <!-- markdownlint-disable MD024 -->
 # Changelog
 

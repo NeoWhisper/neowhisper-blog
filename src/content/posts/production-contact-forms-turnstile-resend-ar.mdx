@@ -1,0 +1,347 @@
+---
+title: "بناء نماذج اتصال جاهزة للإنتاج باستخدام Cloudflare Turnstile وResend"
+date: "2026-02-09"
+excerpt: "تجنب السبام ومشاكل التسليم. إليك كيفية بناء نموذج اتصال يعمل فعلياً في الإنتاج، باستخدام Turnstile للحماية وResend للتسليم الموثوق."
+category: "Next.js"
+coverImage: "/images/contact-form-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+من المفترض أن تكون نماذج الاتصال بسيطة. حتى تنشرها في بيئة الإنتاج.
+
+ثم تبدأ رسائل السبام بالتدفق. تهبط الرسائل في مجلد السبام. يرسل المستخدمون نماذج فارغة. يصبح صندوق الوارد فوضى من إرساليات البوتات وصفر استفسارات حقيقية.
+
+لقد أعدت بناء [نموذج الاتصال](/contact?lang=ar) لهذا الموقع للتو، وسأريك بالضبط كيفية صنع نموذج يعمل فعلياً. لا كلام نظري—فقط الأنماط المهمة عندما يبدأ المستخدمون الحقيقيون (والبوتات الحقيقية) في استخدام النموذج.
+
+---
+
+## المشكلة مع نماذج الاتصال "البسيطة"
+
+نموذج اتصال أساسي سهل:
+
+```tsx
+<form action="/api/contact" method="POST">
+  <input name="email" />
+  <textarea name="message" />
+  <button>إرسال</button>
+</form>
+```
+
+لكن هذا يفشل في الإنتاج:
+
+1. **بوتات السبام** ستغرقه في غضون ساعات من الإطلاق
+2. **توصيل البريد الإلكتروني** كابوس (Gmail يصنفك كسبام)
+3. **لا توجد ملاحظات** عند فشل شيء على جانب الخادم
+4. **تحسين تدريجي صفر** (يتعطل بدون JavaScript)
+
+تحتاج إلى ثلاثة أشياء:
+- حماية حقيقية من السبام (وليس honeypot يتجاوزه البوتات في 2026)
+- توصيل بريد إلكتروني موثوق (SPF، DKIM، DMARC بشكل صحيح)
+- تجربة مستخدم قوية (تعمل مع وبدون JavaScript)
+
+---
+
+## لماذا Cloudflare Turnstile + Resend؟
+
+**Cloudflare Turnstile** هو reCAPTCHA بدون تتبع Google. إنه غير مرئي لمعظم المستخدمين، مجاني للأحجام المعقولة، ويوقف البوتات فعلياً.
+
+**Resend** هو البديل الحديث لـ SendGrid/Mailgun. واجهة برمجة نظيفة، قابلية توصيل ممتازة، وتسعير معقول.
+
+كلاهما لديه واجهات برمجة متوافقة مع Next.js ولا يتطلب إعدادات SDK معقدة.
+
+---
+
+## الخطوة 1: إضافة Turnstile إلى النموذج
+
+أولاً، احصل على مفتاح موقع Turnstile من [Cloudflare](https://dash.cloudflare.com/?to=/:account/turnstile).
+
+أضفه إلى `.env.local`:
+
+```bash
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-site-key
+TURNSTILE_SECRET_KEY=your-secret-key
+```
+
+ثم أضف الأداة إلى النموذج:
+
+```tsx
+'use client';
+
+export default function ContactForm() {
+  return (
+    <form method="POST" action="/api/contact">
+      <input name="name" required />
+      <input name="email" type="email" required />
+      <textarea name="details" required />
+      
+      {/* تحدي Turnstile */}
+      <div 
+        className="cf-turnstile"
+        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+      />
+      
+      <button type="submit">إرسال</button>
+      
+      <Script 
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+        async 
+        defer 
+      />
+    </form>
+  );
+}
+```
+
+يعرض هذا أداة التحدي. يضيف Turnstile تلقائياً رمز `cf-turnstile-response` إلى إرسال النموذج.
+
+---
+
+## الخطوة 2: التحقق من الرمز على جانب الخادم
+
+في مسار API الخاص بك (`/api/contact/route.ts`)، تحقق من الرمز قبل إرسال أي بريد إلكتروني:
+
+```tsx
+export async function POST(request: Request) {
+  const formData = await request.formData();
+  const turnstileToken = formData.get('cf-turnstile-response');
+  
+  if (!turnstileToken) {
+    return NextResponse.json(
+      { ok: false, message: 'فشل التحقق من السبام.' },
+      { status: 400 }
+    );
+  }
+  
+  // التحقق مع Cloudflare
+  const verifyResponse = await fetch(
+    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: turnstileToken,
+      }),
+    }
+  );
+  
+  const verifyData = await verifyResponse.json();
+  
+  if (!verifyData.success) {
+    console.error('فشل التحقق من Turnstile:', verifyData);
+    return NextResponse.json(
+      { ok: false, message: 'فشل التحقق من السبام.' },
+      { status: 400 }
+    );
+  }
+  
+  // الرمز صالح، تابع إرسال البريد
+}
+```
+
+**نقطة مهمة:** تحقق دائماً على جانب الخادم. يمكن تزوير رموز العميل.
+
+---
+
+## الخطوة 3: إرسال البريد الإلكتروني باستخدام Resend
+
+احصل على مفتاح API الخاص بك من [Resend](https://resend.com/api-keys) وأضفه إلى `.env.local`:
+
+```bash
+RESEND_API_KEY=re_your_key_here
+RESEND_FROM="Your Name <hello@yourdomain.com>"
+RESEND_TO=your-inbox@example.com
+```
+
+ثم أرسل البريد الإلكتروني:
+
+```tsx
+const emailPayload = {
+  from: process.env.RESEND_FROM,
+  to: [process.env.RESEND_TO],
+  subject: `استفسار جديد من ${formData.get('name')}`,
+  reply_to: formData.get('email'),
+  text: `
+    الاسم: ${formData.get('name')}
+    البريد الإلكتروني: ${formData.get('email')}
+    
+    الرسالة:
+    ${formData.get('details')}
+  `,
+};
+
+const emailResponse = await fetch('https://api.resend.com/emails', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(emailPayload),
+});
+
+if (!emailResponse.ok) {
+  console.error('خطأ في Resend API:', await emailResponse.text());
+  return NextResponse.json(
+    { ok: false, message: 'فشل إرسال البريد الإلكتروني.' },
+    { status: 500 }
+  );
+}
+
+return NextResponse.json({ ok: true });
+```
+
+---
+
+## الخطوة 4: إصلاح قابلية توصيل البريد (الجزء الذي يتخطاه الجميع)
+
+إرسال بريد إلكتروني سهل. وصوله إلى صندوق الوارد هو الصعب.
+
+تحتاج إلى ثلاثة سجلات DNS:
+
+### سجل SPF
+أضف إلى DNS الخاص بك (النوع: TXT، المضيف: `@`):
+
+```
+v=spf1 include:_spf.resend.com ~all
+```
+
+### سجل DKIM
+يوفره Resend في لوحة التحكم. أضفه إلى DNS الخاص بك كما هو موضح بالضبط.
+
+### سجل DMARC
+أضف إلى DNS الخاص بك (النوع: TXT، المضيف: `_dmarc`):
+
+```
+v=DMARC1; p=quarantine; rua=mailto:postmaster@yourdomain.com; pct=100; adkim=s; aspf=s
+```
+
+**لماذا هذا مهم:** بدون هذه السجلات، سيصنف Gmail/Outlook رسائلك كسبام أو يرفضها تماماً. تعلمت هذا بالطريقة الصعبة—[نموذج الاتصال](/contact?lang=ar) الخاص بنا لم يعمل لأسابيع حتى أضفنا DMARC.
+
+استخدم [MXToolbox](https://mxtoolbox.com/) للتحقق من إعداد السجلات الثلاثة بشكل صحيح.
+
+---
+
+## الخطوة 5: التحسين التدريجي (يعمل بدون JavaScript)
+
+يجب أن يعمل النموذج حتى لو فشل تحميل JavaScript. استخدم المنصة:
+
+```tsx
+<form method="POST" action="/api/contact">
+  {/* الحقول هنا */}
+</form>
+```
+
+في مسار API، اكتشف ما إذا كان إرسال نموذج HTML:
+
+```tsx
+const contentType = request.headers.get('content-type') ?? '';
+const isFormSubmit = contentType.includes('application/x-www-form-urlencoded');
+
+if (isFormSubmit) {
+  // إعادة التوجيه مع رسالة نجاح/خطأ
+  return NextResponse.redirect(
+    new URL('/contact?success=1&lang=ar', request.url),
+    303
+  );
+}
+
+// وإلا، أرجع JSON لطلبات XHR
+return NextResponse.json({ ok: true });
+```
+
+بهذه الطريقة، حتى المستخدمون على 3G بطيء مع تعطيل JavaScript يمكنهم الاتصال بك.
+
+---
+
+## الخطوة 6: التعامل مع الأخطاء بشكل مناسب
+
+لا ترجع فقط رسائل "حدث خطأ ما" عامة. كن محدداً:
+
+```tsx
+// حقول مطلوبة مفقودة
+if (!name || !email || !details) {
+  return json({ ok: false, message: 'يرجى ملء جميع الحقول المطلوبة.' });
+}
+
+// تنسيق بريد إلكتروني غير صالح
+if (!email.includes('@')) {
+  return json({ ok: false, message: 'يرجى إدخال عنوان بريد إلكتروني صالح.' });
+}
+
+// فشل Turnstile
+if (!verifyData.success) {
+  return json({ ok: false, message: 'يرجى إكمال فحص الأمان.' });
+}
+
+// فشل إرسال البريد
+if (!emailResponse.ok) {
+  console.error('خطأ Resend:', await emailResponse.text());
+  return json({ ok: false, message: 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى أو مراسلتنا مباشرة.' });
+}
+```
+
+أظهر هذه الأخطاء في واجهة المستخدم حتى يعرف المستخدمون ما يجب إصلاحه.
+
+---
+
+## الخطوة 7: اختبار كل شيء
+
+قبل الشحن:
+
+1. **اختبر Turnstile:** أرسل مع/بدون إكمال التحدي
+2. **اختبر التحقق:** جرب حقول فارغة، رسائل بريد إلكتروني غير صالحة، إلخ.
+3. **اختبر قابلية التوصيل:** أرسل إلى Gmail، Outlook، Yahoo
+4. **تحقق من رؤوس السبام:** ابحث عن SPF/DKIM/DMARC PASS في رؤوس البريد
+5. **اختبر بدون JS:** عطل JavaScript وأرسل النموذج
+6. **اختبر حالات الفشل:** عطل API مؤقتاً وانظر رسائل الخطأ
+
+---
+
+## المزالق الشائعة (وكيفية تجنبها)
+
+### "تذهب الرسائل إلى السبام"
+→ تحقق من سجلات DNS الخاصة بك. يجب أن تكون الثلاثة (SPF، DKIM، DMARC) صحيحة.
+
+### "يفشل Turnstile على localhost"
+→ أضف `localhost` كنطاق مسموح في إعدادات Turnstile.
+
+### "يُرسل النموذج لكن لا شيء يحدث"
+→ تحقق من سجلات الخادم. قد يُرجع Resend أخطاء لا تلتقطها.
+
+### "يشتكي المستخدمون من عدم القدرة على الإرسال"
+→ تأكد من أن مفتاح موقع Turnstile عام (بادئة `NEXT_PUBLIC_` في Next.js).
+
+---
+
+## ما تحصل عليه من هذا
+
+بهذا الإعداد:
+- ✅ سبام صفر (Turnstile يحظر البوتات)
+- ✅ تصل الرسائل إلى صندوق الوارد (سجلات DNS مناسبة)
+- ✅ يعمل بدون JavaScript (تحسين تدريجي)
+- ✅ رسائل خطأ واضحة (تجربة مستخدم أفضل)
+- ✅ سهل الصيانة (مسار API بسيط)
+
+إجمالي وقت الإعداد حوالي 2-3 ساعات، لكنه محكم بمجرد الانتهاء.
+
+---
+
+## الذهاب أبعد
+
+بمجرد أن يعمل هذا، يمكنك إضافة:
+- تحديد المعدل (إرسال واحد لكل IP في الساعة)
+- إشعارات webhook إلى Slack/Discord
+- رسائل بريد إلكتروني رد تلقائي لتأكيد الاستلام
+- تتبع تحليلات معدلات التحويل
+
+لكن أتقن الأساسيات أولاً. نموذج اتصال يعمل يتفوق على نموذج فاخر معطل.
+
+---
+
+**هل تحتاج مساعدة في بناء نموذج اتصال جاهز للإنتاج لموقعك؟** نحن متخصصون في تطوير Next.js مع معالجة جميع التفاصيل—من حماية السبام إلى قابلية توصيل البريد. تحقق من [خدماتنا](/services?lang=ar) أو [تواصل معنا](/contact?lang=ar) لمناقشة مشروعك.
+
+---
+
+**ذات صلة:** إذا كنت تبني مواقع متعددة اللغات، تحقق من دليلنا حول [شحن مواقع Next.js الجاهزة لـ AdSense](/blog/adsense-ready-multilingual-nextjs?lang=ar) مع التعريب المناسب.

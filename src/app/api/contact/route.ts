@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { normalizeLang } from "@/lib/i18n";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM;
+// Validate RESEND_FROM: must contain @ to be a valid email
+const RESEND_FROM_RAW = process.env.RESEND_FROM || "";
+const RESEND_FROM = RESEND_FROM_RAW.trim().includes("@")
+  ? RESEND_FROM_RAW.trim()
+  : "onboarding@resend.dev"; // Fallback to Resend's test email
 const RESEND_TO = process.env.RESEND_TO || "neowhisperhq@gmail.com";
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
 
@@ -96,11 +100,10 @@ export async function POST(request: Request) {
       .map((entry) => entry.trim())
       .filter(Boolean);
 
-    // Safe handling of the "From" address
-    let finalFrom = RESEND_FROM.trim();
-    if (!finalFrom.includes("<") && finalFrom.includes("@")) {
-      finalFrom = `NeoWhisper <${finalFrom}>`;
-    }
+    // RESEND_FROM is now guaranteed to be a valid email (validated at top of file)
+    const finalFrom = RESEND_FROM.includes("<")
+      ? RESEND_FROM
+      : `NeoWhisper <${RESEND_FROM}>`;
 
     const emailPayload = {
       from: finalFrom,

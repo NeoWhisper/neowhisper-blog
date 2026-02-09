@@ -1,0 +1,347 @@
+---
+title: "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend"
+date: "2026-02-09"
+excerpt: "Skip the spam. Skip the deliverability headaches. Here's how to build a contact form that actually works in production, using Turnstile for protection and Resend for reliable delivery."
+category: "Next.js"
+coverImage: "/images/contact-form-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+Contact forms are supposed to be simple. Until you ship one to production.
+
+Then the spam hits. Emails land in spam folders. Users submit blank forms. Your inbox becomes a mess of bot submissions and zero real inquiries.
+
+I just rebuilt the [contact form](/contact) for this site, and I'm going to show you exactly how to make one that actually works. No theoretical fluff—just the patterns that matter when real users (and real bots) start hitting your form.
+
+---
+
+## The Problem with "Simple" Contact Forms
+
+A basic contact form is easy:
+
+```tsx
+<form action="/api/contact" method="POST">
+  <input name="email" />
+  <textarea name="message" />
+  <button>Send</button>
+</form>
+```
+
+But this breaks in production:
+
+1. **Spam bots** will flood it within hours of launch
+2. **Email deliverability** is a nightmare (Gmail marks you as spam)
+3. **No feedback** when something fails server-side
+4. **Zero progressive enhancement** (breaks without JavaScript)
+
+You need three things:
+- Real spam protection (not a honeypot that bots bypass in 2026)
+- Reliable email delivery (SPF, DKIM, DMARC done right)
+- Solid UX (works with and without JavaScript)
+
+---
+
+## Why Cloudflare Turnstile + Resend?
+
+**Cloudflare Turnstile** is reCAPTCHA without the Google tracking. It's invisible to most users, free for reasonable volumes, and actually stops bots.
+
+**Resend** is the modern alternative to SendGrid/Mailgun. Clean API, excellent deliverability, and reasonable pricing.
+
+Both have Next.js-friendly APIs and don't require complex SDK setups.
+
+---
+
+## Step 1: Add Turnstile to Your Form
+
+First, grab your Turnstile site key from [Cloudflare](https://dash.cloudflare.com/?to=/:account/turnstile).
+
+Add it to `.env.local`:
+
+```bash
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-site-key
+TURNSTILE_SECRET_KEY=your-secret-key
+```
+
+Then add the widget to your form:
+
+```tsx
+'use client';
+
+export default function ContactForm() {
+  return (
+    <form method="POST" action="/api/contact">
+      <input name="name" required />
+      <input name="email" type="email" required />
+      <textarea name="details" required />
+      
+      {/* Turnstile Challenge */}
+      <div 
+        className="cf-turnstile"
+        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+      />
+      
+      <button type="submit">Send Message</button>
+      
+      <Script 
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+        async 
+        defer 
+      />
+    </form>
+  );
+}
+```
+
+This renders a challenge widget. Turnstile automatically adds a `cf-turnstile-response` token to your form submission.
+
+---
+
+## Step 2: Verify the Token Server-Side
+
+In your API route (`/api/contact/route.ts`), verify the token before sending any email:
+
+```tsx
+export async function POST(request: Request) {
+  const formData = await request.formData();
+  const turnstileToken = formData.get('cf-turnstile-response');
+  
+  if (!turnstileToken) {
+    return NextResponse.json(
+      { ok: false, message: 'Spam verification failed.' },
+      { status: 400 }
+    );
+  }
+  
+  // Verify with Cloudflare
+  const verifyResponse = await fetch(
+    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: turnstileToken,
+      }),
+    }
+  );
+  
+  const verifyData = await verifyResponse.json();
+  
+  if (!verifyData.success) {
+    console.error('Turnstile verification failed:', verifyData);
+    return NextResponse.json(
+      { ok: false, message: 'Spam verification failed.' },
+      { status: 400 }
+    );
+  }
+  
+  // Token is valid, proceed with sending email
+}
+```
+
+**Key point:** Always verify server-side. Client tokens can be faked.
+
+---
+
+## Step 3: Send Email with Resend
+
+Get your API key from [Resend](https://resend.com/api-keys) and add it to `.env.local`:
+
+```bash
+RESEND_API_KEY=re_your_key_here
+RESEND_FROM="Your Name <hello@yourdomain.com>"
+RESEND_TO=your-inbox@example.com
+```
+
+Then send the email:
+
+```tsx
+const emailPayload = {
+  from: process.env.RESEND_FROM,
+  to: [process.env.RESEND_TO],
+  subject: `New inquiry from ${formData.get('name')}`,
+  reply_to: formData.get('email'),
+  text: `
+    Name: ${formData.get('name')}
+    Email: ${formData.get('email')}
+    
+    Message:
+    ${formData.get('details')}
+  `,
+};
+
+const emailResponse = await fetch('https://api.resend.com/emails', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(emailPayload),
+});
+
+if (!emailResponse.ok) {
+  console.error('Resend API error:', await emailResponse.text());
+  return NextResponse.json(
+    { ok: false, message: 'Failed to send email.' },
+    { status: 500 }
+  );
+}
+
+return NextResponse.json({ ok: true });
+```
+
+---
+
+## Step 4: Fix Email Deliverability (The Part Everyone Skips)
+
+Sending an email is easy. Having it land in the inbox is hard.
+
+You need three DNS records:
+
+### SPF Record
+Add to your DNS (type: TXT, host: `@`):
+
+```
+v=spf1 include:_spf.resend.com ~all
+```
+
+### DKIM Record
+Resend provides this in their dashboard. Add it to your DNS exactly as shown.
+
+### DMARC Record
+Add to your DNS (type: TXT, host: `_dmarc`):
+
+```
+v=DMARC1; p=quarantine; rua=mailto:postmaster@yourdomain.com; pct=100; adkim=s; aspf=s
+```
+
+**Why this matters:** Without these, Gmail/Outlook will mark your emails as spam or reject them entirely. I learned this the hard way—our [contact form](/contact) wasn't working for weeks until we added DMARC.
+
+Use [MXToolbox](https://mxtoolbox.com/) to verify all three records are set up correctly.
+
+---
+
+## Step 5: Progressive Enhancement (Works Without JavaScript)
+
+Your form should work even if JavaScript fails to load. Use the platform:
+
+```tsx
+<form method="POST" action="/api/contact">
+  {/* Fields here */}
+</form>
+```
+
+In your API route, detect if it's an HTML form submission:
+
+```tsx
+const contentType = request.headers.get('content-type') ?? '';
+const isFormSubmit = contentType.includes('application/x-www-form-urlencoded');
+
+if (isFormSubmit) {
+  // Redirect back with success/error message
+  return NextResponse.redirect(
+    new URL('/contact?success=1', request.url),
+    303
+  );
+}
+
+// Otherwise, return JSON for XHR requests
+return NextResponse.json({ ok: true });
+```
+
+This way, even users on slow 3G with JavaScript disabled can still contact you.
+
+---
+
+## Step 6: Handle Errors Gracefully
+
+Don't just return generic "Something went wrong" messages. Be specific:
+
+```tsx
+// Missing required fields
+if (!name || !email || !details) {
+  return json({ ok: false, message: 'Please fill in all required fields.' });
+}
+
+// Invalid email format
+if (!email.includes('@')) {
+  return json({ ok: false, message: 'Please enter a valid email address.' });
+}
+
+// Turnstile failed
+if (!verifyData.success) {
+  return json({ ok: false, message: 'Please complete the security check.' });
+}
+
+// Email sending failed
+if (!emailResponse.ok) {
+  console.error('Resend error:', await emailResponse.text());
+  return json({ ok: false, message: 'Failed to send message. Please try again or email us directly.' });
+}
+```
+
+Show these errors in your UI so users know what to fix.
+
+---
+
+## Step 7: Test Everything
+
+Before you ship:
+
+1. **Test Turnstile:** Submit with/without completing the challenge
+2. **Test validation:** Try blank fields, invalid emails, etc.
+3. **Test deliverability:** Send to Gmail, Outlook, Yahoo
+4. **Check spam headers:** Look for SPF/DKIM/DMARC PASS in email headers
+5. **Test without JS:** Disable JavaScript and submit the form
+6. **Test failure states:** Temporarily break your API and see error messages
+
+---
+
+## Common Pitfalls (and How to Avoid Them)
+
+### "Emails go to spam"
+→ Check your DNS records. All three (SPF, DKIM, DMARC) must be correct.
+
+### "Turnstile fails on localhost"
+→ Add `localhost` as an allowed domain in your Turnstile settings.
+
+### "Form submits but nothing happens"
+→ Check your server logs. Resend might be returning errors you're not catching.
+
+### "Users complain they can't submit"
+→ Make sure your Turnstile site key is public (`NEXT_PUBLIC_` prefix in Next.js).
+
+---
+
+## What This Gets You
+
+With this setup:
+- ✅ Zero spam (Turnstile blocks bots)
+- ✅ Emails land in inbox (proper DNS records)
+- ✅ Works without JavaScript (progressive enhancement)
+- ✅ Clear error messages (better UX)
+- ✅ Easy to maintain (simple API route)
+
+The total setup time is about 2-3 hours, but it's bulletproof once it's done.
+
+---
+
+## Going Further
+
+Once this is working, you can add:
+- Rate limiting (1 submission per IP per hour)
+- Webhook notifications to Slack/Discord
+- Auto-reply emails to confirm receipt
+- Analytics tracking for conversion rates
+
+But nail the basics first. A working contact form beats a fancy broken one.
+
+---
+
+**Need help building a production-ready contact form for your site?** We specialize in Next.js development with all the details handled—from spam protection to email deliverability. Check out our [services](/services) or [get in touch](/contact) to discuss your project.
+
+---
+
+**Related:** If you're building multilingual sites, check out our guide on [shipping AdSense-ready Next.js sites](/blog/adsense-ready-multilingual-nextjs) with proper localization.

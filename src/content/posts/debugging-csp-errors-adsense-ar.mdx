@@ -1,0 +1,306 @@
+---
+title: "من 6 أخطاء CSP إلى صفر: تصحيح Content Security Policy لـ AdSense"
+date: "2026-02-09"
+excerpt: "هل تم حظر سكريبتات AdSense بواسطة CSP؟ وحدة التحكم مليئة بأخطاء frame-src؟ إليك كيف قمت بتصحيح وإصلاح 6 انتهاكات Content Security Policy في الإنتاج—خطوة بخطوة، مع رسائل الخطأ الحقيقية والحلول."
+category: "Next.js"
+coverImage: "/images/csp-debugging-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+اعتقدت أن موقعنا جاهز لـ AdSense. كود نظيف، إعداد صحيح، كل شيء حسب القواعد.
+
+ثم فتحت DevTools مع تعطيل مانعات الإعلانات.
+
+**ستة أخطاء CSP حمراء زاهية حدقت بي.**
+
+كل سكريبت واحد من AdSense تم حظره. لن يتم تحميل الإعلانات. لن يعمل التتبع. ولم أكن أعرف أي نطاقات يحتاجها Google فعلياً حتى رأيتها تفشل في الوقت الفعلي.
+
+إليك بالضبط كيف قمت بتصحيحه، وما تعلمته، وإعداد CSP الذي نجح أخيراً.
+
+---
+
+## المشكلة: CSP يحظر كل ما يحتاجه Google
+
+من المفترض أن تحمي Content Security Policy مستخدميك. لكن إذا كنت صارماً جداً، فإنها تكسر السكريبتات الشرعية—بما في ذلك AdSense.
+
+إليك ما رأيته في وحدة التحكم عندما اختبرت لأول مرة:
+
+```
+Refused to load the script 'https://pagead2.googlesyndication.com/...' 
+because it violates the following Content Security Policy directive: "script-src 'self'"
+
+Refused to frame 'https://www.google.com/...' 
+because it violates the following Content Security Policy directive: "frame-src 'self'"
+
+Refused to frame 'https://ep2.adtrafficquality.google/...'
+because an ancestor violates the following Content Security Policy directive: "frame-src 'self'"
+```
+
+ستة نطاقات مختلفة. ستة انتهاكات مختلفة. صفر إعلانات تظهر.
+
+إذا كنت تبني [موقعاً جاهزاً لـ AdSense](/blog/adsense-ready-multilingual-nextjs?lang=ar)، فهذا هو الجزء الذي يتعثر فيه الجميع.
+
+---
+
+## الخطوة 1: فهم ما يفعله CSP فعلياً
+
+CSP هو عنوان أمان يخبر المتصفحات: "قم فقط بتحميل الموارد من النطاقات التي أسمح بها صراحةً."
+
+في Next.js، تحدده في `next.config.ts`:
+
+```tsx
+async headers() {
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "frame-src 'self'",
+  ].join("; ");
+  
+  return [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Content-Security-Policy", value: csp },
+      ],
+    },
+  ];
+}
+```
+
+هذا يقول: "قم فقط بتحميل السكريبتات والإطارات من نطاقي الخاص."
+
+هذا آمن. وهو أيضاً سبب عدم عمل AdSense.
+
+---
+
+## الخطوة 2: افتح DevTools وأعد إنتاج المشكلة
+
+لا تخمن ما تم حظره. شاهده يفشل في الوقت الفعلي.
+
+**إليك الطريقة:**
+
+1. **عطّل مانعات الإعلانات** (تخفي الأخطاء الحقيقية)
+2. افتح DevTools → Console
+3. حمّل صفحتك
+4. ابحث عن أخطاء CSP الحمراء
+
+سترى أسطراً مثل:
+
+```
+Refused to execute inline script because it violates the following 
+Content Security Policy directive: "script-src 'self'"
+```
+
+أو:
+
+```
+Refused to load the script 'https://pagead2.googlesyndication.com/...' 
+because it violates the following Content Security Policy directive: 
+"script-src 'self'"
+```
+
+**اكتب كل نطاق محظور.** ستحتاج إلى إضافتها للقائمة البيضاء.
+
+---
+
+## الخطوة 3: حدد ما يحتاجه AdSense فعلياً
+
+من خلال التجربة والخطأ (وقراءة تلك الأخطاء في وحدة التحكم)، إليك ما يتطلبه Google AdSense:
+
+### script-src (تنفيذ JavaScript)
+- `https://www.googletagmanager.com` (Google Tag Manager)
+- `https://www.google-analytics.com` (Analytics)
+- `https://pagead2.googlesyndication.com` (إعلانات AdSense)
+- `https://adtrafficquality.google` (التحقق من الإعلانات)
+- `https://fundingchoicesmessages.google.com` (رسائل الموافقة)
+
+### connect-src (استدعاءات API، طلبات fetch)
+- كل ما سبق، بالإضافة إلى:
+- `https://googleads.g.doubleclick.net` (خدمة الإعلانات)
+- `https://tpc.googlesyndication.com` (محتوى طرف ثالث)
+- `https://*.google.com` (خدمات Google المختلفة)
+
+### frame-src (إطارات iframe، محتوى مضمن)
+- `https://googleads.g.doubleclick.net`
+- `https://tpc.googlesyndication.com`
+- `https://*.google.com`
+- `https://adtrafficquality.google`
+- `https://*.adtrafficquality.google`
+- `https://fundingchoicesmessages.google.com`
+
+**حرف البدل `*.google.com` ضروري** لأن Google يستخدم نطاقات فرعية متعددة لا يمكنك التنبؤ بها.
+
+---
+
+## الخطوة 4: حدّث إعداد CSP الخاص بك
+
+إليك الإعداد الذي عمل وأصلح جميع الأخطاء الستة:
+
+```tsx
+// next.config.ts
+async headers() {
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://*.google.com",
+    "frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
+    "img-src 'self' data: https:",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+
+  return [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Content-Security-Policy", value: csp },
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+      ],
+    },
+  ];
+}
+```
+
+**التغييرات الرئيسية:**
+- أضفنا `'unsafe-inline'` إلى `script-src` (Next.js hydration يحتاجه)
+- أضفنا جميع نطاقات Google إلى `script-src`، `connect-src`، و `frame-src`
+- استخدمنا حرف البدل `*.google.com` للنطاقات الفرعية
+- حافظنا على `object-src 'none'` (مهم للأمان)
+
+---
+
+## الخطوة 5: اختبر مرة أخرى (بالطريقة الصحيحة)
+
+بعد النشر:
+
+1. **تحديث صارم** (Cmd+Shift+R على Mac، Ctrl+Shift+R على Windows)
+2. افتح DevTools → Console
+3. تحقق من أخطاء CSP
+4. ابحث عن رسائل "PASS" الخضراء في تبويب الشبكة
+
+إذا كنت لا تزال ترى أخطاء، تحقق:
+- هل قمت بإعادة النشر؟ (التغييرات تطبق فقط بعد النشر)
+- هل تم مسح ذاكرة التخزين المؤقت للمتصفح؟
+- هل مانعات الإعلانات لا تزال معطلة؟
+
+---
+
+## الأخطاء الشائعة (وكيف ارتكبتها)
+
+### الخطأ #1: نسيان 'unsafe-inline'
+**الخطأ:** `Refused to execute inline script`
+
+**السبب:** Next.js يستخدم سكريبتات مضمنة للترطيب. بدون `'unsafe-inline'`، يتعطل تطبيقك.
+
+**الإصلاح:** أضف `'unsafe-inline'` إلى `script-src`.
+
+### الخطأ #2: فقدان *.google.com
+**الخطأ:** `Refused to frame 'https://ep2.adtrafficquality.google/'`
+
+**السبب:** Google يستخدم نطاقات فرعية عشوائية لا يمكنك التنبؤ بها.
+
+**الإصلاح:** أضف `https://*.google.com` إلى `frame-src` و `connect-src`.
+
+### الخطأ #3: الإضافة فقط إلى script-src
+**الخطأ:** `Refused to connect to 'https://pagead2.googlesyndication.com'`
+
+**السبب:** تحتاج السكريبتات لإجراء استدعاءات API (connect-src) وتحميل إطارات (frame-src).
+
+**الإصلاح:** أضف النطاقات إلى **الثلاثة جميعاً**.
+
+### الخطأ #4: الاختبار مع تشغيل مانعات الإعلانات
+**الخطأ:** لا توجد أخطاء معروضة، لكن الإعلانات لا تزال لا تحمّل.
+
+**السبب:** مانعات الإعلانات تخفي أخطاء CSP الحقيقية.
+
+**الإصلاح:** عطّل جميع الإضافات واختبر في وضع التصفح الخفي.
+
+---
+
+## ماذا عن الأمان؟
+
+"أليس السماح بنطاقات Google مخاطرة أمنية؟"
+
+ليس حقاً. أنت تثق صراحةً في Google لخدمة الإعلانات. هذا هو الهدف الكامل من AdSense.
+
+**ما لا تفعله:**
+- السماح بسكريبتات مضمنة عشوائية
+- فتح موقعك لهجمات XSS
+- تعطيل CSP بالكامل
+
+**ما تفعله:**
+- السماح بنطاقات Google محددة وموثوقة
+- الحفاظ على `object-src 'none'` (يحظر Flash، إلخ.)
+- الحفاظ على `form-action 'self'` (يمنع اختطاف النماذج)
+
+هذا هو **الحد الأدنى المطلوب من CSP** لـ AdSense مع الحفاظ على أمان معقول.
+
+---
+
+## الخطوة 6: وثّق CSP الخاص بك (أنت المستقبلي سيشكرك)
+
+أضفت هذا إلى README الخاص بنا:
+
+```markdown
+## Content Security Policy (CSP) لـ AdSense
+
+النطاقات المطلوبة:
+- script-src: Google Tag Manager، Analytics، AdSense، Ad Quality
+- connect-src: كل ما سبق بالإضافة إلى DoubleClick، Syndication
+- frame-src: جميع نطاقات خدمة الإعلانات بالإضافة إلى *.google.com
+
+إذا رأيت أخطاء CSP:
+1. تحقق من DevTools Console
+2. أضف النطاق المحظور إلى التوجيه المناسب
+3. لا تستخدم أبداً حرف البدل * لكل شيء
+```
+
+هذا وفر لي ساعات عندما كان علي تصحيح مشكلة CSP جديدة لاحقاً.
+
+---
+
+## النتيجة
+
+بعد هذه الإصلاحات:
+- ✅ صفر أخطاء CSP في وحدة التحكم
+- ✅ يتم تحميل سكريبتات AdSense بشكل صحيح
+- ✅ يمكن عرض الإعلانات (عند الموافقة)
+- ✅ يعمل تتبع Analytics
+- ✅ لا توجد تنازلات أمنية
+
+إجمالي الوقت للتصحيح والإصلاح: **حوالي ساعة واحدة** (معظمها كان تجربة وخطأ).
+
+---
+
+## الذهاب أبعد
+
+بمجرد أن يعمل CSP الخاص بك:
+
+1. **راقب الأخطاء الجديدة** (تحقق من وحدة التحكم بانتظام)
+2. **اختبر على متصفحات متعددة** (Chrome، Firefox، Safari)
+3. **تحقق من الجوال** (CSP يعمل بنفس الطريقة، لكن اختبر على أي حال)
+4. **وثّق التغييرات** (أنت المستقبلي سينسى لماذا أضفت نطاقاً)
+
+وعندما يضيف AdSense نطاقاً جديداً؟ سترى ذلك في وحدة التحكم فوراً.
+
+---
+
+## الأدوات التي ساعدت
+
+- [CSP Evaluator](https://csp-evaluator.withgoogle.com/) - تحقق من نقاط الضعف في سياستك
+- Browser DevTools - شاهد بالضبط ما تم حظره
+- [Report-URI CSP Builder](https://report-uri.com/home/generate) - إنشاء سياسات CSP
+
+---
+
+**هل تحتاج مساعدة في جعل موقعك جاهزاً لـ AdSense؟** من إعداد CSP إلى قابلية توصيل البريد الإلكتروني، نتعامل مع جميع التفاصيل التقنية حتى تتمكن من التركيز على المحتوى. تحقق من [خدماتنا](/services?lang=ar) أو [تواصل معنا](/contact?lang=ar) لمناقشة مشروعك.
+
+---
+
+**ذات صلة:** للحصول على قائمة مراجعة كاملة لجاهزية AdSense، راجع دليلنا حول [شحن مواقع Next.js متعددة اللغات الجاهزة لـ AdSense](/blog/adsense-ready-multilingual-nextjs?lang=ar).

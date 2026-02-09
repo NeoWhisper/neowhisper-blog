@@ -1,0 +1,306 @@
+---
+title: "6つのCSPエラーをゼロに：AdSense向けContent Security Policyのデバッグ"
+date: "2026-02-09"
+excerpt: "AdSenseスクリプトがCSPでブロックされている？コンソールがframe-srcエラーだらけ？本番環境で6つのContent Security Policy違反をデバッグして修正した方法を、実際のエラーメッセージと解決策とともにステップバイステップで解説します。"
+category: "Next.js"
+coverImage: "/images/csp-debugging-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+サイトがAdSense対応だと思っていました。クリーンなコード、適切なセットアップ、すべて教科書通りです。
+
+それでDevToolsを開き、広告ブロッカーを無効にしました。
+
+**6つの真っ赤なCSPエラーが私を見つめていました。**
+
+AdSenseスクリプトがすべてブロックされていました。広告は読み込まれません。トラッキングも機能しません。実際に失敗するのをリアルタイムで見るまで、Googleが実際にどのドメインを必要としているのか分かりませんでした。
+
+これが私がどうデバッグしたか、何を学んだか、そして最終的に機能したCSP設定です。
+
+---
+
+## 問題：CSPがGoogleに必要なすべてをブロックする
+
+Content Security Policyはユーザーを保護するためのものです。しかし、厳しすぎると正当なスクリプトが壊れます—AdSenseを含めて。
+
+最初にテストしたとき、コンソールで見たものは次のとおりです：
+
+```
+Refused to load the script 'https://pagead2.googlesyndication.com/...' 
+because it violates the following Content Security Policy directive: "script-src 'self'"
+
+Refused to frame 'https://www.google.com/...' 
+because it violates the following Content Security Policy directive: "frame-src 'self'"
+
+Refused to frame 'https://ep2.adtrafficquality.google/...'
+because an ancestor violates the following Content Security Policy directive: "frame-src 'self'"
+```
+
+6つの異なるドメイン。6つの異なる違反。広告は表示されません。
+
+[AdSense対応サイト](/blog/adsense-ready-multilingual-nextjs?lang=ja)を構築している場合、これが誰もがつまずく部分です。
+
+---
+
+## ステップ1：CSPが実際に何をするかを理解する
+
+CSPは、ブラウザに「私が明示的に許可したドメインからのみリソースを読み込んでください」と指示するセキュリティヘッダーです。
+
+Next.jsでは、`next.config.ts`で定義します：
+
+```tsx
+async headers() {
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "frame-src 'self'",
+  ].join("; ");
+  
+  return [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Content-Security-Policy", value: csp },
+      ],
+    },
+  ];
+}
+```
+
+これは「自分のドメインからのみスクリプトとフレームを読み込む」と言っています。
+
+これは安全です。そして、これがAdSenseが機能しない理由でもあります。
+
+---
+
+## ステップ2：DevToolsを開いて問題を再現する
+
+何がブロックされているか推測しないでください。リアルタイムで失敗するのを見てください。
+
+**方法は次のとおり：**
+
+1. **広告ブロッカーを無効にする**（本当のエラーを隠します）
+2. DevTools → Consoleを開く
+3. ページを読み込む
+4. 赤いCSPエラーを探す
+
+次のような行が表示されます：
+
+```
+Refused to execute inline script because it violates the following 
+Content Security Policy directive: "script-src 'self'"
+```
+
+または：
+
+```
+Refused to load the script 'https://pagead2.googlesyndication.com/...' 
+because it violates the following Content Security Policy directive: 
+"script-src 'self'"
+```
+
+**ブロックされたすべてのドメインを書き留めてください。** それらを許可リストに追加する必要があります。
+
+---
+
+## ステップ3：AdSenseが実際に必要とするものを特定する
+
+試行錯誤（とそれらのコンソールエラーを読むこと）を通じて、Google AdSenseが必要とするものは次のとおりです：
+
+### script-src（JavaScript実行）
+- `https://www.googletagmanager.com`（Google Tag Manager）
+- `https://www.google-analytics.com`（Analytics）
+- `https://pagead2.googlesyndication.com`（AdSense広告）
+- `https://adtrafficquality.google`（広告検証）
+- `https://fundingchoicesmessages.google.com`（同意メッセージ）
+
+### connect-src（API呼び出し、fetchリクエスト）
+- 上記のすべて、加えて：
+- `https://googleads.g.doubleclick.net`（広告配信）
+- `https://tpc.googlesyndication.com`（サードパーティコンテンツ）
+- `https://*.google.com`（さまざまなGoogleサービス）
+
+### frame-src（iframe、埋め込みコンテンツ）
+- `https://googleads.g.doubleclick.net`
+- `https://tpc.googlesyndication.com`
+- `https://*.google.com`
+- `https://adtrafficquality.google`
+- `https://*.adtrafficquality.google`
+- `https://fundingchoicesmessages.google.com`
+
+**ワイルドカード`*.google.com`は必須です** Googleは予測できない複数のサブドメインを使用するためです。
+
+---
+
+## ステップ4：CSP設定を更新する
+
+6つのエラーすべてを修正した動作する設定は次のとおりです：
+
+```tsx
+// next.config.ts
+async headers() {
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://*.google.com",
+    "frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
+    "img-src 'self' data: https:",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+
+  return [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "Content-Security-Policy", value: csp },
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+      ],
+    },
+  ];
+}
+```
+
+**主な変更点：**
+- `script-src`に`'unsafe-inline'`を追加（Next.jsのハイドレーションに必要）
+- すべてのGoogleドメインを`script-src`、`connect-src`、`frame-src`に追加
+- サブドメインに`*.google.com`ワイルドカードを使用
+- `object-src 'none'`を維持（セキュリティに重要）
+
+---
+
+## ステップ5：再度テストする（正しい方法）
+
+デプロイ後：
+
+1. **ハードリフレッシュ**（MacではCmd+Shift+R、WindowsではCtrl+Shift+R）
+2. DevTools → Consoleを開く
+3. CSPエラーを確認
+4. ネットワークタブで緑の「PASS」メッセージを探す
+
+まだエラーが表示される場合は、確認してください：
+- 再デプロイしましたか？（変更はデプロイ後にのみ適用されます）
+- ブラウザのキャッシュはクリアされましたか？
+- 広告ブロッカーはまだ無効になっていますか？
+
+---
+
+## よくある間違い（そして私がそれらを犯した方法）
+
+### 間違い#1：'unsafe-inline'を忘れる
+**エラー：** `Refused to execute inline script`
+
+**理由：** Next.jsはハイドレーションにインラインスクリプトを使用します。`'unsafe-inline'`がないと、アプリが壊れます。
+
+**修正：** `script-src`に`'unsafe-inline'`を追加します。
+
+### 間違い#2：*.google.comが欠けている
+**エラー：** `Refused to frame 'https://ep2.adtrafficquality.google/'`
+
+**理由：** Googleは予測できないランダムなサブドメインを使用します。
+
+**修正：** `frame-src`と`connect-src`に`https://*.google.com`を追加します。
+
+### 間違い#3：script-srcにのみ追加する
+**エラー：** `Refused to connect to 'https://pagead2.googlesyndication.com'`
+
+**理由：** スクリプトはAPI呼び出し（connect-src）とiframeの読み込み（frame-src）を行う必要があります。
+
+**修正：** ドメインを**3つすべて**のディレクティブに追加します。
+
+### 間違い#4：広告ブロッカーをオンにしてテストする
+**エラー：** エラーは表示されませんが、広告はまだ読み込まれません。
+
+**理由：** 広告ブロッカーは本当のCSPエラーを隠します。
+
+**修正：** すべての拡張機能を無効にし、シークレットモードでテストします。
+
+---
+
+## セキュリティについてはどうですか？
+
+「Googleドメインを許可することはセキュリティリスクではありませんか？」
+
+実際にはそうではありません。広告を配信するためにGoogleを明示的に信頼しています。それがAdSenseの全体的なポイントです。
+
+**あなたがしていないこと：**
+- 任意のインラインスクリプトを許可する
+- サイトをXSS攻撃に開放する
+- CSPを完全に無効にする
+
+**あなたがしていること：**
+- 特定の信頼できるGoogleドメインを許可する
+- `object-src 'none'`を維持（Flashなどをブロック）
+- `form-action 'self'`を維持（フォームハイジャックを防ぐ）
+
+これは、妥当なセキュリティを維持しながらAdSenseに**最低限必要なCSP**です。
+
+---
+
+## ステップ6：CSPを文書化する（未来のあなたが感謝します）
+
+私はこれをREADMEに追加しました：
+
+```markdown
+## AdSense向けContent Security Policy（CSP）
+
+必須ドメイン：
+- script-src: Google Tag Manager、Analytics、AdSense、Ad Quality
+- connect-src: 上記すべて加えてDoubleClick、Syndication
+- frame-src: すべての広告配信ドメイン加えて*.google.com
+
+CSPエラーが表示される場合：
+1. DevTools Consoleを確認
+2. ブロックされたドメインを適切なディレクティブに追加
+3. すべてにワイルドカード*を使用しないでください
+```
+
+これにより、後で新しいCSPの問題をデバッグしたときに数時間節約できました。
+
+---
+
+## 結果
+
+これらの修正後：
+- ✅ コンソールでCSPエラーゼロ
+- ✅ AdSenseスクリプトが正しく読み込まれる
+- ✅ 広告がレンダリングできる（承認されたとき）
+- ✅ アナリティクストラッキングが機能する
+- ✅ セキュリティの妥協なし
+
+デバッグと修正の合計時間：**約1時間**（ほとんどが試行錯誤でした）。
+
+---
+
+## さらに先へ
+
+CSPが機能したら：
+
+1. **新しいエラーを監視する**（定期的にコンソールを確認）
+2. **複数のブラウザでテストする**（Chrome、Firefox、Safari）
+3. **モバイルを確認する**（CSPは同じように機能しますが、とにかくテスト）
+4. **変更を文書化する**（未来のあなたはドメインを追加した理由を忘れます）
+
+そしてAdSenseが新しいドメインを追加したら？コンソールにすぐに表示されます。
+
+---
+
+## 役立つツール
+
+- [CSP Evaluator](https://csp-evaluator.withgoogle.com/) - ポリシーの弱点をチェック
+- ブラウザDevTools - 何がブロックされているか正確に確認
+- [Report-URI CSP Builder](https://report-uri.com/home/generate) - CSPポリシーを生成
+
+---
+
+**サイトをAdSense対応にするサポートが必要ですか？** CSP設定からメール配信性まで、コンテンツに集中できるようすべての技術的詳細を処理します。[サービス詳細](/services?lang=ja)をご覧いただくか、[お問い合わせ](/contact?lang=ja)からプロジェクトについてご相談ください。
+
+---
+
+**関連記事:** 完全なAdSense準備チェックリストについては、[AdSense対応多言語Next.jsサイトの出荷ガイド](/blog/adsense-ready-multilingual-nextjs?lang=ja)をご覧ください。

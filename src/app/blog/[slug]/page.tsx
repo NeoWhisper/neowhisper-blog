@@ -38,13 +38,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const languages: Record<string, string> = {};
 
     languageVariants.forEach((variant) => {
-        languages[variant.lang] = `${baseUrl}/blog/${variant.slug}`;
+        languages[variant.lang] = `${baseUrl}/blog/${encodeURIComponent(variant.slug)}`;
     });
 
     // Add x-default to the base (English) version if it exists
     const baseVariant = languageVariants.find((v) => v.lang === 'en');
     if (baseVariant) {
-        languages['x-default'] = `${baseUrl}/blog/${baseVariant.slug}`;
+        languages['x-default'] = `${baseUrl}/blog/${encodeURIComponent(baseVariant.slug)}`;
     }
 
     return {

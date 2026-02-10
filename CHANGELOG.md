@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.0...v1.6.1) (2026-02-10)
+
+
+### Bug Fixes
+
+* **security:** resolve XSS and upgrade Next.js to 16.1.5 ([361700f](https://github.com/NeoWhisper/neowhisper-blog/commit/361700fc1ae6032a76f95fda176b6f65cc883cd6))
+
 # [1.6.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.5.1...v1.6.0) (2026-02-09)
 
 

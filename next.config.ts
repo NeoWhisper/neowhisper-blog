@@ -44,15 +44,6 @@ const nextConfig: NextConfig = {
           { key: "X-Powered-By", value: "" },
         ],
       },
-      // Remove CORS header from robots.txt and sitemap.xml for security
-      {
-        source: "/robots.txt",
-        headers: [{ key: "Access-Control-Allow-Origin", value: "" }],
-      },
-      {
-        source: "/sitemap.xml",
-        headers: [{ key: "Access-Control-Allow-Origin", value: "" }],
-      },
     ];
   },
 };

@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.7.0...v1.8.0) (2026-02-16)
+
+
+### Features
+
+* **site:** refine multilingual positioning and roadmap timeline ([e3494a2](https://github.com/NeoWhisper/neowhisper-blog/commit/e3494a23c8c4315830c6d95ab32d5387ca4890d5))
+
 # [1.7.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.1...v1.7.0) (2026-02-16)
 
 

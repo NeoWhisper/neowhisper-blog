@@ -24,7 +24,7 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
 
 ### Prerequisites
 
-- Node.js 25.x
+- Node.js 24.x
 - npm, yarn, pnpm, or bun
 
 ### Installation

@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.1...v1.8.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **seo:** use existing logo asset in blog structured data ([8b0decc](https://github.com/NeoWhisper/neowhisper-blog/commit/8b0decc21090f62c108a3c2e26aa2f294bd4bc40))
+
 ## [1.8.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.0...v1.8.1) (2026-02-16)
 
 

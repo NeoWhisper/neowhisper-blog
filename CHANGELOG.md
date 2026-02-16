@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.0...v1.8.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* **adsense:** remove stray markdown from ads.txt ([347062e](https://github.com/NeoWhisper/neowhisper-blog/commit/347062ef2cbbdcaea074dff07f8f57dcb1e5469c))
+
 # [1.8.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.7.0...v1.8.0) (2026-02-16)
 
 

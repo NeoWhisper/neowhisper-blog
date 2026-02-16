@@ -5,82 +5,73 @@ import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 const translations = {
   en: {
     label: "About",
-    title: "NeoWhisper Studio",
-    subtitle: "We build multilingual products that feel premium and ship fast.",
+    title: "The Visionary Studio",
+    subtitle: "Bridging Japan and the Middle East through multilingual tech.",
+    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Alqadi Yousif Mohammed A.",
     back: "Back to Home",
-    focusTitle: "Our Focus",
-    focusCopy:
-      "NeoWhisper blends product engineering, content strategy, and localization to launch across English, Japanese, and Arabic.",
-    focusBullets: [
-      "Full-stack web platforms",
-      "Game and interactive experiences",
-      "Multilingual content systems",
+    sections: [
+      {
+        title: "Who we are",
+        copy: "A Tokyo-based full-stack developer and consultant working across Japanese, English, and Arabic. We specialize in building digital products that blend technical engineering with cultural strategy, focusing on high-polish web, games, and AI tools."
+      },
+      {
+        title: "What we do",
+        copy: "We provide end-to-end software development, indie game prototyping, multilingual content production, and deep localization services. We help clients launch products that feel native in three languages from day one."
+      },
+      {
+        title: "Why we exist",
+        copy: "To bridge the gap between Japan and the Middle East. We believe that multilingual technology, games, and digital products can connect cultures and create new opportunities in the global digital economy."
+      }
     ],
-    workTitle: "How We Work",
-    workCopy:
-      "We ship fast, validate early, and refine with a kaizen mindset. Each build is designed to scale globally with strong SEO and performance.",
-    workBullets: [
-      "Sprint-based delivery",
-      "Premium visual systems",
-      "Metrics-driven iteration",
-    ],
-    nextTitle: "What's Next",
-    nextCopy:
-      "We're expanding our product catalog with apps, creative tools, and audio releases. Follow the blog to see what we're building.",
+    address: "Registered address: Minato-ku, Tokyo",
     visitBlog: "Visit the Blog",
     contact: "Contact Us",
   },
   ja: {
     label: "概要",
-    title: "NeoWhisper Studio",
-    subtitle: "プレミアム品質とスピード感で多言語プロダクトを届けます。",
+    title: "ビジョナリー・スタジオ",
+    subtitle: "多言語技術で日本と中東を繋ぐ架け橋へ。",
+    intro: "NEO WHISPERは、2025年12月に東京都港区にてアルカディ・ユセフ・ムハンマド・A（Alqadi Yousif Mohammed A.）により設立された、ITサービスを提供する登録済みの個人事業主です。",
     back: "ホームへ戻る",
-    focusTitle: "私たちの強み",
-    focusCopy:
-      "NeoWhisperは、プロダクト開発・コンテンツ戦略・ローカライズを統合し、英日アラビア語での展開を支援します。",
-    focusBullets: [
-      "フルスタックWeb開発",
-      "ゲームとインタラクティブ制作",
-      "多言語コンテンツ運用",
+    sections: [
+      {
+        title: "私たちについて",
+        copy: "東京都を拠点に、日本語・英語・アラビア語の3ヶ国語で活動するフルスタックデベロッパー兼コンサルタントです。技術的なエンジニアリングと文化的戦略を融合させ、高品質なWeb・ゲーム・AIツールの構築を専門としています。"
+      },
+      {
+        title: "事業内容",
+        copy: "ソフトウェア開発、インディーゲームの試作、多言語コンテンツ制作、そして高度なローカライズサービスを提供。初日から3ヶ国語でネイティブに感じられる製品の立ち上げを支援します。"
+      },
+      {
+        title: "理念",
+        copy: "日本と中東の距離を縮めること。多言語技術、ゲーム、デジタルプロダクトは文化を繋ぎ、グローバルなデジタル経済における新しい機会を創出できると信じています。"
+      }
     ],
-    workTitle: "進め方",
-    workCopy:
-      "スプリントで素早く検証し、改善を積み重ねるスタイルです。SEOとパフォーマンスを前提に設計します。",
-    workBullets: [
-      "スプリント型デリバリー",
-      "プレミアムなビジュアル設計",
-      "データで改善",
-    ],
-    nextTitle: "これから",
-    nextCopy:
-      "アプリ・クリエイティブツール・音楽などの新しいプロダクトを準備中です。最新情報はブログへ。",
+    address: "登録住所: 東京都港区",
     visitBlog: "ブログを見る",
     contact: "お問い合わせ",
   },
   ar: {
     label: "نبذة",
-    title: "NeoWhisper Studio",
-    subtitle: "نصنع منتجات متعددة اللغات بجودة عالية وسرعة تنفيذ.",
+    title: "الرؤية والاستوديو",
+    subtitle: "سد الفجوة بين اليابان والشرق الأوسط عبر التقنيات متعددة اللغات.",
+    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل القاضي يوسف محمد أ.",
     back: "العودة للرئيسية",
-    focusTitle: "تركيزنا",
-    focusCopy:
-      "نمزج بين تطوير المنتجات واستراتيجية المحتوى والتعريب لإطلاق عالمي يدعم الإنجليزية واليابانية والعربية.",
-    focusBullets: [
-      "منصات ويب متكاملة",
-      "تجارب ألعاب وتفاعلية",
-      "أنظمة محتوى متعددة اللغات",
+    sections: [
+      {
+        title: "من نحن",
+        copy: "مطور برمجيات متكامل (Full-stack) ومستشار تقني مقيم في طوكيو، نعمل باللغات اليابانية والإنجليزية والعربية. نتخصص في بناء منتجات رقمية تمزج بين الهندسة التقنية والاستراتيجية الثقافية، مع التركيز على الويب والألعاب وأدوات الذكاء الاصطناعي."
+      },
+      {
+        title: "ماذا نفعل",
+        copy: "نقدم تطوير البرمجيات من البداية للنهاية، نماذج الألعاب الأولية، إنتاج المحتوى متعدد اللغات، وخدمات التعريب العميقة. نساعد العملاء على إطلاق منتجات تبدو كأنها صُممت محليًا بثلاث لغات منذ اليوم الأول."
+      },
+      {
+        title: "لماذا نحن هنا",
+        copy: "لربط اليابان والشرق الأوسط. نؤمن بأن التقنيات متعددة اللغات والألعاب والمنتجات الرقمية يمكنها ربط الثقافات وخلق فرص جديدة في الاقتصاد الرقمي العالمي."
+      }
     ],
-    workTitle: "أسلوب عملنا",
-    workCopy:
-      "ننجز بسرعة، نختبر مبكرًا، ونحسن بشكل مستمر بروح كايزن. كل منتج مصمم للنمو عالميًا.",
-    workBullets: [
-      "تنفيذ بنظام السبرنت",
-      "تصميم بصري فاخر",
-      "تحسين قائم على البيانات",
-    ],
-    nextTitle: "القادم",
-    nextCopy:
-      "نعمل على إطلاق تطبيقات وأدوات إبداعية وإصدارات صوتية جديدة. تابع المدونة لمعرفة كل جديد.",
+    address: "العنوان المسجل: مدينة ميناتو، طوكيو",
     visitBlog: "زيارة المدونة",
     contact: "تواصل معنا",
   },
@@ -175,7 +166,7 @@ export default async function AboutPage({
             <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white">
               {t.title}
             </h1>
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 italic">
               {t.subtitle}
             </p>
           </div>
@@ -187,55 +178,51 @@ export default async function AboutPage({
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t.focusTitle}
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-              {t.focusCopy}
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-              {t.focusBullets.map((item) => (
-                <li key={item}>• {item}</li>
-              ))}
-            </ul>
-          </div>
+        <div className="mb-12 rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+          <p className="text-lg font-medium leading-relaxed text-gray-900 dark:text-white">
+            {t.intro}
+          </p>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-purple-500">
+            {t.address}
+          </p>
+        </div>
 
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t.workTitle}
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-              {t.workCopy}
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-              {t.workBullets.map((item) => (
-                <li key={item}>• {item}</li>
-              ))}
-            </ul>
-          </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {t.sections.map((section) => (
+            <div key={section.title} className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {section.title}
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                {section.copy}
+              </p>
+            </div>
+          ))}
 
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5 md:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t.nextTitle}
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-              {t.nextCopy}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href={`/blog?lang=${currentLang}`}
-                className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-              >
-                {t.visitBlog}
-              </Link>
-              <Link
-                href={`/contact?lang=${currentLang}`}
-                className="rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-              >
-                {t.contact}
-              </Link>
+          <div className="rounded-3xl border border-white/20 bg-purple-600/5 p-8 backdrop-blur-lg dark:border-white/10 md:col-span-3">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div className="max-w-xl">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Work with NEO WHISPER
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  Ready to bridge the gap and build something world-class? Let&apos;s talk about your next project.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={`/blog?lang=${currentLang}`}
+                  className="rounded-full bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:bg-white/5 dark:text-gray-200"
+                >
+                  {t.visitBlog}
+                </Link>
+                <Link
+                  href={`/contact?lang=${currentLang}`}
+                  className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  {t.contact}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

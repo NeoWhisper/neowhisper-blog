@@ -11,34 +11,47 @@ const translations = {
     back: "Back to Home",
     cards: [
       {
-        title: "Full-Stack Product Development",
+        title: "Software & Tools Development",
         description:
-          "Strategy, UX, and engineering for modern web platforms and internal tools.",
-        bullets: ["Next.js + TypeScript", "MVP to scale", "SEO-first builds"],
+          "Custom software solutions, automation tools, and integrated systems for business operations.",
+        bullets: [
+          "Internal dashboards",
+          "Automation tools",
+          "API integrations",
+        ],
       },
       {
         title: "Game Development",
         description:
-          "Rapid prototyping, vertical slices, and production-ready game loops.",
-        bullets: ["Unity / Godot", "Mobile + PC", "Polished UI/UX"],
-      },
-      {
-        title: "Localization & Translation",
-        description:
-          "Native-level EN/JA/AR translation with technical accuracy.",
+          "Interactive experiences and game prototypes built for engagement and polish.",
         bullets: [
-          "Product UI copy",
-          "Docs and tutorials",
-          "Launch localization",
+          "Casual mobile prototypes",
+          "Indie game MVPs",
+          "Production vertical slices",
         ],
       },
       {
-        title: "Content & Growth Systems",
+        title: "Web & Content Production",
         description:
-          "Editorial strategy and SEO pipelines for long-term visibility.",
-        bullets: ["Keyword strategy", "Content ops", "Analytics + GA4"],
+          "Modern web platforms and content systems optimized for clarity and reach.",
+        bullets: [
+          "Corporate sites",
+          "Landing pages",
+          "Multilingual blogs (like NeoWhisper Blog)",
+        ],
+      },
+      {
+        title: "Translation & Localization (EN/AR/JP)",
+        description:
+          "Seamless adaptation of products and content for global audiences with technical accuracy.",
+        bullets: [
+          "App UI strings",
+          "Technical documentation",
+          "Marketing pages",
+        ],
       },
     ],
+    cta: "Tell me about your project",
   },
   ja: {
     label: "サービス",
@@ -47,56 +60,56 @@ const translations = {
     back: "ホームへ戻る",
     cards: [
       {
-        title: "フルスタック開発",
-        description:
-          "Webプロダクトや社内ツールを、戦略から実装まで一貫して支援します。",
-        bullets: ["Next.js + TypeScript", "MVPからスケール", "SEO重視の構成"],
+        title: "ソフトウェア・ツール開発",
+        description: "業務効率を改善するカスタムソフトウェアや自動化ツール、API連携システムを構築します。",
+        bullets: ["社内ダッシュボード", "業務自動化ツール", "各種API連携"],
       },
       {
         title: "ゲーム開発",
-        description: "試作からリリースまで、プレイ感を重視した制作を行います。",
-        bullets: ["Unity / Godot", "モバイル + PC", "UI/UX最適化"],
+        description: "エンゲージメントを高めるインタラクティブな体験や、高品質なゲームプロトタイプを制作します。",
+        bullets: ["カジュアルゲーム試作", "インディーゲームMVP", "垂直スライス版制作"],
       },
       {
-        title: "翻訳・ローカライズ",
-        description:
-          "EN/JA/ARの技術翻訳と製品ローカライズをネイティブ品質で提供。",
-        bullets: ["UIコピー", "ドキュメント", "ローンチ対応"],
+        title: "Web・コンテンツ制作",
+        description: "情報の伝わりやすさとリーチを追求した、モダンなWebプラットフォームとコンテンツ基盤を提供します。",
+        bullets: ["コーポレートサイト", "ランディングページ", "多言語ブログ（NeoWhisper Blogなど）"],
       },
       {
-        title: "コンテンツ＆成長支援",
-        description: "SEOと編集戦略で継続的な流入を作ります。",
-        bullets: ["キーワード設計", "制作フロー", "GA4分析"],
+        title: "翻訳・ローカライズ (日/英/阿)",
+        description: "グローバルに展開する製品やコンテンツを、技術的正確さを保ちつつ多言語へ最適化します。",
+        bullets: ["アプリUI文言", "技術ドキュメント", "マーケティングページ"],
       },
     ],
+    cta: "プロジェクトについて相談する",
   },
   ar: {
     label: "الخدمات",
     title: "خدماتنا",
-    subtitle: "تنفيذ احترافي وتجارب متعددة اللغات تناسب السوق السعودي.",
+    subtitle: "تنفيذ احترافي وتجارب متعددة اللغات تناسب احتياجاتك.",
     back: "العودة للرئيسية",
     cards: [
       {
-        title: "تطوير المنتجات الرقمية",
-        description: "نحوّل الأفكار إلى منصات ويب ومنتجات داخلية قابلة للنمو.",
-        bullets: ["Next.js + TypeScript", "من MVP إلى التوسع", "تهيئة SEO"],
+        title: "تطوير البرمجيات والأدوات",
+        description: "حلول برمجية مخصصة، أدوات أتمتة، وأنظمة متكاملة لعمليات الأعمال.",
+        bullets: ["لوحات تحكم داخلية", "أدوات الأتمتة", "ربط واجهات API"],
       },
       {
         title: "تطوير الألعاب",
-        description: "نماذج أولية وتجارب لعب متقنة جاهزة للإطلاق.",
-        bullets: ["Unity / Godot", "موبايل وكمبيوتر", "واجهة وتجربة عالية"],
+        description: "تجارب تفاعلية ونماذج ألعاب أولية مبنية بجودة وإتقان.",
+        bullets: ["نماذج ألعاب موبايل", "نسخ MVP للألعاب", "تطوير أنظمة اللعب"],
       },
       {
-        title: "الترجمة والتعريب",
-        description: "تعريب احترافي للمنتجات والمحتوى بدقة تقنية عالية.",
-        bullets: ["نصوص الواجهة", "الوثائق", "تحضير الإطلاق"],
+        title: "إنتاج الويب والمحتوى",
+        description: "منصات ويب حديثة وأنظمة محتوى محسنة للوضوح والوصول.",
+        bullets: ["مواقع شركات", "صفحات هبوط (Landing Pages)", "مدونات متعددة اللغات"],
       },
       {
-        title: "نمو المحتوى والسيو",
-        description: "استراتيجية تحرير وتحسين الظهور لضمان نتائج مستمرة.",
-        bullets: ["أبحاث الكلمات", "عمليات المحتوى", "تحليلات GA4"],
+        title: "الترجمة والتعريب (EN/AR/JP)",
+        description: "تكييف المنتجات والمحتوى للجمهور العالمي بدقة تقنية عالية.",
+        bullets: ["نصوص الواجهات", "الوثائق التقنية", "صفحات التسويق"],
       },
     ],
+    cta: "أخبرني عن مشروعك",
   },
 } as const;
 
@@ -225,6 +238,17 @@ export default async function ServicesPage({
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-16 flex justify-center">
+          <Link
+            href={`/contact?lang=${currentLang}`}
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full p-4 px-10 font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-[1.02]"
+          >
+            <span className="absolute inset-0 h-full w-full bg-gradient-to-br from-purple-600 to-pink-600"></span>
+            <span className="absolute bottom-0 right-0 mb-32 mr-4 block h-64 w-64 origin-bottom-left translate-x-24 rotate-45 transform rounded-full bg-white opacity-10 transition-all duration-500 ease-out group-hover:mb-0 group-hover:mr-0"></span>
+            <span className="relative text-sm uppercase tracking-widest">{t.cta}</span>
+          </Link>
         </div>
       </div>
     </div>

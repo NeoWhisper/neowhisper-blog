@@ -7,18 +7,18 @@
 import Link from "next/link";
 import { getPosts } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
-import BlogCtaButton from "@/components/BlogCtaButton";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
 
 const translations = {
   en: {
-    studio: "NeoWhisper Studio",
+    studio: "NEO WHISPER",
     heroTitle: "Build products, launch stories, and scale globally.",
     heroSubtitle:
-      "NeoWhisper is a multidisciplinary studio crafting software, games, and multilingual experiences. We build with clarity, speed, and a premium aesthetic.",
+      "Tokyo-based multilingual (JP/EN/AR) studio for web, games, and localization.",
     visitBlog: "Visit the Blog",
-    viewProjects: "View Projects",
+    viewProjects: "See Projects",
+    viewServices: "View Services",
     servicesTitle: "Services",
     projectsTitle: "Featured Projects",
     projectsCta: "See more →",
@@ -83,12 +83,13 @@ const translations = {
     music: ["Spotify", "Apple Music", "YouTube", "Bandcamp"],
   },
   ja: {
-    studio: "NeoWhisper Studio",
+    studio: "NEO WHISPER",
     heroTitle: "プロダクトを作り、物語を届け、世界へ。",
     heroSubtitle:
-      "NeoWhisperは、ソフトウェア・ゲーム・多言語体験を設計するスタジオです。速く、丁寧に、プレミアムな品質で届けます。",
+      "東京を拠点に、Web・ゲーム・ローカライズを提供する多言語（日/英/阿）スタジオ。",
     visitBlog: "ブログを見る",
     viewProjects: "プロジェクトを見る",
+    viewServices: "サービスを見る",
     servicesTitle: "サービス",
     projectsTitle: "注目プロジェクト",
     projectsCta: "もっと見る →",
@@ -153,12 +154,13 @@ const translations = {
     music: ["Spotify", "Apple Music", "YouTube", "Bandcamp"],
   },
   ar: {
-    studio: "NeoWhisper Studio",
+    studio: "نيو ويسبر (NEO WHISPER)",
     heroTitle: "نبني منتجات ونطلق قصصًا وننمو عالميًا.",
     heroSubtitle:
-      "نيو ويسبر استوديو متعدد التخصصات لتطوير البرمجيات والألعاب وتجارب متعددة اللغات بجودة عالية.",
+      "استوديو في طوكيو يقدم خدمات الويب والألعاب والتعريب بثلاث لغات (اليابانية/الإنجليزية/العربية).",
     visitBlog: "زيارة المدونة",
     viewProjects: "عرض المشاريع",
+    viewServices: "عرض الخدمات",
     servicesTitle: "الخدمات",
     projectsTitle: "مشاريع مختارة",
     projectsCta: "المزيد →",
@@ -270,7 +272,12 @@ export default async function Home({
               className="mt-8 flex flex-wrap justify-center gap-4"
               dir="ltr"
             >
-              <BlogCtaButton label={copy.visitBlog} lang={currentLang} />
+              <Link
+                href={`/services?lang=${currentLang}`}
+                className="inline-flex items-center justify-center rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+              >
+                {copy.viewServices}
+              </Link>
               <Link
                 href={`/projects?lang=${currentLang}`}
                 className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
@@ -284,31 +291,28 @@ export default async function Home({
             >
               <Link
                 href="/?lang=en"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${
-                  currentLang === "en"
-                    ? "border-purple-400 bg-purple-600 text-white"
-                    : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                }`}
+                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "en"
+                  ? "border-purple-400 bg-purple-600 text-white"
+                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                  }`}
               >
                 English
               </Link>
               <Link
                 href="/?lang=ja"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${
-                  currentLang === "ja"
-                    ? "border-purple-400 bg-purple-600 text-white"
-                    : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                }`}
+                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ja"
+                  ? "border-purple-400 bg-purple-600 text-white"
+                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                  }`}
               >
                 日本語
               </Link>
               <Link
                 href="/?lang=ar"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${
-                  currentLang === "ar"
-                    ? "border-purple-400 bg-purple-600 text-white"
-                    : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                }`}
+                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ar"
+                  ? "border-purple-400 bg-purple-600 text-white"
+                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                  }`}
               >
                 العربية
               </Link>
@@ -358,11 +362,10 @@ export default async function Home({
               {projects.map((item) => (
                 <div
                   key={item.title}
-                  className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${
-                    item.status === "planned"
-                      ? "opacity-60 grayscale"
-                      : "hover:-translate-y-1 hover:shadow-xl"
-                  }`}
+                  className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${item.status === "planned"
+                    ? "opacity-60 grayscale"
+                    : "hover:-translate-y-1 hover:shadow-xl"
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -397,9 +400,8 @@ export default async function Home({
                   {copy.downloads.map((label) => (
                     <span
                       key={label}
-                      className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${
-                        "opacity-60"
-                      }`}
+                      className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
+                        }`}
                     >
                       {label}
                     </span>
@@ -421,9 +423,8 @@ export default async function Home({
                 {copy.music.map((label) => (
                   <span
                     key={label}
-                    className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${
-                      "opacity-60"
-                    }`}
+                    className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
+                      }`}
                   >
                     {label}
                   </span>

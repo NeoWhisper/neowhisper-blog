@@ -10,6 +10,8 @@ const copy = {
     title: "Selected Work",
     subtitle:
       "Product experiments, client builds, and multi-platform releases.",
+    intro:
+      "Selected shipped projects by NEO WHISPER, a registered IT services sole proprietorship in Tokyo (since Dec 2025).",
     back: "Back to Home",
     planned: "Planned",
   },
@@ -17,6 +19,8 @@ const copy = {
     label: "プロジェクト",
     title: "選定プロジェクト",
     subtitle: "プロダクト開発、クライアント案件、マルチプラットフォーム対応。",
+    intro:
+      "NEO WHISPER（2025年12月に東京都港区にて開業したITサービス個人事業主）による、ローンチ済みの実績一覧。",
     back: "ホームへ戻る",
     planned: "準備中",
   },
@@ -24,6 +28,8 @@ const copy = {
     label: "المشاريع",
     title: "أعمال مختارة",
     subtitle: "منتجات وتجارب ومشاريع متعددة المنصات.",
+    intro:
+      "مجموعة من المشاريع المنفذة بواسطة نيو ويسبر (NEO WHISPER)، وهي مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو (منذ ديسمبر 2025).",
     back: "العودة للرئيسية",
     planned: "قريبًا",
   },
@@ -128,6 +134,9 @@ export default async function ProjectsPage({
             <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
               {t.subtitle}
             </p>
+            <p className="mt-6 max-w-2xl rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4 text-sm font-medium text-purple-700 dark:text-purple-300">
+              {t.intro}
+            </p>
           </div>
           <Link
             href={`/?lang=${currentLang}`}
@@ -141,11 +150,10 @@ export default async function ProjectsPage({
           {projects.map((project) => (
             <article
               key={project.title}
-              className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${
-                project.status === "planned"
-                  ? "opacity-60 grayscale"
-                  : "hover:-translate-y-1 hover:shadow-xl"
-              }`}
+              className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${project.status === "planned"
+                ? "opacity-60 grayscale"
+                : "hover:-translate-y-1 hover:shadow-xl"
+                }`}
             >
               <div className="relative mb-4 h-40 w-full overflow-hidden rounded-2xl">
                 <Image

@@ -7,6 +7,7 @@ import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 const navItems = [
   { label: "Services", href: "/services" },
   { label: "Projects", href: "/projects" },
+  { label: "Roadmap", href: "/roadmap" },
   { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },

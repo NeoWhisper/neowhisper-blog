@@ -5,102 +5,108 @@ import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 const translations = {
     en: {
         label: "Roadmap",
-        title: "Mission & Vision",
-        subtitle: "The path from shipped products to global impact.",
+        title: "Client Roadmap",
+        subtitle:
+            "How we plan, build, and deliver IT services from kickoff to launch.",
         back: "Back to Home",
         sections: [
             {
-                title: "Delivered & Shipped",
+                title: "Discovery & Scope",
                 items: [
-                    "NeoWhisper Blog Platform (Next.js/MDX Stack)",
-                    "Studio Portfolio & Service Catalog",
+                    "Clarify business goals, technical requirements, and target users.",
+                    "Define scope, timeline, and delivery phases before implementation.",
+                    "Plan multilingual coverage across Japanese, English, and Arabic when needed.",
                 ],
             },
             {
-                title: "In Progress (2026)",
+                title: "Build & Quality",
                 items: [
-                    "Indie Game MVP & Vertical Slice",
-                    "Open Source Automation Tools (TypeScript/Python)",
-                    "Client Case Studies & B2B Solutions",
+                    "Execute software, web, app, and game development in iterative milestones.",
+                    "Produce web content and translation/localization aligned with product goals.",
+                    "Run validation for quality, performance, and production readiness.",
                 ],
             },
             {
-                title: "Long-Term (2027+)",
+                title: "Launch & Support",
                 items: [
-                    "Bridges: Connecting Japan and Middle East via multilingual tech.",
-                    "Digital Physicality: Merging creative media with software.",
-                    "Localization Ecosystems for JP/EN/AR markets.",
+                    "Deploy, verify, and hand over with clear documentation.",
+                    "Support onboarding and operational transition for your team.",
+                    "Provide optional ongoing improvements and maintenance plans.",
                 ],
             },
         ],
-        technicalTitle: "Technical Roadmap for Developers",
-        technicalLink: "View on GitHub →",
+        ctaTitle: "Need a roadmap for your project?",
+        ctaLink: "Contact us ->",
     },
     ja: {
         label: "ロードマップ",
-        title: "ミッションとビジョン",
-        subtitle: "出荷済みの製品から、グローバルなインパクトへの道筋。",
+        title: "クライアント向けロードマップ",
+        subtitle:
+            "ITサービスを、要件定義から公開・運用までどのように進めるかを示します。",
         back: "ホームへ戻る",
         sections: [
             {
-                title: "提供済み・ローンチ済み",
+                title: "ヒアリングと要件定義",
                 items: [
-                    "NeoWhisper ブログプラットフォーム (Next.js/MDX構成)",
-                    "スタジオポートフォリオ・提供サービス一覧",
+                    "事業目標、要件、対象ユーザーを明確化します。",
+                    "実装前に、スコープ・スケジュール・納品フェーズを定義します。",
+                    "必要に応じて、日本語・英語・アラビア語の多言語対応方針を設計します。",
                 ],
             },
             {
-                title: "進行中 (2026)",
+                title: "開発・制作・検証",
                 items: [
-                    "インディーゲームMVP・垂直スライス版",
-                    "オープンソース自動化ツール (TypeScript/Python)",
-                    "クライアント事例・B2Bソリューション開発",
+                    "ソフトウェア、Web、アプリ、ゲーム開発を段階的に実施します。",
+                    "プロダクト目的に合わせてWebコンテンツ制作と翻訳・ローカライズを行います。",
+                    "品質・性能・本番運用性の観点で検証を実施します。",
                 ],
             },
             {
-                title: "長期ビジョン (2027年以降)",
+                title: "公開・運用支援",
                 items: [
-                    "Bridges: 多言語技術で日本と中東を繋ぐ架け橋へ",
-                    "デジタルフィジカリティ: クリエイティブメディアとソフトの融合",
-                    "日・英・阿市場向けのローカライズ・エコシステム構築",
+                    "公開後の確認を行い、ドキュメントとともに引き渡します。",
+                    "チームへのオンボーディングと運用移行を支援します。",
+                    "必要に応じて、継続改善と保守プランを提供します。",
                 ],
             },
         ],
-        technicalTitle: "開発者向けテクニカルロードマップ",
-        technicalLink: "GitHubで見る →",
+        ctaTitle: "あなたのプロジェクト向けロードマップを作成します",
+        ctaLink: "お問い合わせ ->",
     },
     ar: {
         label: "خارطة الطريق",
-        title: "المهمة والرؤية",
-        subtitle: "المسار من المنتجات المنفذة إلى الأثر العالمي.",
+        title: "خارطة طريق للعميل",
+        subtitle:
+            "كيف ننفذ خدمات تقنية المعلومات من الاكتشاف وحتى الإطلاق والدعم.",
         back: "العودة للرئيسية",
         sections: [
             {
-                title: "تم التسليم والإطلاق",
+                title: "الاكتشاف وتحديد النطاق",
                 items: [
-                    "منصة مدونة NeoWhisper (Next.js/MDX)",
-                    "معرض أعمال الاستوديو وقائمة الخدمات",
+                    "تحديد الأهداف التجارية والمتطلبات التقنية والجمهور المستهدف.",
+                    "تحديد النطاق والجدول الزمني ومراحل التسليم قبل التنفيذ.",
+                    "تخطيط التغطية متعددة اللغات: اليابانية والإنجليزية والعربية عند الحاجة.",
                 ],
             },
             {
-                title: "قيد التنفيذ (2026)",
+                title: "التنفيذ وضمان الجودة",
                 items: [
-                    "نموذج أولي للعبة مستقلة (MVP)",
-                    "أدوات أتمتة مفتوحة المصدر (TypeScript/Python)",
-                    "دراسات حالة للعملاء وحلول B2B",
+                    "تنفيذ تطوير البرمجيات والويب والتطبيقات والألعاب على مراحل واضحة.",
+                    "إنتاج محتوى الويب والترجمة/التعريب بما يتوافق مع أهداف المشروع.",
+                    "إجراء فحوصات الجودة والأداء وجاهزية الإنتاج قبل الإطلاق.",
                 ],
             },
             {
-                title: "بعيد المدى (2027 وما بعده)",
+                title: "الإطلاق والدعم",
                 items: [
-                    "الجسور: ربط اليابان والشرق الأوسط عبر التقنيات متعددة اللغات",
-                    "الواقع الرقمي: دمج الوسائط الإبداعية مع البرمجيات",
-                    "نظام بيئي للتعريب لأسواق اليابان والشرق الأوسط",
+                    "النشر والتحقق ثم التسليم مع توثيق واضح.",
+                    "دعم انتقال التشغيل وتهيئة فريقك بعد الإطلاق.",
+                    "توفير خطط صيانة وتحسين مستمر عند الحاجة.",
                 ],
             },
         ],
-        technicalTitle: "خارطة الطريق التقنية للمطورين",
-        technicalLink: "عرض على GitHub →",
+        ctaTitle: "هل تحتاج خارطة طريق لمشروعك؟",
+        ctaLink: "تواصل معنا ->",
     },
 } as const;
 
@@ -114,16 +120,19 @@ export async function generateMetadata({
 
     const meta = {
         en: {
-            title: "Roadmap - NeoWhisper | Future Vision & Shipped Work",
-            description: "Discover the professional and technical roadmap of NeoWhisper. From multilingual platforms to Japanese-Middle Eastern tech bridges.",
+            title: "Roadmap - NeoWhisper | Client Delivery Process",
+            description:
+                "Customer-facing roadmap showing how NeoWhisper scopes, builds, and delivers IT services.",
         },
         ja: {
-            title: "ロードマップ - NeoWhisper | 今後のビジョンと実績",
-            description: "NeoWhisperのビジネス・技術ロードマップ。多言語プラットフォームから日本と中東の技術の架け橋まで。",
+            title: "ロードマップ - NeoWhisper | 提供プロセス",
+            description:
+                "NeoWhisperがITサービスをどのように要件定義し、開発し、納品するかを示すクライアント向けページ。",
         },
         ar: {
-            title: "خارطة الطريق - NeoWhisper | الرؤية المستقبلية والأعمال المنفذة",
-            description: "اكتشف خارطة الطريق المهنية والتقنية لنيو ويسبر. من المنصات متعددة اللغات إلى جسور التقنية بين اليابان والشرق الأوسط.",
+            title: "خارطة الطريق - NeoWhisper | عملية التسليم",
+            description:
+                "صفحة موجهة للعملاء توضح كيف يقوم NeoWhisper بتحديد النطاق والتنفيذ وتسليم خدمات تقنية المعلومات.",
         },
     };
 
@@ -202,16 +211,14 @@ export default async function RoadmapPage({
 
                 <div className="mt-20 rounded-3xl border border-white/20 bg-white/60 p-8 text-center backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {t.technicalTitle}
+                        {t.ctaTitle}
                     </h3>
-                    <a
-                        href="https://github.com/NeoWhisper"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <Link
+                        href={`/contact?lang=${currentLang}`}
                         className="mt-4 inline-block text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
                     >
-                        {t.technicalLink}
-                    </a>
+                        {t.ctaLink}
+                    </Link>
                 </div>
             </div>
         </div>

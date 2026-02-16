@@ -38,16 +38,16 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="font-sans antialiased min-h-screen flex flex-col">
-        {/* `SiteHeader` reads search params via `useSearchParams`, which must be wrapped in Suspense for SSG/404 prerender. */}
+      <body className="font-sans antialiased min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
+        {/* SiteHeader reads search params via useSearchParams, which must be wrapped in Suspense for SSG/404 prerender. */}
         <Suspense fallback={null}>
           <SiteHeader />
         </Suspense>
-        <div className="flex-1">
+        <main className="flex-1 relative overflow-hidden">
           <GoogleAnalytics />
           {children}
-        </div>
-        {/* `SiteFooter` reads search params via `useSearchParams` for language persistence. */}
+        </main>
+        {/* SiteFooter reads search params via useSearchParams for language persistence. */}
         <Suspense fallback={null}>
           <SiteFooter />
         </Suspense>

@@ -3,14 +3,14 @@
   "version": "1.7.0",
   "private": true,
   "engines": {
-    "node": "22.x"
+    "node": "25.x"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:e2e": "playwright test --config=playwright.config.ts",
+    "test:e2e": "playwright test",
     "prepare": "husky"
   },
   "dependencies": {

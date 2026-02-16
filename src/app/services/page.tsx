@@ -7,7 +7,7 @@ const translations = {
     label: "Services",
     title: "What We Deliver",
     subtitle:
-      "Premium engineering, creative direction, and multilingual delivery.",
+      "Official IT services scope: software, games, apps, web/content production, and translation.",
     back: "Back to Home",
     cards: [
       {
@@ -43,7 +43,7 @@ const translations = {
       {
         title: "Translation & Localization (EN/AR/JP)",
         description:
-          "Seamless adaptation of products and content for global audiences with technical accuracy.",
+          "Seamless adaptation of software, apps, websites, and content for global audiences with technical accuracy.",
         bullets: [
           "App UI strings",
           "Technical documentation",
@@ -56,7 +56,7 @@ const translations = {
   ja: {
     label: "サービス",
     title: "提供できること",
-    subtitle: "プレミアムな開発力と多言語対応で成果に繋げます。",
+    subtitle: "開業届の事業概要に沿ったITサービスを提供します。",
     back: "ホームへ戻る",
     cards: [
       {
@@ -75,7 +75,7 @@ const translations = {
         bullets: ["コーポレートサイト", "ランディングページ", "多言語ブログ（NeoWhisper Blogなど）"],
       },
       {
-        title: "翻訳・ローカライズ (日/英/阿)",
+        title: "翻訳・ローカライズ (日本語/英語/アラビア語)",
         description: "グローバルに展開する製品やコンテンツを、技術的正確さを保ちつつ多言語へ最適化します。",
         bullets: ["アプリUI文言", "技術ドキュメント", "マーケティングページ"],
       },
@@ -85,7 +85,7 @@ const translations = {
   ar: {
     label: "الخدمات",
     title: "خدماتنا",
-    subtitle: "تنفيذ احترافي وتجارب متعددة اللغات تناسب احتياجاتك.",
+    subtitle: "نقدم نطاق خدمات تقنية المعلومات وفقًا لوصف النشاط المسجل.",
     back: "العودة للرئيسية",
     cards: [
       {
@@ -125,17 +125,17 @@ export async function generateMetadata({
     en: {
       title: "Services - NeoWhisper | Full-Stack Development & Localization",
       description:
-        "Premium full-stack development, game development, EN/JA/AR localization, and content strategy. Next.js experts delivering SEO-first web platforms and multilingual products.",
+        "IT services including software development, game development, app development, web production, web content production, and EN/JA/AR translation/localization.",
     },
     ja: {
       title: "サービス - NeoWhisper | フルスタック開発・多言語対応",
       description:
-        "フルスタック開発、ゲーム開発、EN/JA/AR翻訳・ローカライズ、コンテンツ戦略。Next.jsの専門家がSEO重視のWebプラットフォームと多言語製品を提供します。",
+        "ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・EN/JA/AR翻訳・ローカライズなど、ITサービス業としての提供内容を掲載。",
     },
     ar: {
       title: "الخدمات - NeoWhisper | تطوير متكامل وتعريب احترافي",
       description:
-        "تطوير مواقع وتطبيقات متكاملة، تطوير ألعاب، ترجمة وتعريب EN/JA/AR، واستراتيجية محتوى. خبراء Next.js في تقديم منصات ويب محسّنة لمحركات البحث ومنتجات متعددة اللغات.",
+        "خدمات تقنية معلومات تشمل تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب ومحتوى الويب والترجمة والتعريب EN/JA/AR.",
     },
   };
 

@@ -4,19 +4,57 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 
+type NavKey = "services" | "projects" | "roadmap" | "blog" | "about" | "contact";
+
 const navItems = [
-  { label: "Services", href: "/services" },
-  { label: "Projects", href: "/projects" },
-  { label: "Roadmap", href: "/roadmap" },
-  { label: "Blog", href: "/blog" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-];
+  { key: "services", href: "/services" },
+  { key: "projects", href: "/projects" },
+  { key: "roadmap", href: "/roadmap" },
+  { key: "blog", href: "/blog" },
+  { key: "about", href: "/about" },
+  { key: "contact", href: "/contact" },
+] as const satisfies ReadonlyArray<{ key: NavKey; href: string }>;
+
+const navLabels: Record<SupportedLang, Record<NavKey, string>> = {
+  en: {
+    services: "Services",
+    projects: "Projects",
+    roadmap: "Roadmap",
+    blog: "Blog",
+    about: "About",
+    contact: "Contact",
+  },
+  ja: {
+    services: "サービス",
+    projects: "プロジェクト",
+    roadmap: "ロードマップ",
+    blog: "ブログ",
+    about: "概要",
+    contact: "お問い合わせ",
+  },
+  ar: {
+    services: "الخدمات",
+    projects: "المشاريع",
+    roadmap: "خارطة الطريق",
+    blog: "المدونة",
+    about: "نبذة",
+    contact: "تواصل",
+  },
+};
+
+function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
+  if (!pathname?.startsWith("/blog/")) return null;
+  if (/-ja\/?$/.test(pathname)) return "ja";
+  if (/-ar\/?$/.test(pathname)) return "ar";
+  return "en";
+}
 
 export default function SiteHeader() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const currentLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
+  const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
+  const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
+  const labels = navLabels[currentLang];
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -46,7 +84,7 @@ export default function SiteHeader() {
                 : "border-white/20 bg-white/50 hover:bg-white dark:border-white/10 dark:bg-white/5"
                 }`}
             >
-              {item.label}
+              {labels[item.key]}
             </Link>
           ))}
         </nav>
@@ -62,7 +100,7 @@ export default function SiteHeader() {
                 : "border-white/20 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
                 }`}
             >
-              {item.label}
+              {labels[item.key]}
             </Link>
           ))}
         </div>

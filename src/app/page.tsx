@@ -13,9 +13,9 @@ import { getProjects } from "@/data/projects";
 const translations = {
   en: {
     studio: "NEO WHISPER",
-    heroTitle: "Build products, launch stories, and scale globally.",
+    heroTitle: "Build software, launch websites, and scale globally.",
     heroSubtitle:
-      "Tokyo-based multilingual (JP/EN/AR) studio for web, games, and localization.",
+      "Tokyo-based IT services business (JP/EN/AR) providing software development, game development, app development, web production, web content production, and translation.",
     visitBlog: "Visit the Blog",
     viewProjects: "See Projects",
     viewServices: "View Services",
@@ -32,7 +32,7 @@ const translations = {
     blogPreviewCta: "See all →",
     aboutTitle: "About NeoWhisper",
     aboutCopy:
-      "NeoWhisper is a studio built around craftsmanship, clarity, and multilingual storytelling. We ship modern web platforms and create digital products that feel premium and globally ready.",
+      "NEO WHISPER is a registered sole proprietorship in Japan under the IT services category. We provide software, game, and app development, web production, web content production, and translation services across Japanese, English, and Arabic.",
     contactTitle: "Let's Build Together",
     contactCopy:
       "Tell us about your product or collaboration idea, and we'll help you scope the next steps.",
@@ -42,8 +42,8 @@ const translations = {
     exploreServices: "Explore Services →",
     services: [
       {
-        title: "Software Development",
-        desc: "Web platforms, internal tools, and product MVPs.",
+        title: "Software & App Development",
+        desc: "Web platforms, apps, internal tools, and product MVPs.",
         icon: "💻",
       },
       {
@@ -84,9 +84,9 @@ const translations = {
   },
   ja: {
     studio: "NEO WHISPER",
-    heroTitle: "プロダクトを作り、物語を届け、世界へ。",
+    heroTitle: "ソフトウェアとWebを開発し、世界へ。",
     heroSubtitle:
-      "東京を拠点に、Web・ゲーム・ローカライズを提供する多言語（日/英/阿）スタジオ。",
+      "東京都港区を拠点とするITサービス業。ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービスを提供しています。",
     visitBlog: "ブログを見る",
     viewProjects: "プロジェクトを見る",
     viewServices: "サービスを見る",
@@ -103,7 +103,7 @@ const translations = {
     blogPreviewCta: "すべて見る →",
     aboutTitle: "NeoWhisperについて",
     aboutCopy:
-      "NeoWhisperはクラフトマンシップと多言語ストーリーテリングにこだわるスタジオです。世界に届くプロダクトを作ります。",
+      "NEO WHISPERは日本で登録された個人事業主（ITサービス業）です。ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービスを、日本語・英語・アラビア語の3言語で提供しています。",
     contactTitle: "一緒に作りましょう",
     contactCopy:
       "プロダクトやコラボレーションのご相談をお聞かせください。",
@@ -113,8 +113,8 @@ const translations = {
     exploreServices: "サービスを見る →",
     services: [
       {
-        title: "ソフトウェア開発",
-        desc: "Webプラットフォーム、社内ツール、MVP開発。",
+        title: "ソフトウェア・アプリ開発",
+        desc: "Webプラットフォーム、アプリ、社内ツール、MVP開発。",
         icon: "💻",
       },
       {
@@ -155,9 +155,9 @@ const translations = {
   },
   ar: {
     studio: "نيو ويسبر (NEO WHISPER)",
-    heroTitle: "نبني منتجات ونطلق قصصًا وننمو عالميًا.",
+    heroTitle: "نطوّر البرمجيات والويب ونتوسع عالميًا.",
     heroSubtitle:
-      "استوديو في طوكيو يقدم خدمات الويب والألعاب والتعريب بثلاث لغات (اليابانية/الإنجليزية/العربية).",
+      "نشاط خدمات تقنية معلومات في طوكيو (اليابانية/الإنجليزية/العربية) يقدم تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب وإنتاج محتوى الويب والترجمة.",
     visitBlog: "زيارة المدونة",
     viewProjects: "عرض المشاريع",
     viewServices: "عرض الخدمات",
@@ -174,7 +174,7 @@ const translations = {
     blogPreviewCta: "عرض الكل →",
     aboutTitle: "حول NeoWhisper",
     aboutCopy:
-      "نركز على الجودة والوضوح والسرد متعدد اللغات لبناء منتجات عالمية.",
+      "نيو ويسبر مؤسسة فردية مسجلة ضمن نشاط خدمات تقنية المعلومات في اليابان. نقدم تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب وإنتاج محتوى الويب والترجمة بثلاث لغات.",
     contactTitle: "لنبدأ مشروعًا معًا",
     contactCopy:
       "أخبرنا عن فكرتك وسنساعدك في تحديد الخطوات القادمة.",
@@ -184,8 +184,8 @@ const translations = {
     exploreServices: "استكشاف الخدمات →",
     services: [
       {
-        title: "تطوير البرمجيات",
-        desc: "منصات ويب وأدوات داخلية وإطلاق MVP.",
+        title: "تطوير البرمجيات والتطبيقات",
+        desc: "منصات ويب وتطبيقات وأدوات داخلية وإطلاق MVP.",
         icon: "💻",
       },
       {
@@ -217,7 +217,7 @@ const translations = {
       },
       {
         title: "حزم التعريب",
-        desc: "خطوط عمل للترجمة EN/JA/AR.",
+        desc: "حزم ترجمة وتوطين احترافية.",
         status: "planned",
       },
     ],
@@ -252,175 +252,151 @@ export default async function Home({
   const projects = getProjects(currentLang);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 -right-20 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-pink-500/10 blur-3xl" />
+    <>
+      <div className="pointer-events-none absolute -top-32 -right-20 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-slate-400/10 blur-3xl transition-opacity animate-pulse" />
 
-        <div className="relative z-10 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"} lang={currentLang}>
-          <header className="mb-16 text-center">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
-              {copy.studio}
-            </p>
-            <h1 className="mx-auto max-w-3xl text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-              {copy.heroTitle}
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-              {copy.heroSubtitle}
-            </p>
-            <div
-              className="mt-8 flex flex-wrap justify-center gap-4"
-              dir="ltr"
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"} lang={currentLang}>
+        <header className="mb-16 text-center">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
+            {copy.studio}
+          </p>
+          <h1 className="mx-auto max-w-3xl text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+            {copy.heroTitle}
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+            {copy.heroSubtitle}
+          </p>
+          <div
+            className="mt-8 flex flex-wrap justify-center gap-4"
+            dir="ltr"
+          >
+            <Link
+              href={`/services?lang=${currentLang}`}
+              className="inline-flex items-center justify-center rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
             >
-              <Link
-                href={`/services?lang=${currentLang}`}
-                className="inline-flex items-center justify-center rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-              >
-                {copy.viewServices}
-              </Link>
-              <Link
-                href={`/projects?lang=${currentLang}`}
-                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-              >
-                {copy.viewProjects}
-              </Link>
-            </div>
-            <div
-              className="mt-10 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400"
-              dir="ltr"
+              {copy.viewServices}
+            </Link>
+            <Link
+              href={`/projects?lang=${currentLang}`}
+              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
             >
-              <Link
-                href="/?lang=en"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "en"
-                  ? "border-purple-400 bg-purple-600 text-white"
-                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                  }`}
-              >
-                English
-              </Link>
-              <Link
-                href="/?lang=ja"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ja"
-                  ? "border-purple-400 bg-purple-600 text-white"
-                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                  }`}
-              >
-                日本語
-              </Link>
-              <Link
-                href="/?lang=ar"
-                className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ar"
-                  ? "border-purple-400 bg-purple-600 text-white"
-                  : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                  }`}
-              >
-                العربية
-              </Link>
-            </div>
-          </header>
+              {copy.viewProjects}
+            </Link>
+          </div>
+          <div
+            className="mt-10 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400"
+            dir="ltr"
+          >
+            <Link
+              href="/?lang=en"
+              className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "en"
+                ? "border-purple-400 bg-purple-600 text-white"
+                : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                }`}
+            >
+              English
+            </Link>
+            <Link
+              href="/?lang=ja"
+              className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ja"
+                ? "border-purple-400 bg-purple-600 text-white"
+                : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                }`}
+            >
+              日本語
+            </Link>
+            <Link
+              href="/?lang=ar"
+              className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ar"
+                ? "border-purple-400 bg-purple-600 text-white"
+                : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                }`}
+            >
+              العربية
+            </Link>
+          </div>
+        </header>
 
-          <section id="services" className="mb-16">
-            <div className="grid gap-6 md:grid-cols-3">
-              {copy.services.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
-                >
-                  <div className="text-3xl mb-4">{item.icon}</div>
+        <section id="services" className="mb-16">
+          <div className="grid gap-6 md:grid-cols-3">
+            {copy.services.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
+              >
+                <div className="text-3xl mb-4">{item.icon}</div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex justify-center">
+            <Link
+              href={`/services?lang=${currentLang}`}
+              className="rounded-full border border-white/20 bg-white/70 px-5 py-2 text-xs font-semibold text-gray-700 shadow-sm transition-all duration-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+            >
+              {copy.exploreServices}
+            </Link>
+          </div>
+        </section>
+
+        <section id="projects" className="mb-16">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              {copy.projectsTitle}
+            </h2>
+            <Link
+              href={`/projects?lang=${currentLang}`}
+              className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
+            >
+              {copy.projectsCta}
+            </Link>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {projects.map((item) => (
+              <div
+                key={item.title}
+                className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${item.status === "planned"
+                  ? "opacity-60 grayscale"
+                  : "hover:-translate-y-1 hover:shadow-xl"
+                  }`}
+              >
+                <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-center">
-              <Link
-                href={`/services?lang=${currentLang}`}
-                className="rounded-full border border-white/20 bg-white/70 px-5 py-2 text-xs font-semibold text-gray-700 shadow-sm transition-all duration-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-              >
-                {copy.exploreServices}
-              </Link>
-            </div>
-          </section>
-
-          <section id="projects" className="mb-16">
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                {copy.projectsTitle}
-              </h2>
-              <Link
-                href={`/projects?lang=${currentLang}`}
-                className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
-              >
-                {copy.projectsCta}
-              </Link>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              {projects.map((item) => (
-                <div
-                  key={item.title}
-                  className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${item.status === "planned"
-                    ? "opacity-60 grayscale"
-                    : "hover:-translate-y-1 hover:shadow-xl"
-                    }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {item.title}
-                    </h3>
-                    {item.status === "planned" && (
-                      <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
-                        {copy.plannedLabel}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section id="downloads" className="mb-16">
-            <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-              <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                    {copy.downloadsTitle}
-                  </h2>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    {copy.downloadsCopy}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {copy.downloads.map((label) => (
-                    <span
-                      key={label}
-                      className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
-                        }`}
-                    >
-                      {label}
+                  {item.status === "planned" && (
+                    <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
+                      {copy.plannedLabel}
                     </span>
-                  ))}
+                  )}
                 </div>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  {item.description}
+                </p>
               </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          <section id="music" className="mb-16">
-            <div className="rounded-3xl border border-white/20 bg-gradient-to-r from-purple-600/20 to-pink-600/10 p-8 backdrop-blur-lg dark:border-white/10">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                {copy.musicTitle}
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {copy.musicCopy}
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {copy.music.map((label) => (
+        <section id="downloads" className="mb-16">
+          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                  {copy.downloadsTitle}
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  {copy.downloadsCopy}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {copy.downloads.map((label) => (
                   <span
                     key={label}
                     className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
@@ -431,64 +407,86 @@ export default async function Home({
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section id="blog-preview" className="mb-16">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                {copy.blogPreviewTitle}
-              </h2>
-              <Link
-                href={`/blog?lang=${currentLang}`}
-                className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
-              >
-                {copy.blogPreviewCta}
-              </Link>
-            </div>
-            <div className="grid gap-6">
-              {posts.map((post) => (
-                <ArticleCard key={post.slug} post={post} lang={currentLang} />
+        <section id="music" className="mb-20">
+          <div className="rounded-3xl border border-white/20 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 p-8 backdrop-blur-lg dark:border-white/10">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              {copy.musicTitle}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              {copy.musicCopy}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {copy.music.map((label) => (
+                <span
+                  key={label}
+                  className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
+                    }`}
+                >
+                  {label}
+                </span>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section id="about" className="mb-16">
-            <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                {copy.aboutTitle}
-              </h2>
-              <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
-                {copy.aboutCopy}
-              </p>
-            </div>
-          </section>
+        <section id="blog-preview" className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              {copy.blogPreviewTitle}
+            </h2>
+            <Link
+              href={`/blog?lang=${currentLang}`}
+              className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
+            >
+              {copy.blogPreviewCta}
+            </Link>
+          </div>
+          <div className="grid gap-6">
+            {posts.map((post) => (
+              <ArticleCard key={post.slug} post={post} lang={currentLang} />
+            ))}
+          </div>
+        </section>
 
-          <section id="contact" className="mb-20">
-            <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                {copy.contactTitle}
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {copy.contactCopy}
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href={`/contact?lang=${currentLang}`}
-                  className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-                >
-                  {copy.contactButton}
-                </Link>
-                <Link
-                  href={`/blog?lang=${currentLang}`}
-                  className="rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                >
-                  {copy.readBlog}
-                </Link>
-              </div>
+        <section id="about" className="mb-16">
+          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              {copy.aboutTitle}
+            </h2>
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+              {copy.aboutCopy}
+            </p>
+          </div>
+        </section>
+
+        <section id="contact" className="mb-20">
+          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              {copy.contactTitle}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              {copy.contactCopy}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href={`/contact?lang=${currentLang}`}
+                className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+              >
+                {copy.contactButton}
+              </Link>
+              <Link
+                href={`/blog?lang=${currentLang}`}
+                className="rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+              >
+                {copy.readBlog}
+              </Link>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }

@@ -10,13 +10,67 @@ import { Post } from "@/types";
 import ArticleCard from "@/components/ArticleCard";
 import { buildCategorySlug } from "@/lib/categories";
 import AuthorBio from "@/components/AuthorBio";
+import { normalizeLang } from "@/lib/i18n";
+
+const siteUrl = "https://www.neowhisper.net";
 
 function getCategoryUrl(category: string, lang: string): string {
   const slug = buildCategorySlug(category);
   return `/category/${encodeURIComponent(slug)}?lang=${lang}`;
 }
 
+function toAbsoluteUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+function getUiText(lang: string) {
+  const currentLang = normalizeLang(lang);
+  const labels = {
+    en: {
+      backToBlog: "Back to Blog",
+      relatedPosts: "Related Posts",
+    },
+    ja: {
+      backToBlog: "ブログへ戻る",
+      relatedPosts: "関連記事",
+    },
+    ar: {
+      backToBlog: "العودة للمدونة",
+      relatedPosts: "مقالات ذات صلة",
+    },
+  } as const;
+
+  return labels[currentLang];
+}
+
+function getAuthorDisplayName(lang: string): string {
+  const currentLang = normalizeLang(lang);
+  if (currentLang === "ar") return "يوسف القاضي";
+  if (currentLang === "ja") return "アルカーディ　ヨセフ";
+  return "Yousif Alqadi";
+}
+
+function estimateWordCount(mdxSource: string): number {
+  const plain = mdxSource
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[#*_>\-[\]()`]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!plain) return 0;
+  return plain.split(" ").length;
+}
+
+function shouldRenderAd(mdxSource: string): boolean {
+  // Keep ad density low on short pages to improve content quality signals.
+  return estimateWordCount(mdxSource) >= 350;
+}
+
 interface BlogPostTemplateProps {
+  slug?: string;
   title: string;
   date: string;
   content: string;
@@ -30,6 +84,7 @@ interface BlogPostTemplateProps {
 }
 
 export default function BlogPostTemplate({
+  slug,
   title,
   date,
   content,
@@ -41,10 +96,49 @@ export default function BlogPostTemplate({
   relatedPosts = [],
   lang = "en",
 }: BlogPostTemplateProps) {
+  const ui = getUiText(lang);
+  const currentLang = normalizeLang(lang);
+  const wordCount = estimateWordCount(content);
+  const showAd = shouldRenderAd(content);
+  const authorName = getAuthorDisplayName(lang);
+  const canonicalUrl = slug
+    ? `${siteUrl}/blog/${encodeURIComponent(slug)}`
+    : `${siteUrl}/blog`;
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    datePublished: date,
+    dateModified: date,
+    wordCount,
+    inLanguage: currentLang,
+    mainEntityOfPage: canonicalUrl,
+    image: coverImage ? [toAbsoluteUrl(coverImage)] : undefined,
+    author: {
+      "@type": "Person",
+      name: authorName,
+      url: `${siteUrl}/about`,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "NeoWhisper",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/og-image.jpg`,
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
         <article className="max-w-3xl mx-auto">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+          />
+
           {/* Back Button */}
           <Link
             href={`/blog?lang=${lang}`}
@@ -63,7 +157,7 @@ export default function BlogPostTemplate({
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            {isRTL ? "العودة للمدونة" : "Back to Blog"}
+            {ui.backToBlog}
           </Link>
 
           {/* Post Card with Glassmorphism */}
@@ -131,11 +225,6 @@ export default function BlogPostTemplate({
                 )}
               </div>
             </header>
-
-            {/* Top Ad Unit */}
-            <div className="px-6 sm:px-12 py-4 border-b border-gray-200 dark:border-gray-700">
-              <AdSenseAd slot="5462294096" />
-            </div>
 
             {/* Post Content */}
             <div
@@ -253,16 +342,18 @@ export default function BlogPostTemplate({
           <AuthorBio lang={lang} isRTL={isRTL} />
 
           {/* Bottom Ad Unit */}
-          <div className="mt-8">
-            <AdSenseAd slot="5462294096" />
-          </div>
+          {showAd && (
+            <div className="mt-8">
+              <AdSenseAd slot="5462294096" />
+            </div>
+          )}
         </article>
 
         {/* Related Posts Section */}
         {relatedPosts.length > 0 && (
           <section className={`mt-16 ${isRTL ? "text-right" : "text-left"}`}>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-8">
-              {isRTL ? "مقالات ذات صلة" : "Related Posts"}
+              {ui.relatedPosts}
             </h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((post) => (
@@ -303,7 +394,7 @@ export default function BlogPostTemplate({
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            {isRTL ? "العودة للمدونة" : "Back to Blog"}
+            {ui.backToBlog}
           </Link>
         </div>
       </div>

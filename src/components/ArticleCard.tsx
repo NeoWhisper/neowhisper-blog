@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { buildCategorySlug } from '@/lib/categories';
+import { normalizeLang } from '@/lib/i18n';
 
 const categoryColors: Record<string, string> = {
     'Next.js': 'bg-black text-white',
@@ -21,6 +22,15 @@ interface ArticleCardProps {
 }
 
 export default function ArticleCard({ post, lang }: ArticleCardProps) {
+    const currentLang = normalizeLang(lang);
+    const isRTL = currentLang === "ar";
+    const readArticleLabel =
+        currentLang === "ja"
+            ? "記事を読む"
+            : currentLang === "ar"
+              ? "اقرأ المقال"
+              : "Read Article";
+
     const categoryHref = post.category
         ? `/category/${buildCategorySlug(post.category)}${lang ? `?lang=${encodeURIComponent(lang)}` : ''
         }`
@@ -71,8 +81,17 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
                         href={`/blog/${encodeURIComponent(post.slug)}`}
                         className="inline-flex items-center text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
                     >
-                        Read Article
-                        <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {readArticleLabel}
+                        <svg
+                            className={`w-4 h-4 transition-transform ${
+                                isRTL
+                                    ? "mr-1 rotate-180 group-hover:-translate-x-1"
+                                    : "ml-1 group-hover:translate-x-1"
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                     </Link>

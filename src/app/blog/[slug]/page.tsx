@@ -85,6 +85,7 @@ export default async function BlogPost({ params }: PageProps) {
 
     return (
         <BlogPostTemplate
+            slug={slug}
             title={post.title}
             date={post.date}
             content={post.content}

@@ -47,7 +47,7 @@ export async function generateMetadata({
     en: {
       title: "Projects - NeoWhisper | Portfolio & Case Studies",
       description:
-        "Explore our portfolio of web platforms, games, and multilingual products. Real-world projects built with Next.js, TypeScript, Unity, and modern tools.",
+        "Explore our portfolio of web platforms, apps, games, and multilingual deliverables. Real-world projects built with Next.js, TypeScript, Unity, and modern tools.",
     },
     ja: {
       title: "プロジェクト - NeoWhisper | ポートフォリオ・実績",

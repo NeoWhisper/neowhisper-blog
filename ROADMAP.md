@@ -1,114 +1,90 @@
-# NeoWhisper Blog - Public Roadmap
+# NeoWhisper Engineering Roadmap (Internal)
 
-**Last Updated:** February 7, 2026  
-**Current Version:** v1.6.0
-
-This roadmap outlines the planned features and improvements for the NeoWhisper Blog. Items are subject to change based on priorities and feedback.
-
----
-
-## 🚀 Active Development
-
-### Content & Writing
-- [ ] Expanding blog content library with technical tutorials
-- [ ] Additional multilingual content (English, Japanese, Arabic)
-- [ ] SEO optimization and search engine submissions
-
-### Code Quality
-- [ ] Functional programming refactoring across components
-- [ ] Enhanced type safety and error handling
-- [ ] Performance monitoring and optimization
+**Last Updated:** February 16, 2026  
+**Current Version:** v1.7.0  
+**Purpose:** Internal planning for engineering, infrastructure, AI-assisted workflows, and experiments.
 
 ---
 
-## 📋 Next Quarter
+## Recently Completed (Timeline)
 
-### New Pages
-- [ ] **Portfolio/Case Studies** - Showcase of completed projects
+| Date | Version | What Was Completed |
+| --- | --- | --- |
+| 2026-02-16 | v1.7.0 | Business identity and service positioning update across core pages; security fix removing empty CORS headers from `robots.txt` and `sitemap.xml`. |
+| 2026-02-10 | v1.6.1 | Security hardening release: XSS fix and Next.js upgraded to `16.1.5`. |
+| 2026-02-09 | v1.6.0 | Contact pipeline maturity (Turnstile + Resend), AdSense/CSP readiness, and major multilingual marketing foundation work. |
+| 2026-02-02 | v1.5.1 | Playwright E2E testing introduced plus security headers and crawler endpoint hardening. |
+| 2026-01-29 to 2026-01-31 | v1.4.0-v1.5.0 | Multilingual blog architecture, hreflang/SEO upgrades, related-post system, and sitemap/category reliability fixes. |
+| 2026-01-13 to 2026-01-14 | v1.3.0-v1.3.1 | Analytics/AdSense foundation, reusable blog template, reading-time, and internal content-planning tooling. |
 
-### SEO & Analytics
-- [ ] Submit sitemap to Google Search Console
-- [ ] Monitor and optimize Core Web Vitals
-- [ ] Validate structured data with Rich Results Test
-- [ ] Monitor hreflang tag performance
+## Current Baseline
 
-### Navigation
-- [ ] Breadcrumb navigation for better UX
-- [ ] Search functionality
-
----
-
-## 🌐 Future Enhancements
-
-### Multilingual Improvements
-- [ ] Upgrade to Next.js i18n routing for cleaner URLs (`[lang]/blog/[slug]`)
-- [ ] Centralized translation files (`en.json`, `ja.json`, `ar.json`)
-- [ ] Automatic language detection based on user preferences
-- [ ] Language-specific content organization
-
-### Performance & Features
-- [ ] Advanced image optimization
-- [ ] Progressive Web App (PWA) capabilities
-- [ ] Dark/light theme toggle
-- [ ] Newsletter subscription
-- [ ] Comments system integration
-
-### Content Discovery
-- [ ] Advanced search and filtering
-- [ ] Tag-based navigation
-- [ ] Archive page by date
-- [ ] Popular posts sidebar
+- Trilingual site foundation (EN/JA/AR) for marketing, services, projects, blog, and legal pages.
+- Contact pipeline in production shape (`/api/contact`) with Turnstile + Resend integration.
+- Security posture in place: CSP, security headers, and scheduled production security scan workflow.
+- Test coverage includes Playwright E2E checks for key routing/security/hydration paths.
+- SEO baseline in place: sitemap, robots, metadata coverage, and structured data for content pages.
 
 ---
 
-## ✅ Recently Completed
+## Active Sprint (0-30 days)
 
-### v1.6.0 (Feb 7, 2026)
-- ✅ Marketing homepage separated from blog hub (`/` vs `/blog`)
-- ✅ Sticky glassmorphism navigation bar
-- ✅ Services page (`/services`)
-- ✅ Projects page (`/projects`)
-- ✅ About page (`/about`)
-- ✅ Contact page (`/contact`)
-- ✅ Multilingual marketing homepage (EN/JA/AR)
+### Content Operations
+- [ ] Add MDX quality checks (frontmatter completeness, date format, language parity hints).
+- [ ] Define a stricter editorial QA checklist for EN/JA/AR consistency.
+- [ ] Normalize category naming and taxonomy mapping across all languages.
 
-### v1.5.1 (Feb 2, 2026)
-- ✅ End-to-end testing with Playwright
-- ✅ GitHub Actions CI/CD for automated testing
-- ✅ Security headers hardening (CSP, X-Frame-Options, X-Content-Type-Options)
-- ✅ Removed X-Powered-By header
-- ✅ Category slug canonicalization
+### Conversion and Trust
+- [ ] Expand client-facing case studies with measurable outcomes.
+- [ ] Tighten service package clarity (scope, deliverables, and expected timelines).
+- [ ] Improve public trust signals while keeping personal data exposure minimal.
 
-### v1.5.0 (Jan 31, 2026)
-- ✅ Hreflang tags for multilingual SEO
-- ✅ Related posts section
-- ✅ Clickable category links
-- ✅ Language-aware language switcher
-- ✅ Core Web Vitals optimization
-
-### v1.4.0 (Jan 29, 2026)
-- ✅ Full multilingual support (EN/JA/AR)
-- ✅ RTL support for Arabic
-- ✅ Language switcher component
-- ✅ Dynamic category navigation
-
-### v1.3.0 (Jan 13, 2026)
-- ✅ Google Analytics (GA4) integration
-- ✅ Google AdSense infrastructure
-- ✅ Enhanced typography and design
+### SEO and Discoverability
+- [ ] Evaluate migration plan for cleaner language routes (`/[lang]/...`).
+- [ ] Add internal linking standards per article type.
+- [ ] Review schema completeness for service and project pages.
 
 ---
 
-## 🤝 Contributing
+## Near-Term (31-90 days)
 
-While this is currently a private project, we welcome feedback and suggestions. If you have ideas or find issues, please open a GitHub issue.
+### AI and Automation Track
+- [ ] Build internal AI-assisted translation QA workflow (terminology consistency and style checks).
+- [ ] Create AI-assisted metadata draft workflow with mandatory human approval.
+- [ ] Build a lightweight internal prompt library for article outlines, localization review, and release notes.
+
+### Infrastructure and Reliability
+- [ ] Add structured error/event logging for contact submission flow.
+- [ ] Add rate-limit and anti-spam observability for contact endpoint.
+- [ ] Add synthetic health checks for critical public paths.
+- [ ] Define dependency and security update cadence with ownership.
+
+### Developer Experience
+- [ ] Add scripts for repo health checks (content lint + link checks + metadata sanity).
+- [ ] Reduce repetitive copy/translations via shared dictionaries where practical.
+- [ ] Improve CI feedback ergonomics (clear failing summaries and remediation hints).
 
 ---
 
-## 📞 Contact
+## Experiment Backlog
 
-For inquiries about features or collaboration opportunities, visit [neowhisper.net](https://www.neowhisper.net)
+- [ ] Interactive technical demos embedded in selected blog posts.
+- [ ] Lightweight downloadable tooling/resources for lead generation.
+- [ ] Small game prototype landing flow connected to projects and contact funnel.
+- [ ] A/B test multilingual CTA variants for service inquiries.
 
 ---
 
-**Note:** This roadmap is a living document and will be updated as priorities evolve. For detailed version history, see [CHANGELOG.md](./CHANGELOG.md).
+## Explicitly Deferred
+
+- Native mobile app products (outside current service-focused execution).
+- Public comments system on blog (moderation overhead not justified now).
+- PWA packaging and offline mode (low priority versus core service delivery).
+
+---
+
+## Internal Notes
+
+- This document is for internal execution planning, not customer-facing marketing copy.
+- Keep legal/business identity aligned with registered scope: IT services business.
+- For public-facing messaging, use the `/roadmap` page and marketing pages instead.

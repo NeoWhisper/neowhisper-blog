@@ -35,7 +35,7 @@ const projectsByLang: Record<SupportedLang, ProjectCard[]> = {
     {
       title: "NeoWhisper ブログプラットフォーム",
       description:
-        "Next.jsとMDXで構築された多言語ブログ（日/英/阿）。SEOとコンテンツ配信に最適化されています。",
+        "Next.jsとMDXで構築された多言語ブログ（日本語/英語/アラビア語）。SEOとコンテンツ配信に最適化されています。",
       tags: ["Next.js", "MDX", "Tailwind", "i18n", "SEO"],
       status: "live",
       image: "/images/nextjs-16-blog-tutorial.png",

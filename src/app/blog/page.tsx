@@ -9,44 +9,138 @@ import Link from "next/link";
 import { getPosts } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
-import { AdSenseAd } from "@/components/AdSenseAd";
 import { buildCategorySlug } from "@/lib/categories";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const siteUrl = "https://www.neowhisper.net";
 
-export const metadata: Metadata = {
-  title: "NeoWhisper Blog | Next.js, React, TypeScript Tutorials",
-  description:
-    "日本語とEnglishの技術ブログ。Next.js、React、TypeScriptのチュートリアルとWeb開発のベストプラクティスを紹介。Bilingual tech tutorials and web development guides.",
-  authors: [{ name: "NeoWhisper Team" }],
-  openGraph: {
-    title: "NeoWhisper Tech Blog",
-    description: "Bilingual tech tutorials and web development guides",
-    url: `${siteUrl}/blog`,
-    siteName: "NeoWhisper",
-    images: [
-      {
-        url: `${siteUrl}/og-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: "NeoWhisper Tech Blog",
-      },
-    ],
-    locale: "ja_JP",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "NeoWhisper Tech Blog",
-    description: "Bilingual tech tutorials and web development",
-    images: [`${siteUrl}/og-image.jpg`],
-  },
-  other: {
+type BlogCopy = {
+  metaTitle: string;
+  metaDescription: string;
+  ogTitle: string;
+  ogDescription: string;
+  keywords: string;
+  backToHome: string;
+  blogName: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  latestArticles: string;
+  noPosts: string;
+  schemaDescription: string;
+};
+
+const copyByLang: Record<SupportedLang, BlogCopy> = {
+  en: {
+    metaTitle: "NeoWhisper Blog | Next.js, React, TypeScript Tutorials",
+    metaDescription:
+      "Deep technical guides on Next.js, React, TypeScript, and modern web development best practices.",
+    ogTitle: "NeoWhisper Tech Blog",
+    ogDescription: "Technical guides, experiments, and multilingual content.",
     keywords:
-      "Next.js, React, TypeScript, Web Development, JavaScript, 技術ブログ, チュートリアル",
+      "Next.js, React, TypeScript, Web Development, JavaScript, technical blog, tutorials",
+    backToHome: "← Back to Home",
+    blogName: "NeoWhisper Blog",
+    heroTitle: "Tech Blog",
+    heroSubtitle:
+      "Deep technical guides, product experiments, and multilingual content for builders.",
+    latestArticles: "Latest Articles",
+    noPosts: "No posts found for this language.",
+    schemaDescription:
+      "Tech blog with tutorials on Next.js, React, and TypeScript.",
+  },
+  ja: {
+    metaTitle: "NeoWhisper ブログ | Next.js・React・TypeScript チュートリアル",
+    metaDescription:
+      "Next.js、React、TypeScriptを中心に、実践的な技術ガイドとWeb開発のベストプラクティスを発信。",
+    ogTitle: "NeoWhisper テックブログ",
+    ogDescription: "技術ガイド、実験、そして多言語コンテンツ。",
+    keywords:
+      "Next.js, React, TypeScript, Web開発, 技術ブログ, チュートリアル",
+    backToHome: "← ホームへ戻る",
+    blogName: "NeoWhisper ブログ",
+    heroTitle: "テックブログ",
+    heroSubtitle:
+      "実践的な技術ガイド、プロダクト実験、多言語コンテンツを発信しています。",
+    latestArticles: "最新記事",
+    noPosts: "この言語の投稿はまだありません。",
+    schemaDescription:
+      "Next.js、React、TypeScriptのチュートリアルを掲載する技術ブログ。",
+  },
+  ar: {
+    metaTitle: "مدونة NeoWhisper | دروس Next.js وReact وTypeScript",
+    metaDescription:
+      "أدلة تقنية معمقة حول Next.js وReact وTypeScript وأفضل ممارسات تطوير الويب الحديثة.",
+    ogTitle: "مدونة NeoWhisper التقنية",
+    ogDescription: "أدلة تقنية وتجارب منتجات ومحتوى متعدد اللغات.",
+    keywords:
+      "Next.js, React, TypeScript, تطوير الويب, مدونة تقنية, دروس",
+    backToHome: "العودة للرئيسية →",
+    blogName: "مدونة NeoWhisper",
+    heroTitle: "المدونة التقنية",
+    heroSubtitle:
+      "أدلة تقنية متعمقة وتجارب منتجات ومحتوى متعدد اللغات لصنّاع المنتجات.",
+    latestArticles: "أحدث المقالات",
+    noPosts: "لا توجد مقالات متاحة لهذه اللغة حالياً.",
+    schemaDescription:
+      "مدونة تقنية تضم دروساً حول Next.js وReact وTypeScript.",
   },
 };
+
+const localeByLang: Record<SupportedLang, string> = {
+  en: "en_US",
+  ja: "ja_JP",
+  ar: "ar_SA",
+};
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+  const copy = copyByLang[currentLang];
+  const locale = localeByLang[currentLang];
+
+  return {
+    title: copy.metaTitle,
+    description: copy.metaDescription,
+    authors: [{ name: "NeoWhisper Team" }],
+    openGraph: {
+      title: copy.ogTitle,
+      description: copy.ogDescription,
+      url: `${siteUrl}/blog`,
+      siteName: "NeoWhisper",
+      images: [
+        {
+          url: `${siteUrl}/og-image.jpg`,
+          width: 1200,
+          height: 630,
+          alt: copy.ogTitle,
+        },
+      ],
+      locale,
+      alternateLocale: Object.values(localeByLang).filter((l) => l !== locale),
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: copy.ogTitle,
+      description: copy.ogDescription,
+      images: [`${siteUrl}/og-image.jpg`],
+    },
+    other: {
+      keywords: copy.keywords,
+    },
+    alternates: {
+      languages: {
+        en: "/blog?lang=en",
+        ja: "/blog?lang=ja",
+        ar: "/blog?lang=ar",
+      },
+    },
+  };
+}
 
 export default async function BlogHome({
   searchParams,
@@ -56,6 +150,7 @@ export default async function BlogHome({
   const posts = getPosts();
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
+  const copy = copyByLang[currentLang];
   const isRTL = currentLang === "ar";
 
   const filteredPosts = posts.filter((post) => {
@@ -89,8 +184,7 @@ export default async function BlogHome({
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "NeoWhisper",
-            description:
-              "Tech blog with tutorials on Next.js, React, and TypeScript",
+            description: copy.schemaDescription,
             url: siteUrl,
             inLanguage: ["ja", "en", "ar"],
             publisher: {
@@ -112,18 +206,17 @@ export default async function BlogHome({
               href={`/?lang=${currentLang}`}
               className="rounded-full border border-white/20 bg-white/60 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
             >
-              ← Back to Home
+              {copy.backToHome}
             </Link>
             <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">NeoWhisper Blog</span>
+            <span className="hidden sm:inline">{copy.blogName}</span>
           </div>
 
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 sm:text-6xl mb-4">
-            Tech Blog
+            {copy.heroTitle}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            Deep technical guides, product experiments, and multilingual content
-            for builders.
+            {copy.heroSubtitle}
           </p>
 
           <div
@@ -165,21 +258,13 @@ export default async function BlogHome({
 
         <CategoryNav categories={uniqueCategories} lang={currentLang} />
 
-        <section className="mb-12">
-          <AdSenseAd slot="5462294096" />
-        </section>
-
         <section>
           <h2
             className={`text-3xl font-bold text-gray-900 dark:text-white mb-8 ${
               isRTL ? "text-right" : "text-left"
             }`}
           >
-            {currentLang === "ja"
-              ? "最新記事"
-              : currentLang === "ar"
-              ? "أحدث المقالات"
-              : "Latest Articles"}
+            {copy.latestArticles}
           </h2>
           {filteredPosts.length > 0 ? (
             <div className="grid gap-8">
@@ -190,7 +275,7 @@ export default async function BlogHome({
           ) : (
             <div className="text-center py-20 bg-white/60 dark:bg-white/5 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
               <p className="text-gray-500 dark:text-gray-400 text-lg">
-                No posts found for this language.
+                {copy.noPosts}
               </p>
             </div>
           )}

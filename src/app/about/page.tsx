@@ -5,22 +5,22 @@ import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 const translations = {
   en: {
     label: "About",
-    title: "The Visionary Studio",
-    subtitle: "Bridging Japan and the Middle East through multilingual tech.",
-    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Alqadi Yousif Mohammed A.",
+    title: "Registered IT Services Business",
+    subtitle: "Business category (開業届): IT services (ITサービス業).",
+    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Yousif Alqadi.",
     back: "Back to Home",
     sections: [
       {
         title: "Who we are",
-        copy: "A Tokyo-based full-stack developer and consultant working across Japanese, English, and Arabic. We specialize in building digital products that blend technical engineering with cultural strategy, focusing on high-polish web, games, and AI tools."
+        copy: "A registered sole proprietorship in Minato City, Tokyo, operating as an IT services business across Japanese, English, and Arabic."
       },
       {
         title: "What we do",
-        copy: "We provide end-to-end software development, indie game prototyping, multilingual content production, and deep localization services. We help clients launch products that feel native in three languages from day one."
+        copy: "Service scope: software development, game development, app development, web production, web content production, and translation/localization."
       },
       {
-        title: "Why we exist",
-        copy: "To bridge the gap between Japan and the Middle East. We believe that multilingual technology, games, and digital products can connect cultures and create new opportunities in the global digital economy."
+        title: "Business focus",
+        copy: "Deliver practical IT services with strong multilingual execution for JP/EN/AR markets."
       }
     ],
     address: "Registered address: Minato-ku, Tokyo",
@@ -29,22 +29,22 @@ const translations = {
   },
   ja: {
     label: "概要",
-    title: "ビジョナリー・スタジオ",
-    subtitle: "多言語技術で日本と中東を繋ぐ架け橋へ。",
-    intro: "NEO WHISPERは、2025年12月に東京都港区にてアルカディ・ユセフ・ムハンマド・A（Alqadi Yousif Mohammed A.）により設立された、ITサービスを提供する登録済みの個人事業主です。",
+    title: "登録済みITサービス事業",
+    subtitle: "開業届上の職業区分: ITサービス業。",
+    intro: "NEO WHISPERは、2025年12月に東京都港区にてアルカーディ　ヨセフにより設立された、ITサービスを提供する登録済みの個人事業主です。",
     back: "ホームへ戻る",
     sections: [
       {
         title: "私たちについて",
-        copy: "東京都を拠点に、日本語・英語・アラビア語の3ヶ国語で活動するフルスタックデベロッパー兼コンサルタントです。技術的なエンジニアリングと文化的戦略を融合させ、高品質なWeb・ゲーム・AIツールの構築を専門としています。"
+        copy: "東京都港区を拠点に、日本語・英語・アラビア語の3言語で提供する、登録済みのITサービス個人事業です。"
       },
       {
         title: "事業内容",
-        copy: "ソフトウェア開発、インディーゲームの試作、多言語コンテンツ制作、そして高度なローカライズサービスを提供。初日から3ヶ国語でネイティブに感じられる製品の立ち上げを支援します。"
+        copy: "ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービスを提供します。"
       },
       {
-        title: "理念",
-        copy: "日本と中東の距離を縮めること。多言語技術、ゲーム、デジタルプロダクトは文化を繋ぎ、グローバルなデジタル経済における新しい機会を創出できると信じています。"
+        title: "事業フォーカス",
+        copy: "JP/EN/AR市場向けに、実務で使えるITサービスを多言語で正確に提供すること。"
       }
     ],
     address: "登録住所: 東京都港区",
@@ -53,22 +53,22 @@ const translations = {
   },
   ar: {
     label: "نبذة",
-    title: "الرؤية والاستوديو",
-    subtitle: "سد الفجوة بين اليابان والشرق الأوسط عبر التقنيات متعددة اللغات.",
-    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل القاضي يوسف محمد أ.",
+    title: "نشاط خدمات تقنية معلومات مسجل",
+    subtitle: "تصنيف النشاط (開業届): خدمات تقنية المعلومات.",
+    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل يوسف القاضي.",
     back: "العودة للرئيسية",
     sections: [
       {
         title: "من نحن",
-        copy: "مطور برمجيات متكامل (Full-stack) ومستشار تقني مقيم في طوكيو، نعمل باللغات اليابانية والإنجليزية والعربية. نتخصص في بناء منتجات رقمية تمزج بين الهندسة التقنية والاستراتيجية الثقافية، مع التركيز على الويب والألعاب وأدوات الذكاء الاصطناعي."
+        copy: "مؤسسة فردية مسجلة في ميناتو-كو، طوكيو، تعمل كنشاط خدمات تقنية معلومات بثلاث لغات: اليابانية والإنجليزية والعربية."
       },
       {
         title: "ماذا نفعل",
-        copy: "نقدم تطوير البرمجيات من البداية للنهاية، نماذج الألعاب الأولية، إنتاج المحتوى متعدد اللغات، وخدمات التعريب العميقة. نساعد العملاء على إطلاق منتجات تبدو كأنها صُممت محليًا بثلاث لغات منذ اليوم الأول."
+        copy: "نقدم تطوير البرمجيات وتطوير الألعاب وتطوير التطبيقات وإنتاج الويب وإنتاج محتوى الويب والترجمة والتعريب ضمن نطاق خدمات تقنية المعلومات."
       },
       {
-        title: "لماذا نحن هنا",
-        copy: "لربط اليابان والشرق الأوسط. نؤمن بأن التقنيات متعددة اللغات والألعاب والمنتجات الرقمية يمكنها ربط الثقافات وخلق فرص جديدة في الاقتصاد الرقمي العالمي."
+        title: "تركيز النشاط",
+        copy: "تقديم خدمات تقنية معلومات عملية بدقة تنفيذ عالية للأسواق اليابانية والإنجليزية والعربية."
       }
     ],
     address: "العنوان المسجل: مدينة ميناتو، طوكيو",
@@ -87,19 +87,19 @@ export async function generateMetadata({
 
   const meta = {
     en: {
-      title: "About - NeoWhisper | Multilingual Product Studio",
+      title: "About - NeoWhisper | IT Services Business",
       description:
-        "NeoWhisper builds premium web platforms, games, and multilingual products across English, Japanese, and Arabic. Full-stack development with SEO-first approach and kaizen mindset.",
+        "Registered IT services sole proprietorship in Tokyo. Service scope includes software development, game development, app development, web production, web content production, and translation.",
     },
     ja: {
-      title: "概要 - NeoWhisper | 多言語プロダクト開発スタジオ",
+      title: "概要 - NeoWhisper | 登録済みITサービス事業",
       description:
-        "NeoWhisperは、英語・日本語・アラビア語に対応したプレミアムなWebプラットフォーム、ゲーム、多言語製品を構築します。SEO重視のフルスタック開発と改善マインドを持つスタジオです。",
+        "NeoWhisperは東京都港区の登録済みITサービス個人事業主です。ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などを提供します。",
     },
     ar: {
-      title: "عن NeoWhisper | استوديو منتجات متعددة اللغات",
+      title: "عن NeoWhisper | نشاط خدمات تقنية معلومات",
       description:
-        "NeoWhisper يبني منصات ويب وألعاب ومنتجات متعددة اللغات بجودة عالية عبر الإنجليزية واليابانية والعربية. تطوير متكامل مع نهج يركز على SEO وعقلية التحسين المستمر.",
+        "نيو ويسبر مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو. يشمل نطاق الخدمات تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب ومحتوى الويب والترجمة.",
     },
   };
 

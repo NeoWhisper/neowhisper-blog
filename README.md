@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Current version: **v1.5.0**
+> Current version: **v1.7.0**
 
 A high-performance, SEO-optimized tech blog built with **Next.js 16**, **App Router**, and **MDX**.
 
@@ -24,7 +24,7 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
 
 ### Prerequisites
 
-- Node.js 20.9 or newer
+- Node.js 25.x
 - npm, yarn, pnpm, or bun
 
 ### Installation

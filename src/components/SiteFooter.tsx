@@ -1,32 +1,112 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 
-function getLabel(key: "privacy" | "terms" | "contact", lang: SupportedLang) {
+function getLabel(
+  key: "privacy" | "terms" | "contact" | "editorial",
+  lang: SupportedLang,
+) {
   const labels: Record<SupportedLang, Record<typeof key, string>> = {
-    en: { privacy: "Privacy", terms: "Terms", contact: "Contact" },
-    ja: { privacy: "プライバシー", terms: "利用規約", contact: "お問い合わせ" },
-    ar: { privacy: "الخصوصية", terms: "الشروط", contact: "تواصل" },
+    en: {
+      privacy: "Privacy",
+      terms: "Terms",
+      contact: "Contact",
+      editorial: "Editorial Policy",
+    },
+    ja: {
+      privacy: "プライバシー",
+      terms: "利用規約",
+      contact: "お問い合わせ",
+      editorial: "編集ポリシー",
+    },
+    ar: {
+      privacy: "الخصوصية",
+      terms: "الشروط",
+      contact: "تواصل",
+      editorial: "سياسة التحرير",
+    },
   };
 
   return labels[lang][key];
 }
 
+function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
+  if (!pathname?.startsWith("/blog/")) return null;
+  if (/-ja\/?$/.test(pathname)) return "ja";
+  if (/-ar\/?$/.test(pathname)) return "ar";
+  return "en";
+}
+
+function getSectionLabel(
+  key: "trustSignals" | "links" | "registration" | "businessType",
+  lang: SupportedLang,
+) {
+  const labels: Record<SupportedLang, Record<typeof key, string>> = {
+    en: {
+      trustSignals: "Trust Signals",
+      links: "Links",
+      registration: "Registered in Minato City, Tokyo",
+      businessType: "Business category: IT services",
+    },
+    ja: {
+      trustSignals: "信頼情報",
+      links: "リンク",
+      registration: "東京都港区で正式登録済み",
+      businessType: "職業区分: ITサービス業",
+    },
+    ar: {
+      trustSignals: "مؤشرات الثقة",
+      links: "الروابط",
+      registration: "تسجيل رسمي في ميناتو-كو، طوكيو",
+      businessType: "تصنيف النشاط: خدمات تقنية المعلومات",
+    },
+  };
+
+  return labels[lang][key];
+}
+
+function getBusinessText(lang: SupportedLang) {
+  const content: Record<SupportedLang, { line1: string; line2: string }> = {
+    en: {
+      line1:
+        "Registered sole proprietorship in Japan. Business category: IT services.",
+      line2:
+        "Service scope: software development, game development, app development, web production, web content production, and translation. Based in Minato City, Tokyo.",
+    },
+    ja: {
+      line1: "日本で登録された個人事業主です（職業: ITサービス業）。",
+      line2:
+        "事業概要: ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービス提供。拠点は東京都港区です。",
+    },
+    ar: {
+      line1:
+        "مؤسسة فردية مسجّلة في اليابان ضمن نشاط خدمات تقنية المعلومات.",
+      line2:
+        "نطاق الخدمات: تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب ومحتوى الويب والترجمة. المقر في ميناتو-كو، طوكيو.",
+    },
+  };
+
+  return content[lang];
+}
+
 export default function SiteFooter() {
   const searchParams = useSearchParams();
-  const currentLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
+  const pathname = usePathname();
+  const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
+  const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
+  const business = getBusinessText(currentLang);
 
   return (
-    <footer className="border-t border-white/5 bg-black/40 backdrop-blur-sm">
-      <div className="mx-auto max-w-5xl px-4 py-12">
+    <footer className="border-t border-white/5 bg-zinc-950">
+      <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-widest text-white">NEO WHISPER</h3>
             <p className="text-xs leading-relaxed text-zinc-400">
-              Individual business (個人事業主) registered in Japan. <br />
-              開業届 filed December 2025. Based in Tokyo.
+              {business.line1} <br />
+              {business.line2}
             </p>
             <div className="flex gap-4">
               <a href="https://github.com/NeoWhisper" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
@@ -37,17 +117,25 @@ export default function SiteFooter() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-white">Trust Signals</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-white">
+              {getSectionLabel("trustSignals", currentLang)}
+            </h3>
             <ul className="space-y-2 text-xs text-zinc-400">
               <li className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                Official Registration Minato-ku
+                {getSectionLabel("registration", currentLang)}
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                {getSectionLabel("businessType", currentLang)}
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-white">Links</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-white">
+              {getSectionLabel("links", currentLang)}
+            </h3>
             <div className="flex flex-col gap-2" dir="ltr">
               <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/privacy", currentLang)}>
                 {getLabel("privacy", currentLang)}
@@ -57,6 +145,9 @@ export default function SiteFooter() {
               </Link>
               <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/contact", currentLang)}>
                 {getLabel("contact", currentLang)}
+              </Link>
+              <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/editorial-policy", currentLang)}>
+                {getLabel("editorial", currentLang)}
               </Link>
             </div>
           </div>
@@ -69,4 +160,3 @@ export default function SiteFooter() {
     </footer>
   );
 }
-

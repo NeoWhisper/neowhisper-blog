@@ -20,7 +20,7 @@ interface AuthorContent {
 const content: Record<string, AuthorContent> = {
   en: {
     title: "About the Author",
-    bio: "NeoWhisper is a full-stack development studio specializing in modern web applications with Next.js, TypeScript, and cutting-edge tools. We build fast, scalable, and beautiful digital experiences for clients worldwide.",
+    bio: "NeoWhisper is a registered IT services business in Tokyo. We provide software development, game development, app development, web/content production, and translation services for global clients.",
     expertise:
       "Expertise: Next.js • TypeScript • React • Node.js • Multilingual Sites • SEO • Performance Optimization",
     cta: "Work with us",
@@ -34,7 +34,7 @@ const content: Record<string, AuthorContent> = {
   },
   ja: {
     title: "著者について",
-    bio: "NeoWhisperは、Next.js、TypeScript、最先端ツールを使用したモダンなWebアプリケーションを専門とするフルスタック開発スタジオです。世界中のクライアントに向けて、高速でスケーラブルかつ美しいデジタル体験を構築しています。",
+    bio: "NeoWhisperは東京都港区を拠点とする登録済みITサービス事業です。ソフトウェア開発・ゲーム開発・アプリ開発・Web/コンテンツ制作・翻訳サービスを提供しています。",
     expertise:
       "専門分野: Next.js • TypeScript • React • Node.js • 多言語サイト • SEO • パフォーマンス最適化",
     cta: "お問い合わせ",
@@ -48,7 +48,7 @@ const content: Record<string, AuthorContent> = {
   },
   ar: {
     title: "عن المؤلف",
-    bio: "NeoWhisper هو استوديو تطوير متكامل متخصص في تطبيقات الويب الحديثة باستخدام Next.js وTypeScript وأحدث الأدوات. نبني تجارب رقمية سريعة وقابلة للتوسع وجميلة للعملاء في جميع أنحاء العالم.",
+    bio: "نيو ويسبر نشاط خدمات تقنية معلومات مسجل في طوكيو. نقدم تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب/المحتوى والترجمة لعملاء من أسواق مختلفة.",
     expertise:
       "الخبرة: Next.js • TypeScript • React • Node.js • مواقع متعددة اللغات • SEO • تحسين الأداء",
     cta: "تواصل معنا",

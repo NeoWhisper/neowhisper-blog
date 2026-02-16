@@ -192,7 +192,7 @@ export default async function BlogHome({
               name: "NeoWhisper",
               logo: {
                 "@type": "ImageObject",
-                url: `${siteUrl}/logo.png`,
+                url: `${siteUrl}/og-image.jpg`,
               },
             },
           }),

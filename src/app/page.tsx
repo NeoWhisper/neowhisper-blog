@@ -5,7 +5,7 @@
  */
 
 import Link from "next/link";
-import { getPosts } from "@/lib/posts";
+import { getPosts, getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
@@ -247,7 +247,7 @@ export default async function Home({
     };
 
     return matchers[currentLang] ?? isEn;
-  });
+  }).filter((post) => getBaseSlug(post.slug) !== "welcome");
   const posts = filteredPosts.slice(0, 3);
   const projects = getProjects(currentLang);
 
@@ -381,54 +381,6 @@ export default async function Home({
                 </p>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section id="downloads" className="mb-16">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                  {copy.downloadsTitle}
-                </h2>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                  {copy.downloadsCopy}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {copy.downloads.map((label) => (
-                  <span
-                    key={label}
-                    className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
-                      }`}
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="music" className="mb-20">
-          <div className="rounded-3xl border border-white/20 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 p-8 backdrop-blur-lg dark:border-white/10">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-              {copy.musicTitle}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              {copy.musicCopy}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {copy.music.map((label) => (
-                <span
-                  key={label}
-                  className={`rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200 ${"opacity-60"
-                    }`}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
           </div>
         </section>
 

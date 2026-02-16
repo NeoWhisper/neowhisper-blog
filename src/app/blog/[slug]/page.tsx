@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     const baseSlug = getBaseSlug(slug);
+    const isWelcomePost = baseSlug === "welcome";
     const languageVariants = getLanguageVariants(baseSlug);
 
     // Determine current language
@@ -50,6 +51,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
         title: post.title,
         description: post.excerpt,
+        robots: isWelcomePost
+            ? {
+                  index: false,
+                  follow: true,
+              }
+            : undefined,
         alternates: {
             languages,
         },

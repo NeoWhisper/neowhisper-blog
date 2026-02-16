@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getPosts } from "@/lib/posts";
+import { getPosts, getBaseSlug } from "@/lib/posts";
 import { categories as canonicalCategories } from "@/lib/categories";
 
 const baseUrl = "https://www.neowhisper.net";
@@ -30,7 +30,7 @@ function createCategorySlug(name: string): string {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getPosts();
+  const posts = getPosts().filter((post) => getBaseSlug(post.slug) !== "welcome");
 
   // Generate blog post URLs
   const blogUrls = posts.map((post) => ({

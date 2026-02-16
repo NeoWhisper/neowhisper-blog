@@ -6,7 +6,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPosts } from "@/lib/posts";
+import { getPosts, getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
 import { buildCategorySlug } from "@/lib/categories";
@@ -164,7 +164,7 @@ export default async function BlogHome({
     };
 
     return matchers[currentLang] ?? isEn;
-  });
+  }).filter((post) => getBaseSlug(post.slug) !== "welcome");
 
   const uniqueCategories = Array.from(
     new Set(filteredPosts.map((post) => post.category))

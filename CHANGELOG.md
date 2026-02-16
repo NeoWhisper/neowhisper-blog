@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.2...v1.9.0) (2026-02-16)
+
+
+### Features
+
+* **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
+
 ## [1.8.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.1...v1.8.2) (2026-02-16)
 
 

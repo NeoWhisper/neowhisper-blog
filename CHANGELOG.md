@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.1...v1.7.0) (2026-02-16)
+
+
+### Bug Fixes
+
+* **security:** remove empty CORS headers from robots and sitemap ([112047d](https://github.com/NeoWhisper/neowhisper-blog/commit/112047db8c51e155d4e18a024dffe44b63c02e3b))
+
+
+### Features
+
+* **business:** transition to professional service agency branding ([cbcd6eb](https://github.com/NeoWhisper/neowhisper-blog/commit/cbcd6ebee282e3bba26c3866fa4621d66ce2a374))
+
 ## [1.6.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.0...v1.6.1) (2026-02-10)
 
 

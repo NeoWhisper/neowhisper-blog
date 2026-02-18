@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { normalizeLang } from "@/lib/i18n";
 
 const LANGUAGES = [
     { code: "en", label: "English", suffix: "" },
@@ -13,10 +14,17 @@ const LANGUAGES = [
 
 interface LanguageSwitcherProps {
     availableLanguages?: string[];
+    mode?: "suffix" | "query";
+    currentLang?: string;
 }
 
-export function LanguageSwitcher({ availableLanguages }: LanguageSwitcherProps = {}) {
+export function LanguageSwitcher({
+    availableLanguages,
+    mode = "suffix",
+    currentLang,
+}: LanguageSwitcherProps = {}) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -51,6 +59,7 @@ export function LanguageSwitcher({ availableLanguages }: LanguageSwitcherProps =
                     const languagesToShow = availableLanguages
                         ? LANGUAGES.filter((lang) => availableLanguages.includes(lang.code))
                         : LANGUAGES;
+                    const queryLang = normalizeLang(currentLang ?? searchParams?.get("lang"));
 
                     return (
                         <div
@@ -58,8 +67,16 @@ export function LanguageSwitcher({ availableLanguages }: LanguageSwitcherProps =
                             dir="ltr"
                         >
                             {languagesToShow.map((lang) => {
-                                const targetHref = `${baseSlugPath}${lang.suffix}`;
-                                const isActive = pathname === targetHref;
+                                const targetHref =
+                                    mode === "query"
+                                        ? lang.code === "en"
+                                            ? pathname
+                                            : `${pathname}?lang=${lang.code}`
+                                        : `${baseSlugPath}${lang.suffix}`;
+                                const isActive =
+                                    mode === "query"
+                                        ? queryLang === lang.code
+                                        : pathname === targetHref;
 
                                 return (
                                     <Link

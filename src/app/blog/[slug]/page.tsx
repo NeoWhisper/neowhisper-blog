@@ -1,108 +1,152 @@
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
-import { getPostBySlug, getPosts, getBaseSlug, getLanguageVariants, getRelatedPosts } from '@/lib/posts';
-import BlogPostTemplate from '@/components/BlogPostTemplate';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import BlogPostTemplate from "@/components/BlogPostTemplate";
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { renderMarkdownToSafeHtml } from "@/lib/markdown";
+import {
+  getHybridLanguageVariants,
+  getHybridPost,
+  getHybridRelatedPosts,
+} from "@/lib/posts-hybrid";
+import { getBaseSlug, getPostLanguage, getPosts } from "@/lib/posts";
 
-const baseUrl = 'https://www.neowhisper.net';
+const baseUrl = "https://www.neowhisper.net";
 
 interface PageProps {
-    params: Promise<{
-        slug: string;
-    }>;
+  params: Promise<{
+    slug: string;
+  }>;
+  searchParams: Promise<{
+    lang?: string;
+  }>;
 }
 
-// 1. Generate Static Params: Tells Next.js which posts to build at compile time
+function resolveLanguage(slug: string, lang?: string | null): SupportedLang {
+  if (lang) return normalizeLang(lang);
+  return normalizeLang(getPostLanguage(slug));
+}
+
+function toOpenGraphLocale(lang: SupportedLang): string {
+  if (lang === "ja") return "ja_JP";
+  if (lang === "ar") return "ar_SA";
+  return "en_US";
+}
+
+function buildPostUrl(
+  slug: string,
+  lang: SupportedLang,
+  source: "static" | "dynamic",
+): string {
+  const encodedSlug = encodeURIComponent(slug);
+
+  if (source === "dynamic") {
+    if (lang === "en") {
+      return `${baseUrl}/blog/${encodedSlug}`;
+    }
+    return `${baseUrl}/blog/${encodedSlug}?lang=${lang}`;
+  }
+
+  return `${baseUrl}/blog/${encodedSlug}`;
+}
+
 export async function generateStaticParams() {
-    const posts = getPosts();
-    return posts.map((post) => ({
-        slug: post.slug,
-    }));
+  const posts = getPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
 }
 
-// 2. Generate Metadata with hreflang tags
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { slug } = await params;
-    const post = getPostBySlug(slug);
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const { lang } = await searchParams;
+  const resolvedLang = resolveLanguage(slug, lang);
+  const post = await getHybridPost(slug, resolvedLang);
 
-    if (!post) {
-        return {};
-    }
+  if (!post) return {};
 
-    const baseSlug = getBaseSlug(slug);
-    const isWelcomePost = baseSlug === "welcome";
-    const languageVariants = getLanguageVariants(baseSlug);
+  const isWelcomePost = getBaseSlug(post.slug) === "welcome";
+  const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
+  const languageAlternates: Record<string, string> = {};
 
-    // Determine current language
-    const currentLang = slug.endsWith('-ar') ? 'ar' : slug.endsWith('-ja') ? 'ja' : 'en';
-
-    // Build hreflang alternates
-    const languages: Record<string, string> = {};
-
-    languageVariants.forEach((variant) => {
-        languages[variant.lang] = `${baseUrl}/blog/${encodeURIComponent(variant.slug)}`;
-    });
-
-    // Add x-default to the base (English) version if it exists
-    const baseVariant = languageVariants.find((v) => v.lang === 'en');
-    if (baseVariant) {
-        languages['x-default'] = `${baseUrl}/blog/${encodeURIComponent(baseVariant.slug)}`;
-    }
-
-    return {
-        title: post.title,
-        description: post.excerpt,
-        robots: isWelcomePost
-            ? {
-                  index: false,
-                  follow: true,
-              }
-            : undefined,
-        alternates: {
-            languages,
-        },
-        openGraph: {
-            title: post.title,
-            description: post.excerpt,
-            images: post.coverImage ? [post.coverImage] : [],
-            locale: currentLang === 'ja' ? 'ja_JP' : currentLang === 'ar' ? 'ar_SA' : 'en_US',
-            alternateLocale: languageVariants
-                .filter((v) => v.lang !== currentLang)
-                .map((v) => (v.lang === 'ja' ? 'ja_JP' : v.lang === 'ar' ? 'ar_SA' : 'en_US')),
-        },
-    };
-}
-
-// 3. The Page Component
-export default async function BlogPost({ params }: PageProps) {
-    // In Next.js 16, params is a Promise that must be awaited
-    const { slug } = await params;
-
-    const post = getPostBySlug(slug);
-    const isRTL = slug.endsWith('-ar');
-    const lang = slug.endsWith('-ar') ? 'ar' : slug.endsWith('-ja') ? 'ja' : 'en';
-
-    if (!post) {
-        notFound();
-    }
-
-    const baseSlug = getBaseSlug(slug);
-    const languageVariants = getLanguageVariants(baseSlug);
-    const availableLanguages = languageVariants.map((v) => v.lang);
-    const relatedPosts = getRelatedPosts(slug, 3);
-
-    return (
-        <BlogPostTemplate
-            slug={slug}
-            title={post.title}
-            date={post.date}
-            content={post.content}
-            coverImage={post.coverImage}
-            category={post.category}
-            readTime={post.readTime}
-            isRTL={isRTL}
-            availableLanguages={availableLanguages}
-            relatedPosts={relatedPosts}
-            lang={lang}
-        />
+  languageVariants.forEach((variant) => {
+    languageAlternates[variant.lang] = buildPostUrl(
+      variant.slug,
+      variant.lang,
+      post.source,
     );
+  });
+
+  const defaultVariant =
+    languageVariants.find((variant) => variant.lang === "en") ??
+    languageVariants[0];
+
+  if (defaultVariant) {
+    languageAlternates["x-default"] = buildPostUrl(
+      defaultVariant.slug,
+      "en",
+      post.source,
+    );
+  }
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    robots: isWelcomePost
+      ? {
+          index: false,
+          follow: true,
+        }
+      : undefined,
+    alternates: {
+      canonical: buildPostUrl(post.slug, post.locale, post.source),
+      languages: languageAlternates,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage ? [post.coverImage] : [],
+      locale: toOpenGraphLocale(post.locale),
+      alternateLocale: languageVariants
+        .filter((variant) => variant.lang !== post.locale)
+        .map((variant) => toOpenGraphLocale(variant.lang)),
+    },
+  };
+}
+
+export default async function BlogPost({ params, searchParams }: PageProps) {
+  const { slug } = await params;
+  const { lang } = await searchParams;
+  const resolvedLang = resolveLanguage(slug, lang);
+
+  const post = await getHybridPost(slug, resolvedLang);
+  if (!post) {
+    notFound();
+  }
+
+  const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
+  const relatedPosts = await getHybridRelatedPosts(post, 3);
+
+  return (
+    <BlogPostTemplate
+      slug={post.slug}
+      title={post.title}
+      date={post.date}
+      content={post.content}
+      renderedHtml={
+        post.source === "dynamic" ? renderMarkdownToSafeHtml(post.content) : undefined
+      }
+      coverImage={post.coverImage}
+      category={post.category}
+      readTime={post.readTime}
+      isRTL={post.locale === "ar"}
+      availableLanguages={languageVariants.map((variant) => variant.lang)}
+      relatedPosts={relatedPosts}
+      lang={post.locale}
+      languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
+      canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}
+    />
+  );
 }

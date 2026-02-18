@@ -74,6 +74,7 @@ interface BlogPostTemplateProps {
   title: string;
   date: string;
   content: string;
+  renderedHtml?: string;
   coverImage?: string;
   category?: string;
   readTime?: string;
@@ -81,6 +82,8 @@ interface BlogPostTemplateProps {
   availableLanguages?: string[];
   relatedPosts?: Post[];
   lang?: string;
+  languageSwitchMode?: "suffix" | "query";
+  canonicalUrl?: string;
 }
 
 export default function BlogPostTemplate({
@@ -88,6 +91,7 @@ export default function BlogPostTemplate({
   title,
   date,
   content,
+  renderedHtml,
   coverImage,
   category,
   readTime,
@@ -95,15 +99,19 @@ export default function BlogPostTemplate({
   availableLanguages,
   relatedPosts = [],
   lang = "en",
+  languageSwitchMode = "suffix",
+  canonicalUrl,
 }: BlogPostTemplateProps) {
   const ui = getUiText(lang);
   const currentLang = normalizeLang(lang);
   const wordCount = estimateWordCount(content);
   const showAd = shouldRenderAd(content);
   const authorName = getAuthorDisplayName(lang);
-  const canonicalUrl = slug
-    ? `${siteUrl}/blog/${encodeURIComponent(slug)}`
-    : `${siteUrl}/blog`;
+  const resolvedCanonicalUrl =
+    canonicalUrl ??
+    (slug
+      ? `${siteUrl}/blog/${encodeURIComponent(slug)}`
+      : `${siteUrl}/blog`);
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -112,7 +120,7 @@ export default function BlogPostTemplate({
     dateModified: date,
     wordCount,
     inLanguage: currentLang,
-    mainEntityOfPage: canonicalUrl,
+    mainEntityOfPage: resolvedCanonicalUrl,
     image: coverImage ? [toAbsoluteUrl(coverImage)] : undefined,
     author: {
       "@type": "Person",
@@ -185,7 +193,11 @@ export default function BlogPostTemplate({
               <div
                 className={`flex mb-6 ${isRTL ? "justify-start" : "justify-end"}`}
               >
-                <LanguageSwitcher availableLanguages={availableLanguages} />
+                <LanguageSwitcher
+                  availableLanguages={availableLanguages}
+                  mode={languageSwitchMode}
+                  currentLang={lang}
+                />
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
@@ -243,98 +255,102 @@ export default function BlogPostTemplate({
             prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl prose-pre:mb-16
             ${isRTL ? "text-right" : "text-left"}`}
             >
-              <MDXRemote
-                source={content}
-                components={{
-                  h2: (props) => (
-                    <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />
-                  ),
-                  hr: (props) => (
-                    <hr
-                      className="my-24 border-gray-200 dark:border-gray-800"
-                      {...props}
-                    />
-                  ),
-                  ol: (props) => (
-                    <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />
-                  ),
-                  a: ({ href, children, ...props }) => {
-                    const isExternal = href?.startsWith("http");
-                    return (
-                      <a
-                        href={href}
-                        className="animated-link text-purple-600 dark:text-purple-400 font-medium inline-flex items-center group"
-                        {...(isExternal
-                          ? { target: "_blank", rel: "noopener noreferrer" }
-                          : {})}
+              {renderedHtml ? (
+                <div dangerouslySetInnerHTML={{ __html: renderedHtml }} />
+              ) : (
+                <MDXRemote
+                  source={content}
+                  components={{
+                    h2: (props) => (
+                      <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />
+                    ),
+                    hr: (props) => (
+                      <hr
+                        className="my-24 border-gray-200 dark:border-gray-800"
                         {...props}
-                      >
-                        <span className="relative">{children}</span>
-                        {isExternal && (
-                          <svg
-                            className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
-                        )}
-                      </a>
-                    );
-                  },
-                  // Professional block components for MDX
-                  Step: ({ number, title, children }: { number: string | number, title?: string, children: ReactNode }) => (
-                    <div className="flex gap-6 mb-16 group items-start">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-110">
-                        {number}
+                      />
+                    ),
+                    ol: (props) => (
+                      <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />
+                    ),
+                    a: ({ href, children, ...props }) => {
+                      const isExternal = href?.startsWith("http");
+                      return (
+                        <a
+                          href={href}
+                          className="animated-link text-purple-600 dark:text-purple-400 font-medium inline-flex items-center group"
+                          {...(isExternal
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                          {...props}
+                        >
+                          <span className="relative">{children}</span>
+                          {isExternal && (
+                            <svg
+                              className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          )}
+                        </a>
+                      );
+                    },
+                    // Professional block components for MDX
+                    Step: ({ number, title, children }: { number: string | number, title?: string, children: ReactNode }) => (
+                      <div className="flex gap-6 mb-16 group items-start">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-110">
+                          {number}
+                        </div>
+                        <div className="flex-1">
+                          {title && <h3 className="text-2xl font-bold mb-4 mt-0">{title}</h3>}
+                          <div className="text-gray-600 dark:text-gray-300 leading-[2.2]">{children}</div>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        {title && <h3 className="text-2xl font-bold mb-4 mt-0">{title}</h3>}
-                        <div className="text-gray-600 dark:text-gray-300 leading-[2.2]">{children}</div>
-                      </div>
-                    </div>
-                  ),
-                  Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
-                    const styles = {
-                      info: 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
-                      warning: 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
-                      success: 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300',
-                    }[type] || 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700';
+                    ),
+                    Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
+                      const styles = {
+                        info: 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
+                        warning: 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
+                        success: 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300',
+                      }[type] || 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700';
 
-                    return (
-                      <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>
+                      return (
+                        <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>
+                          {children}
+                        </div>
+                      );
+                    },
+                    Checklist: ({ children }: { children: ReactNode }) => (
+                      <div className="my-16 space-y-4 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
                         {children}
                       </div>
-                    );
-                  },
-                  Checklist: ({ children }: { children: ReactNode }) => (
-                    <div className="my-16 space-y-4 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
-                      {children}
-                    </div>
-                  ),
-                  CheckItem: ({ children }: { children: ReactNode }) => (
-                    <div className="flex items-start gap-4">
-                      <div className="mt-1-5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
+                    ),
+                    CheckItem: ({ children }: { children: ReactNode }) => (
+                      <div className="flex items-start gap-4">
+                        <div className="mt-1-5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700 dark:text-gray-200">{children}</span>
                       </div>
-                      <span className="text-gray-700 dark:text-gray-200">{children}</span>
-                    </div>
-                  ),
-                }}
-                options={{
-                  mdxOptions: {
-                    rehypePlugins: [rehypeHighlight],
-                  },
-                }}
-              />
+                    ),
+                  }}
+                  options={{
+                    mdxOptions: {
+                      rehypePlugins: [rehypeHighlight],
+                    },
+                  }}
+                />
+              )}
             </div>
           </div>
 

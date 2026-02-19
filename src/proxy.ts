@@ -5,15 +5,13 @@ import { isAllowedAdminEmail } from "@/lib/admin-auth";
 function hasSupabaseEnv() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 }
 
 export async function proxy(request: NextRequest) {
   if (!hasSupabaseEnv()) {
-    const fallback = new URL("/", request.url);
-    fallback.searchParams.set("lang", "en");
-    return NextResponse.redirect(fallback);
+    return NextResponse.next();
   }
 
   const response = NextResponse.next({

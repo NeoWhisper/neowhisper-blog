@@ -18,7 +18,7 @@ export type CreatePostInput = {
 export type ActionResult = {
   success?: true;
   message?: string;
-  postId?: number;
+  postId?: string;
   error?: string;
 };
 
@@ -40,9 +40,9 @@ function normalizeLocale(value: string): PostLocale {
 function hasRequiredContent(input: CreatePostInput): boolean {
   return Boolean(
     input.title.trim() &&
-      input.slug.trim() &&
-      input.content.trim() &&
-      input.locale,
+    input.slug.trim() &&
+    input.content.trim() &&
+    input.locale,
   );
 }
 
@@ -127,6 +127,6 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
   return {
     success: true,
     message: "Draft created.",
-    postId: post.id as number,
+    postId: String(post.id),
   };
 }

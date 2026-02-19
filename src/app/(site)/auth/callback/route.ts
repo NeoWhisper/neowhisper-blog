@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
-
-function getSafeNextPath(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/admin";
-  return value;
-}
+import { getSafeNextPath } from "@/lib/auth-utils";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -13,7 +9,14 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      const loginUrl = new URL("/login", requestUrl.origin);
+      loginUrl.searchParams.set("next", nextPath);
+      loginUrl.searchParams.set("error", "auth_failed");
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.redirect(new URL(nextPath, requestUrl.origin));

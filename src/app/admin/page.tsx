@@ -149,7 +149,7 @@ export default function AdminPage() {
                   >
                     {LOCALES.map((l) => (
                       <option key={l.value} value={l.value} className="bg-gray-900">
-                        {l.flag} {l.label}
+                        {l.label}
                       </option>
                     ))}
                   </select>

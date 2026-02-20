@@ -6,11 +6,12 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPosts, getBaseSlug } from "@/lib/posts";
+import { getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
 import { buildCategorySlug } from "@/lib/categories";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getHybridPosts } from "@/lib/posts-hybrid";
 
 const siteUrl = "https://www.neowhisper.net";
 
@@ -147,24 +148,14 @@ export default async function BlogHome({
 }: {
   searchParams: Promise<{ lang?: string }>;
 }) {
-  const posts = getPosts();
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
   const isRTL = currentLang === "ar";
 
-  const filteredPosts = posts.filter((post) => {
-    const isAr = post.slug.endsWith("-ar");
-    const isJa = post.slug.endsWith("-ja");
-    const isEn = !isAr && !isJa;
-
-    const matchers: Record<string, boolean> = {
-      ar: isAr,
-      ja: isJa,
-    };
-
-    return matchers[currentLang] ?? isEn;
-  }).filter((post) => getBaseSlug(post.slug) !== "welcome");
+  const filteredPosts = (await getHybridPosts(currentLang)).filter(
+    (post) => getBaseSlug(post.slug) !== "welcome",
+  );
 
   const uniqueCategories = Array.from(
     new Set(filteredPosts.map((post) => post.category))

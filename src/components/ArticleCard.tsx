@@ -24,6 +24,11 @@ interface ArticleCardProps {
 export default function ArticleCard({ post, lang }: ArticleCardProps) {
     const currentLang = normalizeLang(lang);
     const isRTL = currentLang === "ar";
+    const isSuffixLocalizedSlug = post.slug.endsWith("-ja") || post.slug.endsWith("-ar");
+    const shouldUseLangQuery = Boolean(lang && lang !== "en" && !isSuffixLocalizedSlug);
+    const postHref = `/blog/${encodeURIComponent(post.slug)}${
+        shouldUseLangQuery ? `?lang=${encodeURIComponent(currentLang)}` : ""
+    }`;
     const readArticleLabel =
         currentLang === "ja"
             ? "記事を読む"
@@ -32,7 +37,7 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
               : "Read Article";
 
     const categoryHref = post.category
-        ? `/category/${buildCategorySlug(post.category)}${lang ? `?lang=${encodeURIComponent(lang)}` : ''
+        ? `/category/${buildCategorySlug(post.category)}${lang ? `?lang=${encodeURIComponent(currentLang)}` : ''
         }`
         : undefined;
 
@@ -41,7 +46,7 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
             <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors duration-500" />
             <div className="relative z-10">
                 {post.coverImage && (
-                    <Link href={`/blog/${encodeURIComponent(post.slug)}`} className="block mb-6 -mx-8 -mt-8 relative h-48">
+                    <Link href={postHref} className="block mb-6 -mx-8 -mt-8 relative h-48">
                         <Image
                             src={post.coverImage}
                             alt={post.title}
@@ -66,7 +71,7 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
                     </time>
                 </div>
 
-                <Link href={`/blog/${encodeURIComponent(post.slug)}`}>
+                <Link href={postHref}>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2">
                         {post.title}
                     </h2>
@@ -78,7 +83,7 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
 
                 <div className="flex items-center justify-between">
                     <Link
-                        href={`/blog/${encodeURIComponent(post.slug)}`}
+                        href={postHref}
                         className="inline-flex items-center text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
                     >
                         {readArticleLabel}

@@ -48,6 +48,10 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
    NEXT_PUBLIC_GA_ID=your-ga-id
    NEXT_PUBLIC_ADSENSE_ID=your-adsense-id
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   # Comma-separated allowlist for /admin access
+   ADMIN_EMAILS=you@example.com
    RESEND_API_KEY=your-resend-api-key
    RESEND_FROM="Your Name <hello@yourdomain.com>"
    # Inbox that receives contact form submissions (comma-separated supported)
@@ -63,6 +67,12 @@ Features trilingual support (**English**, **日本語**, **العربية**) and
    ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the result.
+
+### Admin Auth (Phase 1)
+
+- Enable GitHub OAuth in Supabase Auth providers.
+- Add `http://localhost:3000/auth/callback` and your production callback URL in Supabase redirect URLs.
+- `/admin` routes are protected by Supabase session + `ADMIN_EMAILS` allowlist.
 
 ## 📝 Writing Posts
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPosts, getBaseSlug } from "@/lib/posts";
 import { categories as canonicalCategories } from "@/lib/categories";
+import { getHybridSitemapBlogEntries } from "@/lib/posts-hybrid";
 
 const baseUrl = "https://www.neowhisper.net";
 
@@ -29,16 +30,34 @@ function createCategorySlug(name: string): string {
     .replace(/\s+/g, "-");
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getPosts().filter((post) => getBaseSlug(post.slug) !== "welcome");
+function buildBlogUrl(
+  slug: string,
+  locale: "en" | "ja" | "ar",
+  source: "static" | "dynamic",
+): string {
+  const encodedSlug = encodeURIComponent(slug);
 
-  // Generate blog post URLs
-  const blogUrls = posts.map((post) => ({
-    url: `${baseUrl}/blog/${encodeURIComponent(post.slug)}`,
-    lastModified: post.date ? new Date(post.date) : new Date(),
+  if (source === "dynamic") {
+    if (locale === "en") return `${baseUrl}/blog/${encodedSlug}`;
+    return `${baseUrl}/blog/${encodedSlug}?lang=${locale}`;
+  }
+
+  return `${baseUrl}/blog/${encodedSlug}`;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const blogEntries = (await getHybridSitemapBlogEntries()).filter(
+    (entry) => getBaseSlug(entry.slug) !== "welcome",
+  );
+
+  const blogUrls = blogEntries.map((entry) => ({
+    url: buildBlogUrl(entry.slug, entry.locale, entry.source),
+    lastModified: new Date(entry.lastModified),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
+
+  const posts = getPosts().filter((post) => getBaseSlug(post.slug) !== "welcome");
 
   // Build a union of category slugs derived from posts and the canonical
   // categories mapping. We intentionally only include categories that

@@ -1,12 +1,10 @@
 # [1.9.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.2...v1.9.0) (2026-02-16)
 
-
 ### Features
 
 * **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
 
 ## [1.8.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.1...v1.8.2) (2026-02-16)
-
 
 ### Bug Fixes
 
@@ -14,13 +12,11 @@
 
 ## [1.8.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.0...v1.8.1) (2026-02-16)
 
-
 ### Bug Fixes
 
 * **adsense:** remove stray markdown from ads.txt ([347062e](https://github.com/NeoWhisper/neowhisper-blog/commit/347062ef2cbbdcaea074dff07f8f57dcb1e5469c))
 
 # [1.8.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.7.0...v1.8.0) (2026-02-16)
-
 
 ### Features
 
@@ -28,11 +24,9 @@
 
 # [1.7.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.1...v1.7.0) (2026-02-16)
 
-
 ### Bug Fixes
 
 * **security:** remove empty CORS headers from robots and sitemap ([112047d](https://github.com/NeoWhisper/neowhisper-blog/commit/112047db8c51e155d4e18a024dffe44b63c02e3b))
-
 
 ### Features
 
@@ -40,13 +34,11 @@
 
 ## [1.6.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.0...v1.6.1) (2026-02-10)
 
-
 ### Bug Fixes
 
 * **security:** resolve XSS and upgrade Next.js to 16.1.5 ([361700f](https://github.com/NeoWhisper/neowhisper-blog/commit/361700fc1ae6032a76f95fda176b6f65cc883cd6))
 
 # [1.6.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.5.1...v1.6.0) (2026-02-09)
-
 
 ### Bug Fixes
 
@@ -61,13 +53,12 @@
 * resolve homepage build errors ([9c5bf71](https://github.com/NeoWhisper/neowhisper-blog/commit/9c5bf713c933b6efaa4869ea6c52bf7a06b5a6e0))
 * **security:** relax CSP for hydration, Turnstile, and AdSense ([56d4296](https://github.com/NeoWhisper/neowhisper-blog/commit/56d4296c2ad456b6a3b211e17a55d625f0dcbb4d))
 * **security:** restrict Access-Control-Allow-Origin for robots.txt and sitemap.xml ([7229175](https://github.com/NeoWhisper/neowhisper-blog/commit/722917520bf6c6090c449def95e8c6f6931907d2))
-* **security:** set Access-Control-Allow-Origin to https://www.neowhisper.net for robots/sitemap ([436d61c](https://github.com/NeoWhisper/neowhisper-blog/commit/436d61cadfcd00a84d216cd5814918c6823a0065))
+* **security:** set Access-Control-Allow-Origin to <https://www.neowhisper.net> for robots/sitemap ([436d61c](https://github.com/NeoWhisper/neowhisper-blog/commit/436d61cadfcd00a84d216cd5814918c6823a0065))
 * **ui:** correct active tab highlighting in mobile and desktop navigation ([1ca33ca](https://github.com/NeoWhisper/neowhisper-blog/commit/1ca33ca937b916bf1b63a10756532204c4c47b4b))
 * **ui:** prevent illegal invocation in Blog CTA; improve contact errors ([2091c1c](https://github.com/NeoWhisper/neowhisper-blog/commit/2091c1c3fb2b193236ec486bf7169b9c9b6b9067))
 * update github-script action to v7 for better API compatibility ([94c51e1](https://github.com/NeoWhisper/neowhisper-blog/commit/94c51e16bf948ad7ac787b0932b06af483f86439))
 * update Node.js version to 20+ and fix GitHub Actions workflows ([8c80ee3](https://github.com/NeoWhisper/neowhisper-blog/commit/8c80ee314ea4d6cc07f3fbb14b97d43de7af29cd))
 * wrap SiteHeader in Suspense for prerender ([11f3814](https://github.com/NeoWhisper/neowhisper-blog/commit/11f3814a20a0273d1076a50511c606bd280247e4))
-
 
 ### Features
 
@@ -90,7 +81,7 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
-- Code quality: Remove if statements from remaining components
+* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`)
 
 ## [1.7.0] - 2026-02-09
 
@@ -100,230 +91,230 @@ This release completes all critical requirements for Google AdSense approval.
 
 ### Added
 
-- **Blog Posts (2 new, bringing total to 6):**
-  - "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
-  - "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN/JA/AR)
-- **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
-- **CookieBanner component** with GDPR compliance and multilingual support
-- **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
-- **SEO metadata** with i18n support for all marketing pages (Services, Projects, About, Contact)
-- **DNS records** for email deliverability (SPF, DKIM, DMARC)
-- **CSP documentation** section in README with troubleshooting guide
+* **Blog Posts (2 new, bringing total to 6):**
+  * "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
+  * "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN/JA/AR)
+* **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
+* **CookieBanner component** with GDPR compliance and multilingual support
+* **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
+* **SEO metadata** with i18n support for all marketing pages (Services, Projects, About, Contact)
+* **DNS records** for email deliverability (SPF, DKIM, DMARC)
+* **CSP documentation** section in README with troubleshooting guide
 
 ### Fixed
 
-- **6 CSP errors** blocking AdSense scripts (frame-src, script-src, connect-src violations)
-- **Email deliverability** - Changed RESEND_FROM to friendly address, configured DMARC
-- **CSP configuration** - Added all required Google domains for AdSense
-- **Twitter/X link** removed from AuthorBio (replaced with real GitHub only)
+* **6 CSP errors** blocking AdSense scripts (frame-src, script-src, connect-src violations)
+* **Email deliverability** - Changed RESEND_FROM to friendly address, configured DMARC
+* **CSP configuration** - Added all required Google domains for AdSense
+* **Twitter/X link** removed from AuthorBio (replaced with real GitHub only)
 
 ### Changed
 
-- **README.md** kept generic for template reusability
-- **DNS-SETUP-CHECKLIST.md** added to .gitignore (operational doc)
-- **CSP policy** relaxed for AdSense while maintaining security (no wildcard *, specific domains only)
-- **Welcome post** expanded with more substantive content and navigation links
+* **README.md** kept generic for template reusability
+* **DNS-SETUP-CHECKLIST.md** added to .gitignore (operational doc)
+* **CSP policy** relaxed for AdSense while maintaining security (no wildcard *, specific domains only)
+* **Welcome post** expanded with more substantive content and navigation links
 
 ### Infrastructure
 
-- Email deliverability tested in production (Gmail/Outlook inbox delivery confirmed)
-- All High-priority AdSense tasks completed (100%)
-- All Critical tasks completed except final translations (75%)
-- Total progress: 18% → 86% in 2 days
+* Email deliverability tested in production (Gmail/Outlook inbox delivery confirmed)
+* All High-priority AdSense tasks completed (100%)
+* All Critical tasks completed except final translations (75%)
+* Total progress: 18% → 86% in 2 days
 
 ### Metrics
 
-- Blog posts: 4 → 6 (target met)
-- Internal links: 0 → 20+ (200% of target)
-- CSP errors: 6 → 0 (100% resolved)
-- Commits: 14 over 2 days
-- Files changed: 40+
+* Blog posts: 4 → 6 (target met)
+* Internal links: 0 → 20+ (200% of target)
+* CSP errors: 6 → 0 (100% resolved)
+* Commits: 14 over 2 days
+* Files changed: 40+
 
 ## [1.6.0] - 2026-02-07
 
 ### Added
 
-- New marketing homepage with multilingual support (EN/JA/AR).
-- Dedicated `/blog` hub page (previous homepage moved and refined).
-- Sticky glassmorphism top navigation bar with key anchors.
-- `/projects`, `/services`, `/about`, and `/contact` standalone pages.
-- Contact form with API endpoint (ready for email provider integration).
-- Resend email delivery support for contact form.
-- Animated “Visit the Blog” CTA with scroll reveal.
-- Planned/locked styling for future projects and platforms.
-- Localized About/Services/Projects/Contact pages (EN/JA/AR).
-- Contact success page and Turnstile spam protection.
-- Multi-recipient email forwarding via `RESEND_TO`.
+* New marketing homepage with multilingual support (EN/JA/AR).
+* Dedicated `/blog` hub page (previous homepage moved and refined).
+* Sticky glassmorphism top navigation bar with key anchors.
+* `/projects`, `/services`, `/about`, and `/contact` standalone pages.
+* Contact form with API endpoint (ready for email provider integration).
+* Resend email delivery support for contact form.
+* Animated “Visit the Blog” CTA with scroll reveal.
+* Planned/locked styling for future projects and platforms.
+* Localized About/Services/Projects/Contact pages (EN/JA/AR).
+* Contact success page and Turnstile spam protection.
+* Multi-recipient email forwarding via `RESEND_TO`.
 
 ### Changed
 
-- Sitemap now includes `/projects` and `/services`.
+* Sitemap now includes `/projects` and `/services`.
 
 ## [1.5.1] - 2026-02-02
 
 ### Added
 
-- Playwright E2E tests and configuration (`tests/` and `playwright.config.ts`).
-- GitHub Actions workflow to run Playwright E2E on push and PRs (`.github/workflows/e2e.yml`).
+* Playwright E2E tests and configuration (`tests/` and `playwright.config.ts`).
+* GitHub Actions workflow to run Playwright E2E on push and PRs (`.github/workflows/e2e.yml`).
 
 ### Fixed
 
-- Canonicalized and redirected non-canonical/encoded category slugs to avoid duplicate pages (fixes empty-state for encoded variants).
-- Removed `Access-Control-Allow-Origin` header for `/robots.txt` and `/sitemap.xml` (security hardening).
-- Added security headers: `Content-Security-Policy`, `X-Frame-Options: DENY`, and `X-Content-Type-Options: nosniff`.
+* Canonicalized and redirected non-canonical/encoded category slugs to avoid duplicate pages (fixes empty-state for encoded variants).
+* Removed `Access-Control-Allow-Origin` header for `/robots.txt` and `/sitemap.xml` (security hardening).
+* Added security headers: `Content-Security-Policy`, `X-Frame-Options: DENY`, and `X-Content-Type-Options: nosniff`.
 
 ### Chore
 
-- Updated `README.md` with E2E instructions and `.gitignore` to ignore Playwright artifacts and IDE files.
+* Updated `README.md` with E2E instructions and `.gitignore` to ignore Playwright artifacts and IDE files.
 
 ## [1.5.0] - 2026-01-31
 
 ### Added
 
-- **Hreflang Tags**: Added proper hreflang tags to all blog posts for SEO, supporting all language variants (en, ja, ar) with `x-default` pointing to English version
-- **Related Posts Section**: Implemented "Related Posts" section below each article showing up to 3 posts from the same category and language, excluding the current post
-- **Clickable Category Links**: Made category badges clickable links in both header metadata and footer sections, pointing to category pages with proper URL encoding
-- **Language-Aware Language Switcher**: Enhanced language switcher to only display available language variants for each post
+* **Hreflang Tags**: Added proper hreflang tags to all blog posts for SEO, supporting all language variants (en, ja, ar) with `x-default` pointing to English version
+* **Related Posts Section**: Implemented "Related Posts" section below each article showing up to 3 posts from the same category and language, excluding the current post
+* **Clickable Category Links**: Made category badges clickable links in both header metadata and footer sections, pointing to category pages with proper URL encoding
+* **Language-Aware Language Switcher**: Enhanced language switcher to only display available language variants for each post
 
 ### Changed
 
-- **Performance Optimization**: Optimized Core Web Vitals by adding `sizes` prop to hero images to prevent Cumulative Layout Shift (CLS)
-- **Font Loading**: Added `display: "swap"` and `preload: true` to font configuration to minimize Flash of Unstyled Text (FOUT)
-- **Image Optimization**: Enhanced Next.js image configuration with proper device sizes, image sizes, and cache TTL settings
-- **Code Cleanup**: Removed unused UI components (`Badge`, `Button`) and unused CSS variables (sidebar, chart, popover) to reduce bundle size
+* **Performance Optimization**: Optimized Core Web Vitals by adding `sizes` prop to hero images to prevent Cumulative Layout Shift (CLS)
+* **Font Loading**: Added `display: "swap"` and `preload: true` to font configuration to minimize Flash of Unstyled Text (FOUT)
+* **Image Optimization**: Enhanced Next.js image configuration with proper device sizes, image sizes, and cache TTL settings
+* **Code Cleanup**: Removed unused UI components (`Badge`, `Button`) and unused CSS variables (sidebar, chart, popover) to reduce bundle size
 
 ### Fixed
 
-- **Layout Shift**: Fixed potential layout shift issues by adding proper `sizes` attribute to all `next/image` components
+* **Layout Shift**: Fixed potential layout shift issues by adding proper `sizes` attribute to all `next/image` components
 
 ## [1.4.2] - 2026-01-31
 
 ### Fixed
 
-- **Sitemap XML Parsing Error**: Fixed XML parsing error (`xmlParseEntityRef: no name`) caused by unescaped `&` characters in category URLs. Category slugs with special characters (like `＆` in Japanese) are now properly URL-encoded using `encodeURIComponent`, ensuring valid XML output.
-- **Double Encoding Issue**: Resolved double-encoding problem where category URLs were being encoded twice, resulting in `%25` instead of `%` in the sitemap.
+* **Sitemap XML Parsing Error**: Fixed XML parsing error (`xmlParseEntityRef: no name`) caused by unescaped `&` characters in category URLs. Category slugs with special characters (like `＆` in Japanese) are now properly URL-encoded using `encodeURIComponent`, ensuring valid XML output.
+* **Double Encoding Issue**: Resolved double-encoding problem where category URLs were being encoded twice, resulting in `%25` instead of `%` in the sitemap.
 
 ### Changed
 
-- **Sitemap Generation**: Refactored sitemap generation to properly URL-encode category slugs while maintaining consistency with `generateStaticParams` in category pages.
-- **Category Slug Consistency**: Standardized category slug generation across sitemap, category pages, and homepage to use the same `createCategorySlug` helper function.
+* **Sitemap Generation**: Refactored sitemap generation to properly URL-encode category slugs while maintaining consistency with `generateStaticParams` in category pages.
+* **Category Slug Consistency**: Standardized category slug generation across sitemap, category pages, and homepage to use the same `createCategorySlug` helper function.
 
 ## [1.4.1] - 2026-01-30
 
 ### Fixed
 
-- **Hydration Error**: Resolved React hydration mismatch in `LanguageSwitcher` component that was causing "Can't find variable: usePathname" errors
-- **Server Errors**: Fixed 500 errors caused by corrupted Turbopack cache
-- **Dev Server Conflicts**: Resolved issues with multiple Next.js dev servers running simultaneously
+* **Hydration Error**: Resolved React hydration mismatch in `LanguageSwitcher` component that was causing "Can't find variable: usePathname" errors
+* **Server Errors**: Fixed 500 errors caused by corrupted Turbopack cache
+* **Dev Server Conflicts**: Resolved issues with multiple Next.js dev servers running simultaneously
 
 ### Changed
 
-- **Code Quality**: Refactored `LanguageSwitcher` to eliminate if statements, using functional patterns with ternary operators and logical operators
-- **Error Handling**: Added ESLint disable comments with detailed explanations for legitimate React patterns
+* **Code Quality**: Refactored `LanguageSwitcher` to eliminate if statements, using functional patterns with ternary operators and logical operators
+* **Error Handling**: Added ESLint disable comments with detailed explanations for legitimate React patterns
 
 ## [1.4.0] - 2026-01-29
 
 ### Added
 
-- **Multilingual Support**: Added support for 3 language variants per post (English, Japanese, Arabic) with suffix-based routing (`-ja`, `-ar`).
-- **Language Switcher**: New glassmorphism `LanguageSwitcher` component to toggle between languages on blog posts.
-- **RTL Support**: Full Right-to-Left layout support for Arabic posts, including flipped icons and text alignment.
-- **New Content**: Added "TypeScript Best Practices for Full-Stack Apps" in EN, AR, and JA.
-- **Dynamic Categories**: Refactored `CategoryNav` to automatically generate categories based on available posts in the current language.
-- **Cover Image**: Generated custom cover image for TypeScript post.
+* **Multilingual Support**: Added support for 3 language variants per post (English, Japanese, Arabic) with suffix-based routing (`-ja`, `-ar`).
+* **Language Switcher**: New glassmorphism `LanguageSwitcher` component to toggle between languages on blog posts.
+* **RTL Support**: Full Right-to-Left layout support for Arabic posts, including flipped icons and text alignment.
+* **New Content**: Added "TypeScript Best Practices for Full-Stack Apps" in EN, AR, and JA.
+* **Dynamic Categories**: Refactored `CategoryNav` to automatically generate categories based on available posts in the current language.
+* **Cover Image**: Generated custom cover image for TypeScript post.
 
 ### Changed
 
-- **Post Layout Spacing**: Significantly increased vertical spacing for `<h2>`, `<hr>`, and `<ol>` elements within blog posts for better readability.
-- **MDX Rendering**: Updated `BlogPostTemplate` to explicitly pass custom components to `MDXRemote`, ensuring consistent styling.
+* **Post Layout Spacing**: Significantly increased vertical spacing for `<h2>`, `<hr>`, and `<ol>` elements within blog posts for better readability.
+* **MDX Rendering**: Updated `BlogPostTemplate` to explicitly pass custom components to `MDXRemote`, ensuring consistent styling.
 
 ### Fixed
 
-- **Arabic Layout**: Resolved text alignment and direction issues for Arabic content (`dir="rtl"`).
-- **Japanese Content Leakage**: Fixed issue where English posts (`desert-geometry.mdx`) were incorrectly tagged as "Art & Design" in Japanese views by standardizing naming conventions.
+* **Arabic Layout**: Resolved text alignment and direction issues for Arabic content (`dir="rtl"`).
+* **Japanese Content Leakage**: Fixed issue where English posts (`desert-geometry.mdx`) were incorrectly tagged as "Art & Design" in Japanese views by standardizing naming conventions.
 
 ## [1.3.1] - 2026-01-14
 
 ### Added
 
-- Reusable `BlogPostTemplate` component for consistent blog styling
-- Automatic reading time calculation using `reading-time` package
-- `formatDate` utility function for consistent date formatting
-- Keyword research data structure (`keyword-research.ts`, gitignored)
-- Content planning dashboard (development-only, gitignored)
+* Reusable `BlogPostTemplate` component for consistent blog styling
+* Automatic reading time calculation using `reading-time` package
+* `formatDate` utility function for consistent date formatting
+* Keyword research data structure (`keyword-research.ts`, gitignored)
+* Content planning dashboard (development-only, gitignored)
 
 ### Changed
 
-- Refactored blog post page to use `BlogPostTemplate` (123 lines → 38 lines)
-- Blog posts now display reading time, category badges, and hero images
-- Updated `.gitignore` to exclude private planning tools
-- Updated project to Next.js 16 to sync with `package.json` version
-- Refreshed tutorial content and images for Next.js 16
+* Refactored blog post page to use `BlogPostTemplate` (123 lines → 38 lines)
+* Blog posts now display reading time, category badges, and hero images
+* Updated `.gitignore` to exclude private planning tools
+* Updated project to Next.js 16 to sync with `package.json` version
+* Refreshed tutorial content and images for Next.js 16
 
 ## [1.3.0] - 2026-01-13
 
 ### Added
 
-- Google Analytics (GA4) integration with secure environment variable configuration
-- Google AdSense setup with conditional loading
-- Helper library (`src/lib/gtag.ts`) for type-safe analytics tracking
-- Client-side `GoogleAnalytics` component for App Router compatibility
-- Environment variable support (`NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_URL`)
-- TypeScript declarations for gtag API
+* Google Analytics (GA4) integration with secure environment variable configuration
+* Google AdSense setup with conditional loading
+* Helper library (`src/lib/gtag.ts`) for type-safe analytics tracking
+* Client-side `GoogleAnalytics` component for App Router compatibility
+* Environment variable support (`NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_URL`)
+* TypeScript declarations for gtag API
 
 ### Changed
 
-- Updated blog tutorial from Next.js 14 to Next.js 15
-- Switched primary font from Geist to Outfit for improved readability
-- Enhanced blog post typography with larger headings (H1: 48px, H2: 36px with borders)
-- Improved spacing and visual hierarchy in blog content
-- Refactored analytics implementation to use dedicated components
-- Updated cover image for tutorial post
+* Updated blog tutorial from Next.js 14 to Next.js 15
+* Switched primary font from Geist to Outfit for improved readability
+* Enhanced blog post typography with larger headings (H1: 48px, H2: 36px with borders)
+* Improved spacing and visual hierarchy in blog content
+* Refactored analytics implementation to use dedicated components
+* Updated cover image for tutorial post
 
 ### Security
 
-- Removed hardcoded API keys and tracking IDs from source code
-- Implemented environment variable-based configuration for all sensitive data
-- Ensured `.env.local` is properly gitignored
+* Removed hardcoded API keys and tracking IDs from source code
+* Implemented environment variable-based configuration for all sensitive data
+* Ensured `.env.local` is properly gitignored
 
 ## [1.2.0] - 2026-01-10
 
 ### Added
 
-- Professional services showcase on homepage (Software, Games, Translation)
-- Trilingual tagline (日本語・English・العربية)
-- Business-focused homepage aligned with NEO WHISPER business plan
-- Back button on blog post pages
-- Styled date badges on blog posts
-- Improved blog post page with glassmorphism design
-- AdSense component (ready for future activation)
-- TODO.md for task tracking
-- CHANGELOG.md for version tracking
+* Professional services showcase on homepage (Software, Games, Translation)
+* Trilingual tagline (日本語・English・العربية)
+* Business-focused homepage aligned with NEO WHISPER business plan
+* Back button on blog post pages
+* Styled date badges on blog posts
+* Improved blog post page with glassmorphism design
+* AdSense component (ready for future activation)
+* TODO.md for task tracking
+* CHANGELOG.md for version tracking
 
 ### Changed
 
-- Consolidated duplicate posts folders (`src/posts` → `src/content/posts`)
-- Improved mobile responsiveness on blog post pages
-- Enhanced glassmorphism UI throughout site
+* Consolidated duplicate posts folders (`src/posts` → `src/content/posts`)
+* Improved mobile responsiveness on blog post pages
+* Enhanced glassmorphism UI throughout site
 
 ### Fixed
 
-- Date display styling on blog cards
-- Missing navigation between pages
-- Post folder organization
+* Date display styling on blog cards
+* Missing navigation between pages
+* Post folder organization
 
 ## [1.1.0] - 2026-01-10
 
 ### Added
 
-- Glassmorphism UI design
-- Custom domain neowhisper.net with SSL
-- Vercel deployment
+* Glassmorphism UI design
+* Custom domain neowhisper.net with SSL
+* Vercel deployment
 
 ## [1.0.0] - 2026-01-08
 
 ### Added
 
-- Initial blog setup with Next.js 15
-- MDX support for blog posts
-- First blog posts (Welcome, Desert Geometry)
+* Initial blog setup with Next.js 15
+* MDX support for blog posts
+* First blog posts (Welcome, Desert Geometry)

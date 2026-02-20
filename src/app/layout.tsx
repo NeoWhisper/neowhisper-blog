@@ -7,9 +7,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "highlight.js/styles/github-dark.css"; // Syntax highlighting theme
+import { Suspense } from "react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieBanner from "@/components/CookieBanner";
-import { Suspense } from "react";
+import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -38,6 +39,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
         <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <AuthCodeRedirect />
+        </Suspense>
         {children}
         {/* Cookie consent banner */}
         <Suspense fallback={null}>

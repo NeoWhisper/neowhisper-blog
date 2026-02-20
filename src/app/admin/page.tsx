@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createPost } from "./actions";
+import { adminStrings, normalizeAdminLang } from "./i18n";
 
 type LocaleValue = "en" | "ja" | "ar";
 
@@ -26,6 +28,10 @@ const inputClass =
 const labelClass = "block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1.5";
 
 export default function AdminPage() {
+  const searchParams = useSearchParams();
+  const lang = normalizeAdminLang(searchParams.get("lang"));
+  const t = adminStrings[lang].page;
+
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -54,11 +60,11 @@ export default function AdminPage() {
     setIsLoading(false);
 
     if (!result.success) {
-      setStatus({ type: "error", message: result.error ?? "Failed to create draft." });
+      setStatus({ type: "error", message: result.error ?? t.draftFailed });
       return;
     }
 
-    setStatus({ type: "success", message: result.message ?? "Draft created successfully." });
+    setStatus({ type: "success", message: result.message ?? t.draftCreated });
     setForm(initialState);
   }
 
@@ -76,12 +82,12 @@ export default function AdminPage() {
             </svg>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">Admin Workspace</p>
-            <h1 className="text-2xl font-bold text-white leading-tight">New Draft Post</h1>
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">{t.workspace}</p>
+            <h1 className="text-2xl font-bold text-white leading-tight">{t.newDraft}</h1>
           </div>
         </div>
         <p className="text-sm text-gray-400 mt-1 ml-12">
-          Create a multilingual post stored as a draft in Supabase.
+          {t.subtitle}
         </p>
       </div>
 
@@ -101,7 +107,7 @@ export default function AdminPage() {
 
             {/* Title */}
             <div>
-              <label htmlFor="admin-title" className={labelClass}>Title <span className="text-purple-400">*</span></label>
+              <label htmlFor="admin-title" className={labelClass}>{t.title} <span className="text-purple-400">*</span></label>
               <input
                 id="admin-title"
                 name="title"
@@ -109,25 +115,26 @@ export default function AdminPage() {
                 required
                 value={form.title}
                 onChange={(e) => updateField("title", e.target.value)}
-                placeholder="My awesome post title"
+                placeholder={t.placeholderTitle}
                 className={inputClass}
               />
             </div>
 
             {/* Slug */}
             <div>
-              <label htmlFor="admin-slug" className={labelClass}>Slug <span className="text-purple-400">*</span></label>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-500 text-sm font-mono">/blog/</span>
+              <label htmlFor="admin-slug" className={labelClass}>{t.slug} <span className="text-purple-400">*</span></label>
+              <p className="text-xs text-gray-500 mb-1.5">{t.slugHint}</p>
+              <div className="flex rounded-xl border border-white/10 bg-white/5 overflow-hidden focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20">
+                <span className="flex items-center border-r border-white/10 bg-white/[0.03] px-4 text-sm font-mono text-gray-500 shrink-0">/blog/</span>
                 <input
                   id="admin-slug"
                   name="slug"
                   type="text"
                   required
                   value={form.slug}
-                  onChange={(e) => updateField("slug", e.target.value)}
-                  placeholder="my-awesome-post"
-                  className={`${inputClass} pl-14 font-mono`}
+                  onChange={(e) => updateField("slug", e.target.value.replace(/^\/+|\/+$/g, "").replace(/\/+/g, "-"))}
+                  placeholder={t.placeholderSlug}
+                  className="flex-1 min-w-0 bg-transparent px-4 py-3 text-sm text-gray-100 placeholder-gray-500 outline-none font-mono"
                 />
               </div>
             </div>
@@ -135,7 +142,7 @@ export default function AdminPage() {
             {/* Locale + Category */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="admin-locale" className={labelClass}>Language</label>
+                <label htmlFor="admin-locale" className={labelClass}>{t.language}</label>
                 <div className="relative">
                   <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-base leading-none">
                     {LOCALES.find((l) => l.value === form.locale)?.flag}
@@ -157,14 +164,14 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label htmlFor="admin-category" className={labelClass}>Category <span className="text-gray-600">(optional)</span></label>
+                <label htmlFor="admin-category" className={labelClass}>{t.category} <span className="text-gray-600">{t.categoryOptional}</span></label>
                 <input
                   id="admin-category"
                   name="category"
                   type="text"
                   value={form.category}
                   onChange={(e) => updateField("category", e.target.value)}
-                  placeholder="e.g. TypeScript, DevOps"
+                  placeholder={t.placeholderCategory}
                   className={inputClass}
                 />
               </div>
@@ -172,13 +179,13 @@ export default function AdminPage() {
 
             {/* Excerpt */}
             <div>
-              <label htmlFor="admin-excerpt" className={labelClass}>Excerpt <span className="text-gray-600">(optional)</span></label>
+              <label htmlFor="admin-excerpt" className={labelClass}>{t.excerpt} <span className="text-gray-600">{t.excerptOptional}</span></label>
               <textarea
                 id="admin-excerpt"
                 name="excerpt"
                 value={form.excerpt}
                 onChange={(e) => updateField("excerpt", e.target.value)}
-                placeholder="A short description shown in blog cards…"
+                placeholder={t.placeholderExcerpt}
                 rows={2}
                 className={`${inputClass} resize-none`}
               />
@@ -188,10 +195,10 @@ export default function AdminPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="admin-content" className={`${labelClass} mb-0`}>
-                  Markdown Content <span className="text-purple-400">*</span>
+                  {t.content} <span className="text-purple-400">*</span>
                 </label>
                 <span className="text-xs text-gray-500 font-mono tabular-nums">
-                  {wordCount} words · {charCount} chars
+                  {wordCount} {t.wordLabel} · {charCount} {t.charLabel}
                 </span>
               </div>
               <textarea
@@ -200,7 +207,7 @@ export default function AdminPage() {
                 required
                 value={form.content}
                 onChange={(e) => updateField("content", e.target.value)}
-                placeholder={"# Post Title\n\nStart writing your post in Markdown…"}
+                placeholder={t.placeholderContent}
                 rows={16}
                 className={`${inputClass} font-mono resize-y leading-relaxed`}
               />
@@ -229,7 +236,7 @@ export default function AdminPage() {
                 onClick={() => { setForm(initialState); setStatus(null); }}
                 className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
               >
-                Clear form
+                {t.clearForm}
               </button>
               <button
                 type="submit"
@@ -242,14 +249,14 @@ export default function AdminPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Saving…
+                    {t.saving}
                   </>
                 ) : (
                   <>
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
                     </svg>
-                    Save Draft
+                    {t.saveDraft}
                   </>
                 )}
               </button>
@@ -259,7 +266,7 @@ export default function AdminPage() {
 
         {/* Footer note */}
         <p className="mt-4 text-center text-xs text-gray-600">
-          Posts are saved as <span className="text-gray-500 font-mono">status: draft</span> and won&apos;t appear publicly until published.
+          {t.footerNote}
         </p>
       </div>
     </main>

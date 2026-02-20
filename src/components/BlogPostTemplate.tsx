@@ -20,8 +20,9 @@ function getCategoryUrl(category: string, lang: string): string {
 }
 
 function toAbsoluteUrl(url: string): string {
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
+  return url.startsWith("http://") || url.startsWith("https://")
+    ? url
+    : `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
 function getUiText(lang: string) {
@@ -46,9 +47,11 @@ function getUiText(lang: string) {
 
 function getAuthorDisplayName(lang: string): string {
   const currentLang = normalizeLang(lang);
-  if (currentLang === "ar") return "يوسف القاضي";
-  if (currentLang === "ja") return "アルカーディ　ヨセフ";
-  return "Yousif Alqadi";
+  const names: Record<string, string> = {
+    ar: "يوسف القاضي",
+    ja: "アルカーディ　ヨセフ",
+  };
+  return names[currentLang] || "Yousif Alqadi";
 }
 
 function estimateWordCount(mdxSource: string): number {
@@ -60,8 +63,7 @@ function estimateWordCount(mdxSource: string): number {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!plain) return 0;
-  return plain.split(" ").length;
+  return plain ? plain.split(" ").length : 0;
 }
 
 function shouldRenderAd(mdxSource: string): boolean {

@@ -47,8 +47,19 @@ export const adminStrings: Record<
       publish: string;
       unpublish: string;
       delete: string;
+      edit: string;
       confirmDelete: string;
       emptyState: string;
+    };
+    edit: {
+      title: string;
+      subtitle: string;
+      saveChanges: string;
+      saving: string;
+      success: string;
+      failed: string;
+      backToPosts: string;
+      notFound: string;
     };
   }
 > = {
@@ -97,8 +108,19 @@ export const adminStrings: Record<
       publish: "Publish",
       unpublish: "Unpublish",
       delete: "Delete",
+      edit: "Edit",
       confirmDelete: "Are you sure you want to delete this post?",
       emptyState: "No posts found.",
+    },
+    edit: {
+      title: "Edit Post",
+      subtitle: "Update the content and settings for your existing post.",
+      saveChanges: "Save Changes",
+      saving: "Saving…",
+      success: "Post updated successfully.",
+      failed: "Failed to update post.",
+      backToPosts: "← Back to Posts",
+      notFound: "Post not found.",
     },
   },
   ja: {
@@ -146,8 +168,19 @@ export const adminStrings: Record<
       publish: "公開する",
       unpublish: "非公開にする",
       delete: "削除",
+      edit: "編集",
       confirmDelete: "本当にこの投稿を削除しますか？",
       emptyState: "投稿が見つかりません。",
+    },
+    edit: {
+      title: "投稿を編集",
+      subtitle: "既存の投稿のコンテンツと設定を更新します。",
+      saveChanges: "変更を保存",
+      saving: "保存中…",
+      success: "投稿を更新しました。",
+      failed: "投稿の更新に失敗しました。",
+      backToPosts: "← 投稿一覧に戻る",
+      notFound: "投稿が見つかりません。",
     },
   },
 };

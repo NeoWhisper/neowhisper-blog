@@ -174,3 +174,58 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   revalidatePath("/admin/posts");
   return { success: true, message: "Post deleted successfully." };
 }
+
+export type UpdatePostInput = {
+  postId: string;
+  title: string;
+  slug: string;
+  locale: PostLocale;
+  excerpt?: string;
+  content: string;
+  category?: string;
+};
+
+export async function updatePostDetail(input: UpdatePostInput): Promise<ActionResult> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || !isAllowedAdminEmail(user.email)) {
+    return { error: "Access denied." };
+  }
+
+  const slug = normalizeSlug(input.slug);
+  if (!slug) return { error: "Slug is invalid after normalization." };
+  const locale = normalizeLocale(input.locale);
+
+  const { data: post, error: fetchErr } = await supabase
+    .from("posts_dynamic")
+    .select("translation_group_id")
+    .eq("id", input.postId)
+    .single();
+
+  if (fetchErr || !post) return { error: "Failed to find post." };
+
+  await supabase
+    .from("translation_groups")
+    .update({ slug })
+    .eq("id", post.translation_group_id);
+
+  const { error } = await supabase
+    .from("posts_dynamic")
+    .update({
+      title: input.title.trim(),
+      locale,
+      excerpt: input.excerpt?.trim() || null,
+      content: input.content.trim(),
+      category: input.category?.trim() || null,
+    })
+    .eq("id", input.postId);
+
+  if (error) {
+    return { error: `Failed to update post: ${error.message}` };
+  }
+
+  revalidatePath("/blog");
+  revalidatePath("/admin/posts");
+  return { success: true, message: "Post updated successfully.", postId: input.postId };
+}

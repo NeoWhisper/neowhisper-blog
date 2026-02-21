@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { deletePost, updatePostStatus } from "../actions";
 
 import { adminStrings } from "../i18n";
@@ -101,6 +102,13 @@ export default function PostsTable({ posts, dict }: PostsTableProps) {
                                             {dict.unpublish}
                                         </button>
                                     )}
+                                    <span className="text-white/10">|</span>
+                                    <Link
+                                        href={`/admin/edit/${post.id}`}
+                                        className="text-blue-400 hover:text-blue-300 transition-colors"
+                                    >
+                                        {dict.edit}
+                                    </Link>
                                     <span className="text-white/10">|</span>
                                     <button
                                         disabled={isProcessing === post.id}

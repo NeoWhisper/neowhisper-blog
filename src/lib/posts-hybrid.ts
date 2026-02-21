@@ -81,8 +81,8 @@ export async function getHybridPosts(locale: string): Promise<HybridPost[]> {
   ] as HybridPost[]);
 
   return combined.sort((a, b) => {
-    const aTime = new Date(a.publishedAt).getTime();
-    const bTime = new Date(b.publishedAt).getTime();
+    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
     return bTime - aTime;
   });
 }

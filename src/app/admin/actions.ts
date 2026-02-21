@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
+import { logger } from "@/lib/logger";
 
 type PostLocale = "en" | "ja" | "ar";
 
@@ -76,7 +77,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .maybeSingle();
 
   if (groupFetchError) {
-    console.error("[Admin:CreatePost] groupFetchError:", groupFetchError.message);
+    await logger.error("Admin:CreatePost", "groupFetchError", groupFetchError);
     return { error: `Failed to check translation group: ${groupFetchError.message}` };
   }
 
@@ -90,7 +91,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
       .single();
 
     if (createGroupError || !createdGroup) {
-      console.error("[Admin:CreatePost] createGroupError:", createGroupError?.message);
+      await logger.error("Admin:CreatePost", "createGroupError", createGroupError);
       return {
         error: `Failed to create translation group: ${createGroupError?.message ?? "unknown error"}`,
       };
@@ -115,7 +116,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .single();
 
   if (createPostError || !post) {
-    console.error("[Admin:CreatePost] createPostError:", createPostError?.message);
+    await logger.error("Admin:CreatePost", "createPostError", createPostError);
     return {
       error: `Failed to create post: ${createPostError?.message ?? "unknown error"}`,
     };
@@ -145,7 +146,7 @@ export async function updatePostStatus(postId: string, status: "draft" | "publis
     .eq("id", postId);
 
   if (error) {
-    console.error("[Admin:UpdateStatus] error:", error.message);
+    await logger.error("Admin:UpdateStatus", "error", error);
     return { error: `Failed to update status: ${error.message}` };
   }
 
@@ -168,7 +169,7 @@ export async function deletePost(postId: string): Promise<ActionResult> {
     .eq("id", postId);
 
   if (error) {
-    console.error("[Admin:DeletePost] error:", error.message);
+    await logger.error("Admin:DeletePost", "error", error);
     return { error: `Failed to delete post: ${error.message}` };
   }
 
@@ -224,7 +225,7 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
     .eq("id", input.postId);
 
   if (error) {
-    console.error("[Admin:UpdateDetail] error:", error.message);
+    await logger.error("Admin:UpdateDetail", "error", error);
     return { error: `Failed to update post: ${error.message}` };
   }
 

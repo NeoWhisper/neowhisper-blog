@@ -75,6 +75,12 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           >
             {t.managePosts}
           </Link>
+          <Link
+            href={`/admin/logs${lang === "ja" ? "?lang=ja" : ""}`}
+            className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${pathname === "/admin/logs" ? "border-purple-400 text-purple-400" : "border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200"}`}
+          >
+            {t.logs}
+          </Link>
         </div>
       </div>
 

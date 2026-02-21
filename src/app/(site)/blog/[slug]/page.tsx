@@ -9,6 +9,7 @@ import {
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
 import { getBaseSlug, getPostLanguage, getPosts } from "@/lib/posts";
+import { logger } from "@/lib/logger";
 
 const baseUrl = "https://www.neowhisper.net";
 
@@ -96,9 +97,9 @@ export async function generateMetadata({
     description: post.excerpt,
     robots: isWelcomePost
       ? {
-          index: false,
-          follow: true,
-        }
+        index: false,
+        follow: true,
+      }
       : undefined,
     alternates: {
       canonical: buildPostUrl(post.slug, post.locale, post.source),
@@ -121,13 +122,31 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
   const { lang } = await searchParams;
   const resolvedLang = resolveLanguage(slug, lang);
 
-  const post = await getHybridPost(slug, resolvedLang);
-  if (!post) {
+  // Use a separate block for data fetching to satisfy the linter
+  // while keeping our diagnostic logging for production debugging.
+  const data = await (async () => {
+    try {
+      const post = await getHybridPost(slug, resolvedLang);
+      if (!post) {
+        console.log(`[BlogPost] Post not found: ${slug}, lang: ${resolvedLang}`);
+        return null;
+      }
+      const [languageVariants, relatedPosts] = await Promise.all([
+        getHybridLanguageVariants(post.slug, post.locale),
+        getHybridRelatedPosts(post, 3),
+      ]);
+      return { post, languageVariants, relatedPosts };
+    } catch (error) {
+      await logger.error("BlogPost:Data", `Error fetching blog post: ${slug}`, error);
+      throw error;
+    }
+  })();
+
+  if (!data) {
     notFound();
   }
 
-  const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
-  const relatedPosts = await getHybridRelatedPosts(post, 3);
+  const { post, languageVariants, relatedPosts } = data;
 
   return (
     <BlogPostTemplate

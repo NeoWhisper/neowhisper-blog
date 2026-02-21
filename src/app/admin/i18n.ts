@@ -8,6 +8,7 @@ export const adminStrings: Record<
       internalOnly: string;
       newPost: string;
       managePosts: string;
+      logs: string;
     };
     page: {
       workspace: string;
@@ -63,6 +64,15 @@ export const adminStrings: Record<
       backToPosts: string;
       notFound: string;
     };
+    logs: {
+      title: string;
+      subtitle: string;
+      level: string;
+      module: string;
+      message: string;
+      time: string;
+      noLogs: string;
+    };
   }
 > = {
   en: {
@@ -71,6 +81,7 @@ export const adminStrings: Record<
       internalOnly: "NeoWhisper Admin · Internal use only",
       newPost: "New Post",
       managePosts: "Manage Posts",
+      logs: "Error Logs",
     },
     page: {
       workspace: "Admin Workspace",
@@ -126,6 +137,15 @@ export const adminStrings: Record<
       backToPosts: "← Back to Posts",
       notFound: "Post not found.",
     },
+    logs: {
+      title: "Error Logs",
+      subtitle: "Review system errors captured from production and local environments.",
+      level: "Level",
+      module: "Module",
+      message: "Message",
+      time: "Time",
+      noLogs: "No error logs found.",
+    },
   },
   ja: {
     layout: {
@@ -133,6 +153,7 @@ export const adminStrings: Record<
       internalOnly: "NeoWhisper 管理 · 社内利用のみ",
       newPost: "新規投稿",
       managePosts: "投稿管理",
+      logs: "エラーログ",
     },
     page: {
       workspace: "管理ワークスペース",
@@ -187,6 +208,15 @@ export const adminStrings: Record<
       failed: "投稿の更新に失敗しました。",
       backToPosts: "← 投稿一覧に戻る",
       notFound: "投稿が見つかりません。",
+    },
+    logs: {
+      title: "Error Logs",
+      subtitle: "Review system errors captured from production and local environments.",
+      level: "Level",
+      module: "Module",
+      message: "Message",
+      time: "Time",
+      noLogs: "No error logs found.",
     },
   },
 };

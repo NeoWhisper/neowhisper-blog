@@ -81,7 +81,14 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
-* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`)
+* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`).
+* Admin dashboard: Refactored `AdminPage` for dynamic hydration from URL params and functional state initialization.
+* Bug fix: Resolved TypeScript/ESLint standalone expression errors in `posts-table.tsx` and `edit-form.tsx` using `void` ternary pattern.
+* Security: Updated CSP to whitelist Perplexity CDN (`r2cdn.perplexity.ai`) and additional Google AdSense domains, resolving font and script blocking errors.
+* Observability: Implemented a persistent, Supabase-backed logging system (`src/lib/logger.ts`) to capture production errors with stack traces.
+* Admin Dashboard: Added a new "Error Logs" management page (`/admin/logs`) to review system errors recorded in the database.
+* Refactoring: Satisfied React linting rules by decoupling data fetching from JSX construction in dynamic blog pages.
+* Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
 
 ## [1.7.0] - 2026-02-09
 

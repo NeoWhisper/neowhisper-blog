@@ -1,7 +1,7 @@
 # NeoWhisper Engineering Roadmap (Internal)
 
-**Last Updated:** February 16, 2026  
-**Current Version:** v1.7.0  
+**Last Updated:** February 21, 2026  
+**Current Version:** v1.9.0  
 **Purpose:** Internal planning for engineering, infrastructure, AI-assisted workflows, and experiments.
 
 ---
@@ -10,7 +10,8 @@
 
 | Date | Version | What Was Completed |
 | --- | --- | --- |
-| 2026-02-16 | v1.7.0 | Business identity and service positioning update across core pages; security fix removing empty CORS headers from `robots.txt` and `sitemap.xml`. |
+| 2026-02-21 | v1.9.0 | Admin Dashboard refactor: dynamic hydration from URL parameters, functional state initialization, and fixed TypeScript expression errors. |
+| 2026-02-16 | v1.8.x-v1.8.2 | Business identity update; SEO and AdSense asset fixes; removed empty CORS headers from `robots.txt` and `sitemap.xml`. |
 | 2026-02-10 | v1.6.1 | Security hardening release: XSS fix and Next.js upgraded to `16.1.5`. |
 | 2026-02-09 | v1.6.0 | Contact pipeline maturity (Turnstile + Resend), AdSense/CSP readiness, and major multilingual marketing foundation work. |
 | 2026-02-02 | v1.5.1 | Playwright E2E testing introduced plus security headers and crawler endpoint hardening. |
@@ -30,16 +31,19 @@
 ## Active Sprint (0-30 days)
 
 ### Content Operations
+
 - [ ] Add MDX quality checks (frontmatter completeness, date format, language parity hints).
 - [ ] Define a stricter editorial QA checklist for EN/JA/AR consistency.
 - [ ] Normalize category naming and taxonomy mapping across all languages.
 
 ### Conversion and Trust
+
 - [ ] Expand client-facing case studies with measurable outcomes.
 - [ ] Tighten service package clarity (scope, deliverables, and expected timelines).
 - [ ] Improve public trust signals while keeping personal data exposure minimal.
 
 ### SEO and Discoverability
+
 - [ ] Evaluate migration plan for cleaner language routes (`/[lang]/...`).
 - [ ] Add internal linking standards per article type.
 - [ ] Review schema completeness for service and project pages.
@@ -49,17 +53,20 @@
 ## Near-Term (31-90 days)
 
 ### AI and Automation Track
+
 - [ ] Build internal AI-assisted translation QA workflow (terminology consistency and style checks).
 - [ ] Create AI-assisted metadata draft workflow with mandatory human approval.
 - [ ] Build a lightweight internal prompt library for article outlines, localization review, and release notes.
 
 ### Infrastructure and Reliability
+
 - [ ] Add structured error/event logging for contact submission flow.
 - [ ] Add rate-limit and anti-spam observability for contact endpoint.
 - [ ] Add synthetic health checks for critical public paths.
 - [ ] Define dependency and security update cadence with ownership.
 
 ### Developer Experience
+
 - [ ] Add scripts for repo health checks (content lint + link checks + metadata sanity).
 - [ ] Reduce repetitive copy/translations via shared dictionaries where practical.
 - [ ] Improve CI feedback ergonomics (clear failing summaries and remediation hints).

@@ -15,14 +15,40 @@ interface LogEntry {
 
 /**
  * NeoWhisper Logger
- * Saves logs to Supabase and optionally console
+ * Saves logs to Supabase and optionally console.
+ * Includes security sanitization to prevent leaking sensitive data.
  */
+
+const SENSITIVE_KEYS = ["password", "token", "secret", "key", "cookie", "auth", "email"];
+
+function sanitize(obj: unknown): unknown {
+    if (!obj || typeof obj !== "object") return obj;
+
+    // Handle arrays
+    if (Array.isArray(obj)) return obj.map((item: unknown) => sanitize(item));
+
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+        if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
+            sanitized[key] = "********";
+        } else if (typeof value === "object") {
+            sanitized[key] = sanitize(value);
+        } else {
+            sanitized[key] = value;
+        }
+    }
+    return sanitized;
+}
+
 export const logger = {
     async log(entry: LogEntry) {
+        // Sanitize context before logging
+        const sanitizedContext = sanitize(entry.context);
+
         // 1. Always log to console in development
         if (process.env.NODE_ENV === "development") {
             const consoleMethod = entry.level === "error" ? "error" : entry.level === "warn" ? "warn" : "log";
-            console[consoleMethod](`[${entry.module}] ${entry.message}`, entry.context || "");
+            console[consoleMethod](`[${entry.module}] ${entry.message}`, sanitizedContext || "");
         }
 
         // 2. Persist to Supabase
@@ -43,7 +69,7 @@ export const logger = {
                 module: entry.module,
                 message: entry.message,
                 stack: entry.stack,
-                context: entry.context,
+                context: sanitizedContext,
                 user_email: user_email,
                 url: entry.url,
             });

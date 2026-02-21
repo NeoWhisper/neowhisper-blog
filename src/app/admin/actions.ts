@@ -130,3 +130,47 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     postId: String(post.id),
   };
 }
+
+export async function updatePostStatus(postId: string, status: "draft" | "published"): Promise<ActionResult> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || !isAllowedAdminEmail(user.email)) {
+    return { error: "Access denied." };
+  }
+
+  const { error } = await supabase
+    .from("posts_dynamic")
+    .update({ status })
+    .eq("id", postId);
+
+  if (error) {
+    return { error: `Failed to update status: ${error.message}` };
+  }
+
+  revalidatePath("/blog");
+  revalidatePath("/admin/posts");
+  return { success: true, message: `Post is now ${status}.` };
+}
+
+export async function deletePost(postId: string): Promise<ActionResult> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || !isAllowedAdminEmail(user.email)) {
+    return { error: "Access denied." };
+  }
+
+  const { error } = await supabase
+    .from("posts_dynamic")
+    .delete()
+    .eq("id", postId);
+
+  if (error) {
+    return { error: `Failed to delete post: ${error.message}` };
+  }
+
+  revalidatePath("/blog");
+  revalidatePath("/admin/posts");
+  return { success: true, message: "Post deleted successfully." };
+}

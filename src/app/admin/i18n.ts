@@ -6,6 +6,8 @@ export const adminStrings: Record<
     layout: {
       backToSite: string;
       internalOnly: string;
+      newPost: string;
+      managePosts: string;
     };
     page: {
       workspace: string;
@@ -34,12 +36,28 @@ export const adminStrings: Record<
       wordLabel: string;
       charLabel: string;
     };
+    posts: {
+      title: string;
+      subtitle: string;
+      status: string;
+      locale: string;
+      actions: string;
+      draft: string;
+      published: string;
+      publish: string;
+      unpublish: string;
+      delete: string;
+      confirmDelete: string;
+      emptyState: string;
+    };
   }
 > = {
   en: {
     layout: {
       backToSite: "← Back to site",
       internalOnly: "NeoWhisper Admin · Internal use only",
+      newPost: "New Post",
+      managePosts: "Manage Posts",
     },
     page: {
       workspace: "Admin Workspace",
@@ -68,11 +86,27 @@ export const adminStrings: Record<
       wordLabel: "words",
       charLabel: "chars",
     },
+    posts: {
+      title: "Manage Posts",
+      subtitle: "Review, publish, unpublish, and delete blog posts.",
+      status: "Status",
+      locale: "Locale",
+      actions: "Actions",
+      draft: "Draft",
+      published: "Published",
+      publish: "Publish",
+      unpublish: "Unpublish",
+      delete: "Delete",
+      confirmDelete: "Are you sure you want to delete this post?",
+      emptyState: "No posts found.",
+    },
   },
   ja: {
     layout: {
       backToSite: "← サイトに戻る",
       internalOnly: "NeoWhisper 管理 · 社内利用のみ",
+      newPost: "新規投稿",
+      managePosts: "投稿管理",
     },
     page: {
       workspace: "管理ワークスペース",
@@ -100,6 +134,20 @@ export const adminStrings: Record<
       placeholderContent: "# タイトル\n\nMarkdown で本文を入力…",
       wordLabel: "単語",
       charLabel: "文字",
+    },
+    posts: {
+      title: "投稿管理",
+      subtitle: "ブログ投稿のレビュー、公開、非公開、削除を行います。",
+      status: "ステータス",
+      locale: "言語",
+      actions: "アクション",
+      draft: "下書き",
+      published: "公開済",
+      publish: "公開する",
+      unpublish: "非公開にする",
+      delete: "削除",
+      confirmDelete: "本当にこの投稿を削除しますか？",
+      emptyState: "投稿が見つかりません。",
     },
   },
 };

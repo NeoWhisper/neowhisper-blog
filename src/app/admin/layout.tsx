@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Suspense } from "react";
 import { adminStrings, normalizeAdminLang } from "./i18n";
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const lang = normalizeAdminLang(searchParams.get("lang"));
 
   const t = adminStrings[lang].layout;
-  const base = "/admin";
 
   return (
     <div
@@ -38,13 +38,13 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </span>
             <span className="text-gray-600">|</span>
             <Link
-              href={lang === "ja" ? base : `${base}?lang=ja`}
+              href={lang === "ja" ? pathname : `${pathname}?lang=ja`}
               className={`text-xs ${lang === "ja" ? "text-purple-400 font-medium" : "text-gray-500 hover:text-gray-300"}`}
             >
               日本語
             </Link>
             <Link
-              href={lang === "en" ? base : `${base}?lang=en`}
+              href={lang === "en" ? pathname : `${pathname}?lang=en`}
               className={`text-xs ${lang === "en" ? "text-purple-400 font-medium" : "text-gray-500 hover:text-gray-300"}`}
             >
               EN
@@ -59,6 +59,24 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
       </header>
+
+      {/* Admin Nav Tabs */}
+      <div className="border-b border-white/8 bg-black/10">
+        <div className="mx-auto flex max-w-3xl items-center gap-6 px-4 sm:px-6 lg:px-8">
+          <Link
+            href={`/admin${lang === "ja" ? "?lang=ja" : ""}`}
+            className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${pathname === "/admin" ? "border-purple-400 text-purple-400" : "border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200"}`}
+          >
+            {t.newPost}
+          </Link>
+          <Link
+            href={`/admin/posts${lang === "ja" ? "?lang=ja" : ""}`}
+            className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${pathname === "/admin/posts" ? "border-purple-400 text-purple-400" : "border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200"}`}
+          >
+            {t.managePosts}
+          </Link>
+        </div>
+      </div>
 
       <div className="flex-1">{children}</div>
 

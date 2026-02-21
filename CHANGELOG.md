@@ -81,7 +81,10 @@ All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
-* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`)
+* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`).
+* Admin dashboard: Refactored `AdminPage` for dynamic hydration from URL params and functional state initialization.
+* Bug fix: Resolved TypeScript/ESLint standalone expression errors in `posts-table.tsx` and `edit-form.tsx` using `void` ternary pattern.
+* Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
 
 ## [1.7.0] - 2026-02-09
 

@@ -37,14 +37,12 @@ export default function EditForm({ initialData, tCommon, tEdit }: EditFormProps)
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-    function updateField<K extends keyof typeof initialData>(
+    const updateField = <K extends keyof typeof initialData>(
         key: K,
         value: (typeof initialData)[K],
-    ) {
-        setForm((prev) => ({ ...prev, [key]: value }));
-    }
+    ) => setForm((prev) => ({ ...prev, [key]: value }));
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsLoading(true);
         setStatus(null);
@@ -61,13 +59,10 @@ export default function EditForm({ initialData, tCommon, tEdit }: EditFormProps)
 
         setIsLoading(false);
 
-        if (!result.success) {
-            setStatus({ type: "error", message: result.error ?? tEdit.failed });
-            return;
-        }
-
-        setStatus({ type: "success", message: result.message ?? tEdit.success });
-    }
+        void (!result.success
+            ? (console.error("[EditForm:Submit] error:", result.error), setStatus({ type: "error", message: result.error ?? tEdit.failed }))
+            : setStatus({ type: "success", message: result.message ?? tEdit.success }));
+    };
 
     const charCount = form.content.length;
     const wordCount = form.content.trim() ? form.content.trim().split(/\s+/).length : 0;

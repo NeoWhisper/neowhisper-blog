@@ -48,6 +48,8 @@ export const adminStrings: Record<
       unpublish: string;
       delete: string;
       edit: string;
+      translations: string;
+      addTranslation: string;
       confirmDelete: string;
       emptyState: string;
     };
@@ -109,6 +111,8 @@ export const adminStrings: Record<
       unpublish: "Unpublish",
       delete: "Delete",
       edit: "Edit",
+      translations: "Translations",
+      addTranslation: "Add Translation",
       confirmDelete: "Are you sure you want to delete this post?",
       emptyState: "No posts found.",
     },
@@ -169,6 +173,8 @@ export const adminStrings: Record<
       unpublish: "非公開にする",
       delete: "削除",
       edit: "編集",
+      translations: "他言語",
+      addTranslation: "翻訳を追加",
       confirmDelete: "本当にこの投稿を削除しますか？",
       emptyState: "投稿が見つかりません。",
     },

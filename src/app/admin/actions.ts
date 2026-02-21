@@ -32,19 +32,16 @@ function normalizeSlug(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function normalizeLocale(value: string): PostLocale {
-  if (value === "ja" || value === "ar") return value;
-  return "en";
-}
+const normalizeLocale = (value: string): PostLocale =>
+  (value === "ja" || value === "ar") ? value : "en";
 
-function hasRequiredContent(input: CreatePostInput): boolean {
-  return Boolean(
-    input.title.trim() &&
-    input.slug.trim() &&
-    input.content.trim() &&
+const hasRequiredContent = (input: CreatePostInput): boolean =>
+  Boolean(
+    input.title?.trim() &&
+    input.slug?.trim() &&
+    input.content?.trim() &&
     input.locale,
   );
-}
 
 export async function createPost(input: CreatePostInput): Promise<ActionResult> {
   if (!hasRequiredContent(input)) {
@@ -79,6 +76,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .maybeSingle();
 
   if (groupFetchError) {
+    console.error("[Admin:CreatePost] groupFetchError:", groupFetchError.message);
     return { error: `Failed to check translation group: ${groupFetchError.message}` };
   }
 
@@ -92,6 +90,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
       .single();
 
     if (createGroupError || !createdGroup) {
+      console.error("[Admin:CreatePost] createGroupError:", createGroupError?.message);
       return {
         error: `Failed to create translation group: ${createGroupError?.message ?? "unknown error"}`,
       };
@@ -116,6 +115,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .single();
 
   if (createPostError || !post) {
+    console.error("[Admin:CreatePost] createPostError:", createPostError?.message);
     return {
       error: `Failed to create post: ${createPostError?.message ?? "unknown error"}`,
     };
@@ -145,6 +145,7 @@ export async function updatePostStatus(postId: string, status: "draft" | "publis
     .eq("id", postId);
 
   if (error) {
+    console.error("[Admin:UpdateStatus] error:", error.message);
     return { error: `Failed to update status: ${error.message}` };
   }
 
@@ -167,6 +168,7 @@ export async function deletePost(postId: string): Promise<ActionResult> {
     .eq("id", postId);
 
   if (error) {
+    console.error("[Admin:DeletePost] error:", error.message);
     return { error: `Failed to delete post: ${error.message}` };
   }
 
@@ -222,6 +224,7 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
     .eq("id", input.postId);
 
   if (error) {
+    console.error("[Admin:UpdateDetail] error:", error.message);
     return { error: `Failed to update post: ${error.message}` };
   }
 

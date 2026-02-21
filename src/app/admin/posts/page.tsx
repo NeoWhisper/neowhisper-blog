@@ -25,7 +25,7 @@ export default async function AdminPostsPage({
     // Fetch all posts order by created_at desc
     const { data: posts, error } = await supabase
         .from("posts_dynamic")
-        .select("id, title, status, locale, created_at, slug:translation_groups(slug)")
+        .select("id, title, status, locale, created_at, category, slug:translation_groups(slug)")
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -38,6 +38,7 @@ export default async function AdminPostsPage({
         status: "draft" | "published";
         locale: string;
         created_at: string;
+        category: string | null;
         slug: { slug: string } | { slug: string }[] | null;
     };
 
@@ -48,6 +49,7 @@ export default async function AdminPostsPage({
             title: p.title,
             status: p.status,
             locale: p.locale,
+            category: p.category || "",
             slug: slugObj?.slug || "unknown",
             createdAt: new Date(p.created_at).toLocaleDateString(lang === "ja" ? "ja-JP" : "en-US", {
                 year: "numeric",

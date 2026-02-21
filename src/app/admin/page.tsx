@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createPost } from "./actions";
 import { adminStrings, normalizeAdminLang } from "./i18n";
@@ -27,23 +27,36 @@ const inputClass =
 
 const labelClass = "block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1.5";
 
-export default function AdminPage() {
-  const searchParams = useSearchParams();
+const AdminPageInner = ({ searchParams }: { searchParams: URLSearchParams }) => {
   const lang = normalizeAdminLang(searchParams.get("lang"));
   const t = adminStrings[lang].page;
 
-  const [form, setForm] = useState(initialState);
+  const [form, setForm] = useState(() => {
+    const s = searchParams.get("slug");
+    const l = searchParams.get("targetLocale") as LocaleValue;
+    const c = searchParams.get("category");
+    const ti = searchParams.get("title");
+
+    return s || l || c || ti
+      ? {
+        ...initialState,
+        slug: s || initialState.slug,
+        locale: l || initialState.locale,
+        category: c || initialState.category,
+        title: ti ? `[${l?.toUpperCase()}] ${ti}` : initialState.title,
+      }
+      : initialState;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  function updateField<K extends keyof typeof initialState>(
+  const updateField = <K extends keyof typeof initialState>(
     key: K,
     value: (typeof initialState)[K],
-  ) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
+  ) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setStatus(null);
@@ -61,12 +74,11 @@ export default function AdminPage() {
 
     if (!result.success) {
       setStatus({ type: "error", message: result.error ?? t.draftFailed });
-      return;
+    } else {
+      setStatus({ type: "success", message: result.message ?? t.draftCreated });
+      setForm(initialState);
     }
-
-    setStatus({ type: "success", message: result.message ?? t.draftCreated });
-    setForm(initialState);
-  }
+  };
 
   const charCount = form.content.length;
   const wordCount = form.content.trim() ? form.content.trim().split(/\s+/).length : 0;
@@ -104,7 +116,6 @@ export default function AdminPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
-
             {/* Title */}
             <div>
               <label htmlFor="admin-title" className={labelClass}>{t.title} <span className="text-purple-400">*</span></label>
@@ -123,7 +134,7 @@ export default function AdminPage() {
             {/* Slug */}
             <div>
               <label htmlFor="admin-slug" className={labelClass}>{t.slug} <span className="text-purple-400">*</span></label>
-              <p className="text-xs text-gray-500 mb-1.5">{t.slugHint}</p>
+              <p className="text-xs text-gray-400 mb-1.5">{t.slugHint}</p>
               <div className="flex rounded-xl border border-white/10 bg-white/5 overflow-hidden focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20">
                 <span className="flex items-center border-r border-white/10 bg-white/[0.03] px-4 text-sm font-mono text-gray-500 shrink-0">/blog/</span>
                 <input
@@ -218,8 +229,8 @@ export default function AdminPage() {
               <div
                 role="alert"
                 className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${status.type === "success"
-                    ? "bg-emerald-500/10 border border-emerald-500/25 text-emerald-300"
-                    : "bg-red-500/10 border border-red-500/25 text-red-300"
+                  ? "bg-emerald-500/10 border border-emerald-500/25 text-emerald-300"
+                  : "bg-red-500/10 border border-red-500/25 text-red-300"
                   }`}
               >
                 <span className="mt-0.5 shrink-0 text-base leading-none">
@@ -233,8 +244,9 @@ export default function AdminPage() {
             <div className="flex items-center justify-between pt-1">
               <button
                 type="button"
-                onClick={() => { setForm(initialState); setStatus(null); }}
+                onClick={() => (setForm(initialState), setStatus(null))}
                 className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                title={t.clearForm}
               >
                 {t.clearForm}
               </button>
@@ -270,5 +282,14 @@ export default function AdminPage() {
         </p>
       </div>
     </main>
+  );
+};
+
+export default function AdminPage() {
+  const searchParams = useSearchParams();
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>
+      <AdminPageInner key={searchParams.toString()} searchParams={searchParams} />
+    </Suspense>
   );
 }

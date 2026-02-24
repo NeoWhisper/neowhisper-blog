@@ -12,6 +12,8 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieBanner from "@/components/CookieBanner";
 import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
+import { outfit, geistMono } from "@/lib/fonts";
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net",
@@ -27,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${outfit.variable} ${geistMono.variable}`}>
       <head>
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script

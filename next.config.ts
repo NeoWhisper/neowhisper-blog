@@ -50,8 +50,8 @@ const nextConfig: NextConfig = {
     ];
 
     const csp = cspEntries
-      .map(entry => entry.trim().replace(/\s+/g, ' '))
-      .filter(entry => !entry.endsWith(" 'self'")) // Clean up empty directives if any
+      .map((entry) => entry.trim().replace(/\s+/g, " "))
+      .filter((entry) => entry.trim() !== "") // Keep non-empty directives
       .join("; ");
 
     return [

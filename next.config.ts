@@ -15,19 +15,20 @@ const nextConfig: NextConfig = {
   // Add `X-Content-Type-Options: nosniff` globally to ensure the browser
   // only treats responses as the declared MIME type.
   async headers() {
-    // NOTE: Next.js App Router uses inline scripts for hydration / RSC runtime.
-    // A strict nonce-based CSP is possible, but requires deeper integration.
-    // For now we allow inline scripts while still restricting sources.
+    const isDev = process.env.NODE_ENV === "development";
+    const isVercelPreview = process.env.VERCEL_ENV === "preview";
+    const allowVercelTools = isDev || isVercelPreview;
+
     const csp = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
-      } https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://partner.googleadservices.com https://*.google.com https://vercel.live`,
+      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""
+      } https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://partner.googleadservices.com https://*.google.com ${allowVercelTools ? "https://vercel.live" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: https://r2cdn.perplexity.ai",
       "font-src 'self' data: https: https://r2cdn.perplexity.ai",
-      `connect-src 'self' ${process.env.NODE_ENV === "development" ? "ws://127.0.0.1:* ws://localhost:*" : ""
-      } https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com https://*.supabase.co https://vercel.live`,
-      "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://vercel.live",
+      `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:*" : ""
+      } https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com https://*.supabase.co ${allowVercelTools ? "https://vercel.live" : ""}`,
+      `frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com ${allowVercelTools ? "https://vercel.live" : ""}`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

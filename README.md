@@ -114,6 +114,12 @@ This site uses a Content Security Policy to allow Google AdSense, Analytics, and
 - AdSense: `pagead2.googlesyndication.com`, `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `*.google.com`, `adtrafficquality.google`, `*.adtrafficquality.google`, `fundingchoicesmessages.google.com`
 - Turnstile: `challenges.cloudflare.com`
 
+## 🧩 Turnstile Troubleshooting
+
+- If DevTools shows `TurnstileError: 110200` with repeated `400` requests to `challenges.cloudflare.com`, your current hostname is not allowed for the widget key.
+- In Cloudflare Turnstile dashboard, add all active hostnames (for example: `localhost`, `127.0.0.1`, your production domain, and preview domains if used).
+- Keep widget key/secret key pairs matched by environment. Use separate widget keys for local/dev and production.
+
 ## 🚀 Deploy on Vercel
 
 Push to your main branch and connect to [Vercel](https://vercel.com/new) for automatic deployments.

@@ -1,3 +1,11 @@
+# [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
+
+
+### Features
+
+* admin posts management, release workflow fixes, and security updates ([#26](https://github.com/NeoWhisper/neowhisper-blog/issues/26)) ([a411693](https://github.com/NeoWhisper/neowhisper-blog/commit/a4116934522392012d237f69ea214ba3d4dc6dab)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* release Supabase Hybrid CMS Phase 1, refactor, and update CI ([#24](https://github.com/NeoWhisper/neowhisper-blog/issues/24)) ([792a2e7](https://github.com/NeoWhisper/neowhisper-blog/commit/792a2e7ad6c867614c4975df793397248c9e8b50)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
 # [1.9.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.2...v1.9.0) (2026-02-16)
 
 ### Features

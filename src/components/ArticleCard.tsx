@@ -16,6 +16,8 @@ const categoryColors: Record<string, string> = {
     'Tutorial': 'bg-pink-500 text-white',
 };
 
+import { isLocalizedSlug } from '@/lib/slug';
+
 interface ArticleCardProps {
     post: Post;
     lang?: string;
@@ -24,17 +26,16 @@ interface ArticleCardProps {
 export default function ArticleCard({ post, lang }: ArticleCardProps) {
     const currentLang = normalizeLang(lang);
     const isRTL = currentLang === "ar";
-    const isSuffixLocalizedSlug = post.slug.endsWith("-ja") || post.slug.endsWith("-ar");
+    const isSuffixLocalizedSlug = isLocalizedSlug(post.slug);
     const shouldUseLangQuery = Boolean(lang && lang !== "en" && !isSuffixLocalizedSlug);
-    const postHref = `/blog/${encodeURIComponent(post.slug)}${
-        shouldUseLangQuery ? `?lang=${encodeURIComponent(currentLang)}` : ""
-    }`;
+    const postHref = `/blog/${encodeURIComponent(post.slug)}${shouldUseLangQuery ? `?lang=${encodeURIComponent(currentLang)}` : ""
+        }`;
     const readArticleLabel =
         currentLang === "ja"
             ? "記事を読む"
             : currentLang === "ar"
-              ? "اقرأ المقال"
-              : "Read Article";
+                ? "اقرأ المقال"
+                : "Read Article";
 
     const categoryHref = post.category
         ? `/category/${buildCategorySlug(post.category)}${lang ? `?lang=${encodeURIComponent(currentLang)}` : ''
@@ -88,11 +89,10 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
                     >
                         {readArticleLabel}
                         <svg
-                            className={`w-4 h-4 transition-transform ${
-                                isRTL
+                            className={`w-4 h-4 transition-transform ${isRTL
                                     ? "mr-1 rotate-180 group-hover:-translate-x-1"
                                     : "ml-1 group-hover:translate-x-1"
-                            }`}
+                                }`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"

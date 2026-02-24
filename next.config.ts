@@ -21,13 +21,13 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
-      } https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://partner.googleadservices.com https://*.google.com`,
+      } https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://partner.googleadservices.com https://*.google.com https://vercel.live`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: https://r2cdn.perplexity.ai",
       "font-src 'self' data: https: https://r2cdn.perplexity.ai",
       `connect-src 'self' ${process.env.NODE_ENV === "development" ? "ws://127.0.0.1:* ws://localhost:*" : ""
-      } https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com https://*.supabase.co`,
-      "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
+      } https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com https://*.supabase.co https://vercel.live`,
+      "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://vercel.live",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

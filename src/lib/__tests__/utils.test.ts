@@ -1,5 +1,6 @@
 import { normalizeLang, withLang } from '../i18n';
 import { getBaseSlug, getPostLanguage } from '../posts';
+import { isLocalizedSlug } from '../slug';
 import { formatDate } from '../utils';
 
 describe('i18n utilities', () => {
@@ -22,6 +23,14 @@ describe('i18n utilities', () => {
 });
 
 describe('slug utilities', () => {
+    test('isLocalizedSlug should detect localized suffixes', () => {
+        expect(isLocalizedSlug('post-ja')).toBe(true);
+        expect(isLocalizedSlug('post-ar')).toBe(true);
+        expect(isLocalizedSlug('post-en')).toBe(false);
+        expect(isLocalizedSlug('post')).toBe(false);
+        expect(isLocalizedSlug('')).toBe(false);
+    });
+
     test('getBaseSlug should remove language suffix', () => {
         expect(getBaseSlug('my-post-ja')).toBe('my-post');
         expect(getBaseSlug('my-post-ar')).toBe('my-post');

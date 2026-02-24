@@ -22,6 +22,8 @@ const translations = {
       sending: "Sending...",
       success: "Thanks! Your message has been received.",
       error: "Something went wrong. Please try again.",
+      turnstileRequired:
+        "Please complete spam verification and submit again.",
       viewConfirmation: "View confirmation",
       placeholderName: "Your full name",
       placeholderEmail: "you@email.com",
@@ -57,6 +59,8 @@ const translations = {
       sending: "送信中...",
       success: "送信ありがとうございます。内容を確認します。",
       error: "送信に失敗しました。時間をおいて再度お試しください。",
+      turnstileRequired:
+        "スパム対策の認証を完了してから、もう一度送信してください。",
       viewConfirmation: "送信内容を確認",
       placeholderName: "お名前",
       placeholderEmail: "you@email.com",
@@ -97,6 +101,8 @@ const translations = {
       sending: "جاري الإرسال...",
       success: "تم استلام رسالتك بنجاح.",
       error: "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      turnstileRequired:
+        "يرجى إكمال تحقق مكافحة الرسائل المزعجة ثم إعادة الإرسال.",
       viewConfirmation: "عرض التأكيد",
       placeholderName: "اسمك الكامل",
       placeholderEmail: "you@email.com",

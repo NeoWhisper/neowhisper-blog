@@ -15,6 +15,7 @@ type ContactCopy = {
   sending: string;
   success: string;
   error: string;
+  turnstileRequired: string;
   viewConfirmation: string;
   placeholderName: string;
   placeholderEmail: string;
@@ -58,6 +59,15 @@ export default function ContactForm({
       turnstileToken: formData.get("cf-turnstile-response"),
       lang: formData.get("lang"),
     };
+
+    if (
+      turnstileSiteKey &&
+      (typeof payload.turnstileToken !== "string" || payload.turnstileToken.trim() === "")
+    ) {
+      setState("error");
+      setMessage(copy.turnstileRequired);
+      return;
+    }
 
     try {
       const res = await fetch("/api/contact", {

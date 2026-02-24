@@ -129,6 +129,9 @@ This release completes all critical requirements for Google AdSense approval.
 * Admin Dashboard: Added a new "Error Logs" management page (`/admin/logs`) to review system errors recorded in the database.
 * Refactoring: Satisfied React linting rules by decoupling data fetching from JSX construction in dynamic blog pages.
 * Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
+* Trust copy (JA): Replaced ambiguous "登録済み" business claims with clearer legal phrasing based on 開業届提出済み status in `about` and `AuthorBio`.
+* Contact UX: Added client-side Turnstile token guard with localized error messages (EN/JA/AR) to avoid noisy failed submissions when captcha is not completed.
+* Cross-reference: Builds on the CSP and header cleanup from merged branch `fix/changelog-fonts-tests-refactor`.
 
 ## [1.6.0] - 2026-02-07
 

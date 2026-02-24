@@ -19,32 +19,30 @@ const nextConfig: NextConfig = {
     const isVercelPreview = process.env.VERCEL_ENV === "preview";
     const allowVercelTools = isDev || isVercelPreview;
 
-    const googleDomains = [
-      "https://www.googletagmanager.com",
-      "https://www.google-analytics.com",
-      "https://pagead2.googlesyndication.com",
-      "https://tpc.googlesyndication.com",
-      "https://googleads.g.doubleclick.net",
-      "https://www.googleadservices.com",
-      "https://adtrafficquality.google",
+    // Use wildcards to keep the header size reasonably small and prevent 400 errors
+    const googleWildcards = [
+      "https://*.googletagmanager.com",
+      "https://*.google-analytics.com",
+      "https://*.googlesyndication.com",
+      "https://*.doubleclick.net",
+      "https://*.googleadservices.com",
       "https://*.adtrafficquality.google",
-      "https://fundingchoicesmessages.google.com",
-      "https://challenges.cloudflare.com",
-      "https://partner.googleadservices.com",
       "https://*.google.com",
+      "https://*.fundingchoicesmessages.google.com",
     ];
 
-    const vercelLive = allowVercelTools ? "https://vercel.live" : "";
-    const supabaseExtra = "https://*.supabase.co";
+    const vercelDomains = allowVercelTools
+      ? "https://vercel.live https://*.vercel.app"
+      : "";
 
     const cspEntries = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval' " : ""}${googleDomains.join(" ")} ${vercelLive}`,
+      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval' " : ""}${googleWildcards.join(" ")} https://challenges.cloudflare.com ${vercelDomains}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: https://r2cdn.perplexity.ai",
       "font-src 'self' data: https: https://r2cdn.perplexity.ai",
-      `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:* " : ""}${googleDomains.join(" ")} ${supabaseExtra} ${vercelLive}`,
-      `frame-src 'self' https://challenges.cloudflare.com ${googleDomains.find(d => d.includes("googleads"))} https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com ${vercelLive}`,
+      `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:* " : ""}${googleWildcards.join(" ")} https://*.supabase.co ${vercelDomains}`,
+      `frame-src 'self' https://challenges.cloudflare.com ${googleWildcards.join(" ")} ${vercelDomains}`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -53,6 +51,7 @@ const nextConfig: NextConfig = {
 
     const csp = cspEntries
       .map(entry => entry.trim().replace(/\s+/g, ' '))
+      .filter(entry => !entry.endsWith(" 'self'")) // Clean up empty directives if any
       .join("; ");
 
     return [

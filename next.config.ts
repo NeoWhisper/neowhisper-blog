@@ -19,21 +19,41 @@ const nextConfig: NextConfig = {
     const isVercelPreview = process.env.VERCEL_ENV === "preview";
     const allowVercelTools = isDev || isVercelPreview;
 
-    const csp = [
+    const googleDomains = [
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+      "https://pagead2.googlesyndication.com",
+      "https://tpc.googlesyndication.com",
+      "https://googleads.g.doubleclick.net",
+      "https://www.googleadservices.com",
+      "https://adtrafficquality.google",
+      "https://*.adtrafficquality.google",
+      "https://fundingchoicesmessages.google.com",
+      "https://challenges.cloudflare.com",
+      "https://partner.googleadservices.com",
+      "https://*.google.com",
+    ];
+
+    const vercelLive = allowVercelTools ? "https://vercel.live" : "";
+    const supabaseExtra = "https://*.supabase.co";
+
+    const cspEntries = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""
-      } https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://partner.googleadservices.com https://*.google.com ${allowVercelTools ? "https://vercel.live" : ""}`,
+      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval' " : ""}${googleDomains.join(" ")} ${vercelLive}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: https://r2cdn.perplexity.ai",
       "font-src 'self' data: https: https://r2cdn.perplexity.ai",
-      `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:*" : ""
-      } https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://challenges.cloudflare.com https://*.google.com https://*.supabase.co ${allowVercelTools ? "https://vercel.live" : ""}`,
-      `frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com ${allowVercelTools ? "https://vercel.live" : ""}`,
+      `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:* " : ""}${googleDomains.join(" ")} ${supabaseExtra} ${vercelLive}`,
+      `frame-src 'self' https://challenges.cloudflare.com ${googleDomains.find(d => d.includes("googleads"))} https://www.googleadservices.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com ${vercelLive}`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'",
-    ].join("; ");
+    ];
+
+    const csp = cspEntries
+      .map(entry => entry.trim().replace(/\s+/g, ' '))
+      .join("; ");
 
     return [
       {

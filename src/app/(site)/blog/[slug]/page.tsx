@@ -56,6 +56,10 @@ export async function generateStaticParams() {
   }));
 }
 
+// Force dynamic to prevent static-gen errors if Supabase is unavailable during build
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function generateMetadata({
   params,
   searchParams,
@@ -64,12 +68,18 @@ export async function generateMetadata({
     const { slug } = await params;
     const { lang } = await searchParams;
     const resolvedLang = resolveLanguage(slug, lang);
-    const post = await getHybridPost(slug, resolvedLang);
 
-    if (!post) return {};
+    // Defensive lookup to avoid throwing
+    const post = await getHybridPost(slug, resolvedLang).catch(err => {
+      console.error(`[Metadata Error] for ${slug}:`, err);
+      return null;
+    });
 
-    const isWelcomePost = getBaseSlug(post.slug) === "welcome";
-    const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
+    if (!post) {
+      return { title: "Blog Post | NeoWhisper" };
+    }
+
+    const languageVariants = await getHybridLanguageVariants(post.slug, post.locale).catch(() => []);
     const languageAlternates: Record<string, string> = {};
 
     languageVariants.forEach((variant) => {
@@ -80,46 +90,17 @@ export async function generateMetadata({
       );
     });
 
-    const defaultVariant =
-      languageVariants.find((variant) => variant.lang === "en") ??
-      languageVariants[0];
-
-    if (defaultVariant) {
-      languageAlternates["x-default"] = buildPostUrl(
-        defaultVariant.slug,
-        "en",
-        post.source,
-      );
-    }
-
     return {
       title: post.title,
       description: post.excerpt,
-      robots: isWelcomePost
-        ? {
-          index: false,
-          follow: true,
-        }
-        : undefined,
       alternates: {
         canonical: buildPostUrl(post.slug, post.locale, post.source),
         languages: languageAlternates,
       },
-      openGraph: {
-        title: post.title,
-        description: post.excerpt,
-        images: post.coverImage ? [post.coverImage] : [],
-        locale: toOpenGraphLocale(post.locale),
-        alternateLocale: languageVariants
-          .filter((variant) => variant.lang !== post.locale)
-          .map((variant) => toOpenGraphLocale(variant.lang)),
-      },
     };
   } catch (error) {
-    console.error("[BlogPost:Metadata] Fatal error generating metadata:", error);
-    return {
-      title: "Blog Post | NeoWhisper",
-    };
+    console.error("[Metadata Critical] Fatal crash:", error);
+    return { title: "Blog Post | NeoWhisper" };
   }
 }
 
@@ -130,25 +111,53 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
 
   const data = await (async () => {
     try {
+      console.log(`[BlogPost] Render attempt: ${slug} (Resolved Lang: ${resolvedLang})`);
+
       const post = await getHybridPost(slug, resolvedLang);
+
       if (!post) {
+        console.warn(`[BlogPost] No data found for ${slug}`);
         return null;
       }
+
+      console.log(`[BlogPost] Post source: ${post.source}`);
+
       const [languageVariants, relatedPosts] = await Promise.all([
-        getHybridLanguageVariants(post.slug, post.locale).catch(() => []),
-        getHybridRelatedPosts(post, 3).catch(() => []),
+        getHybridLanguageVariants(post.slug, post.locale).catch(e => {
+          console.error("[BlogPost] Variants fetch error:", e);
+          return [];
+        }),
+        getHybridRelatedPosts(post, 3).catch(e => {
+          console.error("[BlogPost] Related fetch error:", e);
+          return [];
+        }),
       ]);
+
       return { post, languageVariants, relatedPosts };
     } catch (error) {
-      console.error(`[BlogPost] Error rendering post ${slug}:`, error);
-      // Fallback for extreme cases: try to get the static post directly if hybrid logic crashed
+      console.error(`[BlogPost] CRITICAL RENDER ERROR for ${slug}:`, error);
+
+      // EMERGENCY FALLBACK to local files
       try {
         const staticPost = getPostBySlug(slug);
         if (staticPost) {
-          const variants = [{ lang: normalizeLang(getPostLanguage(staticPost.slug)), slug: staticPost.slug }];
-          return { post: { ...staticPost, locale: variants[0].lang, source: "static" as const, publishedAt: staticPost.date, updatedAt: staticPost.date }, languageVariants: variants, relatedPosts: [] };
+          console.log("[BlogPost] Fallback to static markdown successful");
+          const lSuffix = getPostLanguage(staticPost.slug) as SupportedLang;
+          return {
+            post: {
+              ...staticPost,
+              locale: lSuffix,
+              source: "static" as const,
+              publishedAt: staticPost.date,
+              updatedAt: staticPost.date
+            },
+            languageVariants: [{ lang: lSuffix, slug: staticPost.slug }],
+            relatedPosts: []
+          };
         }
-      } catch { /* Ignore fallback errors */ }
+      } catch (fError) {
+        console.error("[BlogPost] Fallback also crashed:", fError);
+      }
 
       return null;
     }

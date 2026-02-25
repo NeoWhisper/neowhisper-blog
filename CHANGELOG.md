@@ -2,11 +2,27 @@
 
 All notable changes to the NeoWhisper blog will be documented here.
 
-## [1.9.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.2...v1.9.0) (2026-02-16)
+## [Unreleased]
+
+* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`).
+* Admin dashboard: Refactored `AdminPage` for dynamic hydration from URL params and functional state initialization.
+* Bug fix: Resolved TypeScript/ESLint standalone expression errors in `posts-table.tsx` and `edit-form.tsx` using `void` ternary pattern.
+* Security: Updated CSP to whitelist Perplexity CDN (`r2cdn.perplexity.ai`) and additional Google AdSense domains, resolving font and script blocking errors.
+* Observability: Implemented a persistent, Supabase-backed logging system (`src/lib/logger.ts`) to capture production errors with stack traces.
+* Admin Dashboard: Added a new "Error Logs" management page (`/admin/logs`) to review system errors recorded in the database.
+* Refactoring: Satisfied React linting rules by decoupling data fetching from JSX construction in dynamic blog pages.
+* Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
+* Trust copy (JA): Replaced ambiguous "登録済み" business claims with clearer legal phrasing based on 開業届提出済み status in `about` and `AuthorBio`.
+* Contact UX: Added client-side Turnstile token guard with localized error messages (EN/JA/AR) to avoid noisy failed submissions when captcha is not completed.
+* **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
+* Cross-reference: Builds on the CSP and header cleanup from merged branch `fix/changelog-fonts-tests-refactor`.
+
+## [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
 
 ### Features
 
-* **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
+* admin posts management, release workflow fixes, and security updates ([#26](https://github.com/NeoWhisper/neowhisper-blog/issues/26)) ([a411693](https://github.com/NeoWhisper/neowhisper-blog/commit/a4116934522392012d237f69ea214ba3d4dc6dab)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* release Supabase Hybrid CMS Phase 1, refactor, and update CI ([#24](https://github.com/NeoWhisper/neowhisper-blog/issues/24)) ([792a2e7](https://github.com/NeoWhisper/neowhisper-blog/commit/792a2e7ad6c867614c4975df793397248c9e8b50)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
 
 ## [1.8.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.1...v1.8.2) (2026-02-16)
 
@@ -132,6 +148,13 @@ This release completes all critical requirements for Google AdSense approval.
 * Trust copy (JA): Replaced ambiguous "登録済み" business claims with clearer legal phrasing based on 開業届提出済み status in `about` and `AuthorBio`.
 * Contact UX: Added client-side Turnstile token guard with localized error messages (EN/JA/AR) to avoid noisy failed submissions when captcha is not completed.
 * Cross-reference: Builds on the CSP and header cleanup from merged branch `fix/changelog-fonts-tests-refactor`.
+
+## [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
+
+### Features
+
+* admin posts management, release workflow fixes, and security updates ([#26](https://github.com/NeoWhisper/neowhisper-blog/issues/26)) ([a411693](https://github.com/NeoWhisper/neowhisper-blog/commit/a4116934522392012d237f69ea214ba3d4dc6dab)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* release Supabase Hybrid CMS Phase 1, refactor, and update CI ([#24](https://github.com/NeoWhisper/neowhisper-blog/issues/24)) ([792a2e7](https://github.com/NeoWhisper/neowhisper-blog/commit/792a2e7ad6c867614c4975df793397248c9e8b50)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
 
 ## [1.6.0] - 2026-02-07
 

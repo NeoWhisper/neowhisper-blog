@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
       "font-src 'self' data: https: https://r2cdn.perplexity.ai",
       `connect-src 'self' ${isDev ? "ws://127.0.0.1:* ws://localhost:* " : ""}${googleWildcards.join(" ")} https://*.supabase.co ${vercelDomains}`,
       `frame-src 'self' https://challenges.cloudflare.com ${googleWildcards.join(" ")} ${vercelDomains}`,
+
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

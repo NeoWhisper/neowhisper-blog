@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.0...v1.11.1) (2026-02-25)
+
+
+### Bug Fixes
+
+* make blog page and logger fault-tolerant to prevent 500 errors ([9b51662](https://github.com/NeoWhisper/neowhisper-blog/commit/9b516627ea5340d60ec9ef99763dd7a4475a4e4a))
+
 # [1.11.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.10.0...v1.11.0) (2026-02-25)
 
 

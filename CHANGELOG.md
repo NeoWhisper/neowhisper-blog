@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.10.0...v1.11.0) (2026-02-25)
+
+
+### Features
+
+* consolidate admin features, supabase logging, and contact ux improvements ([#34](https://github.com/NeoWhisper/neowhisper-blog/issues/34)) ([37d9a95](https://github.com/NeoWhisper/neowhisper-blog/commit/37d9a95189138a77d31cec5e007c39bab6674709)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
 # Changelog
 
 All notable changes to the NeoWhisper blog will be documented here.

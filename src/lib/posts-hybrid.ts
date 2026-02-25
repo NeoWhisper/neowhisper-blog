@@ -15,6 +15,8 @@ import {
 } from "@/lib/posts-dynamic";
 import type { Post } from "@/types";
 
+import { isLocalizedSlug } from "@/lib/slug";
+
 export type HybridPost = Post & {
   locale: SupportedLang;
   source: "static" | "dynamic";
@@ -38,11 +40,11 @@ function toHybridStaticPost(post: Post): HybridPost {
 function staticSlugCandidates(slug: string, locale: SupportedLang): string[] {
   const candidates = new Set<string>([slug]);
 
-  if (locale === "ja" && !slug.endsWith("-ja")) {
+  if (locale === "ja" && !isLocalizedSlug(slug)) {
     candidates.add(`${slug}-ja`);
   }
 
-  if (locale === "ar" && !slug.endsWith("-ar")) {
+  if (locale === "ar" && !isLocalizedSlug(slug)) {
     candidates.add(`${slug}-ar`);
   }
 
@@ -53,11 +55,18 @@ function staticSlugCandidates(slug: string, locale: SupportedLang): string[] {
   return Array.from(candidates);
 }
 
+/**
+ * Removes duplicate posts by prioritizing the first occurrence.
+ * Since dynamic posts are usually passed first in the array,
+ * this ensures that dynamic (database) posts overwrite static (file-system) posts
+ * when they share the same locale and slug.
+ */
 function dedupeDynamicFirst(posts: HybridPost[]): HybridPost[] {
   const seen = new Set<string>();
   const result: HybridPost[] = [];
 
   for (const post of posts) {
+    // Unique key identifying a post in a specific language
     const key = `${post.locale}:${post.slug}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -177,10 +186,16 @@ export async function getHybridSitemapBlogEntries(): Promise<
   const combined = [...dynamicEntries, ...staticEntries];
   const seen = new Set<string>();
 
-  return combined.filter((entry) => {
-    const key = `${entry.locale}:${entry.slug}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return combined
+    .filter((entry) => {
+      const key = `${entry.locale}:${entry.slug}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) =>
+      a.locale.localeCompare(b.locale) ||
+      a.slug.localeCompare(b.slug) ||
+      (new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+    );
 }

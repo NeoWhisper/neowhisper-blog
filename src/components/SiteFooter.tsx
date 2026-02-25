@@ -53,7 +53,7 @@ function getSectionLabel(
     ja: {
       trustSignals: "信頼情報",
       links: "リンク",
-      registration: "東京都港区で正式登録済み",
+      registration: "東京都港区を拠点に開業届提出済み",
       businessType: "職業区分: ITサービス業",
     },
     ar: {
@@ -76,7 +76,7 @@ function getBusinessText(lang: SupportedLang) {
         "Service scope: software development, game development, app development, web production, web content production, and translation. Based in Minato City, Tokyo.",
     },
     ja: {
-      line1: "日本で登録された個人事業主です（職業: ITサービス業）。",
+      line1: "日本で開業届を提出済みの個人事業主です（職業: ITサービス業）。",
       line2:
         "事業概要: ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービス提供。拠点は東京都港区です。",
     },

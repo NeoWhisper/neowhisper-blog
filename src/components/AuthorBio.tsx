@@ -34,7 +34,7 @@ const content: Record<string, AuthorContent> = {
   },
   ja: {
     title: "著者について",
-    bio: "NeoWhisperは東京都港区を拠点とする登録済みITサービス事業です。ソフトウェア開発・ゲーム開発・アプリ開発・Web/コンテンツ制作・翻訳サービスを提供しています。",
+    bio: "NeoWhisperは東京都港区を拠点とする個人事業主です。税務署へ開業届を提出済みで、ソフトウェア開発・ゲーム開発・アプリ開発・Web/コンテンツ制作・翻訳サービスを提供しています。",
     expertise:
       "専門分野: Next.js • TypeScript • React • Node.js • 多言語サイト • SEO • パフォーマンス最適化",
     cta: "お問い合わせ",

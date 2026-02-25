@@ -181,7 +181,7 @@ export default function BlogPostTemplate({
                   fill
                   className="object-cover"
                   priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+                  sizes="(max-width: 768px) 100vw, 768px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               </div>

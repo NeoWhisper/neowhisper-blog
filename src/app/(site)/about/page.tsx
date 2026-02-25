@@ -29,14 +29,14 @@ const translations = {
   },
   ja: {
     label: "概要",
-    title: "登録済みITサービス事業",
+    title: "ITサービス個人事業",
     subtitle: "開業届上の職業区分: ITサービス業。",
-    intro: "NEO WHISPERは、2025年12月に東京都港区にてアルカーディ　ヨセフにより設立された、ITサービスを提供する登録済みの個人事業主です。",
+    intro: "NEO WHISPERは、2025年12月に東京都港区でアルカーディ ヨセフが開業したITサービス個人事業です。税務署へ開業届を提出済みです。",
     back: "ホームへ戻る",
     sections: [
       {
         title: "私たちについて",
-        copy: "東京都港区を拠点に、日本語・英語・アラビア語の3言語で提供する、登録済みのITサービス個人事業です。"
+        copy: "東京都港区を拠点に、税務署へ開業届を提出済みの個人事業として、日本語・英語・アラビア語の3言語でITサービスを提供しています。"
       },
       {
         title: "事業内容",
@@ -92,9 +92,9 @@ export async function generateMetadata({
         "Registered IT services sole proprietorship in Tokyo. Service scope includes software development, game development, app development, web production, web content production, and translation.",
     },
     ja: {
-      title: "概要 - NeoWhisper | 登録済みITサービス事業",
+      title: "概要 - NeoWhisper | ITサービス個人事業",
       description:
-        "NeoWhisperは東京都港区の登録済みITサービス個人事業主です。ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などを提供します。",
+        "NeoWhisperは東京都港区を拠点とするITサービス個人事業主です。税務署へ開業届を提出済みで、ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などを提供します。",
     },
     ar: {
       title: "عن NeoWhisper | نشاط خدمات تقنية معلومات",

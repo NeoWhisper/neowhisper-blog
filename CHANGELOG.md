@@ -1,16 +1,28 @@
-# [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
+# Changelog
 
+All notable changes to the NeoWhisper blog will be documented here.
+
+## [Unreleased]
+
+* Code quality: Removed if statements from remaining components (`ArticleCard.tsx` and `BlogPostTemplate.tsx`).
+* Admin dashboard: Refactored `AdminPage` for dynamic hydration from URL params and functional state initialization.
+* Bug fix: Resolved TypeScript/ESLint standalone expression errors in `posts-table.tsx` and `edit-form.tsx` using `void` ternary pattern.
+* Security: Updated CSP to whitelist Perplexity CDN (`r2cdn.perplexity.ai`) and additional Google AdSense domains, resolving font and script blocking errors.
+* Observability: Implemented a persistent, Supabase-backed logging system (`src/lib/logger.ts`) to capture production errors with stack traces.
+* Admin Dashboard: Added a new "Error Logs" management page (`/admin/logs`) to review system errors recorded in the database.
+* Refactoring: Satisfied React linting rules by decoupling data fetching from JSX construction in dynamic blog pages.
+* Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
+* Trust copy (JA): Replaced ambiguous "登録済み" business claims with clearer legal phrasing based on 開業届提出済み status in `about` and `AuthorBio`.
+* Contact UX: Added client-side Turnstile token guard with localized error messages (EN/JA/AR) to avoid noisy failed submissions when captcha is not completed.
+* **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
+* Cross-reference: Builds on the CSP and header cleanup from merged branch `fix/changelog-fonts-tests-refactor`.
+
+## [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
 
 ### Features
 
 * admin posts management, release workflow fixes, and security updates ([#26](https://github.com/NeoWhisper/neowhisper-blog/issues/26)) ([a411693](https://github.com/NeoWhisper/neowhisper-blog/commit/a4116934522392012d237f69ea214ba3d4dc6dab)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
 * release Supabase Hybrid CMS Phase 1, refactor, and update CI ([#24](https://github.com/NeoWhisper/neowhisper-blog/issues/24)) ([792a2e7](https://github.com/NeoWhisper/neowhisper-blog/commit/792a2e7ad6c867614c4975df793397248c9e8b50)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
-
-# [1.9.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.2...v1.9.0) (2026-02-16)
-
-### Features
-
-* **content-quality:** strengthen trust pages and reduce thin-indexed content ([43fb039](https://github.com/NeoWhisper/neowhisper-blog/commit/43fb03984c46f64707dd0e622442078c5b8fa351))
 
 ## [1.8.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.8.1...v1.8.2) (2026-02-16)
 
@@ -24,21 +36,62 @@
 
 * **adsense:** remove stray markdown from ads.txt ([347062e](https://github.com/NeoWhisper/neowhisper-blog/commit/347062ef2cbbdcaea074dff07f8f57dcb1e5469c))
 
-# [1.8.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.7.0...v1.8.0) (2026-02-16)
+## [1.8.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.7.0...v1.8.0) (2026-02-16)
 
 ### Features
 
 * **site:** refine multilingual positioning and roadmap timeline ([e3494a2](https://github.com/NeoWhisper/neowhisper-blog/commit/e3494a23c8c4315830c6d95ab32d5387ca4890d5))
 
-# [1.7.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.1...v1.7.0) (2026-02-16)
+<!-- markdownlint-disable MD024 -->
+## [1.7.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.1...v1.7.0) (2026-02-16)
+
+### 🎉 AdSense Readiness Milestone
+
+This release completes all critical requirements for Google AdSense approval.
 
 ### Bug Fixes
 
 * **security:** remove empty CORS headers from robots and sitemap ([112047d](https://github.com/NeoWhisper/neowhisper-blog/commit/112047db8c51e155d4e18a024dffe44b63c02e3b))
+* **6 CSP errors** blocking AdSense scripts (frame-src, script-src, connect-src violations)
+* **Email deliverability** - Changed RESEND_FROM to friendly address, configured DMARC
+* **CSP configuration** - Added all required Google domains for AdSense
+* **Twitter/X link** removed from AuthorBio (replaced with real GitHub only)
 
 ### Features
 
 * **business:** transition to professional service agency branding ([cbcd6eb](https://github.com/NeoWhisper/neowhisper-blog/commit/cbcd6ebee282e3bba26c3866fa4621d66ce2a374))
+* **Blog Posts (2 new, bringing total to 6):**
+  * "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
+  * "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN/JA/AR)
+* **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
+* **CookieBanner component** with GDPR compliance and multilingual support
+* **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
+* **SEO metadata** with i18n support for all marketing pages (Services, Projects, About, Contact)
+* **DNS records** for email deliverability (SPF, DKIM, DMARC)
+* **CSP documentation** section in README with troubleshooting guide
+
+### Changed
+
+* **README.md** kept generic for template reusability
+* **DNS-SETUP-CHECKLIST.md** added to .gitignore (operational doc)
+* **CSP policy** relaxed for AdSense while maintaining security (no wildcard *, specific domains only)
+* **Welcome post** expanded with more substantive content and navigation links
+
+### Infrastructure
+
+* Email deliverability tested in production (Gmail/Outlook inbox delivery confirmed)
+* All High-priority AdSense tasks completed (100%)
+* All Critical tasks completed except final translations (75%)
+* Total progress: 18% → 86% in 2 days
+
+### Metrics
+
+* Blog posts: 4 → 6 (target met)
+* Internal links: 0 → 20+ (200% of target)
+* CSP errors: 6 → 0 (100% resolved)
+* Commits: 14 over 2 days
+* Files changed: 40+
+<!-- markdownlint-enable MD024 -->
 
 ## [1.6.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.6.0...v1.6.1) (2026-02-10)
 
@@ -46,7 +99,7 @@
 
 * **security:** resolve XSS and upgrade Next.js to 16.1.5 ([361700f](https://github.com/NeoWhisper/neowhisper-blog/commit/361700fc1ae6032a76f95fda176b6f65cc883cd6))
 
-# [1.6.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.5.1...v1.6.0) (2026-02-09)
+## [1.6.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.5.1...v1.6.0) (2026-02-09)
 
 ### Bug Fixes
 
@@ -71,21 +124,16 @@
 ### Features
 
 * add Author Bio component for E-E-A-T signals (AdSense H2) ([2fbd4fc](https://github.com/NeoWhisper/neowhisper-blog/commit/2fbd4fc3444a4692d02c687bc56997fc10b72a55))
-* add blog post about production contact forms (Post [#5](https://github.com/NeoWhisper/neowhisper-blog/issues/5)) ([789209f](https://github.com/NeoWhisper/neowhisper-blog/commit/789209f40868334b363d4029360ae5d4654e0d48))
-* add final blog post [#6](https://github.com/NeoWhisper/neowhisper-blog/issues/6) about CSP debugging (EN only for now) ([a764787](https://github.com/NeoWhisper/neowhisper-blog/commit/a7647878579b5da80fc24bb817a31892fd98c93b))
+* add blog post about production contact forms (Post #5) ([789209f](https://github.com/NeoWhisper/neowhisper-blog/commit/789209f40868334b363d4029360ae5d4654e0d48))
+* add final blog post #6 about CSP debugging (EN only for now) ([a764787](https://github.com/NeoWhisper/neowhisper-blog/commit/a7647878579b5da80fc24bb817a31892fd98c93b))
 * add GDPR-compliant Cookie Banner (AdSense H3) ([9e6bc13](https://github.com/NeoWhisper/neowhisper-blog/commit/9e6bc138254150f0bf6d3bddd09d469f73216c31))
 * add internal links to all blog posts for AdSense compliance ([cb81d6e](https://github.com/NeoWhisper/neowhisper-blog/commit/cb81d6ecee48e516afd90d71525894b5ff35bfff))
-* add JA/AR translations for contact forms post (Post [#5](https://github.com/NeoWhisper/neowhisper-blog/issues/5) complete) ([ed92043](https://github.com/NeoWhisper/neowhisper-blog/commit/ed920435b2874d8bd1cb45b3f0fae2096397a478))
-* add JA/AR translations for Post [#6](https://github.com/NeoWhisper/neowhisper-blog/issues/6) - ALL POSTS NOW TRILINGUAL! ([f82e095](https://github.com/NeoWhisper/neowhisper-blog/commit/f82e095e1e97758aec2002699887f6e0b51626e3))
-* add SEO metadata with i18n support to all marketing pages (AdSense H4) ([f95a849](https://github.com/NeoWhisper/neowhisper-blog/commit/f95a849a0b94a9d6e80fc51bbeba3aec81d0becb)), closes [Hi#priority](https://github.com/Hi/issues/priority)
+* add JA/AR translations for contact forms post (Post #5 complete) ([ed92043](https://github.com/NeoWhisper/neowhisper-blog/commit/ed920435b2874d8bd1cb45b3f0fae2096397a478))
+* add JA/AR translations for Post #6 - ALL POSTS NOW TRILINGUAL! ([f82e095](https://github.com/NeoWhisper/neowhisper-blog/commit/f82e095e1e97758aec2002699887f6e0b51626e3))
+* add SEO metadata with i18n support to all marketing pages (AdSense H4) ([f95a849](https://github.com/NeoWhisper/neowhisper-blog/commit/f95a849a0b94a9d6e80fc51bbeba3aec81d0becb)), closes Hi#priority
 * **ci:** add semantic-release with commitlint, husky, and dependabot ([1a3e774](https://github.com/NeoWhisper/neowhisper-blog/commit/1a3e774fb3f59c0a1227caee1de7c0f08aa8f2ee))
 * **csp:** finalize AdSense & Turnstile readiness ([7be1d61](https://github.com/NeoWhisper/neowhisper-blog/commit/7be1d6146ad4d44c520ae2ed226af7b34c5a3d2f))
 * **site:** add multilingual marketing pages, contact form, and project system ([3b59837](https://github.com/NeoWhisper/neowhisper-blog/commit/3b59837ad5b1873a4a8713a6fb1b1f44338fc20a))
-
-<!-- markdownlint-disable MD024 -->
-# Changelog
-
-All notable changes to the NeoWhisper blog will be documented here.
 
 ## [Unreleased]
 
@@ -97,53 +145,16 @@ All notable changes to the NeoWhisper blog will be documented here.
 * Admin Dashboard: Added a new "Error Logs" management page (`/admin/logs`) to review system errors recorded in the database.
 * Refactoring: Satisfied React linting rules by decoupling data fetching from JSX construction in dynamic blog pages.
 * Observability: Added standardized client and server-side logging for all admin actions (create, update, delete, status change).
+* Trust copy (JA): Replaced ambiguous "登録済み" business claims with clearer legal phrasing based on 開業届提出済み status in `about` and `AuthorBio`.
+* Contact UX: Added client-side Turnstile token guard with localized error messages (EN/JA/AR) to avoid noisy failed submissions when captcha is not completed.
+* Cross-reference: Builds on the CSP and header cleanup from merged branch `fix/changelog-fonts-tests-refactor`.
 
-## [1.7.0] - 2026-02-09
+## [1.10.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.9.0...v1.10.0) (2026-02-24)
 
-### 🎉 AdSense Readiness Milestone
+### Features
 
-This release completes all critical requirements for Google AdSense approval.
-
-### Added
-
-* **Blog Posts (2 new, bringing total to 6):**
-  * "Building Production-Ready Contact Forms with Cloudflare Turnstile and Resend" (EN/JA/AR)
-  * "From 6 CSP Errors to Zero: Debugging Content Security Policy for AdSense" (EN/JA/AR)
-* **AuthorBio component** with E-E-A-T signals (expertise, authority, trust)
-* **CookieBanner component** with GDPR compliance and multilingual support
-* **Internal links** added to all blog posts (15 files updated, 2-3 links per post)
-* **SEO metadata** with i18n support for all marketing pages (Services, Projects, About, Contact)
-* **DNS records** for email deliverability (SPF, DKIM, DMARC)
-* **CSP documentation** section in README with troubleshooting guide
-
-### Fixed
-
-* **6 CSP errors** blocking AdSense scripts (frame-src, script-src, connect-src violations)
-* **Email deliverability** - Changed RESEND_FROM to friendly address, configured DMARC
-* **CSP configuration** - Added all required Google domains for AdSense
-* **Twitter/X link** removed from AuthorBio (replaced with real GitHub only)
-
-### Changed
-
-* **README.md** kept generic for template reusability
-* **DNS-SETUP-CHECKLIST.md** added to .gitignore (operational doc)
-* **CSP policy** relaxed for AdSense while maintaining security (no wildcard *, specific domains only)
-* **Welcome post** expanded with more substantive content and navigation links
-
-### Infrastructure
-
-* Email deliverability tested in production (Gmail/Outlook inbox delivery confirmed)
-* All High-priority AdSense tasks completed (100%)
-* All Critical tasks completed except final translations (75%)
-* Total progress: 18% → 86% in 2 days
-
-### Metrics
-
-* Blog posts: 4 → 6 (target met)
-* Internal links: 0 → 20+ (200% of target)
-* CSP errors: 6 → 0 (100% resolved)
-* Commits: 14 over 2 days
-* Files changed: 40+
+* admin posts management, release workflow fixes, and security updates ([#26](https://github.com/NeoWhisper/neowhisper-blog/issues/26)) ([a411693](https://github.com/NeoWhisper/neowhisper-blog/commit/a4116934522392012d237f69ea214ba3d4dc6dab)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* release Supabase Hybrid CMS Phase 1, refactor, and update CI ([#24](https://github.com/NeoWhisper/neowhisper-blog/issues/24)) ([792a2e7](https://github.com/NeoWhisper/neowhisper-blog/commit/792a2e7ad6c867614c4975df793397248c9e8b50)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
 
 ## [1.6.0] - 2026-02-07
 

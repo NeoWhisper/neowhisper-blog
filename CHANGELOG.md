@@ -1,3 +1,10 @@
+## [1.11.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.1...v1.11.2) (2026-02-25)
+
+
+### Bug Fixes
+
+* nuclear stability patch for blog page 500 errors ([f245912](https://github.com/NeoWhisper/neowhisper-blog/commit/f245912c14a7754c66e4bbec7a8e6e3ced8f0c38))
+
 ## [1.11.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.0...v1.11.1) (2026-02-25)
 
 

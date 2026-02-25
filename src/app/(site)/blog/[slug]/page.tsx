@@ -8,8 +8,7 @@ import {
   getHybridPost,
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
-import { getBaseSlug, getPostLanguage, getPosts } from "@/lib/posts";
-import { logger } from "@/lib/logger";
+import { getBaseSlug, getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
 
 const baseUrl = "https://www.neowhisper.net";
 
@@ -61,60 +60,67 @@ export async function generateMetadata({
   params,
   searchParams,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const { lang } = await searchParams;
-  const resolvedLang = resolveLanguage(slug, lang);
-  const post = await getHybridPost(slug, resolvedLang);
+  try {
+    const { slug } = await params;
+    const { lang } = await searchParams;
+    const resolvedLang = resolveLanguage(slug, lang);
+    const post = await getHybridPost(slug, resolvedLang);
 
-  if (!post) return {};
+    if (!post) return {};
 
-  const isWelcomePost = getBaseSlug(post.slug) === "welcome";
-  const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
-  const languageAlternates: Record<string, string> = {};
+    const isWelcomePost = getBaseSlug(post.slug) === "welcome";
+    const languageVariants = await getHybridLanguageVariants(post.slug, post.locale);
+    const languageAlternates: Record<string, string> = {};
 
-  languageVariants.forEach((variant) => {
-    languageAlternates[variant.lang] = buildPostUrl(
-      variant.slug,
-      variant.lang,
-      post.source,
-    );
-  });
+    languageVariants.forEach((variant) => {
+      languageAlternates[variant.lang] = buildPostUrl(
+        variant.slug,
+        variant.lang,
+        post.source,
+      );
+    });
 
-  const defaultVariant =
-    languageVariants.find((variant) => variant.lang === "en") ??
-    languageVariants[0];
+    const defaultVariant =
+      languageVariants.find((variant) => variant.lang === "en") ??
+      languageVariants[0];
 
-  if (defaultVariant) {
-    languageAlternates["x-default"] = buildPostUrl(
-      defaultVariant.slug,
-      "en",
-      post.source,
-    );
-  }
+    if (defaultVariant) {
+      languageAlternates["x-default"] = buildPostUrl(
+        defaultVariant.slug,
+        "en",
+        post.source,
+      );
+    }
 
-  return {
-    title: post.title,
-    description: post.excerpt,
-    robots: isWelcomePost
-      ? {
-        index: false,
-        follow: true,
-      }
-      : undefined,
-    alternates: {
-      canonical: buildPostUrl(post.slug, post.locale, post.source),
-      languages: languageAlternates,
-    },
-    openGraph: {
+    return {
       title: post.title,
       description: post.excerpt,
-      images: post.coverImage ? [post.coverImage] : [],
-      locale: toOpenGraphLocale(post.locale),
-      alternateLocale: languageVariants
-        .filter((variant) => variant.lang !== post.locale)
-        .map((variant) => toOpenGraphLocale(variant.lang)),
-    },
-  };
+      robots: isWelcomePost
+        ? {
+          index: false,
+          follow: true,
+        }
+        : undefined,
+      alternates: {
+        canonical: buildPostUrl(post.slug, post.locale, post.source),
+        languages: languageAlternates,
+      },
+      openGraph: {
+        title: post.title,
+        description: post.excerpt,
+        images: post.coverImage ? [post.coverImage] : [],
+        locale: toOpenGraphLocale(post.locale),
+        alternateLocale: languageVariants
+          .filter((variant) => variant.lang !== post.locale)
+          .map((variant) => toOpenGraphLocale(variant.lang)),
+      },
+    };
+  } catch (error) {
+    console.error("[BlogPost:Metadata] Fatal error generating metadata:", error);
+    return {
+      title: "Blog Post | NeoWhisper",
+    };
+  }
 }
 
 export default async function BlogPost({ params, searchParams }: PageProps) {
@@ -122,23 +128,29 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
   const { lang } = await searchParams;
   const resolvedLang = resolveLanguage(slug, lang);
 
-  // Use a separate block for data fetching to satisfy the linter
-  // while keeping our diagnostic logging for production debugging.
   const data = await (async () => {
     try {
       const post = await getHybridPost(slug, resolvedLang);
       if (!post) {
-        console.log(`[BlogPost] Post not found: ${slug}, lang: ${resolvedLang}`);
         return null;
       }
       const [languageVariants, relatedPosts] = await Promise.all([
-        getHybridLanguageVariants(post.slug, post.locale),
-        getHybridRelatedPosts(post, 3),
+        getHybridLanguageVariants(post.slug, post.locale).catch(() => []),
+        getHybridRelatedPosts(post, 3).catch(() => []),
       ]);
       return { post, languageVariants, relatedPosts };
     } catch (error) {
-      await logger.error("BlogPost:Data", `Error fetching blog post: ${slug}`, error);
-      throw error;
+      console.error(`[BlogPost] Error rendering post ${slug}:`, error);
+      // Fallback for extreme cases: try to get the static post directly if hybrid logic crashed
+      try {
+        const staticPost = getPostBySlug(slug);
+        if (staticPost) {
+          const variants = [{ lang: normalizeLang(getPostLanguage(staticPost.slug)), slug: staticPost.slug }];
+          return { post: { ...staticPost, locale: variants[0].lang, source: "static" as const, publishedAt: staticPost.date, updatedAt: staticPost.date }, languageVariants: variants, relatedPosts: [] };
+        }
+      } catch { /* Ignore fallback errors */ }
+
+      return null;
     }
   })();
 

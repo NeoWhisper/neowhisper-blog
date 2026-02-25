@@ -1,5 +1,5 @@
 
-import { createSupabaseServerClient } from "./supabase-ssr";
+
 
 export type LogLevel = "error" | "info" | "warn" | "debug";
 
@@ -53,7 +53,19 @@ export const logger = {
 
         // 2. Persist to Supabase
         try {
-            const supabase = await createSupabaseServerClient();
+            // Only attempt server-side logging if we are actually in a request context
+            // In static generation, we might want to skip or use a different client
+            const { createSupabaseServerClient } = await import("./supabase-ssr");
+
+            // This might still throw if called during static generation, but we catch it
+            const supabase = await createSupabaseServerClient().catch(() => null);
+
+            if (!supabase) {
+                if (process.env.NODE_ENV === "development") {
+                    console.warn("[Logger] Supabase server client unavailable, skipping remote log.");
+                }
+                return;
+            }
 
             // Attempt to get user if on server
             let user_email = entry.user_email;
@@ -75,7 +87,9 @@ export const logger = {
             });
         } catch (err) {
             // Fail silently to avoid crashing the app due to logging failure
-            console.error("FATAL: Logging to Supabase failed.", err);
+            if (process.env.NODE_ENV === "development") {
+                console.error("FATAL: Logging to Supabase failed.", err);
+            }
         }
     },
 

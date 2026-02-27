@@ -9,7 +9,6 @@ import {
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
 import { getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
-import { logger } from "@/lib/logger";
 
 const baseUrl = "https://www.neowhisper.net";
 
@@ -62,11 +61,11 @@ export async function generateMetadata({
   try {
     const { slug } = await params;
     const { lang } = await searchParams;
-    const resolvedLang = resolveLanguage(slug, lang);
+    const decodedSlug = decodeURIComponent(slug);
+    const resolvedLang = resolveLanguage(decodedSlug, lang);
 
-    // Defensive lookup to avoid throwing
-    const post = await getHybridPost(slug, resolvedLang).catch(err => {
-      console.error(`[Metadata Error] for ${slug}:`, err);
+    const post = await getHybridPost(decodedSlug, resolvedLang).catch(err => {
+      console.error(`[Metadata Error] for ${decodedSlug}:`, err);
       return null;
     });
 
@@ -102,16 +101,18 @@ export async function generateMetadata({
 export default async function BlogPost({ params, searchParams }: PageProps) {
   const { slug } = await params;
   const { lang } = await searchParams;
-  const resolvedLang = resolveLanguage(slug, lang);
+  // Decode slug in case it arrived URL-encoded from CDN/proxy
+  const decodedSlug = decodeURIComponent(slug);
+  const resolvedLang = resolveLanguage(decodedSlug, lang);
 
   const data = await (async () => {
     try {
-      console.log(`[BlogPost] Render attempt: ${slug} (Resolved Lang: ${resolvedLang})`);
+      console.log(`[BlogPost] Render attempt: ${decodedSlug} (Resolved Lang: ${resolvedLang})`);
 
-      const post = await getHybridPost(slug, resolvedLang);
+      const post = await getHybridPost(decodedSlug, resolvedLang);
 
       if (!post) {
-        console.warn(`[BlogPost] No data found for ${slug}`);
+        console.warn(`[BlogPost] No data found for ${decodedSlug}`);
         return null;
       }
 
@@ -134,20 +135,20 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
         try {
           renderedHtml = renderMarkdownToSafeHtml(post.content);
         } catch (htmlErr) {
-          console.error(`[BlogPost] HTML render error for ${slug}:`, htmlErr);
-          // Throw so the outer try-catch catches it and activates the static fallback
+          console.error(`[BlogPost] HTML render error for ${decodedSlug}:`, htmlErr);
           throw htmlErr;
         }
       }
 
       return { post, languageVariants, relatedPosts, renderedHtml };
     } catch (error) {
-      console.error(`[BlogPost] CRITICAL RENDER ERROR for ${slug}:`, error);
-      logger.error("BlogPost", "CRITICAL RENDER ERROR", error, { slug, lang: resolvedLang }).catch(() => { });
+      console.error(`[BlogPost] CRITICAL RENDER ERROR for ${decodedSlug}:`, error);
 
-      // EMERGENCY FALLBACK to local files
+      // EMERGENCY FALLBACK: serve from local filesystem.
+      // IMPORTANT: No logger here — logger calls cookies()/Supabase which can
+      // itself throw, causing a second cascading failure that blocks this fallback.
       try {
-        const staticPost = getPostBySlug(slug);
+        const staticPost = getPostBySlug(decodedSlug);
         if (staticPost) {
           console.log("[BlogPost] Fallback to static markdown successful");
           const lSuffix = getPostLanguage(staticPost.slug) as SupportedLang;
@@ -157,10 +158,10 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
               locale: lSuffix,
               source: "static" as const,
               publishedAt: staticPost.date,
-              updatedAt: staticPost.date
+              updatedAt: staticPost.date,
             },
             languageVariants: [{ lang: lSuffix, slug: staticPost.slug }],
-            relatedPosts: []
+            relatedPosts: [],
           };
         }
       } catch (fError) {

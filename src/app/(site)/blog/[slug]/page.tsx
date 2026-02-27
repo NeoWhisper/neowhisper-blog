@@ -8,7 +8,8 @@ import {
   getHybridPost,
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
-import { getBaseSlug, getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
+import { getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
+import { logger } from "@/lib/logger";
 
 const baseUrl = "https://www.neowhisper.net";
 
@@ -24,12 +25,6 @@ interface PageProps {
 function resolveLanguage(slug: string, lang?: string | null): SupportedLang {
   if (lang) return normalizeLang(lang);
   return normalizeLang(getPostLanguage(slug));
-}
-
-function toOpenGraphLocale(lang: SupportedLang): string {
-  if (lang === "ja") return "ja_JP";
-  if (lang === "ar") return "ar_SA";
-  return "en_US";
 }
 
 function buildPostUrl(
@@ -133,9 +128,22 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
         }),
       ]);
 
-      return { post, languageVariants, relatedPosts };
+      let renderedHtml: string | undefined = undefined;
+
+      if (post.source === "dynamic") {
+        try {
+          renderedHtml = renderMarkdownToSafeHtml(post.content);
+        } catch (htmlErr) {
+          console.error(`[BlogPost] HTML render error for ${slug}:`, htmlErr);
+          // Throw so the outer try-catch catches it and activates the static fallback
+          throw htmlErr;
+        }
+      }
+
+      return { post, languageVariants, relatedPosts, renderedHtml };
     } catch (error) {
       console.error(`[BlogPost] CRITICAL RENDER ERROR for ${slug}:`, error);
+      logger.error("BlogPost", "CRITICAL RENDER ERROR", error, { slug, lang: resolvedLang }).catch(() => { });
 
       // EMERGENCY FALLBACK to local files
       try {
@@ -167,7 +175,7 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const { post, languageVariants, relatedPosts } = data;
+  const { post, languageVariants, relatedPosts, renderedHtml } = data;
 
   return (
     <BlogPostTemplate
@@ -175,9 +183,7 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
       title={post.title}
       date={post.date}
       content={post.content}
-      renderedHtml={
-        post.source === "dynamic" ? renderMarkdownToSafeHtml(post.content) : undefined
-      }
+      renderedHtml={renderedHtml}
       coverImage={post.coverImage}
       category={post.category}
       readTime={post.readTime}

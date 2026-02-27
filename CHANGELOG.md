@@ -1,3 +1,10 @@
+## [1.11.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.2...v1.11.3) (2026-02-27)
+
+
+### Bug Fixes
+
+* remove unused toOpenGraphLocale function ([8f71430](https://github.com/NeoWhisper/neowhisper-blog/commit/8f71430a77b1d21aa7fe169aaa271660a20a79f8))
+
 ## [1.11.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.1...v1.11.2) (2026-02-25)
 
 

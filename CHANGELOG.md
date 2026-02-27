@@ -1,3 +1,10 @@
+## [1.11.4](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.3...v1.11.4) (2026-02-27)
+
+
+### Bug Fixes
+
+* remove logger from catch block and decode slug to fix 500 errors on all blog posts ([297ce4b](https://github.com/NeoWhisper/neowhisper-blog/commit/297ce4b3c829c31a4bc309046be7134efad68dec))
+
 ## [1.11.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.2...v1.11.3) (2026-02-27)
 
 

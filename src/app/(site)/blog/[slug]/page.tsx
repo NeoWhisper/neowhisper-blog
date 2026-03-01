@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import BlogPostTemplate from "@/components/BlogPostTemplate";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
-import { renderMarkdownToSafeHtml } from "@/lib/markdown";
 import {
   getHybridLanguageVariants,
   getHybridPost,
@@ -133,10 +131,11 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
 
       if (post.source === "dynamic") {
         try {
+          const { renderMarkdownToSafeHtml } = await import("@/lib/markdown");
           renderedHtml = renderMarkdownToSafeHtml(post.content);
         } catch (htmlErr) {
           console.error(`[BlogPost] HTML render error for ${decodedSlug}:`, htmlErr);
-          throw htmlErr;
+          renderedHtml = undefined;
         }
       }
 
@@ -177,23 +176,37 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
   }
 
   const { post, languageVariants, relatedPosts, renderedHtml } = data;
+  try {
+    const { default: BlogPostTemplate } = await import(
+      "@/components/BlogPostTemplate"
+    );
 
-  return (
-    <BlogPostTemplate
-      slug={post.slug}
-      title={post.title}
-      date={post.date}
-      content={post.content}
-      renderedHtml={renderedHtml}
-      coverImage={post.coverImage}
-      category={post.category}
-      readTime={post.readTime}
-      isRTL={post.locale === "ar"}
-      availableLanguages={languageVariants.map((variant) => variant.lang)}
-      relatedPosts={relatedPosts}
-      lang={post.locale}
-      languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
-      canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}
-    />
-  );
+    return (
+      <BlogPostTemplate
+        slug={post.slug}
+        title={post.title}
+        date={post.date}
+        content={post.content}
+        renderedHtml={renderedHtml}
+        coverImage={post.coverImage}
+        category={post.category}
+        readTime={post.readTime}
+        isRTL={post.locale === "ar"}
+        availableLanguages={languageVariants.map((variant) => variant.lang)}
+        relatedPosts={relatedPosts}
+        lang={post.locale}
+        languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
+        canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}
+      />
+    );
+  } catch (templateErr) {
+    console.error("[BlogPost] Template import error:", templateErr);
+    return (
+      <article className="mx-auto max-w-3xl px-6 py-12">
+        <h1 className="text-3xl font-bold">{post.title}</h1>
+        <p className="mt-4 text-sm opacity-70">{post.date}</p>
+        <div className="mt-8 whitespace-pre-wrap">{post.content}</div>
+      </article>
+    );
+  }
 }

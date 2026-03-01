@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.5...v1.12.0) (2026-03-01)
+
+
+### Features
+
+* **posts:** add multilingual Next.js production debugging playbook and PR templates ([#35](https://github.com/NeoWhisper/neowhisper-blog/issues/35)) ([669e631](https://github.com/NeoWhisper/neowhisper-blog/commit/669e6312a0b1df10c0c91261f524112c8bf463de))
+
 ## [1.11.5](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.4...v1.11.5) (2026-03-01)
 
 

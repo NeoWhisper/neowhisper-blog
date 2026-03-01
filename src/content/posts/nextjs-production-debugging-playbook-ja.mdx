@@ -1,0 +1,163 @@
+---
+title: "ローカルでは動くのに本番で壊れるときのNext.jsデバッグ実践ガイド"
+date: "2026-03-01"
+excerpt: "本番だけで発生する500エラーは、実は再現可能で切り分け可能です。Next.js App Router向けに、ルート障害を特定するための実践手順をまとめました。"
+category: "Next.js"
+coverImage: "/images/nextjs-16-blog-tutorial.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+ローカルでは問題なく動くのに、本番では `500`。  
+Next.jsを運用していると、かなりの頻度で遭遇するパターンです。
+
+特にApp Routerのサーバー描画ルートでは、環境差がそのまま障害として表面化します。
+
+ただし安心してください。  
+この種の不具合は「謎」ではなく、手順を固定すれば高確率で切り分けできます。
+
+---
+
+## なぜ「ローカルOK / 本番NG」が起きるのか
+
+主な原因は次の5つです。
+
+1. 実行環境の差分（Nodeバージョン、Edge/Nodeランタイム差）
+2. 環境変数の差分（未設定、値の不一致、秘密情報の形式違い）
+3. 実行モードの差分（`next dev` と `next build && next start` は別物）
+4. ルートモジュールのトップレベルimportでのクラッシュ
+5. 本番インフラ上での外部依存の挙動差
+
+まず「原因カテゴリ」を確定すると、調査が速くなります。
+
+---
+
+## Step 1: まずはHTTPで障害範囲を測る
+
+コードを触る前に、ルート単位で事実確認します。
+
+```bash
+curl -s -o /dev/null -w '/blog HTTP:%{http_code}\n' 'https://example.com/blog'
+curl -s -o /dev/null -w '/blog/known-post HTTP:%{http_code}\n' 'https://example.com/blog/known-post'
+curl -s -o /dev/null -w '/blog/missing HTTP:%{http_code}\n' 'https://example.com/blog/definitely-missing-slug'
+```
+
+見方:
+
+- 一覧は`200`、詳細だけ`500` -> 詳細ルートの描画経路が怪しい
+- 存在しないslugも`500`（本来は`404`） -> `notFound()`より前で落ちている可能性が高い
+- 特定slugのみ失敗 -> コンテンツやデータ依存の可能性
+
+この3本だけでも、調査の方向がかなり固まります。
+
+---
+
+## Step 2: ローカルでも必ず本番モードで再現確認
+
+`next dev`だけで安心しないことが重要です。
+
+```bash
+npm run dev
+npm run build && npm run start
+```
+
+`dev`は通るが`build/start`で壊れるなら、SSR/ランタイム/ビルド特有の問題です。
+
+さらに可能なら本番と揃えます:
+
+- Nodeメジャーバージョン
+- 環境変数セット
+- フラグや設定値
+
+再現条件が揃っていないと、誤判定が増えます。
+
+---
+
+## Step 3: 失敗ルートではトップレベルimportを疑う
+
+見落としがちな典型例です。  
+ルートファイルのトップレベルimportが本番で例外を出すと、リクエスト内のtry/catchまで到達しません。
+
+壊れやすい形:
+
+```tsx
+import HeavyTemplate from "@/components/HeavyTemplate";
+import { riskyRender } from "@/lib/risky-renderer";
+```
+
+より安全な形:
+
+1. ルート入口は軽量に保つ
+2. リスクの高い処理は必要時に遅延import
+3. 任意機能は失敗しても継続できる設計にする
+
+```tsx
+let html: string | undefined;
+
+try {
+  const { riskyRender } = await import("@/lib/risky-renderer");
+  html = riskyRender(content);
+} catch (err) {
+  console.error("Optional render path failed:", err);
+  html = undefined;
+}
+```
+
+---
+
+## Step 4: エラー処理中の「連鎖クラッシュ」を防ぐ
+
+catch内でさらに不安定な依存（外部ロガー、認証SDKなど）を呼び、二次障害を起こすケースは多いです。
+
+フォールバック経路は以下を徹底します。
+
+- 副作用を最小化
+- 依存を最小化
+- 最低限の表示で返せるようにする
+- 存在しないslugは必ず`404`へ落とす
+
+フォールバックが落ちる設計は、フォールバックではありません。
+
+---
+
+## Step 5: デプロイ後スモークテストを固定化
+
+本番デプロイ直後に、最低限これだけ実行します。
+
+1. 一覧ページ `200`
+2. 既知slug `200`
+3. 存在しないslug `404`
+
+簡易スクリプト例:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="${1:-https://example.com}"
+
+curl -s -o /dev/null -w '/blog HTTP:%{http_code}\n' "$BASE_URL/blog"
+curl -s -o /dev/null -w '/blog/known-post HTTP:%{http_code}\n' "$BASE_URL/blog/known-post"
+curl -s -o /dev/null -w '/blog/missing HTTP:%{http_code}\n' "$BASE_URL/blog/this-post-does-not-exist-xyz-123"
+```
+
+---
+
+## チェックリスト
+
+- HTTPで障害範囲を先に確認したか
+- `next build && next start`で再現確認したか
+- 本番と同じNode/環境変数で検証したか
+- 失敗ルートのトップレベルimportを見直したか
+- 任意機能の描画経路を遅延import化したか
+- フォールバックの依存を最小化したか
+- デプロイ後スモークテストを運用に組み込んだか
+
+---
+
+本番障害は避けられません。  
+でも、調査手順は標準化できます。
+
+「謎の500」をチェックリスト化できると、復旧速度も再発防止も大きく改善します。
+

@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.4...v1.11.5) (2026-03-01)
+
+
+### Bug Fixes
+
+* harden blog slug route against production import/render failures ([5c3cad9](https://github.com/NeoWhisper/neowhisper-blog/commit/5c3cad919caace47a5e1b69c37ec79e186f17d8e))
+
 ## [1.11.4](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.3...v1.11.4) (2026-02-27)
 
 

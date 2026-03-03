@@ -1,0 +1,164 @@
+---
+title: "Next.js + Vercel Security Hardening Checklist (Real Production Workflow)"
+date: "2026-03-03"
+excerpt: "A practical hardening workflow for production Next.js apps on Vercel: CSP, CORS, metadata routes, monitoring, and safe rollout strategy."
+category: "Next.js"
+coverImage: "/images/nextjs-16-tutorial-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+Security advice is easy to repeat and hard to apply.
+
+Most teams don't fail because they don't know what CSP or CORS is. They fail because they change too many things at once, break production, then roll everything back.
+
+This is the production workflow we now use on Next.js + Vercel to harden security **without** breaking analytics or ad integrations.
+
+---
+
+## 1. Start With an Explicit Threat Surface
+
+Before touching headers, list your real exposure points:
+
+- Public pages and API routes
+- Form endpoints (`/api/contact`, auth callbacks)
+- Metadata routes (`/robots.txt`, `/sitemap.xml`)
+- Third-party scripts (AdSense, GA, Turnstile)
+- Admin paths (`/admin/*`)
+
+If you skip this step, your policy will be generic and too loose.
+
+---
+
+## 2. Roll Out CSP in Phases, Not All at Once
+
+The stable sequence:
+
+1. Build nonce-capable rendering path.
+2. Deploy CSP as **report-only** first.
+3. Watch real browser violations in production.
+4. Add only required domains.
+5. Enforce CSP header after violations stabilize.
+
+In middleware/proxy flow, generate per-request nonce and pass it to components:
+
+```ts
+const nonce = crypto.randomUUID().replace(/-/g, "");
+requestHeaders.set("x-nonce", nonce);
+```
+
+Then use that nonce on script tags that you own.
+
+Key principle: allow minimum surface for `script-src`, then tune `connect-src`, `img-src`, and `frame-src` with real evidence from console/network.
+
+---
+
+## 3. Treat CORS on Metadata Routes as a Security Detail
+
+Many teams forget `/robots.txt` and `/sitemap.xml`, then scanners flag wildcard or reflected origins.
+
+For static metadata routes:
+
+- If cross-origin fetch is not needed, avoid permissive behavior.
+- If platform behavior re-adds default headers, enforce a safe explicit fallback.
+
+Practical policy:
+
+- Allow only `https://www.neowhisper.net` and `https://neowhisper.net`
+- Set `Vary: Origin`
+- Never use `*` when specific origin is enough
+
+This fixes scanner noise and prevents unnecessary cross-origin leakage.
+
+---
+
+## 4. Separate Compatibility Relaxations From Core Security
+
+In real production, some third-party scripts still rely on style attributes or specific frame hosts.
+
+Instead of giving up and adding broad `unsafe-inline` everywhere, isolate compatibility rules:
+
+- Keep strong `script-src` with nonce + strict-dynamic.
+- Add narrowly scoped allowances for runtime style attributes if needed.
+- Add exact hosts discovered from production violations (for example `ep1/ep2.adtrafficquality.google`).
+
+This keeps your core XSS posture strong while avoiding broken ads/analytics.
+
+---
+
+## 5. Harden Trust Pages and Operational Signals
+
+Ad/network reviews and manual audits look at more than headers.
+
+Keep these pages complete and maintained:
+
+- About
+- Contact
+- Privacy
+- Terms
+- Editorial Policy
+- Projects (with real shipped work, not only "planned")
+
+Security posture is stronger when technical controls and organizational signals match.
+
+---
+
+## 6. Add Post-Deploy Security Smoke Checks
+
+After every production release, run quick checks:
+
+```bash
+curl -sI https://www.neowhisper.net/ | grep -i content-security-policy
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/robots.txt | grep -i access-control-allow-origin
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/sitemap.xml | grep -i access-control-allow-origin
+```
+
+And verify manually in browser console with blockers disabled:
+
+- No new CSP violations from your own code
+- Third-party violations understood and intentionally handled
+- Ad slots and analytics still functional
+
+---
+
+## 7. Recommended Baseline for Next.js on Vercel
+
+This baseline has worked well for us:
+
+- `default-src 'self'`
+- `script-src` with nonce + strict-dynamic + explicit trusted domains
+- `style-src` nonce-based
+- `style-src-attr 'unsafe-inline'` only if required by third-party runtime behavior
+- Tight `connect-src`, `img-src`, `frame-src`
+- `object-src 'none'`, `base-uri 'self'`, `frame-ancestors 'none'`
+
+Do not copy giant wildcard policies from random snippets.
+Use your actual app behavior as the source of truth.
+
+---
+
+## Common Mistakes We Stopped Making
+
+1. Shipping strict CSP directly in enforce mode without report-only learning phase.
+2. Fixing scanner alerts by adding broad wildcards.
+3. Forgetting metadata route headers.
+4. Assuming local browser behavior equals production edge behavior.
+5. Not documenting why each external domain is allowed.
+
+---
+
+## Final Checklist
+
+- [ ] Nonce path is wired end-to-end.
+- [ ] CSP moved from report-only to enforce with observed data.
+- [ ] Metadata CORS behavior is explicit and minimal.
+- [ ] Third-party compatibility rules are narrow and documented.
+- [ ] Trust pages are complete and current.
+- [ ] Post-deploy smoke checks are part of release routine.
+
+Hardening is not a one-time patch.
+It is an operating process.
+
+If your Next.js site is growing and integrating more external systems, this process is what keeps security and business requirements aligned.
+

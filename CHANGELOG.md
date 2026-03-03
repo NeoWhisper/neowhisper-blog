@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.1...v1.12.2) (2026-03-03)
+
+
+### Bug Fixes
+
+* **security:** prevent wildcard ACAO fallback on metadata routes ([#42](https://github.com/NeoWhisper/neowhisper-blog/issues/42)) ([adc7fd6](https://github.com/NeoWhisper/neowhisper-blog/commit/adc7fd61f588cfc24d7754d9fb2fa40f7e6f04f6))
+
 ## [1.12.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.0...v1.12.1) (2026-03-03)
 
 

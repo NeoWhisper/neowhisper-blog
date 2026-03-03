@@ -38,6 +38,7 @@ function buildCsp({
     "https://googleads.g.doubleclick.net",
     "https://adtrafficquality.google",
     "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google",
     "https://fundingchoicesmessages.google.com",
     "https://challenges.cloudflare.com",
   ];
@@ -73,7 +74,7 @@ function buildCsp({
     "img-src 'self' data: blob: https://www.google-analytics.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googletagmanager.com https://www.gstatic.com https://www.google.com",
     "font-src 'self' data: https://fonts.gstatic.com",
     `connect-src ${connectSrc.join(" ")}`,
-    "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://www.google.com",
+    "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://adtrafficquality.google https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

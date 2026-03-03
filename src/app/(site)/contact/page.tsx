@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import ContactForm from "@/components/ContactForm";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
@@ -200,6 +201,7 @@ export default async function ContactPage({
 }: {
   searchParams: Promise<{ lang?: string }>;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const t = translations[currentLang];
@@ -234,6 +236,7 @@ export default async function ContactPage({
         <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
           {turnstileSiteKey && (
             <Script
+              nonce={nonce}
               src="https://challenges.cloudflare.com/turnstile/v0/api.js"
               async
               defer

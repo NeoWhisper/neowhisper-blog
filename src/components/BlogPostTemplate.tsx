@@ -2,6 +2,7 @@ import Image from "next/image";
 import React, { ReactNode } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
+import { headers } from "next/headers";
 import rehypeHighlight from "rehype-highlight";
 import { formatDate } from "@/lib/utils";
 import { AdSenseAd } from "@/components/AdSenseAd";
@@ -88,7 +89,7 @@ interface BlogPostTemplateProps {
   canonicalUrl?: string;
 }
 
-export default function BlogPostTemplate({
+export default async function BlogPostTemplate({
   slug,
   title,
   date,
@@ -109,6 +110,7 @@ export default function BlogPostTemplate({
   const wordCount = estimateWordCount(content);
   const showAd = shouldRenderAd(content);
   const authorName = getAuthorDisplayName(lang);
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const resolvedCanonicalUrl =
     canonicalUrl ??
     (slug
@@ -145,6 +147,7 @@ export default function BlogPostTemplate({
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
         <article className="max-w-3xl mx-auto">
           <script
+            nonce={nonce}
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
           />

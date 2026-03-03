@@ -35,8 +35,7 @@ export function AdSenseAd({ slot }: Props) {
 
     return (
         <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
+            className="adsbygoogle adsbygoogle-block"
             data-ad-client={adClientId}
             data-ad-slot={slot}
             data-ad-format="auto"

@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.0...v1.12.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* **security:** enforce nonce CSP and restrict robots/sitemap CORS ([18e87b5](https://github.com/NeoWhisper/neowhisper-blog/commit/18e87b559608926da114d755aec36c187f836178))
+
 # [1.12.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.5...v1.12.0) (2026-03-01)
 
 

@@ -145,7 +145,7 @@ export default async function BlogPostTemplate({
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
-        <article className="max-w-3xl mx-auto">
+        <article className="max-w-3xl mx-auto w-full">
           <script
             nonce={nonce}
             type="application/ld+json"
@@ -257,7 +257,7 @@ export default async function BlogPostTemplate({
             prose-ul:my-16 prose-ol:my-16
             prose-hr:my-32 prose-hr:border-gray-200 dark:prose-hr:border-gray-800
             prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50/50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:mb-16
-            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl prose-pre:mb-16
+            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl prose-pre:mb-16 prose-pre:max-w-full prose-pre:overflow-x-auto prose-code:break-words
             ${isRTL ? "text-right" : "text-left"}`}
             >
               {renderedHtml ? (

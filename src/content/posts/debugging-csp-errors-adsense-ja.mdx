@@ -77,7 +77,8 @@ const connectSrc = [
   "'self'",
   isDev ? "ws://localhost:* ws://127.0.0.1:*" : "", // 開発環境のみWebSocketを許可
   "https://www.google-analytics.com",
-  "https://ep1.adtrafficquality.google", // AdSense SODAR endpoint
+  "https://ep1.adtrafficquality.google", // AdSense SODAR endpoints
+  "https://ep2.adtrafficquality.google",
   // ... 他のドメイン
 ]
   .filter(Boolean)
@@ -93,8 +94,8 @@ const connectSrc = [
 試行錯誤の結果、Google AdSenseが実際に必要とするドメインのリストは以下の通りです：
 
 - **script-src:** `googletagmanager.com`, `google-analytics.com`, `pagead2.googlesyndication.com`, `fundingchoicesmessages.google.com`
-- **connect-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`, `ep1.adtrafficquality.google`
-- **frame-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`
+- **connect-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`, `ep1.adtrafficquality.google`, `ep2.adtrafficquality.google`
+- **frame-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`, `ep1.adtrafficquality.google`, `ep2.adtrafficquality.google`
 
 _注：ワイルドカードは可能な限り避け、実際のコンソールエラーを確認してから必要最小限で追加してください。_
 
@@ -132,6 +133,7 @@ const connectSrc = [
   "https://googleads.g.doubleclick.net",
   "https://adtrafficquality.google",
   "https://ep1.adtrafficquality.google",
+  "https://ep2.adtrafficquality.google",
   "https://fundingchoicesmessages.google.com",
   "https://challenges.cloudflare.com",
   isDev ? "ws://localhost:* ws://127.0.0.1:*" : "",
@@ -145,7 +147,7 @@ const csp = [
   `style-src 'self' 'nonce-${nonce}'`,
   "style-src-attr 'unsafe-inline'",
   `connect-src ${connectSrc}`,
-  "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://www.google.com",
+  "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://adtrafficquality.google https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com",
   "object-src 'none'",
 ].join("; ");
 ```

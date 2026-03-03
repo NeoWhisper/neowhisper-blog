@@ -1,6 +1,6 @@
 ## Description
 
-<!-- Use this template for dev/code branches (e.g. dev, feature/*, fix/*, refactor/*). -->
+<!-- Use this default template for dev/code branches (e.g. dev, feature/*, fix/*, refactor/*). -->
 <!-- Briefly describe the changes in this PR -->
 
 ## Type of Change

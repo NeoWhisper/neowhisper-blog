@@ -11,7 +11,7 @@ function AnalyticsLogic() {
     const searchParams = useSearchParams()
 
     useEffect(() => {
-        if (pathname) {
+        if (pathname && GA_TRACKING_ID) {
             pageview(pathname)
         }
     }, [pathname, searchParams])
@@ -19,14 +19,20 @@ function AnalyticsLogic() {
     return null
 }
 
-export default function GoogleAnalytics() {
+export default function GoogleAnalytics({ nonce }: { nonce?: string }) {
+    if (!GA_TRACKING_ID) {
+        return null
+    }
+
     return (
         <>
             <Script
+                nonce={nonce}
                 strategy="afterInteractive"
                 src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
             />
             <Script
+                nonce={nonce}
                 id="gtag-init"
                 strategy="afterInteractive"
                 dangerouslySetInnerHTML={{

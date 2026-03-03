@@ -1,5 +1,6 @@
 ## Summary
 
+<!-- Use this template for content PRs (e.g. contents branch, post translations, editorial updates). -->
 <!-- One short paragraph explaining what content was added/updated and why. -->
 
 ## Files Changed

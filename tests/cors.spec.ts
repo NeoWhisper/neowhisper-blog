@@ -1,27 +1,40 @@
 import { test, expect } from "@playwright/test";
 
-// Ensure static resources do not send Access-Control-Allow-Origin headers.
-// This prevents accidental broad CORS exposure for robots/sitemap.
-// Note: Next.js doesn't allow complete header removal, so we accept empty string as valid.
-
-test("robots.txt and sitemap.xml do not include ACAO header", async ({
+// Ensure metadata resources never return wildcard ACAO and are restricted
+// to trusted origins only.
+test("robots.txt and sitemap.xml use restricted ACAO policy", async ({
   request,
 }) => {
-  const origin = "https://malicious.example";
+  const trustedOrigin = "https://www.neowhisper.net";
+  const untrustedOrigin = "https://malicious.example";
 
-  const robots = await request.get("/robots.txt", {
-    headers: { Origin: origin },
+  const robotsTrusted = await request.get("/robots.txt", {
+    headers: { Origin: trustedOrigin },
   });
-  const robotsHeaders = robots.headers();
-  // Accept undefined or empty string (Next.js limitation - can't remove, only override)
-  const robotsAcao = robotsHeaders["access-control-allow-origin"];
-  expect(robotsAcao === undefined || robotsAcao === "").toBe(true);
+  expect(robotsTrusted.headers()["access-control-allow-origin"]).toBe(
+    trustedOrigin,
+  );
 
-  const sitemap = await request.get("/sitemap.xml", {
-    headers: { Origin: origin },
+  const robotsUntrusted = await request.get("/robots.txt", {
+    headers: { Origin: untrustedOrigin },
   });
-  const sitemapHeaders = sitemap.headers();
-  // Accept undefined or empty string (Next.js limitation - can't remove, only override)
-  const sitemapAcao = sitemapHeaders["access-control-allow-origin"];
-  expect(sitemapAcao === undefined || sitemapAcao === "").toBe(true);
+  const robotsUntrustedAcao =
+    robotsUntrusted.headers()["access-control-allow-origin"];
+  expect(robotsUntrustedAcao).toBe("https://www.neowhisper.net");
+  expect(robotsUntrustedAcao).not.toBe("*");
+
+  const sitemapTrusted = await request.get("/sitemap.xml", {
+    headers: { Origin: trustedOrigin },
+  });
+  expect(sitemapTrusted.headers()["access-control-allow-origin"]).toBe(
+    trustedOrigin,
+  );
+
+  const sitemapUntrusted = await request.get("/sitemap.xml", {
+    headers: { Origin: untrustedOrigin },
+  });
+  const sitemapUntrustedAcao =
+    sitemapUntrusted.headers()["access-control-allow-origin"];
+  expect(sitemapUntrustedAcao).toBe("https://www.neowhisper.net");
+  expect(sitemapUntrustedAcao).not.toBe("*");
 });

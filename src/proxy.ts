@@ -107,9 +107,6 @@ function applyMetadataCorsFix(request: NextRequest, response: NextResponse) {
     return;
   }
 
-  const vary = response.headers.get("Vary");
-  response.headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
-
   const allowedOrigins = new Set([
     "https://www.neowhisper.net",
     "https://neowhisper.net",
@@ -118,10 +115,16 @@ function applyMetadataCorsFix(request: NextRequest, response: NextResponse) {
 
   if (requestOrigin && allowedOrigins.has(requestOrigin)) {
     response.headers.set("Access-Control-Allow-Origin", requestOrigin);
+    const vary = response.headers.get("Vary");
+    response.headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
     return;
   }
 
-  response.headers.delete("Access-Control-Allow-Origin");
+  // Some metadata routes can re-add a permissive ACAO later if absent.
+  // Set an explicit non-wildcard fallback to prevent `*` from appearing.
+  response.headers.set("Access-Control-Allow-Origin", "https://www.neowhisper.net");
+  const vary = response.headers.get("Vary");
+  response.headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
 }
 
 function addNonceToRequestHeaders(

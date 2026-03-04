@@ -1,0 +1,211 @@
+---
+title: "From Inquiry to Delivery: A Technical Client Workflow for Small Studios"
+date: "2026-03-03"
+excerpt: "How to run a reliable client workflow from first inquiry to production launch: scoping, architecture, communication, risk control, and handoff."
+category: "Product Strategy"
+coverImage: "/images/contact-form-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+Many client projects fail long before code quality becomes the problem.
+
+The real failures are usually:
+
+- vague requirements,
+- weak communication checkpoints,
+- no risk boundaries,
+- and chaotic handoff.
+
+This is the workflow we use to move from first contact to stable delivery without drama.
+
+---
+
+## Phase 1: Intake That Actually Filters Real Work
+
+A contact form is not just a lead collector. It should collect the minimum data needed to make a technical decision.
+
+Required fields we treat as non-negotiable:
+
+- project goal,
+- expected users,
+- timeline expectation,
+- budget range,
+- current stack (if any).
+
+What this solves:
+
+- prevents generic "build me something" requests from entering the pipeline,
+- improves first-call quality,
+- reduces unpaid discovery loops.
+
+If the inquiry cannot answer these basics, scope is impossible.
+
+---
+
+## Phase 2: Discovery Call With a Structured Output
+
+The first call is not for free architecture consulting.
+Its output should be a clear decision:
+
+1. proceed,
+2. postpone,
+3. reject.
+
+At the end of discovery, we produce:
+
+- problem statement (what must improve),
+- delivery scope (what is in/out),
+- risks (technical + operational),
+- first milestone definition.
+
+No scope document, no build start.
+
+---
+
+## Phase 3: Technical Scope Draft (Buildable, Not Marketing)
+
+A useful scope draft includes:
+
+- system boundaries (frontend/backend/integrations),
+- environments (dev/staging/prod),
+- security baseline (auth, rate limits, headers, secrets),
+- content and localization scope (EN/JA/AR if needed),
+- acceptance criteria for each milestone.
+
+This is where most overpromising is prevented.
+
+If a requirement cannot be measured, it cannot be accepted.
+
+---
+
+## Phase 4: Milestone Delivery With Proof
+
+For each milestone, we require proof in three forms:
+
+- functional demo,
+- source diff,
+- short ops note (deploy/env changes/tests).
+
+This protects both sides:
+
+- client sees real progress,
+- dev team avoids "hidden work" arguments.
+
+A milestone without proof is just status text.
+
+---
+
+## Phase 5: Communication Cadence (Low Noise, High Signal)
+
+Daily chatter is optional. Predictable reporting is not.
+
+We use:
+
+- one async update cadence (for example twice weekly),
+- one risk escalation rule (blockers raised within same day),
+- one decision log for requirement changes.
+
+This keeps communication accountable without meeting overload.
+
+---
+
+## Phase 6: Change Requests Without Scope Collapse
+
+Every client project gets new ideas mid-build.
+Without a change policy, schedule collapses.
+
+Our rule:
+
+1. classify change as
+   - bug fix,
+   - same-scope adjustment,
+   - net-new feature.
+2. estimate impact in time/cost/risk.
+3. approve in writing before implementation.
+
+No silent scope expansion.
+
+---
+
+## Phase 7: Production Readiness Checklist
+
+Before launch, we verify:
+
+- environment variables and secret handling,
+- CSP/CORS/security headers,
+- form and webhook failure handling,
+- analytics and ad integrations (if enabled),
+- rollback path,
+- ownership transfer (accounts, domains, docs).
+
+Most post-launch incidents come from skipping this checklist, not from missing fancy patterns.
+
+---
+
+## Phase 8: Handoff and 30-Day Stabilization
+
+A delivery is incomplete without transition.
+
+Required handoff pack:
+
+- architecture map,
+- deployment procedure,
+- known limitations,
+- maintenance recommendations,
+- incident contact path.
+
+Then run a short stabilization window (for example 30 days) for production tuning and bug triage.
+
+---
+
+## Practical Templates We Reuse
+
+### Inquiry Summary Template
+
+- Business goal:
+- User segment:
+- Core workflow:
+- Deadline:
+- Budget band:
+- Must-have vs nice-to-have:
+
+### Milestone Acceptance Template
+
+- Objective:
+- Demo URL/video:
+- Code reference:
+- Test evidence:
+- Open risks:
+- Accepted by:
+
+Templates reduce ambiguity and speed up onboarding.
+
+---
+
+## What This Workflow Improved for Us
+
+- Better project fit from day one
+- Fewer urgent re-scopes
+- Faster handoff with less confusion
+- Higher trust with clients because decisions are traceable
+
+This is especially important for small studios and solo operators where one unstable project can consume the entire pipeline.
+
+---
+
+## Final Checklist
+
+- [ ] Intake form captures technical decision inputs
+- [ ] Discovery produces explicit go/no-go decision
+- [ ] Scope is measurable and versioned
+- [ ] Milestones require proof, not status text
+- [ ] Change requests are classified and approved
+- [ ] Launch has a repeatable readiness checklist
+- [ ] Handoff includes docs and stabilization support
+
+Reliable delivery is a system, not a personality trait.
+
+If you run a small technical studio, your workflow design is one of your strongest competitive advantages.
+

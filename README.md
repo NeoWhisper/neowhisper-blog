@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Current version: **v1.9.0**
+> Current version: **v1.12.2**
 
 A high-performance, SEO-optimized tech blog built with **Next.js 16**, **App Router**, and **MDX**.
 
@@ -93,7 +93,7 @@ author:
 
 ## 🔒 Content Security Policy (CSP) for AdSense
 
-This site uses a Content Security Policy to allow Google AdSense, Analytics, and Cloudflare Turnstile while maintaining security. The CSP is configured in `next.config.ts`.
+This site uses a Content Security Policy to allow Google AdSense, Analytics, and Cloudflare Turnstile while maintaining security. The CSP is configured in `src/proxy.ts`.
 
 **Required domains for AdSense:**
 
@@ -105,7 +105,7 @@ This site uses a Content Security Policy to allow Google AdSense, Analytics, and
 
 1. Open DevTools Console with ad blockers disabled
 2. Look for "Content Security Policy" errors
-3. Add only the blocked domain to the appropriate directive in `next.config.ts`
+3. Add only the blocked domain to the appropriate directive in `src/proxy.ts`
 4. Never use wildcard `*` - always specify exact domains
 
 **Current allowed domains:**
@@ -147,7 +147,7 @@ There are two ways to run the Playwright E2E tests locally:
 
 ## 🔒 Production security scan (weekly)
 
-A scheduled GitHub Action runs weekly (and on pushes to `main`) to verify critical security headers and static asset configuration (CSP, `X-Frame-Options`, `X-Content-Type-Options`, and absence of `Access-Control-Allow-Origin` on `robots.txt`/`sitemap.xml`). If the scan detects regressions, it uploads logs as workflow artifacts and **automatically opens a GitHub issue** with the scan output so regressions are visible and tracked. To change this behavior edit `.github/workflows/production-security-scan.yml` (it uses `GITHUB_TOKEN`); you can also redirect alerts to Slack or email instead of creating issues.
+A scheduled GitHub Action runs weekly (and on pushes to `main`) to verify critical security headers and static asset configuration (CSP, `X-Frame-Options`, `X-Content-Type-Options`, plus non-wildcard metadata-route CORS behavior on `robots.txt`/`sitemap.xml`). If the scan detects regressions, it uploads logs as workflow artifacts and **automatically opens a GitHub issue** with the scan output so regressions are visible and tracked. To change this behavior edit `.github/workflows/production-security-scan.yml` (it uses `GITHUB_TOKEN`); you can also redirect alerts to Slack or email instead of creating issues.
 
 ---
 

@@ -20,7 +20,9 @@ test("robots.txt and sitemap.xml use restricted ACAO policy", async ({
   });
   const robotsUntrustedAcao =
     robotsUntrusted.headers()["access-control-allow-origin"];
-  expect(robotsUntrustedAcao).toBe("https://www.neowhisper.net");
+  expect(robotsUntrustedAcao === undefined || robotsUntrustedAcao === "").toBe(
+    true,
+  );
   expect(robotsUntrustedAcao).not.toBe("*");
 
   const sitemapTrusted = await request.get("/sitemap.xml", {
@@ -35,6 +37,8 @@ test("robots.txt and sitemap.xml use restricted ACAO policy", async ({
   });
   const sitemapUntrustedAcao =
     sitemapUntrusted.headers()["access-control-allow-origin"];
-  expect(sitemapUntrustedAcao).toBe("https://www.neowhisper.net");
+  expect(
+    sitemapUntrustedAcao === undefined || sitemapUntrustedAcao === "",
+  ).toBe(true);
   expect(sitemapUntrustedAcao).not.toBe("*");
 });

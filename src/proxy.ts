@@ -125,8 +125,8 @@ function applyMetadataCorsFix(request: NextRequest, response: NextResponse) {
   }
 
   // Some metadata routes can re-add a permissive ACAO later if absent.
-  // Set an explicit non-wildcard fallback to prevent `*` from appearing.
-  response.headers.set("Access-Control-Allow-Origin", "https://www.neowhisper.net");
+  // Keep ACAO explicitly empty to avoid wildcard fallback while denying CORS.
+  response.headers.set("Access-Control-Allow-Origin", "");
   const vary = response.headers.get("Vary");
   response.headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
 }

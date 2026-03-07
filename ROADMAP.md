@@ -1,7 +1,8 @@
 # NeoWhisper Engineering Roadmap (Internal)
 
-**Last Updated:** February 21, 2026  
-**Current Version:** v1.9.0  
+**Last Updated:** March 7, 2026  
+**Current Stable Release:** v1.12.2 (`main`)  
+**Dev Stream:** Unreleased changes pending next semantic-release cut on merge to `main`  
 **Purpose:** Internal planning for engineering, infrastructure, AI-assisted workflows, and experiments.
 
 ---
@@ -10,6 +11,9 @@
 
 | Date | Version | What Was Completed |
 | --- | --- | --- |
+| 2026-03-07 | v1.12.x (dev) | Published March AI trend briefs and AI security workflow posts in EN/JA/AR. |
+| 2026-03-03 | v1.12.2 | Security header hardening updates and metadata-route CORS fixes (`robots.txt` / `sitemap.xml`). |
+| 2026-03-01 | v1.12.0-v1.12.1 | Production debugging playbook rollout and CSP/CORS stabilization updates. |
 | 2026-02-21 | v1.9.0 | Admin Dashboard refactor: dynamic hydration from URL parameters, functional state initialization, and fixed TypeScript expression errors. |
 | 2026-02-16 | v1.8.x-v1.8.2 | Business identity update; SEO and AdSense asset fixes; removed empty CORS headers from `robots.txt` and `sitemap.xml`. |
 | 2026-02-10 | v1.6.1 | Security hardening release: XSS fix and Next.js upgraded to `16.1.5`. |

@@ -1,7 +1,8 @@
 # NeoWhisper Engineering Roadmap (Internal)
 
 **Last Updated:** March 7, 2026  
-**Current Version:** v1.12.2  
+**Current Stable Release:** v1.12.2 (`main`)  
+**Dev Stream:** Unreleased changes pending next semantic-release cut on merge to `main`  
 **Purpose:** Internal planning for engineering, infrastructure, AI-assisted workflows, and experiments.
 
 ---

@@ -1,0 +1,130 @@
+---
+title: "AI-Assisted Security Playbook (2026): From Vulnerability Discovery to Patch Workflow"
+date: "2026-03-07"
+excerpt: "A practical engineering workflow for teams that want to use modern AI systems in vulnerability research without creating compliance or reliability chaos."
+category: "Tech Tips"
+coverImage: "/images/csp-debugging-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+Security teams are entering a new phase.
+
+AI is no longer only writing sample code or generating triage summaries. It is now helping find real vulnerabilities in mature production software.
+
+---
+
+## Why This Matters Right Now
+
+In March 2026, Anthropic published details from a collaboration with Mozilla:
+
+- Claude Opus 4.6 identified 22 Firefox vulnerabilities in two weeks.
+- 14 were high severity based on Mozilla's classification.
+- 112 unique reports were submitted for review.
+
+This is a concrete signal that AI-assisted vulnerability discovery is production relevant.
+
+At the same time, Anthropic's exploit case study showed limits:
+
+- Reliable exploit conversion remained difficult.
+- The successful exploit path required a reduced-security test environment.
+
+So the near-term conclusion is balanced: finding issues is getting faster, but robust exploitation still has major constraints in defended environments.
+
+---
+
+## Practical Model for Engineering Teams
+
+Use AI to increase discovery and triage speed, then keep high-assurance controls around verification and patching.
+
+1. Discovery lane:
+   Run AI-assisted static and semantic scans against prioritized code areas.
+2. Repro lane:
+   Require each finding to include deterministic reproduction steps.
+3. Verification lane:
+   Human security engineers validate severity and exploitability.
+4. Patch lane:
+   AI can propose candidate fixes, but maintain mandatory human approval.
+5. Regression lane:
+   Add tests and re-run scanners to confirm closure.
+
+Do not collapse these lanes into one "autofix" pipeline.
+
+---
+
+## Minimum Artifacts Per Finding
+
+For each accepted report, require:
+
+- Affected component and version
+- Reproduction steps
+- Expected impact class (e.g., memory corruption, privilege boundary)
+- Candidate patch and risk notes
+- Verification status and owner
+
+This keeps the pipeline auditable and prevents noisy model output from polluting backlog quality.
+
+---
+
+## Where AI Is Strongest Today
+
+Anthropic's Economic Index updates show strong model performance in some complex knowledge tasks, with high relative speedups and meaningful success rates under structured evaluation.
+
+This aligns with security usage where the hard part is often "analyze, rank, and explain" before exploitation even starts.
+
+Use that strength:
+
+- vulnerability discovery support
+- triage prioritization
+- patch suggestion drafting
+- report standardization
+
+Be conservative on autonomous exploitation and automatic deployment of generated fixes.
+
+---
+
+## 14-Day Rollout Plan
+
+Day 1-3:
+
+- Select one service or module with good test coverage.
+- Define report schema and severity SLA.
+
+Day 4-7:
+
+- Run AI-assisted discovery in read-only mode.
+- Compare precision/recall against your normal process.
+
+Day 8-11:
+
+- Enable patch suggestions for medium severity items.
+- Require human review for every patch.
+
+Day 12-14:
+
+- Measure mean time to triage, mean time to patch, and false-positive rate.
+- Decide go/no-go for expanding scope.
+
+---
+
+## Final Take
+
+The winning security posture in 2026 is not "human only" or "AI only."
+
+It is a controlled hybrid workflow:
+
+- AI for speed and breadth,
+- humans for judgment and accountability,
+- automation for repeatability.
+
+That combination improves security outcomes without creating governance debt.
+
+---
+
+## References
+
+- [Anthropic Red Team: Partnering with Mozilla to improve Firefox's security (March 6, 2026)](https://red.anthropic.com/2026/firefox/)
+- [Anthropic Red Team: Reverse engineering Claude's CVE-2026-2796 exploit (March 6, 2026)](https://red.anthropic.com/2026/exploit/)
+- [Anthropic: The Anthropic Economic Index (updated January 2026)](https://www.anthropic.com/news/the-anthropic-economic-index)
+

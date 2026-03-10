@@ -1,0 +1,139 @@
+---
+title: "قائمة تقوية الأمان لـ Next.js على Vercel (نسخة تشغيل فعلية)"
+date: "2026-03-03"
+excerpt: "دليل عملي لتقوية تطبيق Next.js على Vercel: CSP وCORS ومسارات metadata ومراقبة ما بعد النشر وخطة إطلاق آمنة."
+category: "Next.js"
+coverImage: "/images/nextjs-16-tutorial-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+المعرفة النظرية بالأمان لا تكفي.
+
+معظم الأعطال لا تأتي من جهل CSP أو CORS، بل من تطبيق تغييرات كبيرة دفعة واحدة في الإنتاج ثم كسر الموقع.
+
+هذا هو المسار العملي الذي نستخدمه في Next.js + Vercel لتقوية الأمان **بدون** كسر الإعلانات أو التحليلات.
+
+---
+
+## 1) حدّد سطح الهجوم أولاً
+
+قبل تعديل أي Header، دوّن نقاط التعرض الفعلية:
+
+- الصفحات العامة وواجهات API
+- نقاط استقبال النماذج (`/api/contact` وغيرها)
+- مسارات metadata (`/robots.txt` و`/sitemap.xml`)
+- سكربتات الطرف الثالث (AdSense / GA / Turnstile)
+- مسارات الإدارة (`/admin/*`)
+
+بدون هذه الخطوة، ستصبح السياسة عامة وضعيفة.
+
+---
+
+## 2) نفّذ CSP على مراحل
+
+الترتيب الآمن:
+
+1. تجهيز مسار nonce
+2. نشر CSP بوضع Report-Only
+3. قراءة المخالفات الحقيقية في الإنتاج
+4. إضافة النطاقات المطلوبة فقط
+5. التحويل إلى وضع enforcement
+
+مثال توزيع nonce عبر الهيدر:
+
+```ts
+const nonce = crypto.randomUUID().replace(/-/g, "");
+requestHeaders.set("x-nonce", nonce);
+```
+
+الفكرة الأساسية: شدّد `script-src` أولاً، ثم اضبط `connect-src` و`img-src` و`frame-src` بناءً على المخالفات الفعلية.
+
+---
+
+## 3) لا تهمل CORS في robots/sitemap
+
+كثير من أدوات الفحص تلتقط إعدادات CORS المتساهلة في `/robots.txt` و`/sitemap.xml`.
+
+النهج الصحيح:
+
+- لا تستخدم `*` إذا كان بالإمكان تحديد أصل (origin) واحد أو اثنين
+- أضف `Vary: Origin`
+- ضع fallback واضح وغير متساهل
+
+هذه التفاصيل الصغيرة تقلّل ضجيج الفحص وتغلق تسربات غير ضرورية.
+
+---
+
+## 4) افصل التوافق عن صلابة الأمان
+
+بعض سكربتات الإعلانات تحتاج خصائص style inline أو نطاقات تشغيل إضافية.
+
+لا يعني هذا أن تفتح كل السياسة.
+
+- حافظ على `script-src` قويًا (nonce + strict-dynamic)
+- أضف التخفيفات فقط في المكان الضروري
+- اسمح بالنطاقات الدقيقة التي ظهرت في المخالفات، وليس wildcard واسع
+
+بهذا تحافظ على الحماية ضد XSS وتستمر الخدمات الخارجية بالعمل.
+
+---
+
+## 5) عزّز إشارات الثقة بالمحتوى والصفحات الرسمية
+
+AdSense لا ينظر فقط إلى Headers، بل إلى جودة الموقع ككل.
+
+احرص على صفحات أساسية مكتملة ومحدثة:
+
+- About
+- Contact
+- Privacy
+- Terms
+- Editorial Policy
+- Projects (مع أعمال حية فعلية، وليس “قريبًا” فقط)
+
+---
+
+## 6) اختبارات سريعة بعد كل نشر
+
+نفّذ فحوصات ثابتة بعد أي Deploy:
+
+```bash
+curl -sI https://www.neowhisper.net/ | grep -i content-security-policy
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/robots.txt | grep -i access-control-allow-origin
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/sitemap.xml | grep -i access-control-allow-origin
+```
+
+ثم راقب Console في المتصفح:
+
+- لا توجد مخالفات CSP ناتجة من كودك
+- أي مخالفات طرف ثالث مفهومة وتم التعامل معها
+- الإعلانات والتحليلات تعمل بشكل طبيعي
+
+---
+
+## 7) Baseline عملي لـ Next.js على Vercel
+
+- `default-src 'self'`
+- `script-src` مع nonce + strict-dynamic
+- `style-src` مع nonce
+- استخدام `style-src-attr 'unsafe-inline'` فقط عند الضرورة
+- `connect-src` و`img-src` و`frame-src` بأقل نطاقات ممكنة
+- `object-src 'none'` و`frame-ancestors 'none'`
+
+النسخ العشوائي لسياسات ضخمة مليئة بالـ wildcard يخلق مشاكل أكثر مما يحل.
+
+---
+
+## قائمة تحقق نهائية
+
+- [ ] nonce يعمل من الطلب حتى مكوّنات الصفحة
+- [ ] تم الانتقال من Report-Only إلى Enforce بعد مراقبة حقيقية
+- [ ] CORS لمسارات metadata مضبوط بشكل صريح
+- [ ] كل نطاق خارجي له سبب واضح
+- [ ] صفحات الثقة مكتملة ومحدثة
+- [ ] اختبار ما بعد النشر جزء من روتين التشغيل
+
+تقوية الأمان ليست “تعديلًا واحدًا”، بل أسلوب تشغيل مستمر.
+

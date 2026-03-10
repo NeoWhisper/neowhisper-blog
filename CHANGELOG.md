@@ -1,3 +1,33 @@
+## [1.12.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.2...v1.12.3) (2026-03-09)
+
+
+### Bug Fixes
+
+* **content+ci:** improve trust wording and simplify e2e npm cache ([e19f7e2](https://github.com/NeoWhisper/neowhisper-blog/commit/e19f7e28b63e10082cbcf520e8a1cbec7e842c90))
+* **security:** allow adtrafficquality image endpoints in CSP img-src ([#46](https://github.com/NeoWhisper/neowhisper-blog/issues/46)) ([e6afe93](https://github.com/NeoWhisper/neowhisper-blog/commit/e6afe93aea4fd3c438c34b590eab765da06b998d)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* **security:** allow ep2 adtrafficquality and stabilize blog code-block layout ([#45](https://github.com/NeoWhisper/neowhisper-blog/issues/45)) ([e03021d](https://github.com/NeoWhisper/neowhisper-blog/commit/e03021ddb36f9cef5679784accaf098ac1960542)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
+## [1.12.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.1...v1.12.2) (2026-03-03)
+
+
+### Bug Fixes
+
+* **security:** prevent wildcard ACAO fallback on metadata routes ([#42](https://github.com/NeoWhisper/neowhisper-blog/issues/42)) ([adc7fd6](https://github.com/NeoWhisper/neowhisper-blog/commit/adc7fd61f588cfc24d7754d9fb2fa40f7e6f04f6))
+
+## [1.12.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.0...v1.12.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* **security:** enforce nonce CSP and restrict robots/sitemap CORS ([18e87b5](https://github.com/NeoWhisper/neowhisper-blog/commit/18e87b559608926da114d755aec36c187f836178))
+
+# [1.12.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.5...v1.12.0) (2026-03-01)
+
+
+### Features
+
+* **posts:** add multilingual Next.js production debugging playbook and PR templates ([#35](https://github.com/NeoWhisper/neowhisper-blog/issues/35)) ([669e631](https://github.com/NeoWhisper/neowhisper-blog/commit/669e6312a0b1df10c0c91261f524112c8bf463de))
+
 ## [1.11.5](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.11.4...v1.11.5) (2026-03-01)
 
 

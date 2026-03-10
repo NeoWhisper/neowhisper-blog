@@ -61,10 +61,11 @@ const csp = [
 
 ```ts
 const isDev = process.env.NODE_ENV === "development";
+const nonce = crypto.randomUUID().replace(/-/g, "");
 
 const scriptSrc = [
   "'self'",
-  "'unsafe-inline'",
+  `'nonce-${nonce}'`,
   isDev ? "'unsafe-eval'" : "", // السماح بـ eval في التطوير
   "https://www.googletagmanager.com",
   // ... نطاقات أخرى
@@ -76,6 +77,8 @@ const connectSrc = [
   "'self'",
   isDev ? "ws://localhost:* ws://127.0.0.1:*" : "", // السماح بـ WebSockets في التطوير
   "https://www.google-analytics.com",
+  "https://ep1.adtrafficquality.google", // نقاط SODAR الخاصة بـ AdSense
+  "https://ep2.adtrafficquality.google",
   // ... نطاقات أخرى
 ]
   .filter(Boolean)
@@ -90,41 +93,63 @@ const connectSrc = [
 
 من خلال التجربة والخطأ، إليك قائمة النطاقات التي يحتاجها Google AdSense فعلياً:
 
-- **script-src:** `googletagmanager.com`, `google-analytics.com`, `pagead2.googlesyndication.com`
-- **connect-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `*.google.com`
-- **frame-src:** `adtrafficquality.google`, `*.adtrafficquality.google`, `fundingchoicesmessages.google.com`
+- **script-src:** `googletagmanager.com`, `google-analytics.com`, `pagead2.googlesyndication.com`, `fundingchoicesmessages.google.com`
+- **connect-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`, `ep1.adtrafficquality.google`, `ep2.adtrafficquality.google`
+- **frame-src:** `googleads.g.doubleclick.net`, `tpc.googlesyndication.com`, `fundingchoicesmessages.google.com`, `ep1.adtrafficquality.google`, `ep2.adtrafficquality.google`
 
-_ملاحظة: علامة النجمة `*.google.com` ضرورية لأن Google تستخدم نطاقات فرعية غير متوقعة._
+_ملاحظة: تجنب الـ wildcard قدر الإمكان. أضف أي نطاق جديد فقط بعد التأكد من خطأ حقيقي في Console._
 
 </Step>
 
 <Step number="٤" title="الإعداد النهائي النظيف">
 
-إليك الإعداد النهائي في `next.config.ts` الذي يتعامل مع كل من التطوير (HMR) والإنتاج (AdSense):
+إليك الإعداد النهائي في `src/proxy.ts` الذي يتعامل مع كل من التطوير (HMR) والإنتاج (AdSense):
 
 ```tsx
-async headers() {
-  const isDev = process.env.NODE_ENV === "development";
+const nonce = crypto.randomUUID().replace(/-/g, "");
+const isDev = process.env.NODE_ENV === "development";
 
-  const csp = [
-    "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com`,
-    `connect-src 'self' ${isDev ? "ws://localhost:* ws://127.0.0.1:*" : ""} https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://*.google.com`,
-    "frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://adtrafficquality.google https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "object-src 'none'",
-  ].join("; ");
+const scriptSrc = [
+  "'self'",
+  `'nonce-${nonce}'`,
+  "'strict-dynamic'",
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+  "https://pagead2.googlesyndication.com",
+  "https://fundingchoicesmessages.google.com",
+  "https://tpc.googlesyndication.com",
+  "https://googleads.g.doubleclick.net",
+  isDev ? "'unsafe-eval'" : "",
+]
+  .filter(Boolean)
+  .join(" ");
 
-  return [
-    {
-      source: "/(.*)",
-      headers: [
-        { key: "Content-Security-Policy", value: csp },
-        // ... رؤوس أخرى
-      ],
-    },
-  ];
-}
+const connectSrc = [
+  "'self'",
+  "https://www.google-analytics.com",
+  "https://region1.google-analytics.com",
+  "https://www.googletagmanager.com",
+  "https://pagead2.googlesyndication.com",
+  "https://googleads.g.doubleclick.net",
+  "https://adtrafficquality.google",
+  "https://ep1.adtrafficquality.google",
+  "https://ep2.adtrafficquality.google",
+  "https://fundingchoicesmessages.google.com",
+  "https://challenges.cloudflare.com",
+  isDev ? "ws://localhost:* ws://127.0.0.1:*" : "",
+]
+  .filter(Boolean)
+  .join(" ");
+
+const csp = [
+  "default-src 'self'",
+  `script-src ${scriptSrc}`,
+  `style-src 'self' 'nonce-${nonce}'`,
+  "style-src-attr 'unsafe-inline'",
+  `connect-src ${connectSrc}`,
+  "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://adtrafficquality.google https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com",
+  "object-src 'none'",
+].join("; ");
 ```
 
 </Step>

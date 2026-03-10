@@ -1,39 +1,80 @@
 ---
-title: "Welcome to NeoWhisper"
+title: "Welcome to NeoWhisper — Why We Built This and What You'll Find Here"
 date: "2026-01-08"
-excerpt: "Starting a modern Next.js + MDX blog."
+excerpt: "NeoWhisper started as a personal studio blog and grew into a technical resource covering Next.js, security, and multilingual web development. Here's what we're building and why."
 category: "Tech Tips"
 author:
   name: "NeoWhisper"
   picture: "/images/author.png"
 ---
 
-## Hello World
+## Why Another Developer Blog?
 
-This is the first post on NeoWhisper.
+That's a fair question. There are thousands of developer blogs on the internet, many of them excellent. So when we launched NeoWhisper, we asked ourselves the same thing: what can we add that isn't already out there?
 
-Welcome to our corner of the web, where we explore modern web development, design thinking, and the intersection of technology and culture.
+The answer came from frustration.
 
-## What is NeoWhisper?
+Most tutorials stop right before the hard part. They show you how to build something in a clean demo environment, then send you off to production where everything breaks in ways the tutorial never mentioned. Error boundaries that hide real causes. CSP headers that block your own scripts. Supabase integrations that work in development and silently fail under real load. Localization setups where the JA and AR versions get flagged as duplicate content by Google.
 
-NeoWhisper is a studio focused on building fast, beautiful, and multilingual web experiences. We work with **Next.js**, **TypeScript**, and cutting-edge tools to create sites that perform well and feel great to use.
+We ran into all of these. And we wrote through them.
 
-## What You'll Find Here
+**NeoWhisper is a studio blog that documents real production problems and how we actually solved them** — not how a textbook says you should have solved them.
 
-On this [blog](/blog), we share:
+---
 
-- **Technical tutorials**: Step-by-step guides for building modern web apps
-- **Best practices**: Real-world patterns we use in production
-- **Design thinking**: How traditional aesthetics meet digital experiences
-- **Multilingual content**: Posts available in English, Japanese, and Arabic
+## Who Is NeoWhisper?
 
-## Start Exploring
+NeoWhisper is a small, independent web studio and technical blog focused on building fast, multilingual, and maintainable web applications. Right now, the focus is on shipping strong public technical content and production-grade implementations, primarily using **Next.js**, **TypeScript**, and **Vercel**.
 
-- **[Services](/services)**: See how we can help with your project
-- **[Projects](/projects)**: Check out our latest work
-- **[About](/about)**: Learn more about our approach
-- **[Contact](/contact)**: Get in touch to discuss your vision
+The studio started from a simple belief: most developers building for international markets are underserved. There is plenty of great content for English-speaking developers building for English-speaking audiences. There is still limited practical guidance for developers who need to ship a site that works correctly in Arabic (RTL layout, different date conventions), Japanese (typography rules, character encoding edge cases), and English simultaneously — within a single Next.js codebase.
 
-Thanks for stopping by. We're just getting started, and we're excited to share what we're building.
+That's one of the core things we write about here.
+
+---
+
+## What You'll Actually Find on This Blog
+
+We publish technical long-form posts in three categories:
+
+### 1. Production Debugging Playbooks
+
+When something breaks in production and not in development, you need a playbook, not a tutorial. These posts walk through the exact debugging process we used on real problems — including the dead ends, the misleading error messages, and the fix that actually worked.
+
+Examples: debugging Next.js 500 errors caused by Supabase SSR cookie handling; fixing Content Security Policy violations introduced by Google AdSense integration; tracing Vercel edge middleware conflicts.
+
+### 2. Security Hardening Guides
+
+A fast blog that leaks user data or is trivially exploitable isn't useful. We take web security seriously and write about it practically. Not CVE lists — actual implementation: nonce-based CSP, CORS policy for metadata routes, Cloudflare Turnstile for form protection, and what the HTTP security headers actually do versus what most guides claim they do.
+
+### 3. Multilingual Development
+
+Building for Arabic, Japanese, and English at once is a different problem than i18n in a single-Latin-script context. We write about: hreflang implementation that Google actually picks up, RTL layout patterns in Tailwind CSS, font loading strategies for CJK and Arabic scripts, and content workflows that avoid duplicate-content penalties.
+
+---
+
+## The Technology Stack
+
+If you're curious about what this blog runs on:
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Content**: MDX files + Supabase hybrid CMS for dynamic posts
+- **Styling**: Tailwind CSS v4
+- **Hosting**: Vercel (with edge middleware for CSP/CORS)
+- **Testing**: Playwright E2E, Jest unit tests
+- **Security**: Automated weekly security scans via GitHub Actions + CodeQL
+
+We write about all of these — and the problems we hit building with them — because that's what we'd want to read.
+
+---
+
+## How to Get the Most Out of This Blog
+
+Posts are published in **English, Japanese (日本語), and Arabic (العربية)**. If you're reading in one language and want the same post in another, look for the language switcher at the top of any post.
+
+The [Blog](/blog) page has everything in reverse-chronological order. If you're looking for something specific, the [category](/category/tech-tips) pages group posts by topic.
+
+If something we've written solved a problem for you — or if you're facing a problem we haven't written about yet — the [Contact](/contact) page is the best way to reach us. We read everything.
+
+Thanks for being here.
 
 — The NeoWhisper Team

@@ -1,0 +1,142 @@
+---
+title: "Next.js + Vercel セキュリティ強化チェックリスト（本番運用版）"
+date: "2026-03-03"
+excerpt: "Next.js を Vercel で運用する際の実践的なハードニング手順。CSP・CORS・メタデータルート・監視・安全なリリース順序を整理。"
+category: "Next.js"
+coverImage: "/images/nextjs-16-tutorial-cover.png"
+author:
+  name: "NeoWhisper"
+  picture: "/images/author.png"
+---
+
+セキュリティは「知っている」だけでは足りません。
+
+多くの失敗は、CSPやCORSの知識不足ではなく、**本番で一気に変更して壊すこと**で起きます。
+
+この記事では、Next.js + Vercelで実際に使っている、壊さずに強化する手順をまとめます。
+
+---
+
+## 1. まず攻撃面を明文化する
+
+ヘッダーを触る前に、対象を列挙します。
+
+- 公開ページとAPIルート
+- フォーム系エンドポイント（`/api/contact` など）
+- メタデータルート（`/robots.txt`, `/sitemap.xml`）
+- 外部スクリプト（AdSense, GA, Turnstile）
+- 管理画面（`/admin/*`）
+
+ここを曖昧にすると、ポリシーは緩くなりがちです。
+
+---
+
+## 2. CSPは段階的に導入する
+
+推奨順序:
+
+1. nonce対応を実装
+2. まず Report-Only で配信
+3. 本番違反ログを確認
+4. 必要なドメインだけ追加
+5. 最後に強制モードへ移行
+
+リクエストごとにnonceを生成し、ヘッダー経由で配布します。
+
+```ts
+const nonce = crypto.randomUUID().replace(/-/g, "");
+requestHeaders.set("x-nonce", nonce);
+```
+
+`script-src` を最小化し、`connect-src` / `img-src` / `frame-src` は実測違反で調整するのが安全です。
+
+---
+
+## 3. robots/sitemap の CORS を放置しない
+
+`/robots.txt` と `/sitemap.xml` は見落とされやすく、スキャンで指摘されます。
+
+方針:
+
+- 不要ならクロスオリジンを広く許可しない
+- 必要時も許可元を固定
+- `Vary: Origin` を設定
+- `*` は避ける
+
+小さな設定ですが、監査品質に直結します。
+
+---
+
+## 4. 互換性対応と本体セキュリティを分離する
+
+広告・計測系は、実行時にstyle属性や追加ドメインを要求することがあります。
+
+その場合も、全体を緩めるのではなく分離して扱います。
+
+- `script-src` は nonce + strict-dynamic を維持
+- 互換性に必要な緩和は最小範囲に限定
+- 追加ドメインは実際の違反ログからピンポイントで許可
+
+この運用で、XSS耐性を落とさずに広告互換を確保できます。
+
+---
+
+## 5. 信頼ページを運用資産として管理する
+
+AdSenseや審査は、ヘッダーだけでなくサイト全体の信頼性を見ます。
+
+最低限そろえるページ:
+
+- About
+- Contact
+- Privacy
+- Terms
+- Editorial Policy
+- Projects（実運用の成果を明示）
+
+技術対策と運用の整合が重要です。
+
+---
+
+## 6. デプロイ後のセキュリティスモークテスト
+
+リリースごとに短い検証を回します。
+
+```bash
+curl -sI https://www.neowhisper.net/ | grep -i content-security-policy
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/robots.txt | grep -i access-control-allow-origin
+curl -sI -H 'Origin: https://P4zuVPFk.com' https://www.neowhisper.net/sitemap.xml | grep -i access-control-allow-origin
+```
+
+さらにブラウザで確認:
+
+- 自作コードのCSP違反がない
+- 外部サービス違反は把握済みで意図的対応済み
+- 広告・計測が正常
+
+---
+
+## 7. Next.js + Vercel での実用ベースライン
+
+- `default-src 'self'`
+- `script-src` は nonce + strict-dynamic
+- `style-src` は nonceベース
+- 必要時のみ `style-src-attr 'unsafe-inline'`
+- `connect-src` / `img-src` / `frame-src` は最小許可
+- `object-src 'none'`, `frame-ancestors 'none'`
+
+「大きなワイルドカード」で早く終わらせるより、最小許可を積み上げるほうが本番で安定します。
+
+---
+
+## 最終チェック
+
+- [ ] nonceが全経路で機能している
+- [ ] Report-Only で学習後に enforce へ移行した
+- [ ] robots/sitemap の CORS が明示設定されている
+- [ ] 外部ドメイン許可に理由がある
+- [ ] 信頼ページが更新されている
+- [ ] デプロイ後チェックを継続運用している
+
+セキュリティ強化は「一度入れて終わり」ではなく、運用プロセスです。
+

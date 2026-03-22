@@ -27,12 +27,18 @@ cat > "${PLIST_PATH}" <<EOF
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>-lc</string>
-    <string>cd "${REPO_ROOT}" &amp;&amp; ./scripts/local-daily-content-pr.sh</string>
+    <string>${REPO_ROOT}/scripts/local-daily-content-pr.sh</string>
   </array>
+
+  <key>WorkingDirectory</key>
+  <string>${REPO_ROOT}</string>
 
   <key>EnvironmentVariables</key>
   <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>${HOME}</string>
     <key>OPENAI_BASE_URL</key>
     <string>${OPENAI_BASE_URL}</string>
     <key>OPENAI_MODEL</key>

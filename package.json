@@ -28,7 +28,7 @@
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
-    "isomorphic-dompurify": "^3.0.0",
+    "isomorphic-dompurify": "^3.6.0",
     "lucide-react": "^0.577.0",
     "marked": "^17.0.5",
     "next": "^16.1.6",

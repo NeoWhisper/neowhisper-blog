@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.3...v1.13.0) (2026-03-22)
+
+
+### Features
+
+* **content-ops:** add local Ollama daily multilingual draft + auto PR runner ([#58](https://github.com/NeoWhisper/neowhisper-blog/issues/58)) ([6d917ac](https://github.com/NeoWhisper/neowhisper-blog/commit/6d917ac9753d6b835f6e6d64a4d3ed26d2e9941b))
+
 ## [1.12.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.2...v1.12.3) (2026-03-09)
 
 

@@ -41,7 +41,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
+    "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.2",
     "@playwright/test": "^1.58.2",
     "@semantic-release/changelog": "^6.0.3",

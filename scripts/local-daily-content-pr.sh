@@ -15,11 +15,19 @@ OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:11434/v1}"
 OPENAI_MODEL="${OPENAI_MODEL:-gpt-oss:20b}"
 OPENAI_API_MODE="${OPENAI_API_MODE:-chat}"
 OPENAI_API_KEY="${OPENAI_API_KEY:-sk-local}"
+NODE_BINARY="${NODE_BINARY:-$(command -v node || true)}"
+NPM_BINARY="${NPM_BINARY:-$(command -v npm || true)}"
 
 export OPENAI_BASE_URL
 export OPENAI_MODEL
 export OPENAI_API_MODE
 export OPENAI_API_KEY
+
+if [[ -z "${NODE_BINARY}" ]]; then
+  echo "[daily-local] Node.js is required but was not found."
+  echo "[daily-local] Add node to PATH or set NODE_BINARY."
+  exit 1
+fi
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "[daily-local] GitHub CLI (gh) is required."
@@ -45,7 +53,7 @@ if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://l
     exit 1
   fi
 
-  if ! OPENAI_MODEL="${OPENAI_MODEL}" node -e '
+  if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
     let input = "";
     process.stdin.setEncoding("utf8");
     process.stdin.on("data", (chunk) => (input += chunk));
@@ -93,7 +101,7 @@ if [[ "${FORCE_GENERATE}" == "true" ]]; then
 fi
 
 echo "[daily-local] Generating daily EN/JA/AR drafts..."
-node scripts/generate-daily-ai-trend-posts.mjs "${GEN_ARGS[@]}"
+"${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs "${GEN_ARGS[@]}"
 
 if git diff --quiet -- src/content/posts; then
   echo "[daily-local] No content changes detected. Exiting without PR."
@@ -101,8 +109,13 @@ if git diff --quiet -- src/content/posts; then
 fi
 
 if [[ "${RUN_BUILD_VALIDATION}" == "true" ]]; then
+  if [[ -z "${NPM_BINARY}" ]]; then
+    echo "[daily-local] npm is required for build validation but was not found."
+    echo "[daily-local] Add npm to PATH, set NPM_BINARY, or set RUN_BUILD_VALIDATION=false."
+    exit 1
+  fi
   echo "[daily-local] Running build validation..."
-  npm run build
+  "${NPM_BINARY}" run build
 fi
 
 TODAY="$(date +%Y-%m-%d)"

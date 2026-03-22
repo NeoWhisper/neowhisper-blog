@@ -66,12 +66,12 @@ const TREND_KEYWORDS = [
 function decodeEntities(value) {
   return value
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
 }
 
 function stripHtml(value) {
@@ -281,7 +281,16 @@ function sanitizeFrontmatter(value, maxLength) {
     .replace(/\s+/g, " ")
     .trim();
   const truncated = maxLength ? singleLine.slice(0, maxLength) : singleLine;
-  return truncated.replace(/"/g, '\\"');
+  return truncated.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function isOfficialOpenAiBaseUrl(baseUrl) {
+  try {
+    const parsed = new URL(baseUrl);
+    return parsed.hostname === "api.openai.com";
+  } catch {
+    return false;
+  }
 }
 
 function getAuthHeaders() {
@@ -508,7 +517,7 @@ async function chooseBaseSlug(dateString, slugSuffix) {
 }
 
 async function main() {
-  if (!process.env.OPENAI_API_KEY && API_BASE_URL.includes("api.openai.com")) {
+  if (!process.env.OPENAI_API_KEY && isOfficialOpenAiBaseUrl(API_BASE_URL)) {
     console.log(
       "OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation.",
     );

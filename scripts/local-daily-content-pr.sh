@@ -107,7 +107,7 @@ else
   "${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs
 fi
 
-if git diff --quiet -- src/content/posts; then
+if git diff --quiet -- src/content/posts && [[ -z "$(git ls-files --others --exclude-standard -- src/content/posts)" ]]; then
   echo "[daily-local] No content changes detected. Exiting without PR."
   exit 0
 fi

@@ -12,6 +12,9 @@
     "lint": "eslint",
     "test": "jest",
     "test:e2e": "playwright test",
+    "content:daily": "node scripts/generate-daily-ai-trend-posts.mjs",
+    "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
+    "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
     "prepare": "husky"
   },
   "dependencies": {

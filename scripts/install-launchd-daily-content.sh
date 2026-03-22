@@ -12,6 +12,29 @@ OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:11434/v1}"
 OPENAI_MODEL="${OPENAI_MODEL:-gpt-oss:20b}"
 OPENAI_API_MODE="${OPENAI_API_MODE:-chat}"
 OPENAI_API_KEY="${OPENAI_API_KEY:-sk-local}"
+NODE_BINARY="${NODE_BINARY:-$(command -v node || true)}"
+NPM_BINARY="${NPM_BINARY:-$(command -v npm || true)}"
+
+if [[ -z "${NODE_BINARY}" || -z "${NPM_BINARY}" ]]; then
+  echo "Node.js and npm are required to run the daily content job."
+  echo "Install them first, then re-run this installer."
+  exit 1
+fi
+
+AGENT_PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+add_dir_to_agent_path() {
+  local dir="$1"
+  [[ -z "${dir}" ]] && return
+  [[ ! -d "${dir}" ]] && return
+  case ":${AGENT_PATH}:" in
+    *":${dir}:"*) ;;
+    *) AGENT_PATH="${dir}:${AGENT_PATH}" ;;
+  esac
+}
+
+add_dir_to_agent_path "$(dirname "${NODE_BINARY}")"
+add_dir_to_agent_path "$(dirname "${NPM_BINARY}")"
 
 mkdir -p "${HOME}/Library/LaunchAgents"
 mkdir -p "${LOG_DIR}"
@@ -27,12 +50,18 @@ cat > "${PLIST_PATH}" <<EOF
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>-lc</string>
-    <string>cd "${REPO_ROOT}" &amp;&amp; ./scripts/local-daily-content-pr.sh</string>
+    <string>${REPO_ROOT}/scripts/local-daily-content-pr.sh</string>
   </array>
+
+  <key>WorkingDirectory</key>
+  <string>${REPO_ROOT}</string>
 
   <key>EnvironmentVariables</key>
   <dict>
+    <key>PATH</key>
+    <string>${AGENT_PATH}</string>
+    <key>HOME</key>
+    <string>${HOME}</string>
     <key>OPENAI_BASE_URL</key>
     <string>${OPENAI_BASE_URL}</string>
     <key>OPENAI_MODEL</key>
@@ -41,6 +70,10 @@ cat > "${PLIST_PATH}" <<EOF
     <string>${OPENAI_API_MODE}</string>
     <key>OPENAI_API_KEY</key>
     <string>${OPENAI_API_KEY}</string>
+    <key>NODE_BINARY</key>
+    <string>${NODE_BINARY}</string>
+    <key>NPM_BINARY</key>
+    <string>${NPM_BINARY}</string>
   </dict>
 
   <key>StartCalendarInterval</key>

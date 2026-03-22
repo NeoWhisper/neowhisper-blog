@@ -257,7 +257,7 @@ export default async function BlogPostTemplate({
             prose-li:text-lg prose-li:mb-16 prose-li:leading-[2.5] marker:text-purple-500
             prose-ul:my-16 prose-ol:my-16
             prose-hr:my-32 prose-hr:border-gray-200 dark:prose-hr:border-gray-800
-            prose-table:my-16 prose-table:w-full prose-table:border-collapse prose-table:text-base prose-table:leading-[1.65]
+            prose-table:my-0 prose-table:w-full prose-table:border-collapse prose-table:text-base prose-table:leading-[1.65]
             prose-thead:bg-gray-100/70 dark:prose-thead:bg-gray-800/50
             prose-th:px-4 prose-th:py-3 prose-th:font-semibold prose-th:border prose-th:border-gray-200 dark:prose-th:border-gray-700
             prose-td:px-4 prose-td:py-3 prose-td:align-top prose-td:border prose-td:border-gray-200 dark:prose-td:border-gray-700
@@ -314,7 +314,7 @@ export default async function BlogPostTemplate({
                       );
                     },
                     table: ({ className, ...props }) => (
-                      <div className="my-16 overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
+                      <div className="mt-8 mb-16 overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
                         <table
                           className={`w-full min-w-[680px] border-collapse text-base leading-[1.65] ${className ?? ""}`}
                           {...props}

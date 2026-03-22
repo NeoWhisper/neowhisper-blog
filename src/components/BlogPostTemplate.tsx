@@ -4,6 +4,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { headers } from "next/headers";
 import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import { formatDate } from "@/lib/utils";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -351,6 +352,7 @@ export default async function BlogPostTemplate({
                   }}
                   options={{
                     mdxOptions: {
+                      remarkPlugins: [remarkGfm],
                       rehypePlugins: [rehypeHighlight],
                     },
                   }}

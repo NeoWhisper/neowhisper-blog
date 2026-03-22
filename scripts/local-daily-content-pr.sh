@@ -101,7 +101,11 @@ if [[ "${FORCE_GENERATE}" == "true" ]]; then
 fi
 
 echo "[daily-local] Generating daily EN/JA/AR drafts..."
-"${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs "${GEN_ARGS[@]}"
+if (( ${#GEN_ARGS[@]} > 0 )); then
+  "${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs "${GEN_ARGS[@]}"
+else
+  "${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs
+fi
 
 if git diff --quiet -- src/content/posts; then
   echo "[daily-local] No content changes detected. Exiting without PR."

@@ -257,10 +257,10 @@ export default async function BlogPostTemplate({
             prose-li:text-lg prose-li:mb-16 prose-li:leading-[2.5] marker:text-purple-500
             prose-ul:my-16 prose-ol:my-16
             prose-hr:my-32 prose-hr:border-gray-200 dark:prose-hr:border-gray-800
-            prose-table:my-16 prose-table:w-full prose-table:border-collapse prose-table:text-base prose-table:leading-[1.9]
+            prose-table:my-16 prose-table:w-full prose-table:border-collapse prose-table:text-base prose-table:leading-[1.65]
             prose-thead:bg-gray-100/70 dark:prose-thead:bg-gray-800/50
-            prose-th:px-5 prose-th:py-4 prose-th:text-left prose-th:font-semibold prose-th:border prose-th:border-gray-200 dark:prose-th:border-gray-700
-            prose-td:px-5 prose-td:py-4 prose-td:align-top prose-td:border prose-td:border-gray-200 dark:prose-td:border-gray-700
+            prose-th:px-4 prose-th:py-3 prose-th:font-semibold prose-th:border prose-th:border-gray-200 dark:prose-th:border-gray-700
+            prose-td:px-4 prose-td:py-3 prose-td:align-top prose-td:border prose-td:border-gray-200 dark:prose-td:border-gray-700
             prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50/50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:mb-16
             prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800 prose-pre:rounded-xl prose-pre:mb-16 prose-pre:max-w-full prose-pre:overflow-x-auto prose-code:break-words
             ${isRTL ? "text-right" : "text-left"}`}
@@ -316,7 +316,7 @@ export default async function BlogPostTemplate({
                     table: ({ className, ...props }) => (
                       <div className="my-16 overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
                         <table
-                          className={`w-full min-w-[680px] border-collapse text-base leading-[1.9] ${className ?? ""}`}
+                          className={`w-full min-w-[680px] border-collapse text-base leading-[1.65] ${className ?? ""}`}
                           {...props}
                         />
                       </div>
@@ -335,13 +335,13 @@ export default async function BlogPostTemplate({
                     ),
                     th: ({ className, ...props }) => (
                       <th
-                        className={`${className ?? ""} px-5 py-4 text-left font-semibold text-gray-900 dark:text-gray-100`}
+                        className={`${className ?? ""} px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 bg-gray-100/90 dark:bg-gray-800/80 backdrop-blur sticky top-0 z-10 ${isRTL ? "text-right" : "text-left"}`}
                         {...props}
                       />
                     ),
                     td: ({ className, ...props }) => (
                       <td
-                        className={`${className ?? ""} px-5 py-4 align-top`}
+                        className={`${className ?? ""} px-4 py-3 align-top ${isRTL ? "text-right" : "text-left"}`}
                         {...props}
                       />
                     ),

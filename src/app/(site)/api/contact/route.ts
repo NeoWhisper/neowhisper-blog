@@ -9,7 +9,6 @@ const RESEND_FROM = RESEND_FROM_RAW.trim().includes("@")
   : "onboarding@resend.dev"; // Fallback to Resend's test email
 const RESEND_TO = process.env.RESEND_TO || "neowhisperhq@gmail.com";
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LENGTH = {
   name: 120,
   email: 254,
@@ -33,6 +32,73 @@ function sanitizeMultiLine(value: string | undefined): string | undefined {
 
 function isTooLong(value: string | undefined, max: number): boolean {
   return Boolean(value && value.length > max);
+}
+
+function isAsciiEmailChar(value: string): boolean {
+  for (let i = 0; i < value.length; i += 1) {
+    if (value.charCodeAt(i) > 127) return false;
+  }
+  return true;
+}
+
+function isValidLocalPart(local: string): boolean {
+  if (!local || local.startsWith(".") || local.endsWith(".")) return false;
+
+  const validSpecial = new Set(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."]);
+
+  for (let i = 0; i < local.length; i += 1) {
+    const ch = local[i];
+    const code = ch.charCodeAt(0);
+    const isAlphaNum =
+      (code >= 48 && code <= 57) ||
+      (code >= 65 && code <= 90) ||
+      (code >= 97 && code <= 122);
+
+    if (!isAlphaNum && !validSpecial.has(ch)) return false;
+  }
+
+  return !local.includes("..");
+}
+
+function isValidDomain(domain: string): boolean {
+  if (!domain || domain.length > 253) return false;
+  if (domain.startsWith(".") || domain.endsWith(".")) return false;
+  if (!domain.includes(".")) return false;
+
+  const labels = domain.split(".");
+  if (labels.some((label) => label.length === 0)) return false;
+
+  for (const label of labels) {
+    if (label.startsWith("-") || label.endsWith("-")) return false;
+
+    for (let i = 0; i < label.length; i += 1) {
+      const ch = label[i];
+      const code = ch.charCodeAt(0);
+      const isAlphaNum =
+        (code >= 48 && code <= 57) ||
+        (code >= 65 && code <= 90) ||
+        (code >= 97 && code <= 122);
+
+      if (!isAlphaNum && ch !== "-") return false;
+    }
+  }
+
+  const tld = labels[labels.length - 1] ?? "";
+  return tld.length >= 2;
+}
+
+function isValidEmailAddress(email: string): boolean {
+  if (!email || email.length > MAX_LENGTH.email) return false;
+  if (!isAsciiEmailChar(email)) return false;
+
+  const atIndex = email.indexOf("@");
+  if (atIndex <= 0 || atIndex !== email.lastIndexOf("@")) return false;
+  if (atIndex >= email.length - 1) return false;
+
+  const local = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+
+  return isValidLocalPart(local) && isValidDomain(domain);
 }
 
 function getClientIp(request: Request): string | undefined {
@@ -85,7 +151,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!EMAIL_REGEX.test(email)) {
+    if (!isValidEmailAddress(email)) {
       if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
       return NextResponse.json(
         { ok: false, message: "Invalid email address." },

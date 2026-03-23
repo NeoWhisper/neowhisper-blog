@@ -19,6 +19,21 @@ interface PageProps {
   }>;
 }
 
+function isLowValueBriefPost(slug: string, content: string): boolean {
+  const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
+  if (!isBrief) return false;
+
+  const wordCount = content
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return wordCount < 900;
+}
+
 function resolveLanguage(slug: string, lang?: string | null): SupportedLang {
   if (lang) return normalizeLang(lang);
   return normalizeLang(getPostLanguage(slug));
@@ -82,6 +97,8 @@ export async function generateMetadata({
       );
     });
 
+    const noIndex = isLowValueBriefPost(post.slug, post.content);
+
     return {
       title: post.title,
       description: post.excerpt,
@@ -89,6 +106,12 @@ export async function generateMetadata({
         canonical: buildPostUrl(post.slug, post.locale, post.source),
         languages: languageAlternates,
       },
+      robots: noIndex
+        ? {
+            index: false,
+            follow: true,
+          }
+        : undefined,
     };
   } catch (error) {
     console.error("[Metadata Critical] Fatal crash:", error);
@@ -105,16 +128,11 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
 
   const data = await (async () => {
     try {
-      console.log(`[BlogPost] Render attempt: ${decodedSlug} (Resolved Lang: ${resolvedLang})`);
-
       const post = await getHybridPost(decodedSlug, resolvedLang);
 
       if (!post) {
-        console.warn(`[BlogPost] No data found for ${decodedSlug}`);
         return null;
       }
-
-      console.log(`[BlogPost] Post source: ${post.source}`);
 
       const [languageVariants, relatedPosts] = await Promise.all([
         getHybridLanguageVariants(post.slug, post.locale).catch(e => {
@@ -149,7 +167,6 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
       try {
         const staticPost = getPostBySlug(decodedSlug);
         if (staticPost) {
-          console.log("[BlogPost] Fallback to static markdown successful");
           const lSuffix = getPostLanguage(staticPost.slug) as SupportedLang;
           return {
             post: {

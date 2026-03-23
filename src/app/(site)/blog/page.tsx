@@ -29,6 +29,10 @@ type BlogCopy = {
   latestArticles: string;
   noPosts: string;
   schemaDescription: string;
+  qualityTitle: string;
+  qualitySummary: string;
+  qualityBullets: [string, string, string];
+  qualityCta: string;
 };
 
 const copyByLang: Record<SupportedLang, BlogCopy> = {
@@ -49,6 +53,15 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
     noPosts: "No posts found for this language.",
     schemaDescription:
       "Tech blog with tutorials on Next.js, React, and TypeScript.",
+    qualityTitle: "Editorial Quality Standards",
+    qualitySummary:
+      "Every article is reviewed for practical depth, production relevance, and multilingual clarity before publication.",
+    qualityBullets: [
+      "Hands-on implementation details",
+      "Security and performance verification",
+      "EN/JA/AR localization review",
+    ],
+    qualityCta: "Read Editorial Policy",
   },
   ja: {
     metaTitle: "NeoWhisper ブログ | Next.js・React・TypeScript チュートリアル",
@@ -67,6 +80,15 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
     noPosts: "この言語の投稿はまだありません。",
     schemaDescription:
       "Next.js、React、TypeScriptのチュートリアルを掲載する技術ブログ。",
+    qualityTitle: "編集品質基準",
+    qualitySummary:
+      "公開前に、実装の実用性・本番適用性・多言語品質をチェックしています。",
+    qualityBullets: [
+      "実装ベースの具体的な手順",
+      "セキュリティと性能の検証",
+      "EN/JA/ARの翻訳品質レビュー",
+    ],
+    qualityCta: "編集ポリシーを見る",
   },
   ar: {
     metaTitle: "مدونة NeoWhisper | دروس Next.js وReact وTypeScript",
@@ -85,6 +107,15 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
     noPosts: "لا توجد مقالات متاحة لهذه اللغة حالياً.",
     schemaDescription:
       "مدونة تقنية تضم دروساً حول Next.js وReact وTypeScript.",
+    qualityTitle: "معايير الجودة التحريرية",
+    qualitySummary:
+      "كل مقال يمر بمراجعة عملية من ناحية العمق التقني، وقابلية التطبيق الإنتاجي، وجودة التوطين متعدد اللغات.",
+    qualityBullets: [
+      "خطوات تنفيذ عملية",
+      "تحقق من الأمان والأداء",
+      "مراجعة جودة EN/JA/AR",
+    ],
+    qualityCta: "قراءة سياسة التحرير",
   },
 };
 
@@ -103,6 +134,8 @@ export async function generateMetadata({
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
   const locale = localeByLang[currentLang];
+  const canonicalPath = `/blog?lang=${currentLang}`;
+  const canonicalUrl = `${siteUrl}${canonicalPath}`;
 
   return {
     title: copy.metaTitle,
@@ -111,7 +144,7 @@ export async function generateMetadata({
     openGraph: {
       title: copy.ogTitle,
       description: copy.ogDescription,
-      url: `${siteUrl}/blog`,
+      url: canonicalUrl,
       siteName: "NeoWhisper",
       images: [
         {
@@ -135,6 +168,7 @@ export async function generateMetadata({
       keywords: copy.keywords,
     },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/blog?lang=en",
         ja: "/blog?lang=ja",
@@ -249,6 +283,35 @@ export default async function BlogHome({
             </Link>
           </div>
         </header>
+
+        <section className="mb-10">
+          <div className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-sm backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.qualityTitle}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              {copy.qualitySummary}
+            </p>
+            <ul className="mt-4 grid gap-2 text-sm text-gray-700 dark:text-gray-200 md:grid-cols-3">
+              {copy.qualityBullets.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-gray-200/70 bg-white/70 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/40"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div className={`mt-4 ${isRTL ? "text-right" : "text-left"}`}>
+              <Link
+                href={`/editorial-policy?lang=${currentLang}`}
+                className="inline-flex items-center rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+              >
+                {copy.qualityCta}
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <CategoryNav categories={uniqueCategories} lang={currentLang} />
 

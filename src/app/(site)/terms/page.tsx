@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const LAST_UPDATED = "2026-02-16";
+const baseUrl = "https://www.neowhisper.net";
 
 const copyByLang: Record<
   SupportedLang,
@@ -58,11 +59,19 @@ export async function generateMetadata({
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
+  const canonicalPath = `/terms?lang=${currentLang}`;
 
   return {
     title: `${copy.title} | NeoWhisper`,
     description: copy.description,
+    openGraph: {
+      title: `${copy.title} | NeoWhisper`,
+      description: copy.description,
+      type: "website",
+      url: `${baseUrl}${canonicalPath}`,
+    },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/terms?lang=en",
         ja: "/terms?lang=ja",

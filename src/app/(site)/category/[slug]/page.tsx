@@ -3,10 +3,67 @@ import ArticleCard from '@/components/ArticleCard';
 import { categories, buildCategorySlug } from '@/lib/categories';
 import Link from 'next/link';
 import { normalizeLang } from '@/lib/i18n';
+import type { Metadata } from 'next';
+
+const baseUrl = "https://www.neowhisper.net";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
     searchParams: Promise<{ lang?: string }>;
+}
+
+function formatTitleFromSlug(slug: string): string {
+    return slug
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+}
+
+function resolveCategoryTitleByLang(slug: string, currentLang: string): string {
+    const canonical = categories.find((c) => c.slug === slug);
+    if (!canonical) return formatTitleFromSlug(slug);
+
+    if (currentLang === "ja") return canonical.nameJa ?? canonical.nameEn;
+    if (currentLang === "ar") return canonical.nameAr ?? canonical.nameEn;
+    return canonical.nameEn;
+}
+
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const { lang } = await searchParams;
+    const currentLang = normalizeLang(lang);
+    const decoded = decodeURIComponent(slug);
+    const canonicalCandidate = buildCategorySlug(decoded.replace(/-/g, ' '));
+    const hasCanonical = categories.some((c) => c.slug === canonicalCandidate);
+    const canonicalSlug = hasCanonical ? canonicalCandidate : decoded;
+    const title = resolveCategoryTitleByLang(canonicalSlug, currentLang);
+    const canonicalPath = `/category/${encodeURIComponent(canonicalSlug)}?lang=${currentLang}`;
+
+    const description =
+        currentLang === "ja"
+            ? `${title}に関する実践記事・技術ガイド。`
+            : currentLang === "ar"
+              ? `مقالات وأدلة عملية حول ${title}.`
+              : `Practical guides and articles about ${title}.`;
+
+    return {
+        title: `${title} | NeoWhisper Blog`,
+        description,
+        alternates: {
+            canonical: canonicalPath,
+            languages: {
+                en: `/category/${encodeURIComponent(canonicalSlug)}?lang=en`,
+                ja: `/category/${encodeURIComponent(canonicalSlug)}?lang=ja`,
+                ar: `/category/${encodeURIComponent(canonicalSlug)}?lang=ar`,
+            },
+        },
+        openGraph: {
+            title: `${title} | NeoWhisper Blog`,
+            description,
+            type: "website",
+            url: `${baseUrl}${canonicalPath}`,
+        },
+    };
 }
 
 /**
@@ -86,12 +143,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               ? canonical.nameAr ?? canonical.nameEn
               : canonical.nameEn
         : undefined;
-    const title =
-        filtered[0]?.category ?? canonicalTitle ??
-        decoded
-            .split('-')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' ');
+    const title = filtered[0]?.category ?? canonicalTitle ?? formatTitleFromSlug(decoded);
 
     /* ---- UI ---- */
     return (
@@ -142,10 +194,18 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 ) : (
                     <div className="text-center py-20 bg-white/40 dark:bg-white/5 backdrop-blur-lg rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
                         <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
-                            No articles found in this category yet.
+                            {currentLang === "ja"
+                                ? "このカテゴリの記事はまだありません。"
+                                : currentLang === "ar"
+                                  ? "لا توجد مقالات في هذا التصنيف حالياً."
+                                  : "No articles found in this category yet."}
                         </p>
                         <p className="text-sm text-gray-400">
-                            Check back soon for new content about {title}!
+                            {currentLang === "ja"
+                                ? `${title}の新しい記事を準備中です。`
+                                : currentLang === "ar"
+                                  ? `سيتم نشر محتوى جديد حول ${title} قريباً.`
+                                  : `Check back soon for new content about ${title}!`}
                         </p>
                     </div>
                 )}

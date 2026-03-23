@@ -21,7 +21,6 @@ jobs:
       - name: Ensure open PR from contents to main
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GH_PAT }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;

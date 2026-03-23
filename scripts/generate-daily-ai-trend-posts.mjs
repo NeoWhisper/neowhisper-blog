@@ -464,7 +464,7 @@ function countTrendHeadings(markdownBody) {
 
 function hasMarkdownTable(markdownBody) {
   const body = String(markdownBody || "");
-  return /^\|.+\|\s*$/m.test(body) && /^\|[\s:-|]+\|\s*$/m.test(body);
+  return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
 }
 
 function validateDraftContent(content) {

@@ -365,11 +365,20 @@ export default async function BlogPostTemplate({
                       </div>
                     ),
                     Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
-                      const styles = {
-                        info: 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
-                        warning: 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
-                        success: 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300',
-                      }[type] || 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700';
+                      let styles: string;
+
+                      switch (type) {
+                        case 'warning':
+                          styles = 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300';
+                          break;
+                        case 'success':
+                          styles = 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300';
+                          break;
+                        case 'info':
+                        default:
+                          styles = 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300';
+                          break;
+                      }
 
                       return (
                         <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>

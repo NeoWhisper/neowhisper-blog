@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
+const baseUrl = "https://www.neowhisper.net";
+
 const translations = {
   en: {
     label: "Services",
@@ -140,6 +142,7 @@ export async function generateMetadata({
   };
 
   const { title, description } = meta[currentLang];
+  const canonicalPath = `/services?lang=${currentLang}`;
 
   return {
     title,
@@ -147,6 +150,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      url: `${baseUrl}${canonicalPath}`,
       type: "website",
       locale:
         currentLang === "ja"
@@ -170,6 +174,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/services?lang=en",
         ja: "/services?lang=ja",

@@ -68,9 +68,16 @@ function estimateWordCount(mdxSource: string): number {
   return plain ? plain.split(" ").length : 0;
 }
 
-function shouldRenderAd(mdxSource: string): boolean {
-  // Keep ad density low on short pages to improve content quality signals.
-  return estimateWordCount(mdxSource) >= 350;
+function isLowValueBriefSlug(slug?: string): boolean {
+  if (!slug) return false;
+  return /(^|-)ai-(it-)?trend-brief-/.test(slug);
+}
+
+function shouldRenderAd(mdxSource: string, slug?: string): boolean {
+  // Keep ad density low on short pages and suppress ads on brief-style roundup
+  // posts to improve user value signals for policy review.
+  if (isLowValueBriefSlug(slug)) return false;
+  return estimateWordCount(mdxSource) >= 600;
 }
 
 interface BlogPostTemplateProps {
@@ -109,7 +116,7 @@ export default async function BlogPostTemplate({
   const ui = getUiText(lang);
   const currentLang = normalizeLang(lang);
   const wordCount = estimateWordCount(content);
-  const showAd = shouldRenderAd(content);
+  const showAd = shouldRenderAd(content, slug);
   const authorName = getAuthorDisplayName(lang);
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const resolvedCanonicalUrl =
@@ -377,7 +384,7 @@ export default async function BlogPostTemplate({
                     ),
                     CheckItem: ({ children }: { children: ReactNode }) => (
                       <div className="flex items-start gap-4">
-                        <div className="mt-1-5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <div className="mt-1.5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>

@@ -9,6 +9,42 @@ const RESEND_FROM = RESEND_FROM_RAW.trim().includes("@")
   : "onboarding@resend.dev"; // Fallback to Resend's test email
 const RESEND_TO = process.env.RESEND_TO || "neowhisperhq@gmail.com";
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_LENGTH = {
+  name: 120,
+  email: 254,
+  company: 160,
+  projectType: 120,
+  budget: 120,
+  details: 4000,
+} as const;
+
+function sanitizeSingleLine(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const sanitized = value.trim().replace(/[\r\n]+/g, " ");
+  return sanitized || undefined;
+}
+
+function sanitizeMultiLine(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const sanitized = value.trim().replace(/\r\n/g, "\n");
+  return sanitized || undefined;
+}
+
+function isTooLong(value: string | undefined, max: number): boolean {
+  return Boolean(value && value.length > max);
+}
+
+function getClientIp(request: Request): string | undefined {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  return realIp || undefined;
+}
 
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -31,12 +67,12 @@ export async function POST(request: Request) {
       body = Object.fromEntries(formData.entries());
     }
 
-    const name = toStr(body.name);
-    const email = toStr(body.email);
-    const details = toStr(body.details);
-    const company = toStr(body.company);
-    const projectType = toStr(body.projectType);
-    const budget = toStr(body.budget);
+    const name = sanitizeSingleLine(toStr(body.name));
+    const email = sanitizeSingleLine(toStr(body.email))?.toLowerCase();
+    const details = sanitizeMultiLine(toStr(body.details));
+    const company = sanitizeSingleLine(toStr(body.company));
+    const projectType = sanitizeSingleLine(toStr(body.projectType));
+    const budget = sanitizeSingleLine(toStr(body.budget));
     const lang = normalizeLang(toStr(body.lang));
     // Check both possible keys for the token
     const turnstileToken = toStr(body.turnstileToken) ?? toStr(body["cf-turnstile-response"]);
@@ -45,6 +81,29 @@ export async function POST(request: Request) {
       if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
       return NextResponse.json(
         { ok: false, message: "Missing required fields." },
+        { status: 400 }
+      );
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
+      return NextResponse.json(
+        { ok: false, message: "Invalid email address." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      isTooLong(name, MAX_LENGTH.name) ||
+      isTooLong(email, MAX_LENGTH.email) ||
+      isTooLong(company, MAX_LENGTH.company) ||
+      isTooLong(projectType, MAX_LENGTH.projectType) ||
+      isTooLong(budget, MAX_LENGTH.budget) ||
+      isTooLong(details, MAX_LENGTH.details)
+    ) {
+      if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
+      return NextResponse.json(
+        { ok: false, message: "One or more fields are too long." },
         { status: 400 }
       );
     }
@@ -58,15 +117,21 @@ export async function POST(request: Request) {
         );
       }
 
+      const verifyBody = new URLSearchParams({
+        secret: TURNSTILE_SECRET_KEY,
+        response: String(turnstileToken),
+      });
+      const clientIp = getClientIp(request);
+      if (clientIp) {
+        verifyBody.set("remoteip", clientIp);
+      }
+
       const verifyRes = await fetch(
         "https://challenges.cloudflare.com/turnstile/v0/siteverify",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            secret: TURNSTILE_SECRET_KEY,
-            response: String(turnstileToken),
-          }),
+          body: verifyBody,
         }
       );
 
@@ -105,15 +170,14 @@ export async function POST(request: Request) {
       ? RESEND_FROM
       : `NeoWhisper <${RESEND_FROM}>`;
 
+    const safeNameForSubject = name.replace(/[\r\n]+/g, " ").slice(0, 80);
     const emailPayload = {
       from: finalFrom,
       to: recipients.length ? recipients : ["neowhisperhq@gmail.com"],
-      subject: `New inquiry from ${name}`,
+      subject: `New inquiry from ${safeNameForSubject || "Website visitor"}`,
       reply_to: email,
       text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || "-"}\nProject Type: ${projectType || "-"}\nBudget: ${budget || "-"}\n\nDetails:\n${details}`,
     };
-
-    console.log("Sending email with payload:", JSON.stringify({ ...emailPayload, text: "(omitted)" }));
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

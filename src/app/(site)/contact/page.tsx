@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import ContactForm from "@/components/ContactForm";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
+const baseUrl = "https://www.neowhisper.net";
+
 const translations = {
   en: {
     label: "Contact",
@@ -157,6 +159,7 @@ export async function generateMetadata({
   };
 
   const { title, description } = meta[currentLang];
+  const canonicalPath = `/contact?lang=${currentLang}`;
 
   return {
     title,
@@ -164,6 +167,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      url: `${baseUrl}${canonicalPath}`,
       type: "website",
       locale:
         currentLang === "ja"
@@ -187,6 +191,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/contact?lang=en",
         ja: "/contact?lang=ja",

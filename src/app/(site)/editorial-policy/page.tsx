@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
+const baseUrl = "https://www.neowhisper.net";
+
 type PolicyCopy = {
   title: string;
   description: string;
@@ -126,11 +128,19 @@ export async function generateMetadata({
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
+  const canonicalPath = `/editorial-policy?lang=${currentLang}`;
 
   return {
     title: `${copy.title} | NeoWhisper`,
     description: copy.description,
+    openGraph: {
+      title: `${copy.title} | NeoWhisper`,
+      description: copy.description,
+      type: "website",
+      url: `${baseUrl}${canonicalPath}`,
+    },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/editorial-policy?lang=en",
         ja: "/editorial-policy?lang=ja",

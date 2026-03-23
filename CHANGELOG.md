@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.13.0...v1.14.0) (2026-03-22)
+
+
+### Features
+
+* **content:** release daily AI draft, automation hardening, and blog table fixes ([#60](https://github.com/NeoWhisper/neowhisper-blog/issues/60)) ([495bfeb](https://github.com/NeoWhisper/neowhisper-blog/commit/495bfeb678c82e0e268cb8ab586571da43576134)), closes [#59](https://github.com/NeoWhisper/neowhisper-blog/issues/59)
+
 # [1.13.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.3...v1.13.0) (2026-03-22)
 
 

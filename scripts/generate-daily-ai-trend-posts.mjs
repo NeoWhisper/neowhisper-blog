@@ -411,7 +411,11 @@ async function createDraftContent({ dateString, sources }) {
     "Create one multilingual trend brief with these requirements:",
     "- Theme: latest AI + IT practical trends for builders and product teams.",
     "- Provide EN/JA/AR versions aligned in meaning (not literal translation).",
-    "- Each body should be 500-800 words, with clear section headings and concrete takeaways.",
+    "- Each body should be 500-800 words.",
+    "- Use markdown H2 headings for trend sections with this pattern: `## 1. Trend name`.",
+    "- Include 3-6 trend sections, each with exact dates and concrete product/team impact.",
+    "- End with a Takeaways section containing a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
+    "- Do not use a bullet list instead of the takeaway table.",
     "- Include exact dates when mentioning events.",
     "- Do not include a references section; it will be appended automatically.",
     "",
@@ -452,6 +456,46 @@ async function createDraftContent({ dateString, sources }) {
   }
 
   return ensureJson(outputText);
+}
+
+function countTrendHeadings(markdownBody) {
+  return (String(markdownBody).match(/^##\s*[0-9٠-٩]+\./gm) || []).length;
+}
+
+function hasMarkdownTable(markdownBody) {
+  const body = String(markdownBody || "");
+  return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
+}
+
+function validateDraftContent(content) {
+  const languages = ["en", "ja", "ar"];
+
+  for (const lang of languages) {
+    const block = content?.[lang];
+    if (!block || typeof block !== "object") {
+      throw new Error(`Model output missing language block: ${lang}`);
+    }
+
+    if (!String(block.title || "").trim()) {
+      throw new Error(`Model output missing ${lang}.title`);
+    }
+    if (!String(block.excerpt || "").trim()) {
+      throw new Error(`Model output missing ${lang}.excerpt`);
+    }
+    if (!String(block.body || "").trim()) {
+      throw new Error(`Model output missing ${lang}.body`);
+    }
+
+    const headingCount = countTrendHeadings(block.body);
+    if (headingCount < 3) {
+      throw new Error(
+        `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
+      );
+    }
+    if (!hasMarkdownTable(block.body)) {
+      throw new Error(`Model output for ${lang}.body is missing a markdown takeaway table.`);
+    }
+  }
 }
 
 function buildReferencesSection(language, sources) {
@@ -563,6 +607,7 @@ async function main() {
   if (!content || !content.en || !content.ja || !content.ar) {
     throw new Error("Model output is missing required language blocks");
   }
+  validateDraftContent(content);
 
   const baseSlug = await chooseBaseSlug(dateString, content.slugSuffix);
   if (!baseSlug) {

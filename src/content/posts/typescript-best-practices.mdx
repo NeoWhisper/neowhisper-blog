@@ -132,15 +132,89 @@ This is the sweet spot: **Runtime safety** (Zod) + **Compile-time safety** (Type
 
 ---
 
+<Step number="5" title="Type Your Environment Variables">
+
+Environment variables are one of the most common sources of silent production failures. You reference `process.env.SUPABASE_URL` everywhere, it's `undefined` in one environment, and your app crashes with a confusing error at runtime instead of at startup.
+
+Fix it once with a validated env module:
+
+```ts
+// lib/env.ts
+import { z } from "zod";
+
+const envSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  RESEND_API_KEY: z.string().min(1),
+  TURNSTILE_SECRET_KEY: z.string().min(1),
+});
+
+// This throws at import time if any variable is missing or malformed.
+// You find out on deploy, not when a user hits the broken page.
+export const env = envSchema.parse(process.env);
+```
+
+Now import `env` instead of `process.env` everywhere. If a variable is missing, your build fails fast with a clear error. No more debugging `Cannot read property of undefined` from a missing env var at 2 AM.
+
+</Step>
+
+---
+
+## When to Break the Rules
+
+TypeScript discipline has limits. Here are three cases where `any` or `unknown` is the right call — and how to contain it:
+
+**1. Third-party libraries with bad types**
+Some packages ship with outdated or missing type definitions. Rather than fighting incomplete `@types/*` packages throughout your codebase, isolate the mess:
+
+```ts
+// lib/legacy-sdk.ts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sdk = require("untyped-legacy-package") as any;
+export const doThing = (id: string): Promise<MyKnownType> => sdk.doThing(id);
+```
+
+One controlled escape hatch. The rest of your codebase stays typed.
+
+**2. JSON parsing from untrusted sources**
+`JSON.parse` returns `any`. That's correct — you genuinely don't know what you'll get. This is exactly what Zod is for. Parse with `unknown`, validate with a schema, then proceed with a proper type.
+
+**3. Incremental migration from JavaScript**
+If you're migrating an existing JavaScript codebase, use `allowJs: true` and `checkJs: false`, and migrate file by file. Trying to type everything at once leads to shortcuts that make the types meaningless.
+
+---
+
+## A Note on Monorepos
+
+If you're running a Next.js frontend plus a Node.js API in the same repo, the shared types approach from Step 1 scales naturally into a `packages/types` workspace:
+
+```
+apps/
+  web/          ← Next.js app
+  api/          ← Express/Hono API
+packages/
+  types/        ← Shared TypeScript interfaces
+    src/
+      user.ts
+      api.ts
+```
+
+Both `web` and `api` import from `@yourproject/types`. One source of truth. One place to update when the data model changes. This is the structure we recommend and use in our own projects.
+
+---
+
 ## The Checklist
 
-You don't need complex generics to write good code. You just need discipline.
+Good TypeScript isn't about clever generics. It's about consistent discipline across the whole stack.
 
 <Checklist>
   <CheckItem>Share types for your data models (DRY)</CheckItem>
   <CheckItem>Wrap every API response in a standard `ApiResponse<T>`</CheckItem>
   <CheckItem>Type your React Hooks (`useUser` vs `useQuery`)</CheckItem>
   <CheckItem>Validate all runtime input with **Zod**</CheckItem>
+  <CheckItem>Validate environment variables at startup, not at runtime</CheckItem>
+  <CheckItem>Isolate any `any` usage behind typed wrappers</CheckItem>
+  <CheckItem>Use a `packages/types` workspace in monorepos</CheckItem>
 </Checklist>
 
 ---

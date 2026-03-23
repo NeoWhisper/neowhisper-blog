@@ -1,3 +1,26 @@
+# [1.14.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.13.0...v1.14.0) (2026-03-22)
+
+
+### Features
+
+* **content:** release daily AI draft, automation hardening, and blog table fixes ([#60](https://github.com/NeoWhisper/neowhisper-blog/issues/60)) ([495bfeb](https://github.com/NeoWhisper/neowhisper-blog/commit/495bfeb678c82e0e268cb8ab586571da43576134)), closes [#59](https://github.com/NeoWhisper/neowhisper-blog/issues/59)
+
+# [1.13.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.3...v1.13.0) (2026-03-22)
+
+
+### Features
+
+* **content-ops:** add local Ollama daily multilingual draft + auto PR runner ([#58](https://github.com/NeoWhisper/neowhisper-blog/issues/58)) ([6d917ac](https://github.com/NeoWhisper/neowhisper-blog/commit/6d917ac9753d6b835f6e6d64a4d3ed26d2e9941b))
+
+## [1.12.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.2...v1.12.3) (2026-03-09)
+
+
+### Bug Fixes
+
+* **content+ci:** improve trust wording and simplify e2e npm cache ([e19f7e2](https://github.com/NeoWhisper/neowhisper-blog/commit/e19f7e28b63e10082cbcf520e8a1cbec7e842c90))
+* **security:** allow adtrafficquality image endpoints in CSP img-src ([#46](https://github.com/NeoWhisper/neowhisper-blog/issues/46)) ([e6afe93](https://github.com/NeoWhisper/neowhisper-blog/commit/e6afe93aea4fd3c438c34b590eab765da06b998d)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+* **security:** allow ep2 adtrafficquality and stabilize blog code-block layout ([#45](https://github.com/NeoWhisper/neowhisper-blog/issues/45)) ([e03021d](https://github.com/NeoWhisper/neowhisper-blog/commit/e03021ddb36f9cef5679784accaf098ac1960542)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
 ## [1.12.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.12.1...v1.12.2) (2026-03-03)
 
 

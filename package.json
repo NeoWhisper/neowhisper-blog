@@ -1,6 +1,6 @@
 {
   "name": "neowhisper-blog",
-  "version": "1.12.2",
+  "version": "1.14.0",
   "private": true,
   "engines": {
     "node": "24.x"
@@ -12,6 +12,9 @@
     "lint": "eslint",
     "test": "jest",
     "test:e2e": "playwright test",
+    "content:daily": "node scripts/generate-daily-ai-trend-posts.mjs",
+    "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
+    "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
     "prepare": "husky"
   },
   "dependencies": {
@@ -25,19 +28,20 @@
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
-    "isomorphic-dompurify": "^3.0.0",
-    "lucide-react": "^0.564.0",
-    "marked": "^17.0.3",
+    "isomorphic-dompurify": "^3.6.0",
+    "lucide-react": "^0.577.0",
+    "marked": "^17.0.5",
     "next": "^16.1.6",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "reading-time": "^1.5.0",
     "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
+    "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.2",
     "@playwright/test": "^1.58.2",
     "@semantic-release/changelog": "^6.0.3",
@@ -52,7 +56,7 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9.39.3",
+    "eslint": "^9.39.4",
     "eslint-config-next": "^16.1.6",
     "husky": "^9.1.7",
     "jest": "^30.2.0",

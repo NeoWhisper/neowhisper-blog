@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Latest stable release: **v1.12.2** (`dev` may contain unreleased changes; semantic-release cuts the next version when merged to `main`)
+> Latest stable release: **v1.14.0** (`dev` may contain unreleased changes; semantic-release cuts the next version when merged to `main`)
 
 A high-performance, SEO-optimized tech blog built with **Next.js 16**, **App Router**, and **MDX**.
 
@@ -90,6 +90,93 @@ author:
   picture: "/images/author.png"
 ---
 ```
+
+## 🤖 Daily AI Content Automation (EN/JA/AR)
+
+This repository includes a multilingual draft generator that can run:
+
+- in GitHub Actions (cloud/API mode), or
+- fully local on your Mac with Ollama (free local mode).
+
+- Workflow: `.github/workflows/daily-ai-content.yml`
+- Generator script: `scripts/generate-daily-ai-trend-posts.mjs`
+- Local auto-PR script: `scripts/local-daily-content-pr.sh`
+- Local scheduler installer (macOS): `scripts/install-launchd-daily-content.sh`
+
+### Free local mode (Ollama on macOS)
+
+1. Start Ollama and pull a model:
+
+   ```bash
+   ollama serve
+   ollama pull qwen2.5:14b-instruct
+   ```
+
+2. Authenticate GitHub CLI for PR creation:
+
+   ```bash
+   gh auth login
+   ```
+
+3. Run once manually (syncs `contents` with `main`, generates post, builds, opens PR):
+
+   ```bash
+   OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
+   OPENAI_MODEL=qwen2.5:14b-instruct \
+   OPENAI_API_MODE=chat \
+   npm run content:daily:pr
+   ```
+
+4. Install daily schedule (default 09:30 local time):
+
+   ```bash
+   OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
+   OPENAI_MODEL=qwen2.5:14b-instruct \
+   OPENAI_API_MODE=chat \
+   npm run content:daily:install-launchd
+   ```
+
+5. Trigger scheduled job immediately (optional):
+
+   ```bash
+   launchctl kickstart -k gui/$(id -u)/net.neowhisper.daily-content
+   ```
+
+Notes:
+
+- The local PR script always starts from `contents`, fetches remotes, and merges `origin/main` into `contents` when needed before content generation.
+- Set `FORCE_GENERATE=true` if you want a same-day variant slug.
+
+### Cloud/API mode (optional)
+
+1. Add repository secret:
+   - `OPENAI_API_KEY` (required for official OpenAI endpoint)
+2. Optional repository variable:
+   - `OPENAI_BASE_URL` (default: `https://api.openai.com/v1`)
+   - `OPENAI_MODEL` (default: `gpt-4.1-mini`)
+3. Merge the workflow into your default branch (`main`) so GitHub `schedule` can run automatically.
+
+### Manual run
+
+Run generator only (no PR automation):
+
+```bash
+npm run content:daily
+```
+
+Optional options:
+
+- `--force`: generate a same-day variant if today's slug already exists
+- `TOPIC_HINT="your angle"`: guide the editorial angle for that day
+
+Example:
+
+```bash
+OPENAI_BASE_URL=http://127.0.0.1:11434/v1 OPENAI_API_MODE=chat \
+TOPIC_HINT="AI security and infra economics" npm run content:daily -- --force
+```
+
+Final human review is still recommended for factual precision and brand tone before merge.
 
 ## 🔒 Content Security Policy (CSP) for AdSense
 

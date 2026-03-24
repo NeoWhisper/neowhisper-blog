@@ -65,7 +65,7 @@
     "tailwindcss": "^4",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.6",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "overrides": {
     "tar": ">=7.5.8"

@@ -2,11 +2,13 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
+const baseUrl = "https://www.neowhisper.net";
+
 const translations = {
   en: {
     label: "About",
     title: "Registered IT Services Business",
-    subtitle: "Business category (開業届): IT services (ITサービス業).",
+    subtitle: "Registered in Japan as an IT services sole proprietorship.",
     intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Yousif Alqadi.",
     back: "Back to Home",
     sections: [
@@ -54,7 +56,7 @@ const translations = {
   ar: {
     label: "نبذة",
     title: "نشاط خدمات تقنية معلومات مسجل",
-    subtitle: "تصنيف النشاط (開業届): خدمات تقنية المعلومات.",
+    subtitle: "نشاط مسجل في اليابان ضمن خدمات تقنية المعلومات.",
     intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل يوسف القاضي.",
     back: "العودة للرئيسية",
     sections: [
@@ -104,6 +106,7 @@ export async function generateMetadata({
   };
 
   const { title, description } = meta[currentLang];
+  const canonicalPath = `/about?lang=${currentLang}`;
 
   return {
     title,
@@ -111,6 +114,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      url: `${baseUrl}${canonicalPath}`,
       type: "website",
       locale:
         currentLang === "ja"
@@ -134,6 +138,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         en: "/about?lang=en",
         ja: "/about?lang=ja",

@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Latest stable release: **v1.12.3** (`dev` may contain unreleased changes; semantic-release cuts the next version when merged to `main`)
+> Latest stable release: **v1.14.0** (`dev` may contain unreleased changes; semantic-release cuts the next version when merged to `main`)
 
 A high-performance, SEO-optimized tech blog built with **Next.js 16**, **App Router**, and **MDX**.
 

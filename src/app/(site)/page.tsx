@@ -5,10 +5,13 @@
  */
 
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getPosts, getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
+
+const siteUrl = "https://www.neowhisper.net";
 
 const translations = {
   en: {
@@ -225,6 +228,66 @@ const translations = {
     music: ["Spotify", "Apple Music", "YouTube", "Bandcamp"],
   },
 } as const;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const currentLang = normalizeLang(lang) as SupportedLang;
+  const copy = translations[currentLang];
+  const canonicalPath = `/?lang=${currentLang}`;
+
+  return {
+    title: copy.heroTitle,
+    description: copy.heroSubtitle,
+    alternates: {
+      canonical: canonicalPath,
+      languages: {
+        en: "/?lang=en",
+        ja: "/?lang=ja",
+        ar: "/?lang=ar",
+      },
+    },
+    openGraph: {
+      title: copy.heroTitle,
+      description: copy.heroSubtitle,
+      url: `${siteUrl}${canonicalPath}`,
+      siteName: "NeoWhisper",
+      type: "website",
+      locale:
+        currentLang === "ja"
+          ? "ja_JP"
+          : currentLang === "ar"
+            ? "ar_SA"
+            : "en_US",
+      alternateLocale: ["en_US", "ja_JP", "ar_SA"].filter((locale) => {
+        const currentLocale =
+          currentLang === "ja"
+            ? "ja_JP"
+            : currentLang === "ar"
+              ? "ar_SA"
+              : "en_US";
+        return locale !== currentLocale;
+      }),
+      images: [
+        {
+          url: `${siteUrl}/og-image.jpg`,
+          width: 1200,
+          height: 630,
+          alt: "NeoWhisper",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: copy.heroTitle,
+      description: copy.heroSubtitle,
+      images: [`${siteUrl}/og-image.jpg`],
+    },
+  };
+}
 
 export default async function Home({
   searchParams,

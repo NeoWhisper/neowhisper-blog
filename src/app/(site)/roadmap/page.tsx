@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
+const baseUrl = "https://www.neowhisper.net";
+
 const translations = {
     en: {
         label: "Roadmap",
@@ -137,10 +139,30 @@ export async function generateMetadata({
     };
 
     const { title, description } = meta[currentLang];
+    const canonicalPath = `/roadmap?lang=${currentLang}`;
 
     return {
         title,
         description,
+        openGraph: {
+            title,
+            description,
+            type: "website",
+            url: `${baseUrl}${canonicalPath}`,
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+        },
+        alternates: {
+            canonical: canonicalPath,
+            languages: {
+                en: "/roadmap?lang=en",
+                ja: "/roadmap?lang=ja",
+                ar: "/roadmap?lang=ar",
+            },
+        },
     };
 }
 

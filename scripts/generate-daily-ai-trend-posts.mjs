@@ -18,6 +18,7 @@ const API_KEY = process.env.OPENAI_API_KEY || "sk-local";
 
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
+const MIN_WORDS_EXCLUSIVE = 700; // Rule: strictly more than 700 words
 
 const FEEDS = [
   {
@@ -411,7 +412,7 @@ async function createDraftContent({ dateString, sources }) {
     "Create one multilingual trend brief with these requirements:",
     "- Theme: latest AI + IT practical trends for builders and product teams.",
     "- Provide EN/JA/AR versions aligned in meaning (not literal translation).",
-    "- Each body should be 500-800 words.",
+    "- Each body must be more than 700 words.",
     "- Use markdown H2 headings for trend sections with this pattern: `## 1. Trend name`.",
     "- Include 3-6 trend sections, each with exact dates and concrete product/team impact.",
     "- End with a Takeaways section containing a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
@@ -467,6 +468,17 @@ function hasMarkdownTable(markdownBody) {
   return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
 }
 
+function countWords(markdownBody) {
+  return String(markdownBody || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean).length;
+}
+
 function validateDraftContent(content) {
   const languages = ["en", "ja", "ar"];
 
@@ -487,9 +499,15 @@ function validateDraftContent(content) {
     }
 
     const headingCount = countTrendHeadings(block.body);
+    const wordCount = countWords(block.body);
     if (headingCount < 3) {
       throw new Error(
         `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
+      );
+    }
+    if (wordCount <= MIN_WORDS_EXCLUSIVE) {
+      throw new Error(
+        `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
       );
     }
     if (!hasMarkdownTable(block.body)) {

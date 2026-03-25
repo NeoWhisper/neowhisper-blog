@@ -1,1 +1,2 @@
 npm run lint
+node scripts/check-new-post-length.mjs

@@ -18,6 +18,7 @@ const API_KEY = process.env.OPENAI_API_KEY || "sk-local";
 
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
+const MIN_WORDS_EXCLUSIVE = 700; // Rule: strictly more than 700 words
 
 const FEEDS = [
   {
@@ -62,6 +63,126 @@ const TREND_KEYWORDS = [
   "inference",
   "api",
 ];
+
+const CATEGORY_DEFINITIONS = [
+  {
+    slug: "software-development",
+    nameEn: "Software Development",
+    nameJa: "Software Development",
+    nameAr: "Software Development",
+    keywords: ["developer", "engineering", "software", "coding", "codebase", "framework", "sdk", "api"],
+  },
+  {
+    slug: "game-development",
+    nameEn: "Game Development",
+    nameJa: "Game Development",
+    nameAr: "Game Development",
+    keywords: ["game", "gaming", "unity", "unreal", "rendering", "simulation"],
+  },
+  {
+    slug: "translation",
+    nameEn: "Translation",
+    nameJa: "Translation",
+    nameAr: "Translation",
+    keywords: ["translation", "localization", "multilingual", "i18n", "l10n", "language"],
+  },
+  {
+    slug: "next.js",
+    nameEn: "Next.js Tutorials",
+    nameJa: "Next.js Tutorials",
+    nameAr: "Next.js Tutorials",
+    keywords: ["next.js", "nextjs", "vercel", "app router", "route handlers"],
+  },
+  {
+    slug: "typescript",
+    nameEn: "TypeScript",
+    nameJa: "TypeScript",
+    nameAr: "TypeScript",
+    keywords: ["typescript", "type safety", "types", "tsconfig", "eslint", "compiler"],
+  },
+  {
+    slug: "tech-tips",
+    nameEn: "Tech Tips",
+    nameJa: "Tech Tips",
+    nameAr: "Tech Tips",
+    keywords: ["how to", "guide", "checklist", "debugging", "tips", "playbook", "best practices"],
+  },
+  {
+    slug: "art-design",
+    nameEn: "Art & Design",
+    nameJa: "アート＆デザイン",
+    nameAr: "الفن والتصميم",
+    keywords: ["design", "ux", "ui", "visual", "typography", "illustration", "creative"],
+  },
+  {
+    slug: "product-strategy",
+    nameEn: "Product Strategy",
+    nameJa: "プロダクト戦略",
+    nameAr: "استراتيجية المنتج",
+    keywords: [
+      "strategy",
+      "roadmap",
+      "product team",
+      "go to market",
+      "regulation",
+      "policy",
+      "adoption",
+      "trend",
+      "impact",
+    ],
+  },
+];
+
+const CATEGORY_MAP = new Map(CATEGORY_DEFINITIONS.map((category) => [category.slug, category]));
+const DEFAULT_CATEGORY_SLUG = "product-strategy";
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9.+\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function scoreCategoryFromText(text) {
+  const normalized = normalizeSearchText(text);
+  if (!normalized) return null;
+
+  let winner = null;
+  let bestScore = 0;
+  for (const category of CATEGORY_DEFINITIONS) {
+    let score = 0;
+    for (const keyword of category.keywords) {
+      if (normalized.includes(keyword)) {
+        score += 1;
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      winner = category;
+    }
+  }
+  return winner;
+}
+
+function pickCategory(content, sources) {
+  const rawSlug = String(content?.categorySlug || "").trim().toLowerCase();
+  if (CATEGORY_MAP.has(rawSlug)) {
+    return CATEGORY_MAP.get(rawSlug);
+  }
+
+  const aggregateText = [
+    content?.en?.title || "",
+    content?.en?.excerpt || "",
+    content?.en?.body || "",
+    ...sources.map((source) => `${source.title} ${source.summary}`),
+  ].join("\n");
+  const heuristicCategory = scoreCategoryFromText(aggregateText);
+  if (heuristicCategory) {
+    return heuristicCategory;
+  }
+  return CATEGORY_MAP.get(DEFAULT_CATEGORY_SLUG);
+}
 
 function decodeEntities(value) {
   return value
@@ -395,6 +516,7 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt) {
 }
 
 async function createDraftContent({ dateString, sources }) {
+  const allowedCategoryList = CATEGORY_DEFINITIONS.map((category) => category.slug).join(", ");
   const systemPrompt = [
     "You are a senior multilingual tech editor.",
     "Write high-trust, human-sounding blog content in English, Japanese, and Arabic.",
@@ -411,16 +533,18 @@ async function createDraftContent({ dateString, sources }) {
     "Create one multilingual trend brief with these requirements:",
     "- Theme: latest AI + IT practical trends for builders and product teams.",
     "- Provide EN/JA/AR versions aligned in meaning (not literal translation).",
-    "- Each body should be 500-800 words.",
+    "- Each body must be more than 700 words.",
     "- Use markdown H2 headings for trend sections with this pattern: `## 1. Trend name`.",
     "- Include 3-6 trend sections, each with exact dates and concrete product/team impact.",
     "- End with a Takeaways section containing a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
     "- Do not use a bullet list instead of the takeaway table.",
     "- Include exact dates when mentioning events.",
     "- Do not include a references section; it will be appended automatically.",
+    `- Pick exactly one category slug from this list: ${allowedCategoryList}.`,
     "",
     "Output schema:",
     "{",
+    `  "categorySlug": "one of: ${allowedCategoryList}",`,
     '  "slugSuffix": "3-5 ascii words, lowercase, hyphen-separated",',
     '  "en": { "title": "...", "excerpt": "...", "body": "markdown" },',
     '  "ja": { "title": "...", "excerpt": "...", "body": "markdown" },',
@@ -467,6 +591,17 @@ function hasMarkdownTable(markdownBody) {
   return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
 }
 
+function countWords(markdownBody) {
+  return String(markdownBody || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean).length;
+}
+
 function validateDraftContent(content) {
   const languages = ["en", "ja", "ar"];
 
@@ -487,9 +622,15 @@ function validateDraftContent(content) {
     }
 
     const headingCount = countTrendHeadings(block.body);
+    const wordCount = countWords(block.body);
     if (headingCount < 3) {
       throw new Error(
         `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
+      );
+    }
+    if (wordCount <= MIN_WORDS_EXCLUSIVE) {
+      throw new Error(
+        `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
       );
     }
     if (!hasMarkdownTable(block.body)) {
@@ -608,6 +749,12 @@ async function main() {
     throw new Error("Model output is missing required language blocks");
   }
   validateDraftContent(content);
+  const selectedCategory =
+    pickCategory(content, selectedSources) ||
+    CATEGORY_MAP.get(DEFAULT_CATEGORY_SLUG) ||
+    CATEGORY_DEFINITIONS[0];
+  const selectedCategorySlug = selectedCategory.slug || DEFAULT_CATEGORY_SLUG;
+  console.log(`[daily-trends] selected category: ${selectedCategorySlug}`);
 
   const baseSlug = await chooseBaseSlug(dateString, content.slugSuffix);
   if (!baseSlug) {
@@ -619,12 +766,12 @@ async function main() {
     {
       lang: "en",
       path: path.join(POSTS_DIR, `${baseSlug}.mdx`),
-      category: "Product Strategy",
+      category: selectedCategory.nameEn,
       body: buildPostDocument({
         title: content.en.title,
         excerpt: content.en.excerpt,
         dateString,
-        category: "Product Strategy",
+        category: selectedCategory.nameEn,
         body: content.en.body,
         referencesSection: buildReferencesSection("en", selectedSources),
       }),
@@ -632,12 +779,12 @@ async function main() {
     {
       lang: "ja",
       path: path.join(POSTS_DIR, `${baseSlug}-ja.mdx`),
-      category: "プロダクト戦略",
+      category: selectedCategory.nameJa || selectedCategory.nameEn,
       body: buildPostDocument({
         title: content.ja.title,
         excerpt: content.ja.excerpt,
         dateString,
-        category: "プロダクト戦略",
+        category: selectedCategory.nameJa || selectedCategory.nameEn,
         body: content.ja.body,
         referencesSection: buildReferencesSection("ja", selectedSources),
       }),
@@ -645,12 +792,12 @@ async function main() {
     {
       lang: "ar",
       path: path.join(POSTS_DIR, `${baseSlug}-ar.mdx`),
-      category: "استراتيجية المنتج",
+      category: selectedCategory.nameAr || selectedCategory.nameEn,
       body: buildPostDocument({
         title: content.ar.title,
         excerpt: content.ar.excerpt,
         dateString,
-        category: "استراتيجية المنتج",
+        category: selectedCategory.nameAr || selectedCategory.nameEn,
         body: content.ar.body,
         referencesSection: buildReferencesSection("ar", selectedSources),
       }),

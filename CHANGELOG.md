@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.0...v1.14.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* sync dev with main, harden security, and improve AdSense/SEO readiness ([#63](https://github.com/NeoWhisper/neowhisper-blog/issues/63)) ([5786de7](https://github.com/NeoWhisper/neowhisper-blog/commit/5786de7bb6163e7d66646d08a12c8b34402024cf)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
 # [1.14.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.13.0...v1.14.0) (2026-03-22)
 
 

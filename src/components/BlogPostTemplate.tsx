@@ -353,7 +353,7 @@ export default async function BlogPostTemplate({
                       />
                     ),
                     // Professional block components for MDX
-                    Step: ({ number, title, children }: { number: number; title?: string; children: ReactNode }) => (
+                    Step: ({ number, title, children }: { number: string | number; title?: string; children: ReactNode }) => (
                       <div className="flex gap-6 mb-16 group items-start">
                         <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-110">
                           {number}

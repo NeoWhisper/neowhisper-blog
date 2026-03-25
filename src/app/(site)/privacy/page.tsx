@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
-const LAST_UPDATED = "2026-02-16";
+const LAST_UPDATED = "2026-03-25";
 const baseUrl = "https://www.neowhisper.net";
 
 const copyByLang: Record<
@@ -21,7 +21,9 @@ const copyByLang: Record<
     points: [
       "NeoWhisper collects only the information necessary to operate this site, respond to inquiries, and deliver requested IT services. We do not sell personal data.",
       "Contact form data (name, email, company, project details) is used only for project communication and service delivery. Data is sent over HTTPS and processed by service providers used for email and spam prevention.",
-      "Analytics and advertising tools (such as Google Analytics and Google AdSense, when enabled) may use cookies for measurement and ad delivery. You can control cookies through browser settings.",
+      "Third-party vendors, including Google, may use cookies to serve ads based on a user's prior visits to this website or other websites.",
+      "Google's use of advertising cookies enables Google and its partners to serve ads to users based on their visit to this site and/or other sites on the Internet.",
+      "Users may opt out of personalized advertising by visiting Google Ads Settings: https://adssettings.google.com. You can also manage cookies through your browser settings.",
       "If you need data access, correction, or deletion, contact neowhisperhq@gmail.com.",
     ],
   },
@@ -32,7 +34,9 @@ const copyByLang: Record<
     points: [
       "NeoWhisperは、サイト運営・お問い合わせ対応・ITサービス提供に必要な範囲でのみ情報を取得します。個人データを販売することはありません。",
       "お問い合わせフォームで送信された情報（氏名・メール・会社名・相談内容）は、案件対応および連絡目的でのみ利用します。送信はHTTPSで保護され、メール配信やスパム対策に利用する外部サービスで処理されます。",
-      "Google AnalyticsやGoogle AdSense（有効時）などの計測・広告ツールがCookieを利用する場合があります。Cookieはブラウザ設定で管理できます。",
+      "Googleを含む第三者配信事業者は、ユーザーの本サイトまたは他サイトへの過去のアクセス情報に基づいて、Cookieを使用して広告を配信する場合があります。",
+      "Googleの広告Cookieにより、Googleおよびそのパートナーは、ユーザーの本サイトまたはインターネット上の他サイトへのアクセス情報に基づいた広告を表示できます。",
+      "ユーザーは Google 広告設定（https://adssettings.google.com）でパーソナライズ広告を無効化できます。Cookieはブラウザ設定からも管理できます。",
       "開示・訂正・削除のご依頼は、neowhisperhq@gmail.com までご連絡ください。",
     ],
   },
@@ -43,7 +47,9 @@ const copyByLang: Record<
     points: [
       "يجمع NeoWhisper فقط البيانات اللازمة لتشغيل الموقع، والرد على الاستفسارات، وتقديم خدمات تقنية المعلومات المطلوبة. لا نقوم ببيع البيانات الشخصية.",
       "بيانات نموذج التواصل (الاسم، البريد، الشركة، تفاصيل المشروع) تُستخدم فقط للتواصل وتنفيذ الخدمة. يتم الإرسال عبر HTTPS وتُعالج البيانات لدى مزودي خدمة البريد والحماية من الرسائل المزعجة.",
-      "قد تستخدم أدوات التحليلات والإعلانات مثل Google Analytics وGoogle AdSense (عند التفعيل) ملفات تعريف الارتباط لأغراض القياس وعرض الإعلانات. يمكنك إدارة الكوكيز من إعدادات المتصفح.",
+      "قد يستخدم مزودو الإعلانات من الجهات الخارجية، بما في ذلك Google، ملفات تعريف الارتباط لعرض الإعلانات بناءً على زيارات المستخدم السابقة لهذا الموقع أو لمواقع أخرى.",
+      "يسمح استخدام Google لملفات تعريف ارتباط الإعلانات لـ Google وشركائها بعرض إعلانات مخصصة وفقًا لزيارة المستخدم لهذا الموقع و/أو لمواقع أخرى على الإنترنت.",
+      "يمكن للمستخدمين إيقاف الإعلانات المخصصة عبر إعدادات إعلانات Google: https://adssettings.google.com. كما يمكن إدارة ملفات تعريف الارتباط من إعدادات المتصفح.",
       "لطلب الوصول إلى بياناتك أو تعديلها أو حذفها، راسلنا على neowhisperhq@gmail.com.",
     ],
   },

@@ -47,7 +47,7 @@ const FEEDS = [
   },
   {
     name: "Apple Developer News",
-    url: "https://developer.apple.com/news/rss/",
+    url: "https://developer.apple.com/news/rss/news.rss",
   },
   {
     name: "Apple ML Research",
@@ -71,7 +71,7 @@ const FEEDS = [
   },
   {
     name: "Tailwind CSS Blog",
-    url: "https://tailwindcss.com/blog/feed.xml",
+    url: "https://tailwindcss.com/blog",
   },
   {
     name: "InfoQ (AI & Dev)",
@@ -79,7 +79,7 @@ const FEEDS = [
   },
   {
     name: "InfoWorld ML",
-    url: "https://www.infoworld.com/category/machine-learning/index.rss",
+    url: "https://www.infoworld.com/artificial-intelligence/",
   },
   {
     name: "Ars Technica (Biz & IT)",
@@ -410,6 +410,15 @@ const TRANSLATION_CONFIGS = [
     tone: "- Tone: professional, technical, and natural for an Arabic audience.",
   },
 ];
+const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
+const API_CALLERS = {
+  responses: callResponsesEndpoint,
+  chat: callChatCompletionsEndpoint,
+};
+const HTML_FEED_EXTRACTORS = {
+  "Tailwind CSS Blog": extractTailwindBlogItems,
+  "InfoWorld ML": extractInfoWorldItems,
+};
 
 function normalizeSearchText(value) {
   return String(value || "")
@@ -519,12 +528,12 @@ function parseDate(value) {
 
 function parseRssItems(xml, feedName) {
   const items = [];
-  for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+  for (const match of xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)) {
     const item = match[1];
     const title = extractTag(item, "title");
     const link = normalizeUrl(extractTag(item, "link"));
     const description = extractTag(item, "description");
-    const pubDate = extractTag(item, "pubDate");
+    const pubDate = extractTag(item, "pubDate") || extractTag(item, "dc:date");
     if (!title || !link) continue;
     items.push({
       feed: feedName,
@@ -559,6 +568,48 @@ function parseAtomEntries(xml, feedName) {
   return entries;
 }
 
+function extractTailwindBlogItems(html, feedName) {
+  const items = [];
+  for (const match of html.matchAll(/<a[^>]+href="(\/blog\/[^"#?]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const link = normalizeUrl(`https://tailwindcss.com${decodeEntities(match[1])}`);
+    const title = stripHtml(match[2]);
+    if (!title || !link || /^(blog|read more)$/i.test(title)) continue;
+    items.push({
+      feed: feedName,
+      title,
+      link,
+      description: "",
+      publishedAt: "",
+      publishedTimestamp: 0,
+    });
+  }
+  return dedupeByLink(items);
+}
+
+function extractInfoWorldItems(html, feedName) {
+  const items = [];
+  for (const match of html.matchAll(/<a[^>]+href="(https:\/\/www\.infoworld\.com\/article\/[^"?#]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const link = normalizeUrl(decodeEntities(match[1]));
+    const title = stripHtml(match[2]);
+    if (!title || !link) continue;
+    items.push({
+      feed: feedName,
+      title,
+      link,
+      description: "",
+      publishedAt: "",
+      publishedTimestamp: 0,
+    });
+  }
+  return dedupeByLink(items);
+}
+
+function parseHtmlFeed(html, feed) {
+  const extractor = HTML_FEED_EXTRACTORS[feed.name];
+  if (!extractor) return [];
+  return extractor(html, feed.name);
+}
+
 async function fetchFeed(feed) {
   const response = await fetch(feed.url, {
     headers: {
@@ -574,7 +625,8 @@ async function fetchFeed(feed) {
   const xml = await response.text();
   const rssItems = parseRssItems(xml, feed.name);
   const atomEntries = parseAtomEntries(xml, feed.name);
-  const all = [...rssItems, ...atomEntries];
+  const htmlItems = parseHtmlFeed(xml, feed);
+  const all = [...rssItems, ...atomEntries, ...htmlItems];
 
   if (all.length === 0) {
     throw new Error(`${feed.name} returned no parseable items`);
@@ -823,6 +875,14 @@ function shouldFallbackToChat(errorMessage, statusCode) {
   );
 }
 
+function getApiCallChain() {
+  const primaryCaller = API_CALLERS[API_MODE];
+  if (primaryCaller) {
+    return [primaryCaller];
+  }
+  return [API_CALLERS.responses, API_CALLERS.chat];
+}
+
 async function callResponsesEndpoint(systemPrompt, userPrompt, options = {}) {
   const {
     maxTokens = DEFAULT_GENERATION_MAX_TOKENS,
@@ -921,21 +981,18 @@ async function callAi(systemPrompt, userPrompt, options = {}) {
 
   for (let attempt = 1; attempt <= MODEL_FETCH_RETRY_ATTEMPTS; attempt += 1) {
     try {
-      if (API_MODE === "responses") {
-        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
-      }
-      if (API_MODE === "chat") {
-        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
-      }
-
-      try {
-        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
-      } catch (error) {
-        const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
-        if (!shouldFallbackToChat(error?.message, statusCode)) {
-          throw error;
+      const callChain = getApiCallChain();
+      for (let index = 0; index < callChain.length; index += 1) {
+        const caller = callChain[index];
+        try {
+          return await caller(systemPrompt, userPrompt, options);
+        } catch (error) {
+          const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
+          const canTryNextCaller = index < callChain.length - 1;
+          if (!canTryNextCaller || !shouldFallbackToChat(error?.message, statusCode)) {
+            throw error;
+          }
         }
-        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
       }
     } catch (error) {
       lastError = error;
@@ -1119,7 +1176,7 @@ function countWords(markdownBody, lang = "en") {
   // English words are space-delimited. Japanese/Arabic often aren't, so use
   // Intl.Segmenter to avoid undercounting (which can incorrectly fail QA).
   const segmentSupported =
-    lang !== "en" && typeof Intl !== "undefined" && Intl.Segmenter;
+    !LANGUAGE_SEGMENTER_EXCLUSIONS.has(lang) && typeof Intl !== "undefined" && Intl.Segmenter;
 
   return !text
     ? 0

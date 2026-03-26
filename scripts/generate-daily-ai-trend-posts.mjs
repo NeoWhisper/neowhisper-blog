@@ -62,6 +62,22 @@ const FEEDS = [
     url: "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feed_claude.xml",
   },
   {
+    name: "React Blog",
+    url: "https://react.dev/rss.xml",
+  },
+  {
+    name: "Next.js Blog",
+    url: "https://nextjs.org/feed.xml",
+  },
+  {
+    name: "Vercel Blog",
+    url: "https://vercel.com/atom",
+  },
+  {
+    name: "Tailwind CSS Blog",
+    url: "https://blog.tailwindcss.com/feed.xml",
+  },
+  {
     name: "The Verge",
     url: "https://www.theverge.com/rss/index.xml",
   },
@@ -90,6 +106,16 @@ const TREND_KEYWORDS = [
   "gpu",
   "inference",
   "api",
+  "react",
+  "next.js",
+  "nextjs",
+  "frontend",
+  "typescript",
+  "javascript",
+  "tailwind",
+  "node",
+  "vercel",
+  "web dev",
 ];
 
 const CATEGORY_DEFINITIONS = [

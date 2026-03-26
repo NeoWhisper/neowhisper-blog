@@ -51,15 +51,11 @@ const FEEDS = [
   },
   {
     name: "Apple ML Research",
-    url: "https://machinelearning.apple.com/feed.xml",
+    url: "https://machinelearning.apple.com/rss.xml",
   },
   {
     name: "AWS Machine Learning",
     url: "https://aws.amazon.com/blogs/machine-learning/feed/",
-  },
-  {
-    name: "Anthropic Engineering",
-    url: "https://www.anthropic.com/engineering/feed.xml",
   },
   {
     name: "React Blog",
@@ -75,7 +71,7 @@ const FEEDS = [
   },
   {
     name: "Tailwind CSS Blog",
-    url: "https://blog.tailwindcss.com/feed.xml",
+    url: "https://tailwindcss.com/blog/feed.xml",
   },
   {
     name: "InfoQ (AI & Dev)",
@@ -116,14 +112,6 @@ const FEEDS = [
   {
     name: "Unlimit-Tech (AR)",
     url: "https://www.unlimit-tech.com/feed",
-  },
-  {
-    name: "Al Jazeera Tech (AR)",
-    url: "https://www.aljazeera.net/xml/rss/all.xml",
-  },
-  {
-    name: "Asharq Al-Awsat (AR)",
-    url: "https://aawsat.com/feed/information-technology",
   },
   {
     name: "The Verge",
@@ -174,6 +162,35 @@ const TREND_KEYWORDS = [
   "serverless",
 ];
 
+const ART_KEYWORDS = [
+  "design",
+  "ux",
+  "ui",
+  "visual",
+  "illustration",
+  "typography",
+  "creative",
+  "art",
+];
+
+const POLITICS_KEYWORDS = [
+  "election",
+  "president",
+  "minister",
+  "parliament",
+  "senate",
+  "government",
+  "congress",
+  "geopolitics",
+  "war",
+  "conflict",
+  "diplomatic",
+  "sanction",
+  "policy debate",
+  "campaign",
+  "voting",
+];
+
 const CATEGORY_DEFINITIONS = [
   {
     slug: "software-development",
@@ -181,6 +198,98 @@ const CATEGORY_DEFINITIONS = [
     nameJa: "Software Development",
     nameAr: "Software Development",
     keywords: ["developer", "engineering", "software", "coding", "codebase", "framework", "sdk", "api"],
+  },
+  {
+    slug: "ai-ml",
+    nameEn: "AI & Machine Learning",
+    nameJa: "AI・機械学習",
+    nameAr: "الذكاء الاصطناعي وتعلم الآلة",
+    keywords: [
+      "ai",
+      "artificial intelligence",
+      "machine learning",
+      "ml",
+      "llm",
+      "agent",
+      "agentic",
+      "inference",
+      "training",
+      "evaluation",
+      "prompt",
+      "rag",
+      "vector",
+      "embedding",
+    ],
+  },
+  {
+    slug: "cloud-devops",
+    nameEn: "Cloud & DevOps",
+    nameJa: "クラウド・DevOps",
+    nameAr: "السحابة و DevOps",
+    keywords: [
+      "cloud",
+      "devops",
+      "kubernetes",
+      "k8s",
+      "docker",
+      "container",
+      "serverless",
+      "terraform",
+      "iac",
+      "ci/cd",
+      "pipeline",
+      "observability",
+      "logging",
+      "metrics",
+      "tracing",
+      "sre",
+      "reliability",
+    ],
+  },
+  {
+    slug: "cybersecurity",
+    nameEn: "Cybersecurity",
+    nameJa: "サイバーセキュリティ",
+    nameAr: "الأمن السيبراني",
+    keywords: [
+      "security",
+      "cybersecurity",
+      "vulnerability",
+      "cve",
+      "exploit",
+      "auth",
+      "oauth",
+      "passkey",
+      "mfa",
+      "zero trust",
+      "csp",
+      "xss",
+      "csrf",
+      "ssrf",
+      "supply chain",
+    ],
+  },
+  {
+    slug: "data-infrastructure",
+    nameEn: "Data & Infrastructure",
+    nameJa: "データ・インフラ",
+    nameAr: "البيانات والبنية التحتية",
+    keywords: [
+      "database",
+      "postgres",
+      "mysql",
+      "redis",
+      "queue",
+      "kafka",
+      "etl",
+      "warehouse",
+      "lakehouse",
+      "index",
+      "scaling",
+      "latency",
+      "throughput",
+      "infrastructure",
+    ],
   },
   {
     slug: "game-development",
@@ -244,7 +353,19 @@ const CATEGORY_DEFINITIONS = [
 ];
 
 const CATEGORY_MAP = new Map(CATEGORY_DEFINITIONS.map((category) => [category.slug, category]));
-const DEFAULT_CATEGORY_SLUG = "product-strategy";
+const ALLOWED_CATEGORY_SLUGS = new Set([
+  "software-development",
+  "ai-ml",
+  "cloud-devops",
+  "cybersecurity",
+  "data-infrastructure",
+  "game-development",
+  "next.js",
+  "typescript",
+  "tech-tips",
+  "art-design",
+]);
+const DEFAULT_CATEGORY_SLUG = "software-development";
 
 function normalizeSearchText(value) {
   return String(value || "")
@@ -277,7 +398,7 @@ function scoreCategoryFromText(text) {
 
 function pickCategory(content, sources) {
   const rawSlug = String(content?.categorySlug || "").trim().toLowerCase();
-  if (CATEGORY_MAP.has(rawSlug)) {
+  if (CATEGORY_MAP.has(rawSlug) && ALLOWED_CATEGORY_SLUGS.has(rawSlug)) {
     return CATEGORY_MAP.get(rawSlug);
   }
 
@@ -288,7 +409,7 @@ function pickCategory(content, sources) {
     ...sources.map((source) => `${source.title} ${source.summary}`),
   ].join("\n");
   const heuristicCategory = scoreCategoryFromText(aggregateText);
-  if (heuristicCategory) {
+  if (heuristicCategory && ALLOWED_CATEGORY_SLUGS.has(heuristicCategory.slug)) {
     return heuristicCategory;
   }
   return CATEGORY_MAP.get(DEFAULT_CATEGORY_SLUG);
@@ -423,6 +544,21 @@ function hasTrendKeyword(text) {
   return TREND_KEYWORDS.some((keyword) => haystack.includes(keyword));
 }
 
+function hasArtKeyword(text) {
+  const haystack = text.toLowerCase();
+  return ART_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
+function hasPoliticsKeyword(text) {
+  const haystack = text.toLowerCase();
+  return POLITICS_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
+function isAllowedTopicItem(item) {
+  const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
+  return !hasPoliticsKeyword(text) && (hasTrendKeyword(text) || hasArtKeyword(text));
+}
+
 function dedupeByLink(items) {
   const seen = new Set();
   const result = [];
@@ -475,16 +611,55 @@ function slugify(value) {
 }
 
 function ensureJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    const firstBrace = text.indexOf("{");
-    const lastBrace = text.lastIndexOf("}");
-    if (firstBrace >= 0 && lastBrace > firstBrace) {
-      return JSON.parse(text.slice(firstBrace, lastBrace + 1));
+  const raw = String(text || "").trim();
+
+  const tryParse = (candidate) => {
+    const value = String(candidate || "").trim();
+    if (!value) return null;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
     }
-    throw new Error("Model response is not valid JSON");
+  };
+
+  const stripCodeFences = (value) => {
+    const s = String(value || "").trim();
+    const fenced = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    return fenced ? fenced[1].trim() : s;
+  };
+
+  const extractObjectSlice = (value) => {
+    const s = String(value || "");
+    const firstBrace = s.indexOf("{");
+    const lastBrace = s.lastIndexOf("}");
+    return firstBrace >= 0 && lastBrace > firstBrace ? s.slice(firstBrace, lastBrace + 1) : "";
+  };
+
+  const repairCommonJsonIssues = (value) => {
+    const s = String(value || "");
+    // Remove trailing commas: { "a": 1, } or [1,2,]
+    return s.replace(/,\s*([}\]])/g, "$1");
+  };
+
+  const attemptOrder = [
+    raw,
+    stripCodeFences(raw),
+    extractObjectSlice(raw),
+    extractObjectSlice(stripCodeFences(raw)),
+    repairCommonJsonIssues(raw),
+    repairCommonJsonIssues(stripCodeFences(raw)),
+    repairCommonJsonIssues(extractObjectSlice(raw)),
+    repairCommonJsonIssues(extractObjectSlice(stripCodeFences(raw))),
+  ];
+
+  for (const attempt of attemptOrder) {
+    const parsed = tryParse(attempt);
+    if (parsed && typeof parsed === "object") return parsed;
   }
+
+  const preview = raw.replace(/\s+/g, " ").slice(0, 240);
+  throw new Error(`Model response is not valid JSON. Preview: ${preview}`);
 }
 
 function extractResponseText(payload) {
@@ -649,7 +824,11 @@ async function callAi(systemPrompt, userPrompt) {
 }
 
 async function createDraftContent({ dateString, sources }) {
-  const allowedCategoryList = CATEGORY_DEFINITIONS.map((category) => category.slug).join(", ");
+  const allowedCategoryList = CATEGORY_DEFINITIONS.filter((category) =>
+    ALLOWED_CATEGORY_SLUGS.has(category.slug),
+  )
+    .map((category) => category.slug)
+    .join(", ");
 
   // 1. Generate Metadata and English Content
   console.log("[daily-trends] generating base metadata and English content...");
@@ -663,7 +842,8 @@ async function createDraftContent({ dateString, sources }) {
     TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
     "",
     "Create a tech trend brief meta-info and English version:",
-    "- Theme: latest AI + IT practical trends for builders and product teams.",
+    "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
+    "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
     "- English body must be 900-1200 words (minimum 850).",
     "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
     "- Include 3-6 trend sections with deep technical analysis.",
@@ -939,9 +1119,7 @@ async function main() {
     }
   });
 
-  const ranked = rankItems(dedupeByLink(sourceItems))
-    .filter((item) => hasTrendKeyword(`${item.title} ${item.description}`))
-    .slice(0, 12);
+  const ranked = rankItems(dedupeByLink(sourceItems)).filter((item) => isAllowedTopicItem(item)).slice(0, 12);
 
   if (ranked.length < 4) {
     console.log("[daily-trends] not enough relevant sources found; skipping post generation.");

@@ -51,15 +51,15 @@ const FEEDS = [
   },
   {
     name: "Apple ML Research",
-    url: "https://machinelearning.apple.com/rss.xml",
+    url: "https://machinelearning.apple.com/feed.xml",
   },
   {
     name: "AWS Machine Learning",
     url: "https://aws.amazon.com/blogs/machine-learning/feed/",
   },
   {
-    name: "Anthropic News",
-    url: "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feed_claude.xml",
+    name: "Anthropic Engineering",
+    url: "https://www.anthropic.com/engineering/feed.xml",
   },
   {
     name: "React Blog",
@@ -82,8 +82,8 @@ const FEEDS = [
     url: "https://www.infoq.com/feed/",
   },
   {
-    name: "InfoWorld",
-    url: "https://www.infoworld.com/index.rss",
+    name: "InfoWorld ML",
+    url: "https://www.infoworld.com/category/machine-learning/index.rss",
   },
   {
     name: "Ars Technica (Biz & IT)",
@@ -107,15 +107,23 @@ const FEEDS = [
   },
   {
     name: "Tech-WD (AR)",
-    url: "https://www.tech-wd.com/wd/feed/",
+    url: "https://www.tech-wd.com/feed",
+  },
+  {
+    name: "AITNews (AR)",
+    url: "https://aitnews.com/feed/",
+  },
+  {
+    name: "Unlimit-Tech (AR)",
+    url: "https://www.unlimit-tech.com/feed",
   },
   {
     name: "Al Jazeera Tech (AR)",
-    url: "https://www.aljazeera.net/science-technology/rss/",
+    url: "https://www.aljazeera.net/xml/rss/all.xml",
   },
   {
-    name: "Al Sharq Tech (AR)",
-    url: "https://www.al-sharq.com/rss/technology",
+    name: "Asharq Al-Awsat (AR)",
+    url: "https://aawsat.com/feed/information-technology",
   },
   {
     name: "The Verge",

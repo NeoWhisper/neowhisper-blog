@@ -8,6 +8,13 @@ LOG_DIR="${REPO_ROOT}/.logs"
 
 RUN_HOUR="${RUN_HOUR:-9}"
 RUN_MINUTE="${RUN_MINUTE:-30}"
+
+if [[ -f "${REPO_ROOT}/.env.local" ]]; then
+  set -a
+  source "${REPO_ROOT}/.env.local"
+  set +a
+fi
+
 OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:11434/v1}"
 OPENAI_MODEL="${OPENAI_MODEL:-gpt-oss:20b}"
 OPENAI_API_MODE="${OPENAI_API_MODE:-chat}"

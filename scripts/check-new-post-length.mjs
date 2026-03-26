@@ -14,15 +14,44 @@ function stripFrontmatter(source) {
   return source.slice(endIndex + 4);
 }
 
-function countWords(markdown) {
-  return markdown
+function countWords(markdown, lang = "en") {
+  const text = markdown
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .filter(Boolean).length;
+    .trim();
+
+  const fallbackCount = () => text.split(" ").filter(Boolean).length;
+
+  // English words are space-delimited. Japanese/Arabic often aren't, so use
+  // Intl.Segmenter to avoid undercounting (which can incorrectly fail QA).
+  const segmentSupported =
+    lang !== "en" && typeof Intl !== "undefined" && Intl.Segmenter;
+
+  return !text
+    ? 0
+    : segmentSupported
+      ? (() => {
+          try {
+            const segmenter = new Intl.Segmenter(lang, { granularity: "word" });
+            return Array.from(segmenter.segment(text)).filter(
+              (seg) => seg?.isWordLike && String(seg.segment || "").trim(),
+            ).length;
+          } catch {
+            return fallbackCount();
+          }
+        })()
+      : fallbackCount();
+}
+
+function getLanguageFromPostFile(relativeFile) {
+  const file = String(relativeFile || "");
+  return file.endsWith("-ja.mdx")
+    ? "ja"
+    : file.endsWith("-ar.mdx")
+      ? "ar"
+      : "en";
 }
 
 function parseAddedPostFiles(diffOutput) {
@@ -56,7 +85,8 @@ async function main() {
     const absoluteFile = path.join(process.cwd(), relativeFile);
     const content = await fs.readFile(absoluteFile, "utf8");
     const body = stripFrontmatter(content);
-    const wordCount = countWords(body);
+    const lang = getLanguageFromPostFile(relativeFile);
+    const wordCount = countWords(body, lang);
 
     if (wordCount <= MIN_WORDS_EXCLUSIVE) {
       failures.push({

@@ -16,6 +16,29 @@ import { normalizeLang } from "@/lib/i18n";
 
 const siteUrl = "https://www.neowhisper.net";
 
+function flattenText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(flattenText).join("");
+  if (node && typeof node === "object" && "props" in node) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return flattenText((node as any).props?.children);
+  }
+  return "";
+}
+
+function headingToId(value: ReactNode): string {
+  const raw = flattenText(value).trim().toLowerCase();
+  const cleaned = raw
+    .replace(/[`"'’“”]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return cleaned || "section";
+}
+
 function getCategoryUrl(category: string, lang: string): string {
   const slug = buildCategorySlug(category);
   return `/category/${encodeURIComponent(slug)}?lang=${lang}`;
@@ -279,7 +302,18 @@ export default async function BlogPostTemplate({
                   source={content}
                   components={{
                     h2: (props) => (
-                      <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />
+                      <h2
+                        id={headingToId(props.children)}
+                        className="text-4xl font-bold mt-24 mb-16 scroll-mt-28"
+                        {...props}
+                      />
+                    ),
+                    h3: (props) => (
+                      <h3
+                        id={headingToId(props.children)}
+                        className="text-2xl font-bold mt-20 mb-10 scroll-mt-28"
+                        {...props}
+                      />
                     ),
                     hr: (props) => (
                       <hr

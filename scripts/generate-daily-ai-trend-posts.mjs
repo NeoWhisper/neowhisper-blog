@@ -18,7 +18,7 @@ const API_KEY = process.env.OPENAI_API_KEY || "sk-local";
 
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
-const MIN_WORDS_EXCLUSIVE = 700; // strictly more than 750 words per language for quality assurance
+const MIN_WORDS_EXCLUSIVE = 700; // strictly more than 700 words per language for quality assurance
 
 const FEEDS = [
   {
@@ -551,6 +551,8 @@ async function callResponsesEndpoint(systemPrompt, userPrompt) {
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.7,
+      // Ensure long-form output (we validate for 700+ words per language).
+      max_output_tokens: 2500,
       input: [
         {
           role: "system",
@@ -605,6 +607,8 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt) {
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.7,
+      // Ensure long-form output (we validate for 700+ words per language).
+      max_tokens: 2500,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -660,7 +664,7 @@ async function createDraftContent({ dateString, sources }) {
     "",
     "Create a tech trend brief meta-info and English version:",
     "- Theme: latest AI + IT practical trends for builders and product teams.",
-    "- English body must be at least 750-800 words.",
+    "- English body must be 900-1200 words (minimum 850).",
     "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
     "- Include 3-6 trend sections with deep technical analysis.",
     "- End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
@@ -684,7 +688,7 @@ async function createDraftContent({ dateString, sources }) {
   const jaSystemPrompt = "You are a senior Japanese tech editor. Return ONLY a valid JSON object.";
   const jaUserPrompt = [
     "Translate and adapt this technical blog post into Japanese.",
-    "- The Japanese body must be more than 750 words.",
+    "- The Japanese body must be 900-1200 words (minimum 850).",
     "- Maintain the exact same structure (H2 headings, takeaway table).",
     "- Tone: professional, technical, and natural for a Japanese audience.",
     "",
@@ -704,7 +708,7 @@ async function createDraftContent({ dateString, sources }) {
   const arSystemPrompt = "You are a senior Arabic tech editor. Return ONLY a valid JSON object.";
   const arUserPrompt = [
     "Translate and adapt this technical blog post into Arabic.",
-    "- The Arabic body must be more than 750 words.",
+    "- The Arabic body must be 900-1200 words (minimum 850).",
     "- Maintain the exact same structure (H2 headings, takeaway table).",
     "- Tone: professional, technical, and natural for an Arabic audience.",
     "",
@@ -735,15 +739,75 @@ function hasMarkdownTable(markdownBody) {
   return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
 }
 
-function countWords(markdownBody) {
-  return String(markdownBody || "")
+function headingToId(text) {
+  const raw = String(text || "").trim().toLowerCase();
+  const cleaned = raw
+    .replace(/[`"'’“”]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return cleaned || "section";
+}
+
+function buildTableOfContents(language, markdownBody) {
+  const body = String(markdownBody || "");
+  const items = body
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => /^##\s*[0-9٠-٩]+\.\s+/.test(line))
+    .map((line) => {
+      const title = line.replace(/^##\s*/, "");
+      return {
+        title,
+        id: headingToId(title),
+      };
+    });
+
+  if (items.length < 2) return "";
+
+  const heading =
+    language === "ja"
+      ? "## 目次"
+      : language === "ar"
+        ? "## المحتويات"
+        : "## Table of Contents";
+
+  const lines = items.map((item) => `- [${item.title}](#${item.id})`);
+  return [heading, "", ...lines, "", "---", ""].join("\n");
+}
+
+function countWords(markdownBody, lang = "en") {
+  const text = String(markdownBody || "")
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .filter(Boolean).length;
+    .trim();
+
+  const fallbackCount = () => text.split(" ").filter(Boolean).length;
+
+  // English words are space-delimited. Japanese/Arabic often aren't, so use
+  // Intl.Segmenter to avoid undercounting (which can incorrectly fail QA).
+  const segmentSupported =
+    lang !== "en" && typeof Intl !== "undefined" && Intl.Segmenter;
+
+  return !text
+    ? 0
+    : segmentSupported
+      ? (() => {
+          try {
+            const segmenter = new Intl.Segmenter(lang, { granularity: "word" });
+            return Array.from(segmenter.segment(text)).filter(
+              (seg) => seg?.isWordLike && String(seg.segment || "").trim(),
+            ).length;
+          } catch {
+            return fallbackCount();
+          }
+        })()
+      : fallbackCount();
 }
 
 function validateDraftContent(content) {
@@ -766,7 +830,7 @@ function validateDraftContent(content) {
     }
 
     const headingCount = countTrendHeadings(block.body);
-    const wordCount = countWords(block.body);
+    const wordCount = countWords(block.body, lang);
     if (headingCount < 3) {
       throw new Error(
         `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
@@ -801,8 +865,10 @@ function buildPostDocument({
   category,
   body,
   referencesSection,
+  language,
 }) {
   const normalizedBody = body.trim();
+  const toc = buildTableOfContents(language, normalizedBody);
   return [
     "---",
     `title: "${sanitizeFrontmatter(title, 120)}"`,
@@ -815,6 +881,7 @@ function buildPostDocument({
     '  picture: "/images/author.png"',
     "---",
     "",
+    toc,
     normalizedBody,
     "",
     "---",
@@ -918,6 +985,7 @@ async function main() {
         category: selectedCategory.nameEn,
         body: content.en.body,
         referencesSection: buildReferencesSection("en", selectedSources),
+        language: "en",
       }),
     },
     {
@@ -931,6 +999,7 @@ async function main() {
         category: selectedCategory.nameJa || selectedCategory.nameEn,
         body: content.ja.body,
         referencesSection: buildReferencesSection("ja", selectedSources),
+        language: "ja",
       }),
     },
     {
@@ -944,6 +1013,7 @@ async function main() {
         category: selectedCategory.nameAr || selectedCategory.nameEn,
         body: content.ar.body,
         referencesSection: buildReferencesSection("ar", selectedSources),
+        language: "ar",
       }),
     },
   ];

@@ -94,6 +94,30 @@ const FEEDS = [
     url: "https://www.zdnet.com/news/rss.xml",
   },
   {
+    name: "ITmedia (JP)",
+    url: "http://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml",
+  },
+  {
+    name: "ASCII.jp (JP)",
+    url: "https://ascii.jp/rss.xml",
+  },
+  {
+    name: "Impress Watch (JP)",
+    url: "https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf",
+  },
+  {
+    name: "Tech-WD (AR)",
+    url: "https://www.tech-wd.com/wd/feed/",
+  },
+  {
+    name: "Al Jazeera Tech (AR)",
+    url: "https://www.aljazeera.net/science-technology/rss/",
+  },
+  {
+    name: "Al Sharq Tech (AR)",
+    url: "https://www.al-sharq.com/rss/technology",
+  },
+  {
     name: "The Verge",
     url: "https://www.theverge.com/rss/index.xml",
   },

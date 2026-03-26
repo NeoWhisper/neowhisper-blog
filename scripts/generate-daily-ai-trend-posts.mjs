@@ -368,6 +368,46 @@ const ALLOWED_CATEGORY_SLUGS = new Set([
 const DEFAULT_CATEGORY_SLUG = "software-development";
 const DEFAULT_GENERATION_MAX_TOKENS = 5000;
 const JSON_REPAIR_MAX_ATTEMPTS = 2;
+const LENGTH_EXPANSION_MAX_ATTEMPTS = 2;
+const LANGUAGE_ORDER = ["en", "ja", "ar"];
+const LANGUAGE_LABELS = {
+  en: {
+    tocHeading: "## Table of Contents",
+    referencesHeading: "## References",
+    categoryNameKey: "nameEn",
+    fileSuffix: "",
+  },
+  ja: {
+    tocHeading: "## 目次",
+    referencesHeading: "## 参考リンク",
+    categoryNameKey: "nameJa",
+    fileSuffix: "-ja",
+  },
+  ar: {
+    tocHeading: "## المحتويات",
+    referencesHeading: "## المراجع",
+    categoryNameKey: "nameAr",
+    fileSuffix: "-ar",
+  },
+};
+const TRANSLATION_CONFIGS = [
+  {
+    lang: "ja",
+    logLabel: "Japanese",
+    systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Japanese.",
+    bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
+    tone: "- Tone: professional, technical, and natural for a Japanese audience.",
+  },
+  {
+    lang: "ar",
+    logLabel: "Arabic",
+    systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Arabic.",
+    bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
+    tone: "- Tone: professional, technical, and natural for an Arabic audience.",
+  },
+];
 
 function normalizeSearchText(value) {
   return String(value || "")
@@ -934,72 +974,66 @@ async function createDraftContent({ dateString, sources }) {
     originalUserPrompt: baseUserPrompt,
   });
 
-  // 2. Generate Japanese Content
-  console.log("[daily-trends] translating/adapting to Japanese...");
-  const jaSystemPrompt = "You are a senior Japanese tech editor. Return ONLY a valid JSON object.";
-  const jaUserPrompt = [
-    "Translate and adapt this technical blog post into Japanese.",
-    "- The Japanese body must be 900-1200 words (minimum 850).",
-    "- Maintain the exact same structure (H2 headings, takeaway table).",
-    "- Tone: professional, technical, and natural for a Japanese audience.",
-    "",
-    "Source (English):",
-    `Title: ${baseResult.en.title}`,
-    `Excerpt: ${baseResult.en.excerpt}`,
-    `Body: ${baseResult.en.body}`,
-    "",
-    "Output schema:",
-    '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-  ].join("\n");
+  const localizedContent = { en: baseResult.en };
+  const promptContextByLang = {
+    en: {
+      systemPrompt: baseSystemPrompt,
+      userPrompt: baseUserPrompt,
+    },
+  };
 
-  const jaRaw = await callAi(jaSystemPrompt, jaUserPrompt, {
-    maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-    temperature: 0.3,
-    responseFormat: { type: "json_object" },
-  });
-  const jaResult = await parseJsonWithRepair({
-    text: jaRaw,
-    label: "japanese translation",
-    schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-    originalSystemPrompt: jaSystemPrompt,
-    originalUserPrompt: jaUserPrompt,
-  });
+  for (const translation of TRANSLATION_CONFIGS) {
+    console.log(`[daily-trends] translating/adapting to ${translation.logLabel}...`);
+    const userPrompt = [
+      translation.instruction,
+      translation.bodyRequirement,
+      "- Maintain the exact same structure (H2 headings, takeaway table).",
+      translation.tone,
+      "",
+      "Source (English):",
+      `Title: ${baseResult.en.title}`,
+      `Excerpt: ${baseResult.en.excerpt}`,
+      `Body: ${baseResult.en.body}`,
+      "",
+      "Output schema:",
+      '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+    ].join("\n");
 
-  // 3. Generate Arabic Content
-  console.log("[daily-trends] translating/adapting to Arabic...");
-  const arSystemPrompt = "You are a senior Arabic tech editor. Return ONLY a valid JSON object.";
-  const arUserPrompt = [
-    "Translate and adapt this technical blog post into Arabic.",
-    "- The Arabic body must be 900-1200 words (minimum 850).",
-    "- Maintain the exact same structure (H2 headings, takeaway table).",
-    "- Tone: professional, technical, and natural for an Arabic audience.",
-    "",
-    "Source (English):",
-    `Title: ${baseResult.en.title}`,
-    `Excerpt: ${baseResult.en.excerpt}`,
-    `Body: ${baseResult.en.body}`,
-    "",
-    "Output schema:",
-    '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-  ].join("\n");
+    const raw = await callAi(translation.systemPrompt, userPrompt, {
+      maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
+      temperature: 0.3,
+      responseFormat: { type: "json_object" },
+    });
 
-  const arRaw = await callAi(arSystemPrompt, arUserPrompt, {
-    maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-    temperature: 0.3,
-    responseFormat: { type: "json_object" },
-  });
-  const arResult = await parseJsonWithRepair({
-    text: arRaw,
-    label: "arabic translation",
-    schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-    originalSystemPrompt: arSystemPrompt,
-    originalUserPrompt: arUserPrompt,
-  });
+    localizedContent[translation.lang] = await parseJsonWithRepair({
+      text: raw,
+      label: `${translation.logLabel.toLowerCase()} translation`,
+      schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+      originalSystemPrompt: translation.systemPrompt,
+      originalUserPrompt: userPrompt,
+    });
+    promptContextByLang[translation.lang] = {
+      systemPrompt: translation.systemPrompt,
+      userPrompt,
+    };
+  }
+
+  const expandedContentEntries = await Promise.all(
+    LANGUAGE_ORDER.map(async (lang) => [
+      lang,
+      await expandLanguageBlockIfNeeded({
+        lang,
+        block: localizedContent[lang],
+        systemPrompt: promptContextByLang[lang].systemPrompt,
+        sourcePrompt: promptContextByLang[lang].userPrompt,
+      }),
+    ]),
+  );
+  const expandedContent = Object.fromEntries(expandedContentEntries);
 
   return {
     ...baseResult,
-    ja: jaResult,
-    ar: arResult,
+    ...expandedContent,
   };
 }
 
@@ -1041,13 +1075,7 @@ function buildTableOfContents(language, markdownBody) {
 
   if (items.length < 2) return "";
 
-  const heading =
-    language === "ja"
-      ? "## 目次"
-      : language === "ar"
-        ? "## المحتويات"
-        : "## Table of Contents";
-
+  const heading = LANGUAGE_LABELS[language]?.tocHeading || LANGUAGE_LABELS.en.tocHeading;
   const lines = items.map((item) => `- [${item.title}](#${item.id})`);
   return [heading, "", ...lines, "", "---", ""].join("\n");
 }
@@ -1083,50 +1111,101 @@ function countWords(markdownBody, lang = "en") {
       : fallbackCount();
 }
 
-function validateDraftContent(content) {
-  const languages = ["en", "ja", "ar"];
+function validateLanguageBlock(lang, block) {
+  if (!block || typeof block !== "object") {
+    throw new Error(`Model output missing language block: ${lang}`);
+  }
 
-  for (const lang of languages) {
-    const block = content?.[lang];
-    if (!block || typeof block !== "object") {
-      throw new Error(`Model output missing language block: ${lang}`);
-    }
+  if (!String(block.title || "").trim()) {
+    throw new Error(`Model output missing ${lang}.title`);
+  }
+  if (!String(block.excerpt || "").trim()) {
+    throw new Error(`Model output missing ${lang}.excerpt`);
+  }
+  if (!String(block.body || "").trim()) {
+    throw new Error(`Model output missing ${lang}.body`);
+  }
 
-    if (!String(block.title || "").trim()) {
-      throw new Error(`Model output missing ${lang}.title`);
-    }
-    if (!String(block.excerpt || "").trim()) {
-      throw new Error(`Model output missing ${lang}.excerpt`);
-    }
-    if (!String(block.body || "").trim()) {
-      throw new Error(`Model output missing ${lang}.body`);
-    }
-
-    const headingCount = countTrendHeadings(block.body);
-    const wordCount = countWords(block.body, lang);
-    if (headingCount < 3) {
-      throw new Error(
-        `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
-      );
-    }
-    if (wordCount <= MIN_WORDS_EXCLUSIVE) {
-      throw new Error(
-        `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
-      );
-    }
-    if (!hasMarkdownTable(block.body)) {
-      throw new Error(`Model output for ${lang}.body is missing a markdown takeaway table.`);
-    }
+  const headingCount = countTrendHeadings(block.body);
+  const wordCount = countWords(block.body, lang);
+  if (headingCount < 3) {
+    throw new Error(
+      `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
+    );
+  }
+  if (wordCount <= MIN_WORDS_EXCLUSIVE) {
+    throw new Error(
+      `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
+    );
+  }
+  if (!hasMarkdownTable(block.body)) {
+    throw new Error(`Model output for ${lang}.body is missing a markdown takeaway table.`);
   }
 }
 
+function validateDraftContent(content) {
+  for (const lang of LANGUAGE_ORDER) {
+    validateLanguageBlock(lang, content?.[lang]);
+  }
+}
+
+async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePrompt }) {
+  let currentBlock = block;
+
+  for (let attempt = 0; attempt <= LENGTH_EXPANSION_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      validateLanguageBlock(lang, currentBlock);
+      return currentBlock;
+    } catch (error) {
+      if (attempt === LENGTH_EXPANSION_MAX_ATTEMPTS) {
+        throw error;
+      }
+
+      const currentWordCount = countWords(currentBlock?.body || "", lang);
+      console.log(
+        `[daily-trends] ${lang}: expanding under-length or invalid draft (attempt ${attempt + 1}/${LENGTH_EXPANSION_MAX_ATTEMPTS})...`,
+      );
+
+      const expandSystemPrompt = [
+        systemPrompt,
+        "You are revising an existing draft to satisfy structural and length requirements.",
+        "Return ONLY a valid JSON object.",
+      ].join("\n");
+
+      const expandUserPrompt = [
+        sourcePrompt,
+        "",
+        `The current ${lang} draft did not pass validation: ${error.message}`,
+        `Current estimated word count: ${currentWordCount}.`,
+        `Revise and expand it so the body is comfortably above ${MIN_WORDS_EXCLUSIVE} words while preserving the same topic and structure.`,
+        "Keep at least 3 `## 1.` style trend sections and end with the markdown takeaway table.",
+        "Strengthen analysis with more technical detail, practical implications, and actionable recommendations.",
+        "",
+        "Current draft JSON:",
+        JSON.stringify(currentBlock),
+      ].join("\n");
+
+      const expandedRaw = await callAi(expandSystemPrompt, expandUserPrompt, {
+        maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
+        temperature: 0.3,
+        responseFormat: { type: "json_object" },
+      });
+
+      currentBlock = await parseJsonWithRepair({
+        text: expandedRaw,
+        label: `${lang} expansion`,
+        schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+        originalSystemPrompt: expandSystemPrompt,
+        originalUserPrompt: expandUserPrompt,
+      });
+    }
+  }
+
+  return currentBlock;
+}
+
 function buildReferencesSection(language, sources) {
-  const heading =
-    language === "ja"
-      ? "## 参考リンク"
-      : language === "ar"
-        ? "## المراجع"
-        : "## References";
+  const heading = LANGUAGE_LABELS[language]?.referencesHeading || LANGUAGE_LABELS.en.referencesHeading;
   const lines = sources.map((source) => `- [${source.title}](${source.url})`);
   return [heading, "", ...lines].join("\n");
 }
@@ -1227,7 +1306,7 @@ async function main() {
     sources: selectedSources,
   });
 
-  if (!content || !content.en || !content.ja || !content.ar) {
+  if (!content || LANGUAGE_ORDER.some((lang) => !content[lang])) {
     throw new Error("Model output is missing required language blocks");
   }
   validateDraftContent(content);
@@ -1244,50 +1323,26 @@ async function main() {
     process.exit(0);
   }
 
-  const files = [
-    {
-      lang: "en",
-      path: path.join(POSTS_DIR, `${baseSlug}.mdx`),
-      category: selectedCategory.nameEn,
+  const files = LANGUAGE_ORDER.map((lang) => {
+    const languageMeta = LANGUAGE_LABELS[lang] || LANGUAGE_LABELS.en;
+    const category = selectedCategory[languageMeta.categoryNameKey] || selectedCategory.nameEn;
+    const localizedBlock = content[lang];
+
+    return {
+      lang,
+      path: path.join(POSTS_DIR, `${baseSlug}${languageMeta.fileSuffix}.mdx`),
+      category,
       body: buildPostDocument({
-        title: content.en.title,
-        excerpt: content.en.excerpt,
+        title: localizedBlock.title,
+        excerpt: localizedBlock.excerpt,
         dateString,
-        category: selectedCategory.nameEn,
-        body: content.en.body,
-        referencesSection: buildReferencesSection("en", selectedSources),
-        language: "en",
+        category,
+        body: localizedBlock.body,
+        referencesSection: buildReferencesSection(lang, selectedSources),
+        language: lang,
       }),
-    },
-    {
-      lang: "ja",
-      path: path.join(POSTS_DIR, `${baseSlug}-ja.mdx`),
-      category: selectedCategory.nameJa || selectedCategory.nameEn,
-      body: buildPostDocument({
-        title: content.ja.title,
-        excerpt: content.ja.excerpt,
-        dateString,
-        category: selectedCategory.nameJa || selectedCategory.nameEn,
-        body: content.ja.body,
-        referencesSection: buildReferencesSection("ja", selectedSources),
-        language: "ja",
-      }),
-    },
-    {
-      lang: "ar",
-      path: path.join(POSTS_DIR, `${baseSlug}-ar.mdx`),
-      category: selectedCategory.nameAr || selectedCategory.nameEn,
-      body: buildPostDocument({
-        title: content.ar.title,
-        excerpt: content.ar.excerpt,
-        dateString,
-        category: selectedCategory.nameAr || selectedCategory.nameEn,
-        body: content.ar.body,
-        referencesSection: buildReferencesSection("ar", selectedSources),
-        language: "ar",
-      }),
-    },
-  ];
+    };
+  });
 
   if (DRY_RUN) {
     console.log(`[daily-trends] dry run completed for slug: ${baseSlug}`);

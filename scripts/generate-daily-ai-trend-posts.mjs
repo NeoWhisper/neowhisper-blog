@@ -18,7 +18,7 @@ const API_KEY = process.env.OPENAI_API_KEY || "sk-local";
 
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
-const MIN_WORDS_EXCLUSIVE = 700; // strictly more than 700 words per language for quality assurance
+const MIN_WORDS_EXCLUSIVE = 700; // Rule: strictly more than 700 words
 
 const FEEDS = [
   {
@@ -32,86 +32,6 @@ const FEEDS = [
   {
     name: "NVIDIA Technical Blog",
     url: "https://developer.nvidia.com/blog/feed/",
-  },
-  {
-    name: "Hacker News (AI)",
-    url: "https://hnrss.org/newest?q=AI",
-  },
-  {
-    name: "TechCrunch (AI)",
-    url: "https://techcrunch.com/category/artificial-intelligence/feed/",
-  },
-  {
-    name: "AI News",
-    url: "https://www.artificialintelligence-news.com/feed/",
-  },
-  {
-    name: "Apple Developer News",
-    url: "https://developer.apple.com/news/rss/news.rss",
-  },
-  {
-    name: "Apple ML Research",
-    url: "https://machinelearning.apple.com/rss.xml",
-  },
-  {
-    name: "AWS Machine Learning",
-    url: "https://aws.amazon.com/blogs/machine-learning/feed/",
-  },
-  {
-    name: "React Blog",
-    url: "https://react.dev/rss.xml",
-  },
-  {
-    name: "Next.js Blog",
-    url: "https://nextjs.org/feed.xml",
-  },
-  {
-    name: "Vercel Blog",
-    url: "https://vercel.com/atom",
-  },
-  {
-    name: "Tailwind CSS Blog",
-    url: "https://tailwindcss.com/blog",
-  },
-  {
-    name: "InfoQ (AI & Dev)",
-    url: "https://www.infoq.com/feed/",
-  },
-  {
-    name: "InfoWorld ML",
-    url: "https://www.infoworld.com/artificial-intelligence/",
-  },
-  {
-    name: "Ars Technica (Biz & IT)",
-    url: "https://feeds.arstechnica.com/arstechnica/index",
-  },
-  {
-    name: "ZDNet (AI & Tech)",
-    url: "https://www.zdnet.com/news/rss.xml",
-  },
-  {
-    name: "ITmedia (JP)",
-    url: "http://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml",
-  },
-  {
-    name: "ASCII.jp (JP)",
-    url: "https://ascii.jp/rss.xml",
-  },
-  {
-    name: "Impress Watch (JP)",
-    url: "https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf",
-  },
-  {
-    name: "Tech-WD (AR)",
-    url: "https://www.tech-wd.com/feed",
-  },
-  {
-    name: "AITNews (AR)",
-    url: "https://aitnews.com/feed/",
-  },
-  {
-    name: "Unlimit-Tech (AR)",
-    url: "https://www.unlimit-tech.com/feed",
   },
   {
     name: "The Verge",
@@ -142,53 +62,6 @@ const TREND_KEYWORDS = [
   "gpu",
   "inference",
   "api",
-  "react",
-  "next.js",
-  "nextjs",
-  "frontend",
-  "typescript",
-  "javascript",
-  "tailwind",
-  "node",
-  "vercel",
-  "web dev",
-  "architecture",
-  "devops",
-  "enterprise",
-  "infrastructure",
-  "database",
-  "scaling",
-  "saas",
-  "serverless",
-];
-
-const ART_KEYWORDS = [
-  "design",
-  "ux",
-  "ui",
-  "visual",
-  "illustration",
-  "typography",
-  "creative",
-  "art",
-];
-
-const POLITICS_KEYWORDS = [
-  "election",
-  "president",
-  "minister",
-  "parliament",
-  "senate",
-  "government",
-  "congress",
-  "geopolitics",
-  "war",
-  "conflict",
-  "diplomatic",
-  "sanction",
-  "policy debate",
-  "campaign",
-  "voting",
 ];
 
 const CATEGORY_DEFINITIONS = [
@@ -198,98 +71,6 @@ const CATEGORY_DEFINITIONS = [
     nameJa: "Software Development",
     nameAr: "Software Development",
     keywords: ["developer", "engineering", "software", "coding", "codebase", "framework", "sdk", "api"],
-  },
-  {
-    slug: "ai-ml",
-    nameEn: "AI & Machine Learning",
-    nameJa: "AI・機械学習",
-    nameAr: "الذكاء الاصطناعي وتعلم الآلة",
-    keywords: [
-      "ai",
-      "artificial intelligence",
-      "machine learning",
-      "ml",
-      "llm",
-      "agent",
-      "agentic",
-      "inference",
-      "training",
-      "evaluation",
-      "prompt",
-      "rag",
-      "vector",
-      "embedding",
-    ],
-  },
-  {
-    slug: "cloud-devops",
-    nameEn: "Cloud & DevOps",
-    nameJa: "クラウド・DevOps",
-    nameAr: "السحابة و DevOps",
-    keywords: [
-      "cloud",
-      "devops",
-      "kubernetes",
-      "k8s",
-      "docker",
-      "container",
-      "serverless",
-      "terraform",
-      "iac",
-      "ci/cd",
-      "pipeline",
-      "observability",
-      "logging",
-      "metrics",
-      "tracing",
-      "sre",
-      "reliability",
-    ],
-  },
-  {
-    slug: "cybersecurity",
-    nameEn: "Cybersecurity",
-    nameJa: "サイバーセキュリティ",
-    nameAr: "الأمن السيبراني",
-    keywords: [
-      "security",
-      "cybersecurity",
-      "vulnerability",
-      "cve",
-      "exploit",
-      "auth",
-      "oauth",
-      "passkey",
-      "mfa",
-      "zero trust",
-      "csp",
-      "xss",
-      "csrf",
-      "ssrf",
-      "supply chain",
-    ],
-  },
-  {
-    slug: "data-infrastructure",
-    nameEn: "Data & Infrastructure",
-    nameJa: "データ・インフラ",
-    nameAr: "البيانات والبنية التحتية",
-    keywords: [
-      "database",
-      "postgres",
-      "mysql",
-      "redis",
-      "queue",
-      "kafka",
-      "etl",
-      "warehouse",
-      "lakehouse",
-      "index",
-      "scaling",
-      "latency",
-      "throughput",
-      "infrastructure",
-    ],
   },
   {
     slug: "game-development",
@@ -353,79 +134,7 @@ const CATEGORY_DEFINITIONS = [
 ];
 
 const CATEGORY_MAP = new Map(CATEGORY_DEFINITIONS.map((category) => [category.slug, category]));
-const ALLOWED_CATEGORY_SLUGS = new Set([
-  "software-development",
-  "ai-ml",
-  "cloud-devops",
-  "cybersecurity",
-  "data-infrastructure",
-  "game-development",
-  "next.js",
-  "typescript",
-  "tech-tips",
-  "art-design",
-]);
-const DEFAULT_CATEGORY_SLUG = "software-development";
-const DEFAULT_GENERATION_MAX_TOKENS = 5000;
-const JSON_REPAIR_MAX_ATTEMPTS = 2;
-const LENGTH_EXPANSION_MAX_ATTEMPTS = 2;
-const MODEL_FETCH_RETRY_ATTEMPTS = 3;
-const MODEL_FETCH_RETRY_DELAY_MS = 1200;
-const TITLE_POLISH_MAX_ATTEMPTS = 1;
-const LANGUAGE_ORDER = ["en", "ja", "ar"];
-const LANGUAGE_LABELS = {
-  en: {
-    tocHeading: "## Table of Contents",
-    referencesHeading: "## References",
-    categoryNameKey: "nameEn",
-    fileSuffix: "",
-  },
-  ja: {
-    tocHeading: "## 目次",
-    referencesHeading: "## 参考リンク",
-    categoryNameKey: "nameJa",
-    fileSuffix: "-ja",
-  },
-  ar: {
-    tocHeading: "## المحتويات",
-    referencesHeading: "## المراجع",
-    categoryNameKey: "nameAr",
-    fileSuffix: "-ar",
-  },
-};
-const TRANSLATION_CONFIGS = [
-  {
-    lang: "ja",
-    logLabel: "Japanese",
-    systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Japanese.",
-    bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for a Japanese audience. Avoid stiff literal translation.",
-  },
-  {
-    lang: "ar",
-    logLabel: "Arabic",
-    systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Arabic.",
-    bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
-    tone:
-      "- Tone: professional, technical, and natural for an Arabic audience in fluent Modern Standard Arabic. Avoid literal translation, awkward compounds, and title constructions that mirror English punctuation or '+' / '/' patterns.",
-  },
-];
-const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
-const API_CALLERS = {
-  responses: callResponsesEndpoint,
-  chat: callChatCompletionsEndpoint,
-};
-const HTML_FEED_EXTRACTORS = {
-  "Tailwind CSS Blog": extractTailwindBlogItems,
-  "InfoWorld ML": extractInfoWorldItems,
-};
-const TITLE_POLISH_RULES = {
-  en: "Rewrite the title and excerpt to feel sharper and more specific. Avoid generic trend-roundup phrasing.",
-  ja: "Rewrite the title and excerpt in natural Japanese tech-editor style. Avoid literal translation and generic roundup phrasing.",
-  ar: "Rewrite the title and excerpt in fluent Modern Standard Arabic. Avoid literal translation, awkward wording, and generic roundup phrasing.",
-};
+const DEFAULT_CATEGORY_SLUG = "product-strategy";
 
 function normalizeSearchText(value) {
   return String(value || "")
@@ -458,17 +167,18 @@ function scoreCategoryFromText(text) {
 
 function pickCategory(content, sources) {
   const rawSlug = String(content?.categorySlug || "").trim().toLowerCase();
-  if (CATEGORY_MAP.has(rawSlug) && ALLOWED_CATEGORY_SLUGS.has(rawSlug)) {
+  if (CATEGORY_MAP.has(rawSlug)) {
     return CATEGORY_MAP.get(rawSlug);
   }
 
-  // Category should be driven by the source mix, not by the model's already-generated
-  // title/body, otherwise generic phrasing can create a self-reinforcing category loop.
-  const sourceAggregateText = sources
-    .map((source) => `${source.title} ${source.summary}`)
-    .join("\n");
-  const heuristicCategory = scoreCategoryFromText(sourceAggregateText);
-  if (heuristicCategory && ALLOWED_CATEGORY_SLUGS.has(heuristicCategory.slug)) {
+  const aggregateText = [
+    content?.en?.title || "",
+    content?.en?.excerpt || "",
+    content?.en?.body || "",
+    ...sources.map((source) => `${source.title} ${source.summary}`),
+  ].join("\n");
+  const heuristicCategory = scoreCategoryFromText(aggregateText);
+  if (heuristicCategory) {
     return heuristicCategory;
   }
   return CATEGORY_MAP.get(DEFAULT_CATEGORY_SLUG);
@@ -534,12 +244,12 @@ function parseDate(value) {
 
 function parseRssItems(xml, feedName) {
   const items = [];
-  for (const match of xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)) {
+  for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
     const item = match[1];
     const title = extractTag(item, "title");
     const link = normalizeUrl(extractTag(item, "link"));
     const description = extractTag(item, "description");
-    const pubDate = extractTag(item, "pubDate") || extractTag(item, "dc:date");
+    const pubDate = extractTag(item, "pubDate");
     if (!title || !link) continue;
     items.push({
       feed: feedName,
@@ -574,48 +284,6 @@ function parseAtomEntries(xml, feedName) {
   return entries;
 }
 
-function extractTailwindBlogItems(html, feedName) {
-  const items = [];
-  for (const match of html.matchAll(/<a[^>]+href="(\/blog\/[^"#?]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
-    const link = normalizeUrl(`https://tailwindcss.com${decodeEntities(match[1])}`);
-    const title = stripHtml(match[2]);
-    if (!title || !link || /^(blog|read more)$/i.test(title)) continue;
-    items.push({
-      feed: feedName,
-      title,
-      link,
-      description: "",
-      publishedAt: "",
-      publishedTimestamp: 0,
-    });
-  }
-  return dedupeByLink(items);
-}
-
-function extractInfoWorldItems(html, feedName) {
-  const items = [];
-  for (const match of html.matchAll(/<a[^>]+href="(https:\/\/www\.infoworld\.com\/article\/[^"?#]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
-    const link = normalizeUrl(decodeEntities(match[1]));
-    const title = stripHtml(match[2]);
-    if (!title || !link) continue;
-    items.push({
-      feed: feedName,
-      title,
-      link,
-      description: "",
-      publishedAt: "",
-      publishedTimestamp: 0,
-    });
-  }
-  return dedupeByLink(items);
-}
-
-function parseHtmlFeed(html, feed) {
-  const extractor = HTML_FEED_EXTRACTORS[feed.name];
-  if (!extractor) return [];
-  return extractor(html, feed.name);
-}
-
 async function fetchFeed(feed) {
   const response = await fetch(feed.url, {
     headers: {
@@ -631,8 +299,7 @@ async function fetchFeed(feed) {
   const xml = await response.text();
   const rssItems = parseRssItems(xml, feed.name);
   const atomEntries = parseAtomEntries(xml, feed.name);
-  const htmlItems = parseHtmlFeed(xml, feed);
-  const all = [...rssItems, ...atomEntries, ...htmlItems];
+  const all = [...rssItems, ...atomEntries];
 
   if (all.length === 0) {
     throw new Error(`${feed.name} returned no parseable items`);
@@ -644,21 +311,6 @@ async function fetchFeed(feed) {
 function hasTrendKeyword(text) {
   const haystack = text.toLowerCase();
   return TREND_KEYWORDS.some((keyword) => haystack.includes(keyword));
-}
-
-function hasArtKeyword(text) {
-  const haystack = text.toLowerCase();
-  return ART_KEYWORDS.some((keyword) => haystack.includes(keyword));
-}
-
-function hasPoliticsKeyword(text) {
-  const haystack = text.toLowerCase();
-  return POLITICS_KEYWORDS.some((keyword) => haystack.includes(keyword));
-}
-
-function isAllowedTopicItem(item) {
-  const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
-  return !hasPoliticsKeyword(text) && (hasTrendKeyword(text) || hasArtKeyword(text));
 }
 
 function dedupeByLink(items) {
@@ -713,131 +365,15 @@ function slugify(value) {
 }
 
 function ensureJson(text) {
-  const raw = String(text || "").trim();
-
-  const tryParse = (candidate) => {
-    const value = String(candidate || "").trim();
-    if (!value) return null;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  };
-
-  const stripCodeFences = (value) => {
-    const s = String(value || "").trim();
-    const fenced = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    return fenced ? fenced[1].trim() : s;
-  };
-
-  const extractObjectSlice = (value) => {
-    const s = String(value || "");
-    const firstBrace = s.indexOf("{");
-    const lastBrace = s.lastIndexOf("}");
-    return firstBrace >= 0 && lastBrace > firstBrace ? s.slice(firstBrace, lastBrace + 1) : "";
-  };
-
-  const repairCommonJsonIssues = (value) => {
-    const s = String(value || "");
-    // Remove trailing commas: { "a": 1, } or [1,2,]
-    return s.replace(/,\s*([}\]])/g, "$1");
-  };
-
-  const attemptOrder = [
-    raw,
-    stripCodeFences(raw),
-    extractObjectSlice(raw),
-    extractObjectSlice(stripCodeFences(raw)),
-    repairCommonJsonIssues(raw),
-    repairCommonJsonIssues(stripCodeFences(raw)),
-    repairCommonJsonIssues(extractObjectSlice(raw)),
-    repairCommonJsonIssues(extractObjectSlice(stripCodeFences(raw))),
-  ];
-
-  for (const attempt of attemptOrder) {
-    const parsed = tryParse(attempt);
-    if (parsed && typeof parsed === "object") return parsed;
-  }
-
-  const preview = raw.replace(/\s+/g, " ").slice(0, 240);
-  throw new Error(`Model response is not valid JSON. Preview: ${preview}`);
-}
-
-function needsTitlePolish(lang, title) {
-  const value = String(title || "").trim().toLowerCase();
-  if (!value) return true;
-
-  const patternMap = {
-    en: [
-      /^(latest|practical)\b/,
-      /\bai\s*[+&/]\s*it\b/,
-      /\btrends?\b.*\b20\d{2}\b/,
-    ],
-    ja: [
-      /^最新/,
-      /トレンド/,
-      /ai\s*[+＆/&]\s*it/i,
-    ],
-    ar: [
-      /اتجاهات/,
-      /أحدث/,
-      /[+/]/,
-    ],
-  };
-
-  const patterns = patternMap[lang] || patternMap.en;
-  return patterns.some((pattern) => pattern.test(value));
-}
-
-async function parseJsonWithRepair({
-  text,
-  label,
-  schemaDescription,
-  originalSystemPrompt,
-  originalUserPrompt,
-}) {
   try {
-    return ensureJson(text);
-  } catch (initialError) {
-    let lastError = initialError;
-
-    for (let attempt = 1; attempt <= JSON_REPAIR_MAX_ATTEMPTS; attempt += 1) {
-      console.log(`[daily-trends] ${label}: repairing malformed JSON (attempt ${attempt}/${JSON_REPAIR_MAX_ATTEMPTS})...`);
-      const repairSystemPrompt = [
-        "You repair malformed JSON generated by another model.",
-        "Return ONLY a valid JSON object.",
-        "Do not add commentary or markdown fences.",
-      ].join("\n");
-
-      const repairUserPrompt = [
-        `Repair this malformed JSON into the required schema: ${schemaDescription}`,
-        "Preserve the original meaning and markdown body content.",
-        "If the content appears truncated, finish the JSON cleanly using the provided source prompts as guidance.",
-        "",
-        "Original system prompt:",
-        originalSystemPrompt,
-        "",
-        "Original user prompt:",
-        originalUserPrompt,
-        "",
-        "Malformed model output:",
-        text,
-      ].join("\n");
-
-      try {
-        const repairedText = await callAi(repairSystemPrompt, repairUserPrompt, {
-          maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-          temperature: 0.2,
-          responseFormat: { type: "json_object" },
-        });
-        return ensureJson(repairedText);
-      } catch (repairError) {
-        lastError = repairError;
-      }
+    return JSON.parse(text);
+  } catch {
+    const firstBrace = text.indexOf("{");
+    const lastBrace = text.lastIndexOf("}");
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      return JSON.parse(text.slice(firstBrace, lastBrace + 1));
     }
-
-    throw new Error(`[${label}] ${lastError?.message || initialError.message}`);
+    throw new Error("Model response is not valid JSON");
   }
 }
 
@@ -885,15 +421,6 @@ function getAuthHeaders() {
   };
 }
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function isTransientModelFetchError(error) {
-  const message = String(error?.message || "").toLowerCase();
-  return message.includes("fetch failed") || message.includes("econnreset") || message.includes("socket hang up");
-}
-
 function shouldFallbackToChat(errorMessage, statusCode) {
   if ([400, 404, 405, 415, 422, 501].includes(statusCode)) {
     return true;
@@ -907,26 +434,13 @@ function shouldFallbackToChat(errorMessage, statusCode) {
   );
 }
 
-function getApiCallChain() {
-  const primaryCaller = API_CALLERS[API_MODE];
-  if (primaryCaller) {
-    return [primaryCaller];
-  }
-  return [API_CALLERS.responses, API_CALLERS.chat];
-}
-
-async function callResponsesEndpoint(systemPrompt, userPrompt, options = {}) {
-  const {
-    maxTokens = DEFAULT_GENERATION_MAX_TOKENS,
-    temperature = 0.7,
-  } = options;
+async function callResponsesEndpoint(systemPrompt, userPrompt) {
   const response = await fetch(`${API_BASE_URL}/responses`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({
       model: MODEL,
-      temperature,
-      max_output_tokens: maxTokens,
+      temperature: 0.7,
       input: [
         {
           role: "system",
@@ -974,24 +488,17 @@ function extractChatContent(payload) {
   return "";
 }
 
-async function callChatCompletionsEndpoint(systemPrompt, userPrompt, options = {}) {
-  const {
-    maxTokens = DEFAULT_GENERATION_MAX_TOKENS,
-    temperature = 0.7,
-    responseFormat = { type: "json_object" },
-  } = options;
+async function callChatCompletionsEndpoint(systemPrompt, userPrompt) {
   const response = await fetch(`${API_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({
       model: MODEL,
-      temperature,
-      max_tokens: maxTokens,
+      temperature: 0.7,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      response_format: responseFormat,
     }),
   });
 
@@ -1008,157 +515,71 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt, options = {
   return outputText;
 }
 
-async function callAi(systemPrompt, userPrompt, options = {}) {
-  let lastError;
-
-  for (let attempt = 1; attempt <= MODEL_FETCH_RETRY_ATTEMPTS; attempt += 1) {
-    try {
-      const callChain = getApiCallChain();
-      for (let index = 0; index < callChain.length; index += 1) {
-        const caller = callChain[index];
-        try {
-          return await caller(systemPrompt, userPrompt, options);
-        } catch (error) {
-          const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
-          const canTryNextCaller = index < callChain.length - 1;
-          if (!canTryNextCaller || !shouldFallbackToChat(error?.message, statusCode)) {
-            throw error;
-          }
-        }
-      }
-    } catch (error) {
-      lastError = error;
-      if (!isTransientModelFetchError(error) || attempt === MODEL_FETCH_RETRY_ATTEMPTS) {
-        throw error;
-      }
-      console.warn(
-        `[daily-trends] model request failed (${error.message}); retrying ${attempt}/${MODEL_FETCH_RETRY_ATTEMPTS - 1}...`,
-      );
-      await delay(MODEL_FETCH_RETRY_DELAY_MS * attempt);
-    }
-  }
-
-  throw lastError;
-}
-
 async function createDraftContent({ dateString, sources }) {
-  const allowedCategoryList = CATEGORY_DEFINITIONS.filter((category) =>
-    ALLOWED_CATEGORY_SLUGS.has(category.slug),
-  )
-    .map((category) => category.slug)
-    .join(", ");
-
-  // 1. Generate Metadata and English Content
-  console.log("[daily-trends] generating base metadata and English content...");
-  const baseSystemPrompt = [
-    "You are a senior tech editor.",
-    "Return ONLY a valid JSON object.",
+  const allowedCategoryList = CATEGORY_DEFINITIONS.map((category) => category.slug).join(", ");
+  const systemPrompt = [
+    "You are a senior multilingual tech editor.",
+    "Write high-trust, human-sounding blog content in English, Japanese, and Arabic.",
+    "Do not invent facts or URLs. Use only the provided source list.",
+    "No emojis. No hype. No marketing buzzwords.",
+    "Keep tone practical, modern, and confident.",
+    "Return JSON only.",
   ].join("\n");
 
-  const baseUserPrompt = [
+  const userPrompt = [
     `Date: ${dateString}`,
     TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
     "",
-    "Create a tech trend brief meta-info and English version:",
-    "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
-    "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
-    "- The title must be specific, vivid, and publication-ready, not a generic template.",
-    "- Avoid bland openings like 'Latest', 'Practical', or 'AI & IT Trends' unless genuinely necessary.",
-    "- Prefer a concrete angle, tension, or consequence over a broad category label.",
-    "- English body must be 900-1200 words (minimum 850).",
-    "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
-    "- Include 3-6 trend sections with deep technical analysis.",
-    "- End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
-    `- Pick exactly one category slug from: ${allowedCategoryList}.`,
+    "Create one multilingual trend brief with these requirements:",
+    "- Theme: latest AI + IT practical trends for builders and product teams.",
+    "- Provide EN/JA/AR versions aligned in meaning (not literal translation).",
+    "- Each body must be more than 700 words.",
+    "- Use markdown H2 headings for trend sections with this pattern: `## 1. Trend name`.",
+    "- Include 3-6 trend sections, each with exact dates and concrete product/team impact.",
+    "- End with a Takeaways section containing a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
+    "- Do not use a bullet list instead of the takeaway table.",
+    "- Include exact dates when mentioning events.",
+    "- Do not include a references section; it will be appended automatically.",
+    `- Pick exactly one category slug from this list: ${allowedCategoryList}.`,
     "",
     "Output schema:",
     "{",
-    '  "categorySlug": "...",',
+    `  "categorySlug": "one of: ${allowedCategoryList}",`,
     '  "slugSuffix": "3-5 ascii words, lowercase, hyphen-separated",',
-    '  "en": { "title": "...", "excerpt": "...", "body": "markdown" }',
+    '  "en": { "title": "...", "excerpt": "...", "body": "markdown" },',
+    '  "ja": { "title": "...", "excerpt": "...", "body": "markdown" },',
+    '  "ar": { "title": "...", "excerpt": "...", "body": "markdown" }',
     "}",
     "",
-    "Sources:",
-    ...sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title} | ${s.url}\nSummary: ${s.summary}`),
+    "Allowed source list:",
+    ...sources.map(
+      (source, index) =>
+        `${index + 1}. [${source.source}] ${source.title} | ${source.publishedAt} | ${source.url}\nSummary: ${source.summary}`,
+    ),
   ].join("\n");
 
-  const baseRaw = await callAi(baseSystemPrompt, baseUserPrompt, {
-    maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-    temperature: 0.5,
-    responseFormat: { type: "json_object" },
-  });
-  const baseResult = await parseJsonWithRepair({
-    text: baseRaw,
-    label: "base generation",
-    schemaDescription: '{ "categorySlug": "...", "slugSuffix": "...", "en": { "title": "...", "excerpt": "...", "body": "markdown" } }',
-    originalSystemPrompt: baseSystemPrompt,
-    originalUserPrompt: baseUserPrompt,
-  });
+  let outputText = "";
 
-  const localizedContent = { en: baseResult.en };
-  const promptContextByLang = {
-    en: {
-      systemPrompt: baseSystemPrompt,
-      userPrompt: baseUserPrompt,
-    },
-  };
-
-  for (const translation of TRANSLATION_CONFIGS) {
-    console.log(`[daily-trends] translating/adapting to ${translation.logLabel}...`);
-    const userPrompt = [
-      translation.instruction,
-      translation.bodyRequirement,
-      "- Maintain the exact same structure (H2 headings, takeaway table).",
-      translation.tone,
-      "",
-      "Source (English):",
-      `Title: ${baseResult.en.title}`,
-      `Excerpt: ${baseResult.en.excerpt}`,
-      `Body: ${baseResult.en.body}`,
-      "",
-      "Output schema:",
-      '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-    ].join("\n");
-
-    const raw = await callAi(translation.systemPrompt, userPrompt, {
-      maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-      temperature: 0.3,
-      responseFormat: { type: "json_object" },
-    });
-
-    localizedContent[translation.lang] = await parseJsonWithRepair({
-      text: raw,
-      label: `${translation.logLabel.toLowerCase()} translation`,
-      schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-      originalSystemPrompt: translation.systemPrompt,
-      originalUserPrompt: userPrompt,
-    });
-    promptContextByLang[translation.lang] = {
-      systemPrompt: translation.systemPrompt,
-      userPrompt,
-    };
+  if (API_MODE === "responses") {
+    outputText = await callResponsesEndpoint(systemPrompt, userPrompt);
+  } else if (API_MODE === "chat") {
+    outputText = await callChatCompletionsEndpoint(systemPrompt, userPrompt);
+  } else {
+    try {
+      outputText = await callResponsesEndpoint(systemPrompt, userPrompt);
+    } catch (error) {
+      const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
+      if (!shouldFallbackToChat(error?.message, statusCode)) {
+        throw error;
+      }
+      console.warn(
+        `[daily-trends] /responses unavailable on ${API_BASE_URL}; falling back to /chat/completions`,
+      );
+      outputText = await callChatCompletionsEndpoint(systemPrompt, userPrompt);
+    }
   }
 
-  const expandedContent = {};
-  for (const lang of LANGUAGE_ORDER) {
-    const expandedBlock = await expandLanguageBlockIfNeeded({
-      lang,
-      block: localizedContent[lang],
-      systemPrompt: promptContextByLang[lang].systemPrompt,
-      sourcePrompt: promptContextByLang[lang].userPrompt,
-    });
-    expandedContent[lang] = await polishLocalizedMetadataIfNeeded({
-      lang,
-      block: expandedBlock,
-      systemPrompt: promptContextByLang[lang].systemPrompt,
-      sourcePrompt: promptContextByLang[lang].userPrompt,
-    });
-  }
-
-  return {
-    ...baseResult,
-    ...expandedContent,
-  };
+  return ensureJson(outputText);
 }
 
 function countTrendHeadings(markdownBody) {
@@ -1170,212 +591,61 @@ function hasMarkdownTable(markdownBody) {
   return /^\|.+\|\s*$/m.test(body) && /^\|[\s:\-|]+\|\s*$/m.test(body);
 }
 
-function headingToId(text) {
-  const raw = String(text || "").trim().toLowerCase();
-  const cleaned = raw
-    .replace(/[`"'’“”]/g, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\s/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  return cleaned || "section";
-}
-
-function buildTableOfContents(language, markdownBody) {
-  const body = String(markdownBody || "");
-  const items = body
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => /^##\s*[0-9٠-٩]+\.\s+/.test(line))
-    .map((line) => {
-      const title = line.replace(/^##\s*/, "");
-      return {
-        title,
-        id: headingToId(title),
-      };
-    });
-
-  if (items.length < 2) return "";
-
-  const heading = LANGUAGE_LABELS[language]?.tocHeading || LANGUAGE_LABELS.en.tocHeading;
-  const lines = items.map((item) => `- [${item.title}](#${item.id})`);
-  return [heading, "", ...lines, "", "---", ""].join("\n");
-}
-
-function countWords(markdownBody, lang = "en") {
-  const text = String(markdownBody || "")
+function countWords(markdownBody) {
+  return String(markdownBody || "")
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
-    .trim();
-
-  const fallbackCount = () => text.split(" ").filter(Boolean).length;
-
-  // English words are space-delimited. Japanese/Arabic often aren't, so use
-  // Intl.Segmenter to avoid undercounting (which can incorrectly fail QA).
-  const segmentSupported =
-    !LANGUAGE_SEGMENTER_EXCLUSIONS.has(lang) && typeof Intl !== "undefined" && Intl.Segmenter;
-
-  return !text
-    ? 0
-    : segmentSupported
-      ? (() => {
-          try {
-            const segmenter = new Intl.Segmenter(lang, { granularity: "word" });
-            return Array.from(segmenter.segment(text)).filter(
-              (seg) => seg?.isWordLike && String(seg.segment || "").trim(),
-            ).length;
-          } catch {
-            return fallbackCount();
-          }
-        })()
-      : fallbackCount();
-}
-
-function validateLanguageBlock(lang, block) {
-  if (!block || typeof block !== "object") {
-    throw new Error(`Model output missing language block: ${lang}`);
-  }
-
-  if (!String(block.title || "").trim()) {
-    throw new Error(`Model output missing ${lang}.title`);
-  }
-  if (!String(block.excerpt || "").trim()) {
-    throw new Error(`Model output missing ${lang}.excerpt`);
-  }
-  if (!String(block.body || "").trim()) {
-    throw new Error(`Model output missing ${lang}.body`);
-  }
-
-  const headingCount = countTrendHeadings(block.body);
-  const wordCount = countWords(block.body, lang);
-  if (headingCount < 3) {
-    throw new Error(
-      `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
-    );
-  }
-  if (wordCount <= MIN_WORDS_EXCLUSIVE) {
-    throw new Error(
-      `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
-    );
-  }
-  if (!hasMarkdownTable(block.body)) {
-    throw new Error(`Model output for ${lang}.body is missing a markdown takeaway table.`);
-  }
+    .trim()
+    .split(" ")
+    .filter(Boolean).length;
 }
 
 function validateDraftContent(content) {
-  for (const lang of LANGUAGE_ORDER) {
-    validateLanguageBlock(lang, content?.[lang]);
-  }
-}
+  const languages = ["en", "ja", "ar"];
 
-async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePrompt }) {
-  let currentBlock = block;
+  for (const lang of languages) {
+    const block = content?.[lang];
+    if (!block || typeof block !== "object") {
+      throw new Error(`Model output missing language block: ${lang}`);
+    }
 
-  for (let attempt = 0; attempt <= LENGTH_EXPANSION_MAX_ATTEMPTS; attempt += 1) {
-    try {
-      validateLanguageBlock(lang, currentBlock);
-      return currentBlock;
-    } catch (error) {
-      if (attempt === LENGTH_EXPANSION_MAX_ATTEMPTS) {
-        throw error;
-      }
+    if (!String(block.title || "").trim()) {
+      throw new Error(`Model output missing ${lang}.title`);
+    }
+    if (!String(block.excerpt || "").trim()) {
+      throw new Error(`Model output missing ${lang}.excerpt`);
+    }
+    if (!String(block.body || "").trim()) {
+      throw new Error(`Model output missing ${lang}.body`);
+    }
 
-      const currentWordCount = countWords(currentBlock?.body || "", lang);
-      console.log(
-        `[daily-trends] ${lang}: expanding under-length or invalid draft (attempt ${attempt + 1}/${LENGTH_EXPANSION_MAX_ATTEMPTS})...`,
+    const headingCount = countTrendHeadings(block.body);
+    const wordCount = countWords(block.body);
+    if (headingCount < 3) {
+      throw new Error(
+        `Model output for ${lang}.body has ${headingCount} trend headings; expected at least 3 with '## 1.' style.`,
       );
-
-      const expandSystemPrompt = [
-        systemPrompt,
-        "You are revising an existing draft to satisfy structural and length requirements.",
-        "Return ONLY a valid JSON object.",
-      ].join("\n");
-
-      const expandUserPrompt = [
-        sourcePrompt,
-        "",
-        `The current ${lang} draft did not pass validation: ${error.message}`,
-        `Current estimated word count: ${currentWordCount}.`,
-        `Revise and expand it so the body is comfortably above ${MIN_WORDS_EXCLUSIVE} words while preserving the same topic and structure.`,
-        "Keep at least 3 `## 1.` style trend sections and end with the markdown takeaway table.",
-        "Strengthen analysis with more technical detail, practical implications, and actionable recommendations.",
-        "",
-        "Current draft JSON:",
-        JSON.stringify(currentBlock),
-      ].join("\n");
-
-      const expandedRaw = await callAi(expandSystemPrompt, expandUserPrompt, {
-        maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-        temperature: 0.3,
-        responseFormat: { type: "json_object" },
-      });
-
-      currentBlock = await parseJsonWithRepair({
-        text: expandedRaw,
-        label: `${lang} expansion`,
-        schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-        originalSystemPrompt: expandSystemPrompt,
-        originalUserPrompt: expandUserPrompt,
-      });
+    }
+    if (wordCount <= MIN_WORDS_EXCLUSIVE) {
+      throw new Error(
+        `Model output for ${lang}.body has ${wordCount} words; expected more than ${MIN_WORDS_EXCLUSIVE}.`,
+      );
+    }
+    if (!hasMarkdownTable(block.body)) {
+      throw new Error(`Model output for ${lang}.body is missing a markdown takeaway table.`);
     }
   }
-
-  return currentBlock;
-}
-
-async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sourcePrompt }) {
-  let currentBlock = block;
-
-  for (let attempt = 0; attempt < TITLE_POLISH_MAX_ATTEMPTS; attempt += 1) {
-    if (!needsTitlePolish(lang, currentBlock?.title)) {
-      return currentBlock;
-    }
-
-    console.log(`[daily-trends] ${lang}: polishing generic title/excerpt...`);
-    const polishSystemPrompt = [
-      systemPrompt,
-      "You are revising only the title and excerpt for editorial quality.",
-      "Return ONLY a valid JSON object.",
-    ].join("\n");
-
-    const polishUserPrompt = [
-      sourcePrompt,
-      "",
-      TITLE_POLISH_RULES[lang] || TITLE_POLISH_RULES.en,
-      "Keep the body unchanged.",
-      "Do not make the title vague. Make it specific and natural.",
-      "",
-      "Current draft JSON:",
-      JSON.stringify(currentBlock),
-      "",
-      'Return schema: { "title": "...", "excerpt": "...", "body": "markdown" }',
-    ].join("\n");
-
-    const polishedRaw = await callAi(polishSystemPrompt, polishUserPrompt, {
-      maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
-      temperature: 0.3,
-      responseFormat: { type: "json_object" },
-    });
-
-    currentBlock = await parseJsonWithRepair({
-      text: polishedRaw,
-      label: `${lang} title polish`,
-      schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
-      originalSystemPrompt: polishSystemPrompt,
-      originalUserPrompt: polishUserPrompt,
-    });
-  }
-
-  return currentBlock;
 }
 
 function buildReferencesSection(language, sources) {
-  const heading = LANGUAGE_LABELS[language]?.referencesHeading || LANGUAGE_LABELS.en.referencesHeading;
+  const heading =
+    language === "ja"
+      ? "## 参考リンク"
+      : language === "ar"
+        ? "## المراجع"
+        : "## References";
   const lines = sources.map((source) => `- [${source.title}](${source.url})`);
   return [heading, "", ...lines].join("\n");
 }
@@ -1387,10 +657,8 @@ function buildPostDocument({
   category,
   body,
   referencesSection,
-  language,
 }) {
   const normalizedBody = body.trim();
-  const toc = buildTableOfContents(language, normalizedBody);
   return [
     "---",
     `title: "${sanitizeFrontmatter(title, 120)}"`,
@@ -1403,7 +671,6 @@ function buildPostDocument({
     '  picture: "/images/author.png"',
     "---",
     "",
-    toc,
     normalizedBody,
     "",
     "---",
@@ -1461,7 +728,9 @@ async function main() {
     }
   });
 
-  const ranked = rankItems(dedupeByLink(sourceItems)).filter((item) => isAllowedTopicItem(item)).slice(0, 12);
+  const ranked = rankItems(dedupeByLink(sourceItems))
+    .filter((item) => hasTrendKeyword(`${item.title} ${item.description}`))
+    .slice(0, 12);
 
   if (ranked.length < 4) {
     console.log("[daily-trends] not enough relevant sources found; skipping post generation.");
@@ -1476,7 +745,7 @@ async function main() {
     sources: selectedSources,
   });
 
-  if (!content || LANGUAGE_ORDER.some((lang) => !content[lang])) {
+  if (!content || !content.en || !content.ja || !content.ar) {
     throw new Error("Model output is missing required language blocks");
   }
   validateDraftContent(content);
@@ -1493,26 +762,47 @@ async function main() {
     process.exit(0);
   }
 
-  const files = LANGUAGE_ORDER.map((lang) => {
-    const languageMeta = LANGUAGE_LABELS[lang] || LANGUAGE_LABELS.en;
-    const category = selectedCategory[languageMeta.categoryNameKey] || selectedCategory.nameEn;
-    const localizedBlock = content[lang];
-
-    return {
-      lang,
-      path: path.join(POSTS_DIR, `${baseSlug}${languageMeta.fileSuffix}.mdx`),
-      category,
+  const files = [
+    {
+      lang: "en",
+      path: path.join(POSTS_DIR, `${baseSlug}.mdx`),
+      category: selectedCategory.nameEn,
       body: buildPostDocument({
-        title: localizedBlock.title,
-        excerpt: localizedBlock.excerpt,
+        title: content.en.title,
+        excerpt: content.en.excerpt,
         dateString,
-        category,
-        body: localizedBlock.body,
-        referencesSection: buildReferencesSection(lang, selectedSources),
-        language: lang,
+        category: selectedCategory.nameEn,
+        body: content.en.body,
+        referencesSection: buildReferencesSection("en", selectedSources),
       }),
-    };
-  });
+    },
+    {
+      lang: "ja",
+      path: path.join(POSTS_DIR, `${baseSlug}-ja.mdx`),
+      category: selectedCategory.nameJa || selectedCategory.nameEn,
+      body: buildPostDocument({
+        title: content.ja.title,
+        excerpt: content.ja.excerpt,
+        dateString,
+        category: selectedCategory.nameJa || selectedCategory.nameEn,
+        body: content.ja.body,
+        referencesSection: buildReferencesSection("ja", selectedSources),
+      }),
+    },
+    {
+      lang: "ar",
+      path: path.join(POSTS_DIR, `${baseSlug}-ar.mdx`),
+      category: selectedCategory.nameAr || selectedCategory.nameEn,
+      body: buildPostDocument({
+        title: content.ar.title,
+        excerpt: content.ar.excerpt,
+        dateString,
+        category: selectedCategory.nameAr || selectedCategory.nameEn,
+        body: content.ar.body,
+        referencesSection: buildReferencesSection("ar", selectedSources),
+      }),
+    },
+  ];
 
   if (DRY_RUN) {
     console.log(`[daily-trends] dry run completed for slug: ${baseSlug}`);
@@ -1530,7 +820,7 @@ async function main() {
   console.log(`[daily-trends] done. base slug: ${baseSlug}`);
 }
 
-main().catch((err) => {
-  console.error(`[daily-trends] failed: ${err.message}`);
+main().catch((error) => {
+  console.error(`[daily-trends] failed: ${error.message}`);
   process.exit(1);
 });

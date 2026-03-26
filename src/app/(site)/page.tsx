@@ -237,7 +237,7 @@ export async function generateMetadata({
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = translations[currentLang];
-  const canonicalPath = `/?lang=${currentLang}`;
+  const canonicalPath = currentLang === "en" ? "/" : `/?lang=${currentLang}`;
 
   return {
     title: copy.heroTitle,
@@ -245,7 +245,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/?lang=en",
+        en: "/",
         ja: "/?lang=ja",
         ar: "/?lang=ar",
       },
@@ -352,7 +352,7 @@ export default async function Home({
             dir="ltr"
           >
             <Link
-              href="/?lang=en"
+              href="/"
               className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "en"
                 ? "border-purple-400 bg-purple-600 text-white"
                 : "border-white/20 bg-white/60 text-gray-700 hover:bg-white hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"

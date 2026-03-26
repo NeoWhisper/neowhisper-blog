@@ -18,7 +18,7 @@ const API_KEY = process.env.OPENAI_API_KEY || "sk-local";
 
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
-const MIN_WORDS_EXCLUSIVE = 700; // Rule: strictly more than 700 words
+const MIN_WORDS_EXCLUSIVE = 700; // strictly more than 750 words per language for quality assurance
 
 const FEEDS = [
   {
@@ -626,71 +626,104 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt) {
   return outputText;
 }
 
-async function createDraftContent({ dateString, sources }) {
-  const allowedCategoryList = CATEGORY_DEFINITIONS.map((category) => category.slug).join(", ");
-  const systemPrompt = [
-    "You are a senior multilingual tech editor.",
-    "Write high-trust, human-sounding blog content in English, Japanese, and Arabic.",
-    "Do not invent facts or URLs. Use only the provided source list.",
-    "No emojis. No hype. No marketing buzzwords.",
-    "Keep tone practical, modern, and confident.",
-    "CRITICAL: Return ONLY a valid JSON object. Do not include any explanation or text outside the JSON block.",
-  ].join("\n");
-
-  const userPrompt = [
-    `Date: ${dateString}`,
-    TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
-    "",
-    "Create one multilingual trend brief with these requirements:",
-    "- Theme: latest AI + IT practical trends for builders and product teams.",
-    "- Provide EN/JA/AR versions aligned in meaning (not literal translation).",
-    "- Each body must be more than 700 words.",
-    "- Use markdown H2 headings for trend sections with this pattern: `## 1. Trend name`.",
-    "- Include 3-6 trend sections, each with exact dates and concrete product/team impact.",
-    "- End with a Takeaways section containing a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
-    "- Do not use a bullet list instead of the takeaway table.",
-    "- Include exact dates when mentioning events.",
-    "- Do not include a references section; it will be appended automatically.",
-    `- Pick exactly one category slug from this list: ${allowedCategoryList}.`,
-    "",
-    "Output schema:",
-    "{",
-    `  "categorySlug": "one of: ${allowedCategoryList}",`,
-    '  "slugSuffix": "3-5 ascii words, lowercase, hyphen-separated",',
-    '  "en": { "title": "...", "excerpt": "...", "body": "markdown" },',
-    '  "ja": { "title": "...", "excerpt": "...", "body": "markdown" },',
-    '  "ar": { "title": "...", "excerpt": "...", "body": "markdown" }',
-    "}",
-    "",
-    "Allowed source list:",
-    ...sources.map(
-      (source, index) =>
-        `${index + 1}. [${source.source}] ${source.title} | ${source.publishedAt} | ${source.url}\nSummary: ${source.summary}`,
-    ),
-  ].join("\n");
-
-  let outputText = "";
-
+async function callAi(systemPrompt, userPrompt) {
   if (API_MODE === "responses") {
-    outputText = await callResponsesEndpoint(systemPrompt, userPrompt);
+    return await callResponsesEndpoint(systemPrompt, userPrompt);
   } else if (API_MODE === "chat") {
-    outputText = await callChatCompletionsEndpoint(systemPrompt, userPrompt);
+    return await callChatCompletionsEndpoint(systemPrompt, userPrompt);
   } else {
     try {
-      outputText = await callResponsesEndpoint(systemPrompt, userPrompt);
+      return await callResponsesEndpoint(systemPrompt, userPrompt);
     } catch (error) {
       const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
       if (!shouldFallbackToChat(error?.message, statusCode)) {
         throw error;
       }
-      console.warn(
-        `[daily-trends] /responses unavailable on ${API_BASE_URL}; falling back to /chat/completions`,
-      );
-      outputText = await callChatCompletionsEndpoint(systemPrompt, userPrompt);
+      return await callChatCompletionsEndpoint(systemPrompt, userPrompt);
     }
   }
+}
 
-  return ensureJson(outputText);
+async function createDraftContent({ dateString, sources }) {
+  const allowedCategoryList = CATEGORY_DEFINITIONS.map((category) => category.slug).join(", ");
+
+  // 1. Generate Metadata and English Content
+  console.log("[daily-trends] generating base metadata and English content...");
+  const baseSystemPrompt = [
+    "You are a senior tech editor.",
+    "Return ONLY a valid JSON object.",
+  ].join("\n");
+
+  const baseUserPrompt = [
+    `Date: ${dateString}`,
+    TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
+    "",
+    "Create a tech trend brief meta-info and English version:",
+    "- Theme: latest AI + IT practical trends for builders and product teams.",
+    "- English body must be at least 750-800 words.",
+    "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
+    "- Include 3-6 trend sections with deep technical analysis.",
+    "- End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
+    `- Pick exactly one category slug from: ${allowedCategoryList}.`,
+    "",
+    "Output schema:",
+    "{",
+    '  "categorySlug": "...",',
+    '  "slugSuffix": "3-5 ascii words, lowercase, hyphen-separated",',
+    '  "en": { "title": "...", "excerpt": "...", "body": "markdown" }',
+    "}",
+    "",
+    "Sources:",
+    ...sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title} | ${s.url}\nSummary: ${s.summary}`),
+  ].join("\n");
+
+  const baseResult = ensureJson(await callAi(baseSystemPrompt, baseUserPrompt));
+
+  // 2. Generate Japanese Content
+  console.log("[daily-trends] translating/adapting to Japanese...");
+  const jaSystemPrompt = "You are a senior Japanese tech editor. Return ONLY a valid JSON object.";
+  const jaUserPrompt = [
+    "Translate and adapt this technical blog post into Japanese.",
+    "- The Japanese body must be more than 750 words.",
+    "- Maintain the exact same structure (H2 headings, takeaway table).",
+    "- Tone: professional, technical, and natural for a Japanese audience.",
+    "",
+    "Source (English):",
+    `Title: ${baseResult.en.title}`,
+    `Excerpt: ${baseResult.en.excerpt}`,
+    `Body: ${baseResult.en.body}`,
+    "",
+    "Output schema:",
+    '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+  ].join("\n");
+
+  const jaResult = ensureJson(await callAi(jaSystemPrompt, jaUserPrompt));
+
+  // 3. Generate Arabic Content
+  console.log("[daily-trends] translating/adapting to Arabic...");
+  const arSystemPrompt = "You are a senior Arabic tech editor. Return ONLY a valid JSON object.";
+  const arUserPrompt = [
+    "Translate and adapt this technical blog post into Arabic.",
+    "- The Arabic body must be more than 750 words.",
+    "- Maintain the exact same structure (H2 headings, takeaway table).",
+    "- Tone: professional, technical, and natural for an Arabic audience.",
+    "",
+    "Source (English):",
+    `Title: ${baseResult.en.title}`,
+    `Excerpt: ${baseResult.en.excerpt}`,
+    `Body: ${baseResult.en.body}`,
+    "",
+    "Output schema:",
+    '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+  ].join("\n");
+
+  const arResult = ensureJson(await callAi(arSystemPrompt, arUserPrompt));
+
+  return {
+    ...baseResult,
+    ja: jaResult,
+    ar: arResult,
+  };
 }
 
 function countTrendHeadings(markdownBody) {
@@ -931,7 +964,7 @@ async function main() {
   console.log(`[daily-trends] done. base slug: ${baseSlug}`);
 }
 
-main().catch((error) => {
-  console.error(`[daily-trends] failed: ${error.message}`);
+main().catch((err) => {
+  console.error(`[daily-trends] failed: ${err.message}`);
   process.exit(1);
 });

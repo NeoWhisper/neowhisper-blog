@@ -78,6 +78,22 @@ const FEEDS = [
     url: "https://blog.tailwindcss.com/feed.xml",
   },
   {
+    name: "InfoQ (AI & Dev)",
+    url: "https://www.infoq.com/feed/",
+  },
+  {
+    name: "InfoWorld",
+    url: "https://www.infoworld.com/index.rss",
+  },
+  {
+    name: "Ars Technica (Biz & IT)",
+    url: "https://feeds.arstechnica.com/arstechnica/index",
+  },
+  {
+    name: "ZDNet (AI & Tech)",
+    url: "https://www.zdnet.com/news/rss.xml",
+  },
+  {
     name: "The Verge",
     url: "https://www.theverge.com/rss/index.xml",
   },
@@ -116,6 +132,14 @@ const TREND_KEYWORDS = [
   "node",
   "vercel",
   "web dev",
+  "architecture",
+  "devops",
+  "enterprise",
+  "infrastructure",
+  "database",
+  "scaling",
+  "saas",
+  "serverless",
 ];
 
 const CATEGORY_DEFINITIONS = [

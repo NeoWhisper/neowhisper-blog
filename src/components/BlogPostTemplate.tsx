@@ -16,6 +16,29 @@ import { normalizeLang } from "@/lib/i18n";
 
 const siteUrl = "https://www.neowhisper.net";
 
+function flattenText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(flattenText).join("");
+  if (node && typeof node === "object" && "props" in node) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return flattenText((node as any).props?.children);
+  }
+  return "";
+}
+
+function headingToId(value: ReactNode): string {
+  const raw = flattenText(value).trim().toLowerCase();
+  const cleaned = raw
+    .replace(/[`"'’“”]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return cleaned || "section";
+}
+
 function getCategoryUrl(category: string, lang: string): string {
   const slug = buildCategorySlug(category);
   return `/category/${encodeURIComponent(slug)}?lang=${lang}`;
@@ -279,7 +302,18 @@ export default async function BlogPostTemplate({
                   source={content}
                   components={{
                     h2: (props) => (
-                      <h2 className="text-4xl font-bold mt-24 mb-16" {...props} />
+                      <h2
+                        id={headingToId(props.children)}
+                        className="text-4xl font-bold mt-24 mb-16 scroll-mt-28"
+                        {...props}
+                      />
+                    ),
+                    h3: (props) => (
+                      <h3
+                        id={headingToId(props.children)}
+                        className="text-2xl font-bold mt-20 mb-10 scroll-mt-28"
+                        {...props}
+                      />
                     ),
                     hr: (props) => (
                       <hr
@@ -353,7 +387,7 @@ export default async function BlogPostTemplate({
                       />
                     ),
                     // Professional block components for MDX
-                    Step: ({ number, title, children }: { number: string | number, title?: string, children: ReactNode }) => (
+                    Step: ({ number, title, children }: { number: string | number; title?: string; children: ReactNode }) => (
                       <div className="flex gap-6 mb-16 group items-start">
                         <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 transition-transform group-hover:scale-110">
                           {number}
@@ -365,11 +399,20 @@ export default async function BlogPostTemplate({
                       </div>
                     ),
                     Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
-                      const styles = {
-                        info: 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
-                        warning: 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
-                        success: 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300',
-                      }[type] || 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700';
+                      let styles: string;
+
+                      switch (type) {
+                        case 'warning':
+                          styles = 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300';
+                          break;
+                        case 'success':
+                          styles = 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300';
+                          break;
+                        case 'info':
+                        default:
+                          styles = 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800/50 text-blue-800 dark:text-blue-300';
+                          break;
+                      }
 
                       return (
                         <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>

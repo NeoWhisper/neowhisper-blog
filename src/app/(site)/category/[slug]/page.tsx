@@ -37,7 +37,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     const hasCanonical = categories.some((c) => c.slug === canonicalCandidate);
     const canonicalSlug = hasCanonical ? canonicalCandidate : decoded;
     const title = resolveCategoryTitleByLang(canonicalSlug, currentLang);
-    const canonicalPath = `/category/${encodeURIComponent(canonicalSlug)}?lang=${currentLang}`;
+    const canonicalPath =
+        currentLang === "en"
+            ? `/category/${encodeURIComponent(canonicalSlug)}`
+            : `/category/${encodeURIComponent(canonicalSlug)}?lang=${currentLang}`;
 
     const description =
         currentLang === "ja"
@@ -52,7 +55,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         alternates: {
             canonical: canonicalPath,
             languages: {
-                en: `/category/${encodeURIComponent(canonicalSlug)}?lang=en`,
+                en: `/category/${encodeURIComponent(canonicalSlug)}`,
                 ja: `/category/${encodeURIComponent(canonicalSlug)}?lang=ja`,
                 ar: `/category/${encodeURIComponent(canonicalSlug)}?lang=ar`,
             },

@@ -59,7 +59,7 @@ export async function generateMetadata({
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
-  const canonicalPath = `/terms?lang=${currentLang}`;
+  const canonicalPath = currentLang === "en" ? "/terms" : `/terms?lang=${currentLang}`;
 
   return {
     title: `${copy.title} | NeoWhisper`,
@@ -73,7 +73,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/terms?lang=en",
+        en: "/terms",
         ja: "/terms?lang=ja",
         ar: "/terms?lang=ar",
       },

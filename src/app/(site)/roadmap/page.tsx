@@ -139,7 +139,7 @@ export async function generateMetadata({
     };
 
     const { title, description } = meta[currentLang];
-    const canonicalPath = `/roadmap?lang=${currentLang}`;
+    const canonicalPath = currentLang === "en" ? "/roadmap" : `/roadmap?lang=${currentLang}`;
 
     return {
         title,
@@ -158,7 +158,7 @@ export async function generateMetadata({
         alternates: {
             canonical: canonicalPath,
             languages: {
-                en: "/roadmap?lang=en",
+                en: "/roadmap",
                 ja: "/roadmap?lang=ja",
                 ar: "/roadmap?lang=ar",
             },

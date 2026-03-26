@@ -282,7 +282,7 @@ export async function POST(request: Request) {
     if (wantsHtml) return redirect(`/contact/success?lang=${lang}`);
     return NextResponse.json({ ok: true });
   } catch {
-    if (wantsHtml) return redirect(`/contact?lang=en&error=1`);
+    if (wantsHtml) return redirect(`/contact?error=1`);
     return NextResponse.json(
       { ok: false, message: "Invalid request." },
       { status: 400 }

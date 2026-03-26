@@ -134,7 +134,7 @@ export async function generateMetadata({
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
   const locale = localeByLang[currentLang];
-  const canonicalPath = `/blog?lang=${currentLang}`;
+  const canonicalPath = currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`;
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
 
   return {
@@ -170,7 +170,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/blog?lang=en",
+        en: "/blog",
         ja: "/blog?lang=ja",
         ar: "/blog?lang=ar",
       },
@@ -252,7 +252,7 @@ export default async function BlogHome({
             dir="ltr"
           >
             <Link
-              href="/blog?lang=en"
+              href="/blog"
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "en"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"

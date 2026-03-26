@@ -369,6 +369,8 @@ const DEFAULT_CATEGORY_SLUG = "software-development";
 const DEFAULT_GENERATION_MAX_TOKENS = 5000;
 const JSON_REPAIR_MAX_ATTEMPTS = 2;
 const LENGTH_EXPANSION_MAX_ATTEMPTS = 2;
+const MODEL_FETCH_RETRY_ATTEMPTS = 3;
+const MODEL_FETCH_RETRY_DELAY_MS = 1200;
 const LANGUAGE_ORDER = ["en", "ja", "ar"];
 const LANGUAGE_LABELS = {
   en: {
@@ -799,6 +801,15 @@ function getAuthHeaders() {
   };
 }
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientModelFetchError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return message.includes("fetch failed") || message.includes("econnreset") || message.includes("socket hang up");
+}
+
 function shouldFallbackToChat(errorMessage, statusCode) {
   if ([400, 404, 405, 415, 422, 501].includes(statusCode)) {
     return true;
@@ -906,21 +917,39 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt, options = {
 }
 
 async function callAi(systemPrompt, userPrompt, options = {}) {
-  if (API_MODE === "responses") {
-    return await callResponsesEndpoint(systemPrompt, userPrompt, options);
-  } else if (API_MODE === "chat") {
-    return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
-  } else {
+  let lastError;
+
+  for (let attempt = 1; attempt <= MODEL_FETCH_RETRY_ATTEMPTS; attempt += 1) {
     try {
-      return await callResponsesEndpoint(systemPrompt, userPrompt, options);
+      if (API_MODE === "responses") {
+        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
+      }
+      if (API_MODE === "chat") {
+        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
+      }
+
+      try {
+        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
+      } catch (error) {
+        const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
+        if (!shouldFallbackToChat(error?.message, statusCode)) {
+          throw error;
+        }
+        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
+      }
     } catch (error) {
-      const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
-      if (!shouldFallbackToChat(error?.message, statusCode)) {
+      lastError = error;
+      if (!isTransientModelFetchError(error) || attempt === MODEL_FETCH_RETRY_ATTEMPTS) {
         throw error;
       }
-      return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
+      console.warn(
+        `[daily-trends] model request failed (${error.message}); retrying ${attempt}/${MODEL_FETCH_RETRY_ATTEMPTS - 1}...`,
+      );
+      await delay(MODEL_FETCH_RETRY_DELAY_MS * attempt);
     }
   }
+
+  throw lastError;
 }
 
 async function createDraftContent({ dateString, sources }) {
@@ -1018,18 +1047,15 @@ async function createDraftContent({ dateString, sources }) {
     };
   }
 
-  const expandedContentEntries = await Promise.all(
-    LANGUAGE_ORDER.map(async (lang) => [
+  const expandedContent = {};
+  for (const lang of LANGUAGE_ORDER) {
+    expandedContent[lang] = await expandLanguageBlockIfNeeded({
       lang,
-      await expandLanguageBlockIfNeeded({
-        lang,
-        block: localizedContent[lang],
-        systemPrompt: promptContextByLang[lang].systemPrompt,
-        sourcePrompt: promptContextByLang[lang].userPrompt,
-      }),
-    ]),
-  );
-  const expandedContent = Object.fromEntries(expandedContentEntries);
+      block: localizedContent[lang],
+      systemPrompt: promptContextByLang[lang].systemPrompt,
+      sourcePrompt: promptContextByLang[lang].userPrompt,
+    });
+  }
 
   return {
     ...baseResult,

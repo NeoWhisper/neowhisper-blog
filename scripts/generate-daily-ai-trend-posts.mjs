@@ -34,6 +34,34 @@ const FEEDS = [
     url: "https://developer.nvidia.com/blog/feed/",
   },
   {
+    name: "Hacker News (AI)",
+    url: "https://hnrss.org/newest?q=AI",
+  },
+  {
+    name: "TechCrunch (AI)",
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/",
+  },
+  {
+    name: "AI News",
+    url: "https://www.artificialintelligence-news.com/feed/",
+  },
+  {
+    name: "Apple Developer News",
+    url: "https://developer.apple.com/news/rss/",
+  },
+  {
+    name: "Apple ML Research",
+    url: "https://machinelearning.apple.com/rss.xml",
+  },
+  {
+    name: "AWS Machine Learning",
+    url: "https://aws.amazon.com/blogs/machine-learning/feed/",
+  },
+  {
+    name: "Anthropic News",
+    url: "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feed_claude.xml",
+  },
+  {
     name: "The Verge",
     url: "https://www.theverge.com/rss/index.xml",
   },
@@ -499,6 +527,7 @@ async function callChatCompletionsEndpoint(systemPrompt, userPrompt) {
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
+      response_format: { type: "json_object" },
     }),
   });
 
@@ -523,7 +552,7 @@ async function createDraftContent({ dateString, sources }) {
     "Do not invent facts or URLs. Use only the provided source list.",
     "No emojis. No hype. No marketing buzzwords.",
     "Keep tone practical, modern, and confident.",
-    "Return JSON only.",
+    "CRITICAL: Return ONLY a valid JSON object. Do not include any explanation or text outside the JSON block.",
   ].join("\n");
 
   const userPrompt = [

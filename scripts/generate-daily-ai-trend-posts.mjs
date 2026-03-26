@@ -371,6 +371,7 @@ const JSON_REPAIR_MAX_ATTEMPTS = 2;
 const LENGTH_EXPANSION_MAX_ATTEMPTS = 2;
 const MODEL_FETCH_RETRY_ATTEMPTS = 3;
 const MODEL_FETCH_RETRY_DELAY_MS = 1200;
+const TITLE_POLISH_MAX_ATTEMPTS = 1;
 const LANGUAGE_ORDER = ["en", "ja", "ar"];
 const LANGUAGE_LABELS = {
   en: {
@@ -399,7 +400,7 @@ const TRANSLATION_CONFIGS = [
     systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
     instruction: "Translate and adapt this technical blog post into Japanese.",
     bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for a Japanese audience.",
+    tone: "- Tone: professional, technical, and natural for a Japanese audience. Avoid stiff literal translation.",
   },
   {
     lang: "ar",
@@ -407,7 +408,8 @@ const TRANSLATION_CONFIGS = [
     systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
     instruction: "Translate and adapt this technical blog post into Arabic.",
     bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for an Arabic audience.",
+    tone:
+      "- Tone: professional, technical, and natural for an Arabic audience in fluent Modern Standard Arabic. Avoid literal translation, awkward compounds, and title constructions that mirror English punctuation or '+' / '/' patterns.",
   },
 ];
 const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
@@ -418,6 +420,11 @@ const API_CALLERS = {
 const HTML_FEED_EXTRACTORS = {
   "Tailwind CSS Blog": extractTailwindBlogItems,
   "InfoWorld ML": extractInfoWorldItems,
+};
+const TITLE_POLISH_RULES = {
+  en: "Rewrite the title and excerpt to feel sharper and more specific. Avoid generic trend-roundup phrasing.",
+  ja: "Rewrite the title and excerpt in natural Japanese tech-editor style. Avoid literal translation and generic roundup phrasing.",
+  ar: "Rewrite the title and excerpt in fluent Modern Standard Arabic. Avoid literal translation, awkward wording, and generic roundup phrasing.",
 };
 
 function normalizeSearchText(value) {
@@ -455,13 +462,12 @@ function pickCategory(content, sources) {
     return CATEGORY_MAP.get(rawSlug);
   }
 
-  const aggregateText = [
-    content?.en?.title || "",
-    content?.en?.excerpt || "",
-    content?.en?.body || "",
-    ...sources.map((source) => `${source.title} ${source.summary}`),
-  ].join("\n");
-  const heuristicCategory = scoreCategoryFromText(aggregateText);
+  // Category should be driven by the source mix, not by the model's already-generated
+  // title/body, otherwise generic phrasing can create a self-reinforcing category loop.
+  const sourceAggregateText = sources
+    .map((source) => `${source.title} ${source.summary}`)
+    .join("\n");
+  const heuristicCategory = scoreCategoryFromText(sourceAggregateText);
   if (heuristicCategory && ALLOWED_CATEGORY_SLUGS.has(heuristicCategory.slug)) {
     return heuristicCategory;
   }
@@ -758,6 +764,32 @@ function ensureJson(text) {
   throw new Error(`Model response is not valid JSON. Preview: ${preview}`);
 }
 
+function needsTitlePolish(lang, title) {
+  const value = String(title || "").trim().toLowerCase();
+  if (!value) return true;
+
+  const patternMap = {
+    en: [
+      /^(latest|practical)\b/,
+      /\bai\s*[+&/]\s*it\b/,
+      /\btrends?\b.*\b20\d{2}\b/,
+    ],
+    ja: [
+      /^最新/,
+      /トレンド/,
+      /ai\s*[+＆/&]\s*it/i,
+    ],
+    ar: [
+      /اتجاهات/,
+      /أحدث/,
+      /[+/]/,
+    ],
+  };
+
+  const patterns = patternMap[lang] || patternMap.en;
+  return patterns.some((pattern) => pattern.test(value));
+}
+
 async function parseJsonWithRepair({
   text,
   label,
@@ -1030,6 +1062,9 @@ async function createDraftContent({ dateString, sources }) {
     "Create a tech trend brief meta-info and English version:",
     "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
     "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
+    "- The title must be specific, vivid, and publication-ready, not a generic template.",
+    "- Avoid bland openings like 'Latest', 'Practical', or 'AI & IT Trends' unless genuinely necessary.",
+    "- Prefer a concrete angle, tension, or consequence over a broad category label.",
     "- English body must be 900-1200 words (minimum 850).",
     "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
     "- Include 3-6 trend sections with deep technical analysis.",
@@ -1106,9 +1141,15 @@ async function createDraftContent({ dateString, sources }) {
 
   const expandedContent = {};
   for (const lang of LANGUAGE_ORDER) {
-    expandedContent[lang] = await expandLanguageBlockIfNeeded({
+    const expandedBlock = await expandLanguageBlockIfNeeded({
       lang,
       block: localizedContent[lang],
+      systemPrompt: promptContextByLang[lang].systemPrompt,
+      sourcePrompt: promptContextByLang[lang].userPrompt,
+    });
+    expandedContent[lang] = await polishLocalizedMetadataIfNeeded({
+      lang,
+      block: expandedBlock,
       systemPrompt: promptContextByLang[lang].systemPrompt,
       sourcePrompt: promptContextByLang[lang].userPrompt,
     });
@@ -1282,6 +1323,52 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         originalUserPrompt: expandUserPrompt,
       });
     }
+  }
+
+  return currentBlock;
+}
+
+async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sourcePrompt }) {
+  let currentBlock = block;
+
+  for (let attempt = 0; attempt < TITLE_POLISH_MAX_ATTEMPTS; attempt += 1) {
+    if (!needsTitlePolish(lang, currentBlock?.title)) {
+      return currentBlock;
+    }
+
+    console.log(`[daily-trends] ${lang}: polishing generic title/excerpt...`);
+    const polishSystemPrompt = [
+      systemPrompt,
+      "You are revising only the title and excerpt for editorial quality.",
+      "Return ONLY a valid JSON object.",
+    ].join("\n");
+
+    const polishUserPrompt = [
+      sourcePrompt,
+      "",
+      TITLE_POLISH_RULES[lang] || TITLE_POLISH_RULES.en,
+      "Keep the body unchanged.",
+      "Do not make the title vague. Make it specific and natural.",
+      "",
+      "Current draft JSON:",
+      JSON.stringify(currentBlock),
+      "",
+      'Return schema: { "title": "...", "excerpt": "...", "body": "markdown" }',
+    ].join("\n");
+
+    const polishedRaw = await callAi(polishSystemPrompt, polishUserPrompt, {
+      maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
+      temperature: 0.3,
+      responseFormat: { type: "json_object" },
+    });
+
+    currentBlock = await parseJsonWithRepair({
+      text: polishedRaw,
+      label: `${lang} title polish`,
+      schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+      originalSystemPrompt: polishSystemPrompt,
+      originalUserPrompt: polishUserPrompt,
+    });
   }
 
   return currentBlock;

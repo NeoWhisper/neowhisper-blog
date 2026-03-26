@@ -10,6 +10,7 @@ SYNC_MAIN_INTO_CONTENTS="${SYNC_MAIN_INTO_CONTENTS:-true}"
 AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
+AUTO_STASH_DIRTY_WORKTREE="${AUTO_STASH_DIRTY_WORKTREE:-false}"
 
 if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set -a
@@ -29,6 +30,27 @@ export OPENAI_MODEL
 export OPENAI_API_MODE
 export OPENAI_API_KEY
 
+STASHED_CHANGES=false
+STASH_REF=""
+
+restore_stash() {
+  if [[ "${STASHED_CHANGES}" != "true" || -z "${STASH_REF}" ]]; then
+    return
+  fi
+
+  echo "[daily-local] Restoring stashed local changes..."
+  if git stash pop --index "${STASH_REF}"; then
+    STASHED_CHANGES=false
+    STASH_REF=""
+  else
+    echo "[daily-local] Could not auto-restore stashed changes cleanly."
+    echo "[daily-local] Your work is still saved in stash: ${STASH_REF}"
+    echo "[daily-local] Re-apply it manually after resolving any conflicts."
+  fi
+}
+
+trap restore_stash EXIT
+
 if [[ -z "${NODE_BINARY}" ]]; then
   echo "[daily-local] Node.js is required but was not found."
   echo "[daily-local] Add node to PATH or set NODE_BINARY."
@@ -46,8 +68,21 @@ if ! gh auth status >/dev/null 2>&1; then
 fi
 
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo "[daily-local] Working tree is not clean. Commit or stash changes before running."
-  exit 1
+  if [[ "${AUTO_STASH_DIRTY_WORKTREE}" == "true" ]]; then
+    echo "[daily-local] Working tree is dirty. Stashing local changes before generation..."
+    STASH_MESSAGE="daily-local-autostash-$(date +%Y%m%d-%H%M%S)"
+    git stash push --include-untracked -m "${STASH_MESSAGE}"
+    STASH_REF="$(git stash list --format='%gd %s' | awk -v msg="${STASH_MESSAGE}" '$0 ~ msg { print $1; exit }')"
+    if [[ -z "${STASH_REF}" ]]; then
+      echo "[daily-local] Failed to find the auto-created stash entry."
+      exit 1
+    fi
+    STASHED_CHANGES=true
+  else
+    echo "[daily-local] Working tree is not clean. Commit or stash changes before running."
+    echo "[daily-local] Tip: rerun with AUTO_STASH_DIRTY_WORKTREE=true to let this script stash and restore your local changes automatically."
+    exit 1
+  fi
 fi
 
 if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://localhost:* ]]; then

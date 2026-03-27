@@ -15,13 +15,72 @@ import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
 import { outfit, geistMono } from "@/lib/fonts";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net";
+const siteName = "NeoWhisper";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net",
-  ),
-  title: "NeoWhisper - Tech Blog",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "NeoWhisper | Trilingual Tech Blog & IT Services",
+    template: `%s | ${siteName}`,
+  },
+  applicationName: siteName,
   description:
-    "Full-stack development with trilingual support (日本語・English・العربية).",
+    "Multilingual tech blog and IT services in Japanese, English, and Arabic: software, apps, web production, and practical engineering guides.",
+  keywords: [
+    "NeoWhisper",
+    "tech blog",
+    "software development",
+    "app development",
+    "web development",
+    "Japan IT services",
+    "multilingual blog",
+    "Japanese English Arabic",
+  ],
+  authors: [{ name: "Yousif Alqadi", url: `${siteUrl}/about` }],
+  creator: "Yousif Alqadi",
+  publisher: siteName,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName,
+    title: "NeoWhisper | Trilingual Tech Blog & IT Services",
+    description:
+      "Multilingual tech blog and IT services in Japanese, English, and Arabic.",
+    locale: "en_US",
+    images: [
+      {
+        url: `${siteUrl}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "NeoWhisper",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NeoWhisper | Trilingual Tech Blog & IT Services",
+    description:
+      "Multilingual tech blog and IT services in Japanese, English, and Arabic.",
+    images: [`${siteUrl}/og-image.jpg`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default async function RootLayout({
@@ -34,6 +93,33 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${geistMono.variable}`}>
       <head>
+        <script
+          nonce={nonce}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: siteName,
+              url: siteUrl,
+              logo: `${siteUrl}/og-image.jpg`,
+              sameAs: [],
+            }),
+          }}
+        />
+        <script
+          nonce={nonce}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: siteName,
+              url: siteUrl,
+              inLanguage: ["en", "ja", "ar"],
+            }),
+          }}
+        />
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script
             nonce={nonce}

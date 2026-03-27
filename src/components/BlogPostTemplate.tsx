@@ -41,7 +41,10 @@ function headingToId(value: ReactNode): string {
 
 function getCategoryUrl(category: string, lang: string): string {
   const slug = buildCategorySlug(category);
-  return `/category/${encodeURIComponent(slug)}?lang=${lang}`;
+  if (normalizeLang(lang) === "en") {
+    return `/category/${encodeURIComponent(slug)}`;
+  }
+  return `/category/${encodeURIComponent(slug)}?lang=${normalizeLang(lang)}`;
 }
 
 function toAbsoluteUrl(url: string): string {
@@ -147,6 +150,9 @@ export default async function BlogPostTemplate({
     (slug
       ? `${siteUrl}/blog/${encodeURIComponent(slug)}`
       : `${siteUrl}/blog`);
+  const blogHomeUrl =
+    currentLang === "en" ? `${siteUrl}/blog` : `${siteUrl}/blog?lang=${currentLang}`;
+  const categoryUrl = category ? `${siteUrl}${getCategoryUrl(category, currentLang)}` : undefined;
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -172,6 +178,34 @@ export default async function BlogPostTemplate({
       },
     },
   };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Blog",
+        item: blogHomeUrl,
+      },
+      ...(category && categoryUrl
+        ? [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: category,
+              item: categoryUrl,
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: category && categoryUrl ? 3 : 2,
+        name: title,
+        item: resolvedCanonicalUrl,
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -182,10 +216,15 @@ export default async function BlogPostTemplate({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
           />
+          <script
+            nonce={nonce}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+          />
 
           {/* Back Button */}
           <Link
-            href={`/blog?lang=${lang}`}
+            href={currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`}
             className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <svg

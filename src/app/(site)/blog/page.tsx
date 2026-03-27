@@ -125,6 +125,19 @@ const localeByLang: Record<SupportedLang, string> = {
   ar: "ar_SA",
 };
 
+function buildPostUrl(
+  slug: string,
+  locale: SupportedLang,
+  source: "static" | "dynamic",
+): string {
+  const encodedSlug = encodeURIComponent(slug);
+  if (source === "dynamic") {
+    if (locale === "en") return `${siteUrl}/blog/${encodedSlug}`;
+    return `${siteUrl}/blog/${encodedSlug}?lang=${locale}`;
+  }
+  return `${siteUrl}/blog/${encodedSlug}`;
+}
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -201,6 +214,52 @@ export default async function BlogHome({
       name: category,
       slug: buildCategorySlug(category),
     }));
+  const blogHomeUrl =
+    currentLang === "en" ? `${siteUrl}/blog` : `${siteUrl}/blog?lang=${currentLang}`;
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: filteredPosts.slice(0, 12).map((post, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: buildPostUrl(post.slug, post.locale, post.source),
+      name: post.title,
+    })),
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: currentLang === "en" ? `${siteUrl}/` : `${siteUrl}/?lang=${currentLang}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: copy.blogName,
+        item: blogHomeUrl,
+      },
+    ],
+  };
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: copy.blogName,
+    description: copy.schemaDescription,
+    url: blogHomeUrl,
+    inLanguage: currentLang,
+    publisher: {
+      "@type": "Organization",
+      name: "NeoWhisper",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/og-image.jpg`,
+      },
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -208,30 +267,25 @@ export default async function BlogHome({
         nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "NeoWhisper",
-            description: copy.schemaDescription,
-            url: siteUrl,
-            inLanguage: ["ja", "en", "ar"],
-            publisher: {
-              "@type": "Organization",
-              name: "NeoWhisper",
-              logo: {
-                "@type": "ImageObject",
-                url: `${siteUrl}/og-image.jpg`,
-              },
-            },
-          }),
+          __html: JSON.stringify(blogSchema),
         }}
+      />
+      <script
+        nonce={nonce}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        nonce={nonce}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <div className="mx-auto max-w-5xl" dir={isRTL ? "rtl" : "ltr"}>
         <header className="mb-12 text-center">
           <div className="mb-6 flex items-center justify-center gap-3 text-xs text-gray-500 dark:text-gray-400">
             <Link
-              href={`/?lang=${currentLang}`}
+              href={currentLang === "en" ? "/" : `/?lang=${currentLang}`}
               className="rounded-full border border-white/20 bg-white/60 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
             >
               {copy.backToHome}

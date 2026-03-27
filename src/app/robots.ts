@@ -1,12 +1,15 @@
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-    return {
-        rules: {
-            userAgent: '*',
-            allow: '/',
-            disallow: ['/content-planning/', '/.git/'],
-        },
-        sitemap: 'https://www.neowhisper.net/sitemap.xml',
-    };
+  return {
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/content-planning/", "/.git/"],
+    },
+    sitemap: [
+      "https://www.neowhisper.net/sitemap.xml",
+      "https://www.neowhisper.net/image-sitemap.xml",
+    ],
+  };
 }

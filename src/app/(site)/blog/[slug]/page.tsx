@@ -56,6 +56,19 @@ function buildPostUrl(
   return `${baseUrl}/blog/${encodedSlug}`;
 }
 
+function getOgLocale(lang: SupportedLang): string {
+  if (lang === "ja") return "ja_JP";
+  if (lang === "ar") return "ar_SA";
+  return "en_US";
+}
+
+function toIsoDate(value?: string): string | undefined {
+  if (!value) return undefined;
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return undefined;
+  return new Date(timestamp).toISOString();
+}
+
 export async function generateStaticParams() {
   const posts = getPosts();
   return posts.map((post) => ({
@@ -98,20 +111,66 @@ export async function generateMetadata({
     });
 
     const noIndex = isLowValueBriefPost(post.slug, post.content);
+    const canonicalUrl = buildPostUrl(post.slug, post.locale, post.source);
+    const publishedTime = toIsoDate(post.publishedAt ?? post.date);
+    const modifiedTime = toIsoDate(post.updatedAt ?? post.publishedAt ?? post.date);
+    const ogImage = post.coverImage
+      ? post.coverImage.startsWith("http://") || post.coverImage.startsWith("https://")
+        ? post.coverImage
+        : `${baseUrl}${post.coverImage.startsWith("/") ? post.coverImage : `/${post.coverImage}`}`
+      : `${baseUrl}/og-image.jpg`;
 
     return {
       title: post.title,
       description: post.excerpt,
+      authors: [{ name: "Yousif Alqadi", url: `${baseUrl}/about` }],
+      category: post.category,
       alternates: {
-        canonical: buildPostUrl(post.slug, post.locale, post.source),
+        canonical: canonicalUrl,
         languages: languageAlternates,
+      },
+      openGraph: {
+        type: "article",
+        url: canonicalUrl,
+        title: post.title,
+        description: post.excerpt,
+        siteName: "NeoWhisper",
+        locale: getOgLocale(post.locale),
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
+        publishedTime,
+        modifiedTime,
+        section: post.category,
+        tags: post.category ? [post.category] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.excerpt,
+        images: [ogImage],
       },
       robots: noIndex
         ? {
             index: false,
             follow: true,
           }
-        : undefined,
+        : {
+            index: true,
+            follow: true,
+            googleBot: {
+              index: true,
+              follow: true,
+              "max-image-preview": "large",
+              "max-snippet": -1,
+              "max-video-preview": -1,
+            },
+          },
     };
   } catch (error) {
     console.error("[Metadata Critical] Fatal crash:", error);

@@ -86,7 +86,12 @@ git fetch --prune origin
 
 echo "[daily-local] Checking out ${BASE_BRANCH}..."
 git checkout "${BASE_BRANCH}"
-git pull --ff-only origin "${BASE_BRANCH}"
+if git merge --ff-only "origin/${BASE_BRANCH}"; then
+  echo "[daily-local] Fast-forwarded ${BASE_BRANCH} to origin/${BASE_BRANCH}."
+else
+  echo "[daily-local] ${BASE_BRANCH} diverged from origin/${BASE_BRANCH}; merging remote changes..."
+  git merge --no-edit "origin/${BASE_BRANCH}"
+fi
 
 if [[ "${SYNC_MAIN_INTO_CONTENTS}" == "true" ]]; then
   if git merge-base --is-ancestor "origin/${MAIN_BRANCH}" HEAD; then

@@ -142,7 +142,7 @@ export async function generateMetadata({
   };
 
   const { title, description } = meta[currentLang];
-  const canonicalPath = `/services?lang=${currentLang}`;
+  const canonicalPath = currentLang === "en" ? "/services" : `/services?lang=${currentLang}`;
 
   return {
     title,
@@ -176,7 +176,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/services?lang=en",
+        en: "/services",
         ja: "/services?lang=ja",
         ar: "/services?lang=ar",
       },

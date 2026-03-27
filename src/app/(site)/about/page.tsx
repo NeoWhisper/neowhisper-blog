@@ -106,7 +106,7 @@ export async function generateMetadata({
   };
 
   const { title, description } = meta[currentLang];
-  const canonicalPath = `/about?lang=${currentLang}`;
+  const canonicalPath = currentLang === "en" ? "/about" : `/about?lang=${currentLang}`;
 
   return {
     title,
@@ -140,7 +140,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/about?lang=en",
+        en: "/about",
         ja: "/about?lang=ja",
         ar: "/about?lang=ar",
       },

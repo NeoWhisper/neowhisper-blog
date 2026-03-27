@@ -128,7 +128,10 @@ export async function generateMetadata({
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
-  const canonicalPath = `/editorial-policy?lang=${currentLang}`;
+  const canonicalPath =
+    currentLang === "en"
+      ? "/editorial-policy"
+      : `/editorial-policy?lang=${currentLang}`;
 
   return {
     title: `${copy.title} | NeoWhisper`,
@@ -142,7 +145,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath,
       languages: {
-        en: "/editorial-policy?lang=en",
+        en: "/editorial-policy",
         ja: "/editorial-policy?lang=ja",
         ar: "/editorial-policy?lang=ar",
       },

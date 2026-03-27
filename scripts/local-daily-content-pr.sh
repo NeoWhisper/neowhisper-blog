@@ -10,6 +10,13 @@ SYNC_MAIN_INTO_CONTENTS="${SYNC_MAIN_INTO_CONTENTS:-true}"
 AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
+PR_BRANCH_PREFIX="${PR_BRANCH_PREFIX:-daily-ai-content}"
+
+if [[ -f "${REPO_ROOT}/.env.local" ]]; then
+  set -a
+  source "${REPO_ROOT}/.env.local"
+  set +a
+fi
 
 if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set -a
@@ -86,7 +93,12 @@ git fetch --prune origin
 
 echo "[daily-local] Checking out ${BASE_BRANCH}..."
 git checkout "${BASE_BRANCH}"
-git pull --ff-only origin "${BASE_BRANCH}"
+if git merge --ff-only "origin/${BASE_BRANCH}"; then
+  echo "[daily-local] Fast-forwarded ${BASE_BRANCH} to origin/${BASE_BRANCH}."
+else
+  echo "[daily-local] ${BASE_BRANCH} diverged from origin/${BASE_BRANCH}; merging remote changes..."
+  git merge --no-edit "origin/${BASE_BRANCH}"
+fi
 
 if [[ "${SYNC_MAIN_INTO_CONTENTS}" == "true" ]]; then
   if git merge-base --is-ancestor "origin/${MAIN_BRANCH}" HEAD; then
@@ -130,7 +142,7 @@ fi
 
 TODAY="$(date +%Y-%m-%d)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-PR_BRANCH="codex/daily-ai-content-${STAMP}"
+PR_BRANCH="${PR_BRANCH_PREFIX}-${STAMP}"
 
 echo "[daily-local] Creating branch ${PR_BRANCH}..."
 git checkout -b "${PR_BRANCH}"

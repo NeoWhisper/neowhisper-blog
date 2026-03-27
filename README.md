@@ -155,6 +155,7 @@ Notes:
 - The local PR script always starts from `contents`, fetches remotes, and merges `origin/main` into `contents` when needed before content generation.
 - `content:sync-main` fast-forwards local `main` to `origin/main` without switching your current branch.
 - Set `FORCE_GENERATE=true` if you want a same-day variant slug.
+- Set `PR_BRANCH_PREFIX` to customize PR branch names (default: `daily-ai-content`).
 
 ### Cloud/API mode (optional)
 

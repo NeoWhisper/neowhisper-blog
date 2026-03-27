@@ -10,6 +10,7 @@ SYNC_MAIN_INTO_CONTENTS="${SYNC_MAIN_INTO_CONTENTS:-true}"
 AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
+PR_BRANCH_PREFIX="${PR_BRANCH_PREFIX:-daily-ai-content}"
 
 if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set -a
@@ -135,7 +136,7 @@ fi
 
 TODAY="$(date +%Y-%m-%d)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-PR_BRANCH="codex/daily-ai-content-${STAMP}"
+PR_BRANCH="${PR_BRANCH_PREFIX}-${STAMP}"
 
 echo "[daily-local] Creating branch ${PR_BRANCH}..."
 git checkout -b "${PR_BRANCH}"

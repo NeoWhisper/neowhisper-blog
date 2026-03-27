@@ -93,33 +93,6 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${geistMono.variable}`}>
       <head>
-        <script
-          nonce={nonce}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: siteName,
-              url: siteUrl,
-              logo: `${siteUrl}/og-image.jpg`,
-              sameAs: [],
-            }),
-          }}
-        />
-        <script
-          nonce={nonce}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: siteName,
-              url: siteUrl,
-              inLanguage: ["en", "ja", "ar"],
-            }),
-          }}
-        />
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script
             nonce={nonce}

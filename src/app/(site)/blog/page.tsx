@@ -6,7 +6,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { headers } from "next/headers";
 import { getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
@@ -196,7 +195,6 @@ export default async function BlogHome({
 }: {
   searchParams: Promise<{ lang?: string }>;
 }) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const { lang } = await searchParams;
   const currentLang = normalizeLang(lang) as SupportedLang;
   const copy = copyByLang[currentLang];
@@ -264,19 +262,16 @@ export default async function BlogHome({
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <script
-        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(blogSchema),
         }}
       />
       <script
-        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
       <script
-        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />

@@ -102,6 +102,8 @@ This repository includes a multilingual draft generator that can run:
 - Generator script: `scripts/generate-daily-ai-trend-posts.mjs`
 - Local auto-PR script: `scripts/local-daily-content-pr.sh`
 - Local scheduler installer (macOS): `scripts/install-launchd-daily-content.sh`
+- Local main sync script: `scripts/sync-local-main.sh`
+- Local main sync installer (macOS): `scripts/install-launchd-sync-main.sh`
 
 ### Free local mode (Ollama on macOS)
 
@@ -136,7 +138,13 @@ This repository includes a multilingual draft generator that can run:
    npm run content:daily:install-launchd
    ```
 
-5. Trigger scheduled job immediately (optional):
+5. Optional: keep local `main` synced daily (default 09:00 local time):
+
+   ```bash
+   npm run content:sync-main:install-launchd
+   ```
+
+6. Trigger scheduled job immediately (optional):
 
    ```bash
    launchctl kickstart -k gui/$(id -u)/net.neowhisper.daily-content
@@ -145,6 +153,7 @@ This repository includes a multilingual draft generator that can run:
 Notes:
 
 - The local PR script always starts from `contents`, fetches remotes, and merges `origin/main` into `contents` when needed before content generation.
+- `content:sync-main` fast-forwards local `main` to `origin/main` without switching your current branch.
 - Set `FORCE_GENERATE=true` if you want a same-day variant slug.
 
 ### Cloud/API mode (optional)

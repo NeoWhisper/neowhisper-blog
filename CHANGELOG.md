@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.1...v1.14.2) (2026-03-27)
+
+
+### Bug Fixes
+
+* **seo:** normalize english canonical urls and sync dev into main ([#80](https://github.com/NeoWhisper/neowhisper-blog/issues/80)) ([df6982c](https://github.com/NeoWhisper/neowhisper-blog/commit/df6982c985718138f87b87b2cc34619b35ab0301)), closes [#23](https://github.com/NeoWhisper/neowhisper-blog/issues/23)
+
 ## [1.14.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.0...v1.14.1) (2026-03-24)
 
 

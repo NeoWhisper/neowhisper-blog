@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Ollama Top 20 Models Cover</title>
+  <desc id="desc">A modern cover image showing model rankings, categories, and charts for an Ollama top 20 guide.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1220"/>
+      <stop offset="55%" stop-color="#113A7D"/>
+      <stop offset="100%" stop-color="#0E7490"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#A78BFA"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+
+  <circle cx="1350" cy="170" r="220" fill="#38BDF8" opacity="0.18" filter="url(#glow)"/>
+  <circle cx="230" cy="760" r="260" fill="#A78BFA" opacity="0.16" filter="url(#glow)"/>
+
+  <rect x="78" y="72" width="1444" height="756" rx="30" fill="url(#panel)" stroke="#FFFFFF" stroke-opacity="0.26"/>
+
+  <text x="130" y="195" font-family="Verdana, Geneva, sans-serif" font-size="72" font-weight="800" fill="#F8FAFC">
+    Ollama Models 2026
+  </text>
+  <text x="130" y="262" font-family="Verdana, Geneva, sans-serif" font-size="42" font-weight="700" fill="#E2E8F0">
+    Top 20 Ranking + Category Scores
+  </text>
+
+  <rect x="130" y="304" width="580" height="12" rx="6" fill="url(#accent)"/>
+
+  <rect x="130" y="360" width="650" height="410" rx="20" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-opacity="0.2"/>
+  <text x="160" y="408" font-family="Verdana, Geneva, sans-serif" font-size="30" font-weight="700" fill="#F8FAFC">Top Models</text>
+
+  <g font-family="Verdana, Geneva, sans-serif" font-size="25" fill="#E2E8F0">
+    <text x="160" y="458">1. Qwen3 30B</text>
+    <text x="160" y="506">2. DeepSeek-R1 70B</text>
+    <text x="160" y="554">3. Llama 4 Scout</text>
+    <text x="160" y="602">4. Qwen3 14B</text>
+    <text x="160" y="650">5. Gemma 3 27B</text>
+  </g>
+
+  <g>
+    <rect x="900" y="360" width="560" height="190" rx="20" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-opacity="0.2"/>
+    <text x="930" y="410" font-family="Verdana, Geneva, sans-serif" font-size="30" font-weight="700" fill="#F8FAFC">Category Snapshot</text>
+    <text x="930" y="458" font-family="Verdana, Geneva, sans-serif" font-size="24" fill="#E2E8F0">Coding • Reasoning • Vision</text>
+    <text x="930" y="497" font-family="Verdana, Geneva, sans-serif" font-size="24" fill="#E2E8F0">Multilingual • Edge • Long Context</text>
+  </g>
+
+  <g transform="translate(900, 582)">
+    <rect x="0" y="0" width="560" height="188" rx="20" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-opacity="0.2"/>
+    <text x="30" y="44" font-family="Verdana, Geneva, sans-serif" font-size="30" font-weight="700" fill="#F8FAFC">Score Graph</text>
+    <g fill="#7DD3FC">
+      <rect x="30" y="78" width="430" height="16" rx="8"/>
+      <rect x="30" y="108" width="388" height="16" rx="8"/>
+      <rect x="30" y="138" width="360" height="16" rx="8"/>
+    </g>
+    <g font-family="Verdana, Geneva, sans-serif" font-size="18" fill="#E2E8F0">
+      <text x="472" y="91">96</text>
+      <text x="430" y="121">92</text>
+      <text x="402" y="151">89</text>
+    </g>
+  </g>
+
+  <text x="130" y="806" font-family="Verdana, Geneva, sans-serif" font-size="24" fill="#C7D2FE">
+    Practical local AI guide • Clean tables • Multi-language
+  </text>
+</svg>

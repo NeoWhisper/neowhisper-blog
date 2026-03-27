@@ -47,7 +47,7 @@ const FEEDS = [
   },
   {
     name: "Apple Developer News",
-    url: "https://developer.apple.com/news/rss/",
+    url: "https://developer.apple.com/news/rss/news.rss",
   },
   {
     name: "Apple ML Research",
@@ -71,7 +71,7 @@ const FEEDS = [
   },
   {
     name: "Tailwind CSS Blog",
-    url: "https://tailwindcss.com/blog/feed.xml",
+    url: "https://tailwindcss.com/blog",
   },
   {
     name: "InfoQ (AI & Dev)",
@@ -79,7 +79,7 @@ const FEEDS = [
   },
   {
     name: "InfoWorld ML",
-    url: "https://www.infoworld.com/category/machine-learning/index.rss",
+    url: "https://www.infoworld.com/artificial-intelligence/",
   },
   {
     name: "Ars Technica (Biz & IT)",
@@ -371,6 +371,7 @@ const JSON_REPAIR_MAX_ATTEMPTS = 2;
 const LENGTH_EXPANSION_MAX_ATTEMPTS = 2;
 const MODEL_FETCH_RETRY_ATTEMPTS = 3;
 const MODEL_FETCH_RETRY_DELAY_MS = 1200;
+const TITLE_POLISH_MAX_ATTEMPTS = 1;
 const LANGUAGE_ORDER = ["en", "ja", "ar"];
 const LANGUAGE_LABELS = {
   en: {
@@ -399,7 +400,7 @@ const TRANSLATION_CONFIGS = [
     systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
     instruction: "Translate and adapt this technical blog post into Japanese.",
     bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for a Japanese audience.",
+    tone: "- Tone: professional, technical, and natural for a Japanese audience. Avoid stiff literal translation.",
   },
   {
     lang: "ar",
@@ -407,9 +408,24 @@ const TRANSLATION_CONFIGS = [
     systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
     instruction: "Translate and adapt this technical blog post into Arabic.",
     bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for an Arabic audience.",
+    tone:
+      "- Tone: professional, technical, and natural for an Arabic audience in fluent Modern Standard Arabic. Avoid literal translation, awkward compounds, and title constructions that mirror English punctuation or '+' / '/' patterns.",
   },
 ];
+const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
+const API_CALLERS = {
+  responses: callResponsesEndpoint,
+  chat: callChatCompletionsEndpoint,
+};
+const HTML_FEED_EXTRACTORS = {
+  "Tailwind CSS Blog": extractTailwindBlogItems,
+  "InfoWorld ML": extractInfoWorldItems,
+};
+const TITLE_POLISH_RULES = {
+  en: "Rewrite the title and excerpt to feel sharper and more specific. Avoid generic trend-roundup phrasing.",
+  ja: "Rewrite the title and excerpt in natural Japanese tech-editor style. Avoid literal translation and generic roundup phrasing.",
+  ar: "Rewrite the title and excerpt in fluent Modern Standard Arabic. Avoid literal translation, awkward wording, and generic roundup phrasing.",
+};
 
 function normalizeSearchText(value) {
   return String(value || "")
@@ -446,13 +462,12 @@ function pickCategory(content, sources) {
     return CATEGORY_MAP.get(rawSlug);
   }
 
-  const aggregateText = [
-    content?.en?.title || "",
-    content?.en?.excerpt || "",
-    content?.en?.body || "",
-    ...sources.map((source) => `${source.title} ${source.summary}`),
-  ].join("\n");
-  const heuristicCategory = scoreCategoryFromText(aggregateText);
+  // Category should be driven by the source mix, not by the model's already-generated
+  // title/body, otherwise generic phrasing can create a self-reinforcing category loop.
+  const sourceAggregateText = sources
+    .map((source) => `${source.title} ${source.summary}`)
+    .join("\n");
+  const heuristicCategory = scoreCategoryFromText(sourceAggregateText);
   if (heuristicCategory && ALLOWED_CATEGORY_SLUGS.has(heuristicCategory.slug)) {
     return heuristicCategory;
   }
@@ -519,12 +534,12 @@ function parseDate(value) {
 
 function parseRssItems(xml, feedName) {
   const items = [];
-  for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+  for (const match of xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)) {
     const item = match[1];
     const title = extractTag(item, "title");
     const link = normalizeUrl(extractTag(item, "link"));
     const description = extractTag(item, "description");
-    const pubDate = extractTag(item, "pubDate");
+    const pubDate = extractTag(item, "pubDate") || extractTag(item, "dc:date");
     if (!title || !link) continue;
     items.push({
       feed: feedName,
@@ -559,6 +574,48 @@ function parseAtomEntries(xml, feedName) {
   return entries;
 }
 
+function extractTailwindBlogItems(html, feedName) {
+  const items = [];
+  for (const match of html.matchAll(/<a[^>]+href="(\/blog\/[^"#?]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const link = normalizeUrl(`https://tailwindcss.com${decodeEntities(match[1])}`);
+    const title = stripHtml(match[2]);
+    if (!title || !link || /^(blog|read more)$/i.test(title)) continue;
+    items.push({
+      feed: feedName,
+      title,
+      link,
+      description: "",
+      publishedAt: "",
+      publishedTimestamp: 0,
+    });
+  }
+  return dedupeByLink(items);
+}
+
+function extractInfoWorldItems(html, feedName) {
+  const items = [];
+  for (const match of html.matchAll(/<a[^>]+href="(https:\/\/www\.infoworld\.com\/article\/[^"?#]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const link = normalizeUrl(decodeEntities(match[1]));
+    const title = stripHtml(match[2]);
+    if (!title || !link) continue;
+    items.push({
+      feed: feedName,
+      title,
+      link,
+      description: "",
+      publishedAt: "",
+      publishedTimestamp: 0,
+    });
+  }
+  return dedupeByLink(items);
+}
+
+function parseHtmlFeed(html, feed) {
+  const extractor = HTML_FEED_EXTRACTORS[feed.name];
+  if (!extractor) return [];
+  return extractor(html, feed.name);
+}
+
 async function fetchFeed(feed) {
   const response = await fetch(feed.url, {
     headers: {
@@ -574,7 +631,8 @@ async function fetchFeed(feed) {
   const xml = await response.text();
   const rssItems = parseRssItems(xml, feed.name);
   const atomEntries = parseAtomEntries(xml, feed.name);
-  const all = [...rssItems, ...atomEntries];
+  const htmlItems = parseHtmlFeed(xml, feed);
+  const all = [...rssItems, ...atomEntries, ...htmlItems];
 
   if (all.length === 0) {
     throw new Error(`${feed.name} returned no parseable items`);
@@ -706,6 +764,32 @@ function ensureJson(text) {
   throw new Error(`Model response is not valid JSON. Preview: ${preview}`);
 }
 
+function needsTitlePolish(lang, title) {
+  const value = String(title || "").trim().toLowerCase();
+  if (!value) return true;
+
+  const patternMap = {
+    en: [
+      /^(latest|practical)\b/,
+      /\bai\s*[+&/]\s*it\b/,
+      /\btrends?\b.*\b20\d{2}\b/,
+    ],
+    ja: [
+      /^最新/,
+      /トレンド/,
+      /ai\s*[+＆/&]\s*it/i,
+    ],
+    ar: [
+      /اتجاهات/,
+      /أحدث/,
+      /[+/]/,
+    ],
+  };
+
+  const patterns = patternMap[lang] || patternMap.en;
+  return patterns.some((pattern) => pattern.test(value));
+}
+
 async function parseJsonWithRepair({
   text,
   label,
@@ -823,6 +907,14 @@ function shouldFallbackToChat(errorMessage, statusCode) {
   );
 }
 
+function getApiCallChain() {
+  const primaryCaller = API_CALLERS[API_MODE];
+  if (primaryCaller) {
+    return [primaryCaller];
+  }
+  return [API_CALLERS.responses, API_CALLERS.chat];
+}
+
 async function callResponsesEndpoint(systemPrompt, userPrompt, options = {}) {
   const {
     maxTokens = DEFAULT_GENERATION_MAX_TOKENS,
@@ -921,21 +1013,18 @@ async function callAi(systemPrompt, userPrompt, options = {}) {
 
   for (let attempt = 1; attempt <= MODEL_FETCH_RETRY_ATTEMPTS; attempt += 1) {
     try {
-      if (API_MODE === "responses") {
-        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
-      }
-      if (API_MODE === "chat") {
-        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
-      }
-
-      try {
-        return await callResponsesEndpoint(systemPrompt, userPrompt, options);
-      } catch (error) {
-        const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
-        if (!shouldFallbackToChat(error?.message, statusCode)) {
-          throw error;
+      const callChain = getApiCallChain();
+      for (let index = 0; index < callChain.length; index += 1) {
+        const caller = callChain[index];
+        try {
+          return await caller(systemPrompt, userPrompt, options);
+        } catch (error) {
+          const statusCode = Number.isFinite(error?.statusCode) ? error.statusCode : 0;
+          const canTryNextCaller = index < callChain.length - 1;
+          if (!canTryNextCaller || !shouldFallbackToChat(error?.message, statusCode)) {
+            throw error;
+          }
         }
-        return await callChatCompletionsEndpoint(systemPrompt, userPrompt, options);
       }
     } catch (error) {
       lastError = error;
@@ -973,6 +1062,9 @@ async function createDraftContent({ dateString, sources }) {
     "Create a tech trend brief meta-info and English version:",
     "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
     "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
+    "- The title must be specific, vivid, and publication-ready, not a generic template.",
+    "- Avoid bland openings like 'Latest', 'Practical', or 'AI & IT Trends' unless genuinely necessary.",
+    "- Prefer a concrete angle, tension, or consequence over a broad category label.",
     "- English body must be 900-1200 words (minimum 850).",
     "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
     "- Include 3-6 trend sections with deep technical analysis.",
@@ -1049,9 +1141,15 @@ async function createDraftContent({ dateString, sources }) {
 
   const expandedContent = {};
   for (const lang of LANGUAGE_ORDER) {
-    expandedContent[lang] = await expandLanguageBlockIfNeeded({
+    const expandedBlock = await expandLanguageBlockIfNeeded({
       lang,
       block: localizedContent[lang],
+      systemPrompt: promptContextByLang[lang].systemPrompt,
+      sourcePrompt: promptContextByLang[lang].userPrompt,
+    });
+    expandedContent[lang] = await polishLocalizedMetadataIfNeeded({
+      lang,
+      block: expandedBlock,
       systemPrompt: promptContextByLang[lang].systemPrompt,
       sourcePrompt: promptContextByLang[lang].userPrompt,
     });
@@ -1119,7 +1217,7 @@ function countWords(markdownBody, lang = "en") {
   // English words are space-delimited. Japanese/Arabic often aren't, so use
   // Intl.Segmenter to avoid undercounting (which can incorrectly fail QA).
   const segmentSupported =
-    lang !== "en" && typeof Intl !== "undefined" && Intl.Segmenter;
+    !LANGUAGE_SEGMENTER_EXCLUSIONS.has(lang) && typeof Intl !== "undefined" && Intl.Segmenter;
 
   return !text
     ? 0
@@ -1225,6 +1323,52 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         originalUserPrompt: expandUserPrompt,
       });
     }
+  }
+
+  return currentBlock;
+}
+
+async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sourcePrompt }) {
+  let currentBlock = block;
+
+  for (let attempt = 0; attempt < TITLE_POLISH_MAX_ATTEMPTS; attempt += 1) {
+    if (!needsTitlePolish(lang, currentBlock?.title)) {
+      return currentBlock;
+    }
+
+    console.log(`[daily-trends] ${lang}: polishing generic title/excerpt...`);
+    const polishSystemPrompt = [
+      systemPrompt,
+      "You are revising only the title and excerpt for editorial quality.",
+      "Return ONLY a valid JSON object.",
+    ].join("\n");
+
+    const polishUserPrompt = [
+      sourcePrompt,
+      "",
+      TITLE_POLISH_RULES[lang] || TITLE_POLISH_RULES.en,
+      "Keep the body unchanged.",
+      "Do not make the title vague. Make it specific and natural.",
+      "",
+      "Current draft JSON:",
+      JSON.stringify(currentBlock),
+      "",
+      'Return schema: { "title": "...", "excerpt": "...", "body": "markdown" }',
+    ].join("\n");
+
+    const polishedRaw = await callAi(polishSystemPrompt, polishUserPrompt, {
+      maxTokens: DEFAULT_GENERATION_MAX_TOKENS,
+      temperature: 0.3,
+      responseFormat: { type: "json_object" },
+    });
+
+    currentBlock = await parseJsonWithRepair({
+      text: polishedRaw,
+      label: `${lang} title polish`,
+      schemaDescription: '{ "title": "...", "excerpt": "...", "body": "markdown" }',
+      originalSystemPrompt: polishSystemPrompt,
+      originalUserPrompt: polishUserPrompt,
+    });
   }
 
   return currentBlock;

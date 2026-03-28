@@ -191,6 +191,21 @@ const POLITICS_KEYWORDS = [
   "voting",
 ];
 
+const FINANCE_KEYWORDS = [
+  "oil market",
+  "crude oil",
+  "brent",
+  "wti",
+  "stock market",
+  "exchange rate",
+  "inflation",
+  "commodity",
+  "barrel",
+  "gas price",
+  "mortgage",
+  "interest rate",
+];
+
 const CATEGORY_DEFINITIONS = [
   {
     slug: "software-development",
@@ -397,19 +412,19 @@ const TRANSLATION_CONFIGS = [
   {
     lang: "ja",
     logLabel: "Japanese",
-    systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Japanese.",
+    systemPrompt: "You are a senior Japanese tech editor at NeoWhisper. Your tone is professional, confident, and slightly warm—like a senior peer sharing insights. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Japanese for builders and creators.",
     bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for a Japanese audience. Avoid stiff literal translation.",
+    tone: "- Tone: professional yet approachable (not stiff formal). Avoid literal translation and corporate clichés.",
   },
   {
     lang: "ar",
     logLabel: "Arabic",
-    systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Arabic.",
+    systemPrompt: "You are a senior Arabic tech editor at NeoWhisper. Your tone is professional, confident, and slightly soft/lighter—like a senior peer sharing insights in Modern Standard Arabic. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Arabic for builders and creators.",
     bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
     tone:
-      "- Tone: professional, technical, and natural for an Arabic audience in fluent Modern Standard Arabic. Avoid literal translation, awkward compounds, and title constructions that mirror English punctuation or '+' / '/' patterns.",
+      "- Tone: professional and natural for an Arabic tech audience. Avoid literal translation and corporate clichés.",
   },
 ];
 const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
@@ -656,9 +671,18 @@ function hasPoliticsKeyword(text) {
   return POLITICS_KEYWORDS.some((keyword) => haystack.includes(keyword));
 }
 
+function hasFinanceKeyword(text) {
+  const haystack = text.toLowerCase();
+  return FINANCE_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
 function isAllowedTopicItem(item) {
   const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
-  return !hasPoliticsKeyword(text) && (hasTrendKeyword(text) || hasArtKeyword(text));
+  return (
+    !hasPoliticsKeyword(text) &&
+    !hasFinanceKeyword(text) &&
+    (hasTrendKeyword(text) || hasArtKeyword(text))
+  );
 }
 
 function dedupeByLink(items) {
@@ -712,6 +736,58 @@ function slugify(value) {
     .replace(/^-|-$/g, "");
 }
 
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const text = String(value || "").trim();
+    if (text) return text;
+  }
+  return "";
+}
+
+function deriveTitleFromBody(markdownBody) {
+  const body = String(markdownBody || "");
+  const headingMatch = body.match(/^##\s*[0-9٠-٩]+\.\s+(.+)$/m);
+  if (headingMatch?.[1]) {
+    return headingMatch[1].trim().slice(0, 110);
+  }
+
+  const firstParagraph = body
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^#+\s*/, "").trim())
+    .find((line) => line && !line.startsWith("|"));
+  return String(firstParagraph || "").slice(0, 110).trim();
+}
+
+function deriveExcerptFromBody(markdownBody, maxLength = 240) {
+  const body = String(markdownBody || "");
+  const tableIndex = body.indexOf("|");
+  const textBeforeTable = tableIndex >= 0 ? body.slice(0, tableIndex) : body;
+
+  const cleanText = textBeforeTable
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleanText) return "";
+  return cleanText.slice(0, maxLength).trim();
+}
+
+function normalizeLanguageBlock(lang, block, fallbackBlock = {}) {
+  const incoming = block && typeof block === "object" ? block : {};
+  const fallback = fallbackBlock && typeof fallbackBlock === "object" ? fallbackBlock : {};
+
+  const body = firstNonEmpty(incoming.body, fallback.body);
+  return {
+    title: firstNonEmpty(
+      incoming.title,
+      fallback.title,
+      deriveTitleFromBody(body),
+      `AI & IT Trend Brief (${lang.toUpperCase()})`,
+    ),
+    excerpt: firstNonEmpty(incoming.excerpt, fallback.excerpt, deriveExcerptFromBody(body)),
+    body,
+  };
+}
+
 function ensureJson(text) {
   const raw = String(text || "").trim();
 
@@ -741,7 +817,9 @@ function ensureJson(text) {
   const repairCommonJsonIssues = (value) => {
     const s = String(value || "");
     // Remove trailing commas: { "a": 1, } or [1,2,]
-    return s.replace(/,\s*([}\]])/g, "$1");
+    return s
+      .replace(/,\s*([}\]])/g, "$1")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, " ");
   };
 
   const attemptOrder = [
@@ -1051,7 +1129,8 @@ async function createDraftContent({ dateString, sources }) {
   // 1. Generate Metadata and English Content
   console.log("[daily-trends] generating base metadata and English content...");
   const baseSystemPrompt = [
-    "You are a senior tech editor.",
+    "You are the blog writer for NeoWhisper, a Tokyo-based AI and IT studio building practical tools for designers, engineers, and product teams.",
+    "Your job is to write blog posts that feel professional and useful, but also a bit light and enjoyable to read for hands-on builders.",
     "Return ONLY a valid JSON object.",
   ].join("\n");
 
@@ -1059,16 +1138,28 @@ async function createDraftContent({ dateString, sources }) {
     `Date: ${dateString}`,
     TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
     "",
-    "Create a tech trend brief meta-info and English version:",
-    "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
-    "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
-    "- The title must be specific, vivid, and publication-ready, not a generic template.",
-    "- Avoid bland openings like 'Latest', 'Practical', or 'AI & IT Trends' unless genuinely necessary.",
-    "- Prefer a concrete angle, tension, or consequence over a broad category label.",
-    "- English body must be 900-1200 words (minimum 850).",
-    "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
-    "- Include 3-6 trend sections with deep technical analysis.",
-    "- End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
+    "Create a tech trend brief draft using the NeoWhisper Blog Style Guide:",
+    "### Tone and Voice",
+    "- Write like a senior engineer or designer talking to peers (professional, confident, but not stiff).",
+    "- Add a subtle touch of warmth and optimism. Use contractions sometimes.",
+    "- Avoid jokes/memes, but prefer simple language like 'save your designer an afternoon' over corporate clichés.",
+    "- Avoid buzzwords like 'unlock new opportunities' or 'revolutionize'.",
+    "",
+    "### Structure Requirements",
+    "1. **Intro (2-3 sentences)**: Set the scene and state why this matters for small studios/creators.",
+    "2. **Main Sections (3-6 trends)**:",
+    "   - Use human-sounding H2 headings (e.g., 'Let AI Handle the Boring Parts').",
+    "   - For each: 2-3 sentences of plain-language explanation.",
+    "   - Include a concrete scenario starting with 'For example,' or 'Imagine...' (e.g., branding studio, solo dev, gallery curator).",
+    "   - A 'What this means for your team' part with 2-3 impact-focused bullet points.",
+    "   - Optionally a 'Try this next' part with 2-3 concrete actions.",
+    "3. **NeoWhisper Angle**: Naturally mention a capability (AI workflows, multilingual UX, or small-team dev) in 1-2 sentences.",
+    "4. **Closing (2-3 sentences)**: Summarize the takeaway and invite the reader to experiment.",
+    "5. **Takeaway Table**: End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps). Ensure one blank line before it starts.",
+    "",
+    "### Constraints",
+    "- Focus: latest AI + IT + art/design practical trends. ONLY IT/software/design topics.",
+    "- English body length: 900-1200 words (minimum 850).",
     `- Pick exactly one category slug from: ${allowedCategoryList}.`,
     "",
     "Output schema:",
@@ -1078,7 +1169,7 @@ async function createDraftContent({ dateString, sources }) {
     '  "en": { "title": "...", "excerpt": "...", "body": "markdown" }',
     "}",
     "",
-    "Sources:",
+    "Sources (to transform into the sections above):",
     ...sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title} | ${s.url}\nSummary: ${s.summary}`),
   ].join("\n");
 
@@ -1094,6 +1185,7 @@ async function createDraftContent({ dateString, sources }) {
     originalSystemPrompt: baseSystemPrompt,
     originalUserPrompt: baseUserPrompt,
   });
+  baseResult.en = normalizeLanguageBlock("en", baseResult?.en);
 
   const localizedContent = { en: baseResult.en };
   const promptContextByLang = {
@@ -1109,6 +1201,7 @@ async function createDraftContent({ dateString, sources }) {
       translation.instruction,
       translation.bodyRequirement,
       "- Maintain the exact same structure (H2 headings, takeaway table).",
+      "- Ensure there is a blank line before the takeaway table for correct markdown rendering.",
       translation.tone,
       "",
       "Source (English):",
@@ -1133,6 +1226,10 @@ async function createDraftContent({ dateString, sources }) {
       originalSystemPrompt: translation.systemPrompt,
       originalUserPrompt: userPrompt,
     });
+    localizedContent[translation.lang] = normalizeLanguageBlock(
+      translation.lang,
+      localizedContent[translation.lang],
+    );
     promptContextByLang[translation.lang] = {
       systemPrompt: translation.systemPrompt,
       userPrompt,
@@ -1303,6 +1400,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         `Current estimated word count: ${currentWordCount}.`,
         `Revise and expand it so the body is comfortably above ${MIN_WORDS_EXCLUSIVE} words while preserving the same topic and structure.`,
         "Keep at least 3 `## 1.` style trend sections and end with the markdown takeaway table.",
+        "Ensure there is a blank line before the takeaway table.",
         "Strengthen analysis with more technical detail, practical implications, and actionable recommendations.",
         "",
         "Current draft JSON:",
@@ -1315,6 +1413,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         responseFormat: { type: "json_object" },
       });
 
+      const previousBlock = currentBlock;
       currentBlock = await parseJsonWithRepair({
         text: expandedRaw,
         label: `${lang} expansion`,
@@ -1322,6 +1421,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         originalSystemPrompt: expandSystemPrompt,
         originalUserPrompt: expandUserPrompt,
       });
+      currentBlock = normalizeLanguageBlock(lang, currentBlock, previousBlock);
     }
   }
 
@@ -1362,6 +1462,7 @@ async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sour
       responseFormat: { type: "json_object" },
     });
 
+    const previousBlock = currentBlock;
     currentBlock = await parseJsonWithRepair({
       text: polishedRaw,
       label: `${lang} title polish`,
@@ -1369,6 +1470,7 @@ async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sour
       originalSystemPrompt: polishSystemPrompt,
       originalUserPrompt: polishUserPrompt,
     });
+    currentBlock = normalizeLanguageBlock(lang, currentBlock, previousBlock);
   }
 
   return currentBlock;

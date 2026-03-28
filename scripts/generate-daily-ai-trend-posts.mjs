@@ -412,19 +412,19 @@ const TRANSLATION_CONFIGS = [
   {
     lang: "ja",
     logLabel: "Japanese",
-    systemPrompt: "You are a senior Japanese tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Japanese.",
+    systemPrompt: "You are a senior Japanese tech editor at NeoWhisper. Your tone is professional, confident, and slightly warm—like a senior peer sharing insights. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Japanese for builders and creators.",
     bodyRequirement: "- The Japanese body must be 900-1200 words (minimum 850).",
-    tone: "- Tone: professional, technical, and natural for a Japanese audience. Avoid stiff literal translation.",
+    tone: "- Tone: professional yet approachable (not stiff formal). Avoid literal translation and corporate clichés.",
   },
   {
     lang: "ar",
     logLabel: "Arabic",
-    systemPrompt: "You are a senior Arabic tech editor. Return ONLY a valid JSON object.",
-    instruction: "Translate and adapt this technical blog post into Arabic.",
+    systemPrompt: "You are a senior Arabic tech editor at NeoWhisper. Your tone is professional, confident, and slightly soft/lighter—like a senior peer sharing insights in Modern Standard Arabic. Return ONLY a valid JSON object.",
+    instruction: "Translate and adapt this technical blog post into Arabic for builders and creators.",
     bodyRequirement: "- The Arabic body must be 900-1200 words (minimum 850).",
     tone:
-      "- Tone: professional, technical, and natural for an Arabic audience in fluent Modern Standard Arabic. Avoid literal translation, awkward compounds, and title constructions that mirror English punctuation or '+' / '/' patterns.",
+      "- Tone: professional and natural for an Arabic tech audience. Avoid literal translation and corporate clichés.",
   },
 ];
 const LANGUAGE_SEGMENTER_EXCLUSIONS = new Set(["en"]);
@@ -1129,7 +1129,8 @@ async function createDraftContent({ dateString, sources }) {
   // 1. Generate Metadata and English Content
   console.log("[daily-trends] generating base metadata and English content...");
   const baseSystemPrompt = [
-    "You are a senior tech editor.",
+    "You are the blog writer for NeoWhisper, a Tokyo-based AI and IT studio building practical tools for designers, engineers, and product teams.",
+    "Your job is to write blog posts that feel professional and useful, but also a bit light and enjoyable to read for hands-on builders.",
     "Return ONLY a valid JSON object.",
   ].join("\n");
 
@@ -1137,16 +1138,28 @@ async function createDraftContent({ dateString, sources }) {
     `Date: ${dateString}`,
     TOPIC_HINT ? `Topic hint: ${TOPIC_HINT}` : "Topic hint: none",
     "",
-    "Create a tech trend brief meta-info and English version:",
-    "- Theme: latest AI + IT + art/design practical trends for builders and product teams.",
-    "- Scope guardrail: ONLY IT/software/developer/art/design topics. Do NOT include politics/current affairs.",
-    "- The title must be specific, vivid, and publication-ready, not a generic template.",
-    "- Avoid bland openings like 'Latest', 'Practical', or 'AI & IT Trends' unless genuinely necessary.",
-    "- Prefer a concrete angle, tension, or consequence over a broad category label.",
-    "- English body must be 900-1200 words (minimum 850).",
-    "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
-    "- Include 3-6 trend sections with deep technical analysis.",
-    "- End with a 3-column markdown table. IMPORTANT: Ensure there is at least one blank line before the table starts (Trend | What It Means for Your Team | Practical Steps).",
+    "Create a tech trend brief draft using the NeoWhisper Blog Style Guide:",
+    "### Tone and Voice",
+    "- Write like a senior engineer or designer talking to peers (professional, confident, but not stiff).",
+    "- Add a subtle touch of warmth and optimism. Use contractions sometimes.",
+    "- Avoid jokes/memes, but prefer simple language like 'save your designer an afternoon' over corporate clichés.",
+    "- Avoid buzzwords like 'unlock new opportunities' or 'revolutionize'.",
+    "",
+    "### Structure Requirements",
+    "1. **Intro (2-3 sentences)**: Set the scene and state why this matters for small studios/creators.",
+    "2. **Main Sections (3-6 trends)**:",
+    "   - Use human-sounding H2 headings (e.g., 'Let AI Handle the Boring Parts').",
+    "   - For each: 2-3 sentences of plain-language explanation.",
+    "   - Include a concrete scenario starting with 'For example,' or 'Imagine...' (e.g., branding studio, solo dev, gallery curator).",
+    "   - A 'What this means for your team' part with 2-3 impact-focused bullet points.",
+    "   - Optionally a 'Try this next' part with 2-3 concrete actions.",
+    "3. **NeoWhisper Angle**: Naturally mention a capability (AI workflows, multilingual UX, or small-team dev) in 1-2 sentences.",
+    "4. **Closing (2-3 sentences)**: Summarize the takeaway and invite the reader to experiment.",
+    "5. **Takeaway Table**: End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps). Ensure one blank line before it starts.",
+    "",
+    "### Constraints",
+    "- Focus: latest AI + IT + art/design practical trends. ONLY IT/software/design topics.",
+    "- English body length: 900-1200 words (minimum 850).",
     `- Pick exactly one category slug from: ${allowedCategoryList}.`,
     "",
     "Output schema:",
@@ -1156,7 +1169,7 @@ async function createDraftContent({ dateString, sources }) {
     '  "en": { "title": "...", "excerpt": "...", "body": "markdown" }',
     "}",
     "",
-    "Sources:",
+    "Sources (to transform into the sections above):",
     ...sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title} | ${s.url}\nSummary: ${s.summary}`),
   ].join("\n");
 

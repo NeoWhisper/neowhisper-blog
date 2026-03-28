@@ -191,6 +191,21 @@ const POLITICS_KEYWORDS = [
   "voting",
 ];
 
+const FINANCE_KEYWORDS = [
+  "oil market",
+  "crude oil",
+  "brent",
+  "wti",
+  "stock market",
+  "exchange rate",
+  "inflation",
+  "commodity",
+  "barrel",
+  "gas price",
+  "mortgage",
+  "interest rate",
+];
+
 const CATEGORY_DEFINITIONS = [
   {
     slug: "software-development",
@@ -656,9 +671,18 @@ function hasPoliticsKeyword(text) {
   return POLITICS_KEYWORDS.some((keyword) => haystack.includes(keyword));
 }
 
+function hasFinanceKeyword(text) {
+  const haystack = text.toLowerCase();
+  return FINANCE_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
 function isAllowedTopicItem(item) {
   const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
-  return !hasPoliticsKeyword(text) && (hasTrendKeyword(text) || hasArtKeyword(text));
+  return (
+    !hasPoliticsKeyword(text) &&
+    !hasFinanceKeyword(text) &&
+    (hasTrendKeyword(text) || hasArtKeyword(text))
+  );
 }
 
 function dedupeByLink(items) {
@@ -735,13 +759,16 @@ function deriveTitleFromBody(markdownBody) {
 }
 
 function deriveExcerptFromBody(markdownBody, maxLength = 240) {
-  const text = String(markdownBody || "")
+  const body = String(markdownBody || "");
+  const tableIndex = body.indexOf("|");
+  const textBeforeTable = tableIndex >= 0 ? body.slice(0, tableIndex) : body;
+
+  const cleanText = textBeforeTable
     .replace(/^#{1,6}\s+/gm, "")
-    .replace(/\|/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  if (!text) return "";
-  return text.slice(0, maxLength).trim();
+  if (!cleanText) return "";
+  return cleanText.slice(0, maxLength).trim();
 }
 
 function normalizeLanguageBlock(lang, block, fallbackBlock = {}) {
@@ -1119,7 +1146,7 @@ async function createDraftContent({ dateString, sources }) {
     "- English body must be 900-1200 words (minimum 850).",
     "- Use markdown H2 headings for trend sections: `## 1. Trend name`.",
     "- Include 3-6 trend sections with deep technical analysis.",
-    "- End with a 3-column markdown table (Trend | What It Means for Your Team | Practical Steps).",
+    "- End with a 3-column markdown table. IMPORTANT: Ensure there is at least one blank line before the table starts (Trend | What It Means for Your Team | Practical Steps).",
     `- Pick exactly one category slug from: ${allowedCategoryList}.`,
     "",
     "Output schema:",
@@ -1161,6 +1188,7 @@ async function createDraftContent({ dateString, sources }) {
       translation.instruction,
       translation.bodyRequirement,
       "- Maintain the exact same structure (H2 headings, takeaway table).",
+      "- Ensure there is a blank line before the takeaway table for correct markdown rendering.",
       translation.tone,
       "",
       "Source (English):",
@@ -1359,6 +1387,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         `Current estimated word count: ${currentWordCount}.`,
         `Revise and expand it so the body is comfortably above ${MIN_WORDS_EXCLUSIVE} words while preserving the same topic and structure.`,
         "Keep at least 3 `## 1.` style trend sections and end with the markdown takeaway table.",
+        "Ensure there is a blank line before the takeaway table.",
         "Strengthen analysis with more technical detail, practical implications, and actionable recommendations.",
         "",
         "Current draft JSON:",

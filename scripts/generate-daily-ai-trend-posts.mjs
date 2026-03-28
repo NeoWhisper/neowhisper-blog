@@ -712,6 +712,55 @@ function slugify(value) {
     .replace(/^-|-$/g, "");
 }
 
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const text = String(value || "").trim();
+    if (text) return text;
+  }
+  return "";
+}
+
+function deriveTitleFromBody(markdownBody) {
+  const body = String(markdownBody || "");
+  const headingMatch = body.match(/^##\s*[0-9٠-٩]+\.\s+(.+)$/m);
+  if (headingMatch?.[1]) {
+    return headingMatch[1].trim().slice(0, 110);
+  }
+
+  const firstParagraph = body
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^#+\s*/, "").trim())
+    .find((line) => line && !line.startsWith("|"));
+  return String(firstParagraph || "").slice(0, 110).trim();
+}
+
+function deriveExcerptFromBody(markdownBody, maxLength = 240) {
+  const text = String(markdownBody || "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\|/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+  return text.slice(0, maxLength).trim();
+}
+
+function normalizeLanguageBlock(lang, block, fallbackBlock = {}) {
+  const incoming = block && typeof block === "object" ? block : {};
+  const fallback = fallbackBlock && typeof fallbackBlock === "object" ? fallbackBlock : {};
+
+  const body = firstNonEmpty(incoming.body, fallback.body);
+  return {
+    title: firstNonEmpty(
+      incoming.title,
+      fallback.title,
+      deriveTitleFromBody(body),
+      `AI & IT Trend Brief (${lang.toUpperCase()})`,
+    ),
+    excerpt: firstNonEmpty(incoming.excerpt, fallback.excerpt, deriveExcerptFromBody(body)),
+    body,
+  };
+}
+
 function ensureJson(text) {
   const raw = String(text || "").trim();
 
@@ -741,7 +790,9 @@ function ensureJson(text) {
   const repairCommonJsonIssues = (value) => {
     const s = String(value || "");
     // Remove trailing commas: { "a": 1, } or [1,2,]
-    return s.replace(/,\s*([}\]])/g, "$1");
+    return s
+      .replace(/,\s*([}\]])/g, "$1")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, " ");
   };
 
   const attemptOrder = [
@@ -1094,6 +1145,7 @@ async function createDraftContent({ dateString, sources }) {
     originalSystemPrompt: baseSystemPrompt,
     originalUserPrompt: baseUserPrompt,
   });
+  baseResult.en = normalizeLanguageBlock("en", baseResult?.en);
 
   const localizedContent = { en: baseResult.en };
   const promptContextByLang = {
@@ -1133,6 +1185,10 @@ async function createDraftContent({ dateString, sources }) {
       originalSystemPrompt: translation.systemPrompt,
       originalUserPrompt: userPrompt,
     });
+    localizedContent[translation.lang] = normalizeLanguageBlock(
+      translation.lang,
+      localizedContent[translation.lang],
+    );
     promptContextByLang[translation.lang] = {
       systemPrompt: translation.systemPrompt,
       userPrompt,
@@ -1315,6 +1371,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         responseFormat: { type: "json_object" },
       });
 
+      const previousBlock = currentBlock;
       currentBlock = await parseJsonWithRepair({
         text: expandedRaw,
         label: `${lang} expansion`,
@@ -1322,6 +1379,7 @@ async function expandLanguageBlockIfNeeded({ lang, block, systemPrompt, sourcePr
         originalSystemPrompt: expandSystemPrompt,
         originalUserPrompt: expandUserPrompt,
       });
+      currentBlock = normalizeLanguageBlock(lang, currentBlock, previousBlock);
     }
   }
 
@@ -1362,6 +1420,7 @@ async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sour
       responseFormat: { type: "json_object" },
     });
 
+    const previousBlock = currentBlock;
     currentBlock = await parseJsonWithRepair({
       text: polishedRaw,
       label: `${lang} title polish`,
@@ -1369,6 +1428,7 @@ async function polishLocalizedMetadataIfNeeded({ lang, block, systemPrompt, sour
       originalSystemPrompt: polishSystemPrompt,
       originalUserPrompt: polishUserPrompt,
     });
+    currentBlock = normalizeLanguageBlock(lang, currentBlock, previousBlock);
   }
 
   return currentBlock;

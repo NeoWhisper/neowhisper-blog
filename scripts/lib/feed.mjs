@@ -1,3 +1,5 @@
+import stripTags from "striptags";
+
 export async function fetchFeed(f) {
   const r = await fetch(f.url, { headers: { "User-Agent": "NeoWhisper/1.0" } });
   if (!r.ok) throw new Error(`${f.name} error`);
@@ -9,9 +11,9 @@ export async function fetchFeed(f) {
     const lMatch = i.match(/<link>([\s\S]*?)<\/link>/i);
     const dMatch = i.match(/<description>([\s\S]*?)<\/description>/i);
     
-    const t = tMatch?.[1]?.replace(/<[^>]+>/g, "");
+    const t = tMatch?.[1] ? stripTags(tMatch[1]) : undefined;
     const l = lMatch?.[1];
-    const d = dMatch?.[1]?.replace(/<[^>]+>/g, "");
+    const d = dMatch?.[1] ? stripTags(dMatch[1]) : undefined;
     
     if (t && l) res.push({ feed: f.name, title: t, link: l, description: d });
   }

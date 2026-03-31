@@ -23,13 +23,18 @@ function isLowValueBriefPost(slug: string, content: string): boolean {
   const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
   if (!isBrief) return false;
 
-  const wordCount = content
+  const cleanContent = content
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+    .trim();
+
+  let wordCount;
+  if (slug.endsWith("-ja")) {
+    wordCount = Math.round(cleanContent.length / 2.5);
+  } else {
+    wordCount = cleanContent.split(/\s+/).filter(Boolean).length;
+  }
 
   return wordCount < 900;
 }

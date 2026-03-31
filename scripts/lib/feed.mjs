@@ -21,7 +21,7 @@ export async function fetchFeed(f) {
     const dMatch = i.match(/<description>([\s\S]*?)<\/description>/i);
     const t = sanitizeFeedText(tMatch?.[1]);
     const l = lMatch?.[1];
-    const d = dMatch?.[1] ? stripTags(dMatch[1]) : undefined;
+    const d = sanitizeFeedText(dMatch?.[1]);
 
     if (t && l) res.push({ feed: f.name, title: t, link: l, description: d });
   }

@@ -4,9 +4,9 @@ function sanitizeFeedText(raw) {
   if (!raw) return raw;
   const withoutTags = stripTags(raw);
   return withoutTags
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">");
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
 }
 
 export async function fetchFeed(f) {

@@ -31,13 +31,8 @@
     "gray-matter": "^4.0.3",
     "he": "^1.2.0",
     "highlight.js": "^11.11.1",
-<<<<<<< dependabot/npm_and_yarn/isomorphic-dompurify-3.7.1
     "isomorphic-dompurify": "^3.7.1",
-    "lucide-react": "^0.577.0",
-=======
-    "isomorphic-dompurify": "^3.6.0",
     "lucide-react": "^1.7.0",
->>>>>>> main
     "marked": "^17.0.5",
     "next": "^16.1.6",
     "next-mdx-remote": "^6.0.0",

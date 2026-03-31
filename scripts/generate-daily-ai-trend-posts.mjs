@@ -32,6 +32,51 @@ function yamlString(value) {
   return json.slice(1, -1);
 }
 
+/**
+ * Generate a markdown anchor from a heading text
+ * Matches GitHub/GitHub-flavored markdown anchor generation
+ */
+function headingToAnchor(headingText) {
+  return headingText
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars except spaces and hyphens
+    .replace(/\s+/g, "-")         // Replace spaces with hyphens
+    .replace(/-+/g, "-")          // Collapse multiple hyphens
+    .replace(/^-|-$/g, "");       // Trim leading/trailing hyphens
+}
+
+/**
+ * Extract headings from markdown content and generate TOC
+ * Only includes ## (h2) headings, skips the TOC heading itself
+ */
+function generateToc(markdownBody, tocHeading) {
+  const headingRegex = /^##\s+(.+)$/gm;
+  const headings = [];
+  let match;
+
+  while ((match = headingRegex.exec(markdownBody)) !== null) {
+    const headingText = match[1].trim();
+    // Skip if this is the TOC heading itself or references heading
+    if (headingText.toLowerCase().includes("table of contents") ||
+      headingText.toLowerCase().includes("目次") ||
+      headingText.toLowerCase().includes("المحتويات") ||
+      headingText.toLowerCase().includes("references") ||
+      headingText.toLowerCase().includes("参考リンク") ||
+      headingText.toLowerCase().includes("المراجع")) {
+      continue;
+    }
+    headings.push({
+      text: headingText,
+      anchor: headingToAnchor(headingText)
+    });
+  }
+
+  if (headings.length === 0) return "";
+
+  const tocItems = headings.map(h => `- [${h.text}](#${h.anchor})`).join("\n");
+  return `${tocHeading}\n\n${tocItems}\n\n---\n\n`;
+}
+
 async function main() {
   if (!process.env.OPENAI_API_KEY && isOfficialOpenAiBaseUrl(API_BASE_URL)) {
     console.log("OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation.");
@@ -63,6 +108,7 @@ async function main() {
   for (const lang of LANGUAGE_ORDER) {
     const meta = LANGUAGE_LABELS[lang];
     const finalBody = Object.values(content[lang].sections).join("\n\n");
+    const toc = generateToc(finalBody, meta.tocHeading);
     const doc = [
       "---",
       `title: "${yamlString(content[lang].title)}"`,
@@ -75,6 +121,7 @@ async function main() {
       '  picture: "/images/author.png"',
       "---",
       "",
+      toc,
       finalBody,
       "",
       meta.referencesHeading,

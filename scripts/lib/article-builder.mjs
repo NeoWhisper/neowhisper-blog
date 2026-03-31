@@ -7,10 +7,10 @@ import { pickCategory, computeWordCounts, selectSectionsToExpand, polishMetadata
 export async function generateOutline({ dateString, sources, categorySlug }) {
   const stageId = startStage("generateOutline", { dateString, categorySlug });
   const systemPrompt = `${SYSTEM_RULES}\nTask: Create a staged article outline for ${dateString} category ${categorySlug}.`;
-  
+
   let retryMsg = "";
   let lastErr = null;
-  
+
   for (let attempt = 0; attempt < 3; attempt++) {
     const userPrompt = `
 Sources:
@@ -30,9 +30,9 @@ Return JSON only.
     try {
       const raw = await callAi(systemPrompt, userPrompt, { responseFormat: { type: "json_object" } });
       const outline = await parseJsonWithRepair({ text: raw, label: "outline generation" });
-      
+
       if (!Array.isArray(outline.sections) || outline.sections.length < 3) throw new Error("Sections array must have at least 3 items");
-      
+
       let totalWords = 0;
       const idSet = new Set();
       for (const sec of outline.sections) {
@@ -40,14 +40,14 @@ Return JSON only.
         if (typeof sec.title !== "string") throw new Error("Missing section title");
         if (typeof sec.intent !== "string") throw new Error("Missing section intent");
         if (typeof sec.targetWordCount !== "number") throw new Error("targetWordCount must be a number");
-        
+
         if (idSet.has(sec.id)) throw new Error("Duplicate section id");
         idSet.add(sec.id);
         totalWords += sec.targetWordCount;
       }
-      
+
       if (totalWords < 800) throw new Error("total targetWordCount < 800");
-      
+
       endStage(stageId, { sections: outline.sections.length });
       return outline;
 
@@ -57,7 +57,7 @@ Return JSON only.
       retryMsg = "\nThe previous outline was rejected. Ensure every section has id, title, intent, and targetWordCount fields.";
     }
   }
-  
+
   endStage(stageId, { error: lastErr?.message });
   throw new Error(`Outline generation failed after retries: ${lastErr?.message}`);
 }
@@ -70,13 +70,15 @@ export async function generateSection(section, sources, outline, previousSection
     : "None yet.";
 
   const userPrompt = `
-Section ID: ${section.id} 
+Section ID: ${section.id}
 Outline: ${JSON.stringify(outline.sections)}
 Sources Data Summary: ${sources.map(s => s.title).join(", ")}
 
 Generate about ${section.targetWordCount} words of detailed technical content.
 Include "Imagine..." for trends and "What this means for your team" bullets.
 Table section must be markdown.
+
+IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
 
 Do not repeat or rephrase content already covered in the following accepted sections:
 ${summariesText}
@@ -95,10 +97,10 @@ Return JSON { "body": "Markdown string" }
 export async function translateSection(enBody, lang, sectionId) {
   const stageId = startStage("translateSection", { sectionId, lang });
   const systemPrompt = `${SYSTEM_RULES}\nTranslation: Senior tech editor for ${lang}.`;
-  
+
   let retryMsg = "";
   let finalBody = "";
-  
+
   for (let attempt = 0; attempt < 2; attempt++) {
     const userPrompt = `
 Translate to ${lang}:
@@ -112,33 +114,33 @@ Return JSON { "body": "Markdown string" }
     const res = await parseJsonWithRepair({ text: raw, label: `section [${sectionId}] ${lang}` });
     const body = res.body || "";
     finalBody = body;
-    
+
     if (!body.trim()) {
       retryMsg = "\nThe previous translation had structural issues. Preserve the same heading structure and list structure as the source.";
       continue;
     }
-    
+
     const countHeadings = text => (text.match(/^(##|###)\s/gm) || []).length;
     const countLists = text => (text.match(/^[-*]\s/gm) || []).length;
-    
+
     if (countHeadings(body) !== countHeadings(enBody)) {
       retryMsg = "\nThe previous translation had structural issues. Preserve the same heading structure and list structure as the source.";
       continue;
     }
-    
+
     if (Math.abs(countLists(body) - countLists(enBody)) > 2) {
       retryMsg = "\nThe previous translation had structural issues. Preserve the same heading structure and list structure as the source.";
       continue;
     }
-    
+
     break; // Checks passed
   }
-  
+
   if (!finalBody) {
     console.warn(`[daily-trends] translation parity check failed for ${lang} section ${sectionId} after retries. Continuing anyway.`);
     finalBody = "Translation incomplete.";
   }
-  
+
   endStage(stageId);
   return finalBody;
 }
@@ -177,7 +179,7 @@ export async function createStagedArticle({ dateString, sources }) {
     console.log(`[daily-trends] creating section ${section.id}...`);
     let en = await generateSection(section, sources, outline, completedEn);
     stagedContent.en.sections[section.id] = en;
-    
+
     // Extract summary
     const summaryRaw = await callAi(
       "You are a summarizer.",

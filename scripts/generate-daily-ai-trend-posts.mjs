@@ -70,7 +70,7 @@ async function main() {
       "",
       finalBody,
       "",
-      `## ${meta.referencesHeading}`,
+      meta.referencesHeading,
       "",
       ranked.map(s => `- [${s.title}](${s.url})`).join("\n")
     ].join("\n");

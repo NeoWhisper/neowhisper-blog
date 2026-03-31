@@ -197,7 +197,7 @@ export async function createStagedArticle({ dateString, sources }) {
     let total = computeWordCounts(stagedContent[lang].sections, lang);
     let attempts = 0;
     while (total < MIN_WORDS_THRESHOLD && attempts < EXPANSION_RETRY_LIMIT && AiState.totalTokensUsed <= MAX_TOKENS_PER_RUN) {
-      const targets = selectSectionsToExpand(stagedContent[lang].sections, lang);
+      const targets = selectSectionsToExpand(stagedContent[lang].sections);
       if (targets.length === 0) break;
       const targetId = targets[0];
       console.log(`[daily-trends] ${lang} under length (${total}w), expanding ${targetId}...`);

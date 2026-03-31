@@ -56,11 +56,17 @@ async function main() {
   for (const lang of LANGUAGE_ORDER) {
     const meta = LANGUAGE_LABELS[lang];
     const finalBody = Object.values(content[lang].sections).join("\n\n");
+    const safeTitle = content[lang].title
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"');
+    const safeExcerpt = content[lang].excerpt
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"');
     const doc = [
       "---",
-      `title: "${content[lang].title.replace(/"/g, '\\"')}"`,
+      `title: "${safeTitle}"`,
       `date: "${dateString}"`,
-      `excerpt: "${content[lang].excerpt.replace(/"/g, '\\"')}"`,
+      `excerpt: "${safeExcerpt}"`,
       `category: "${category[meta.categoryNameKey]}"`,
       `coverImage: "${COVER_IMAGE}"`,
       "author:",

@@ -1,12 +1,10 @@
 import stripTags from "striptags";
+import he from "he";
 
 function sanitizeFeedText(raw) {
   if (!raw) return raw;
   const withoutTags = stripTags(raw);
-  return withoutTags
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+  return he.decode(withoutTags);
 }
 
 export async function fetchFeed(f) {

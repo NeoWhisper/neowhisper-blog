@@ -25,6 +25,13 @@ import { flushMetrics } from "./lib/metrics.mjs";
 import { createStagedArticle } from "./lib/article-builder.mjs";
 import { LANGUAGE_ORDER, LANGUAGE_LABELS } from "./lib/constants.mjs";
 
+function yamlString(value) {
+  // Use JSON.stringify to escape backslashes, quotes, and control characters,
+  // then strip the surrounding quotes so it can be embedded inside "..."
+  const json = JSON.stringify(String(value));
+  return json.slice(1, -1);
+}
+
 async function main() {
   if (!process.env.OPENAI_API_KEY && isOfficialOpenAiBaseUrl(API_BASE_URL)) {
     console.log("OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation.");
@@ -58,13 +65,13 @@ async function main() {
     const finalBody = Object.values(content[lang].sections).join("\n\n");
     const safeTitle = content[lang].title
       .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
+      `title: "${yamlString(content[lang].title)}"`,
     const safeExcerpt = content[lang].excerpt
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
-    const doc = [
+      `excerpt: "${yamlString(content[lang].excerpt)}"`,
+      `category: "${yamlString(category[meta.categoryNameKey])}"`,
+      `coverImage: "${yamlString(COVER_IMAGE)}"`,
       "---",
-      `title: "${safeTitle}"`,
+      `  name: "${yamlString(AUTHOR_NAME)}"`,
       `date: "${dateString}"`,
       `excerpt: "${safeExcerpt}"`,
       `category: "${category[meta.categoryNameKey]}"`,

@@ -21,6 +21,7 @@ import {
 } from "./lib/config.mjs";
 import { fetchFeed } from "./lib/feed.mjs";
 import { AiState } from "./lib/ai.mjs";
+import { flushMetrics } from "./lib/metrics.mjs";
 import { createStagedArticle } from "./lib/article-builder.mjs";
 import { LANGUAGE_ORDER, LANGUAGE_LABELS } from "./lib/constants.mjs";
 
@@ -84,6 +85,8 @@ async function main() {
   }
   
   console.log(`[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: en/ja/ar`);
+  
+  await flushMetrics();
 }
 
 main().catch(console.error);

@@ -1,9 +1,11 @@
 import process from "node:process";
 import { callAi, parseJsonWithRepair, AiState } from "./ai.mjs";
+import { startStage, endStage } from "./metrics.mjs";
 import { SYSTEM_RULES, CONTENT_CONSTRAINTS, MAX_TOKENS_PER_RUN, LANGUAGE_ORDER, MIN_WORDS_THRESHOLD, EXPANSION_RETRY_LIMIT } from "./constants.mjs";
 import { pickCategory, computeWordCounts, selectSectionsToExpand, polishMetadata } from "./utils.mjs";
 
 export async function generateOutline({ dateString, sources, categorySlug }) {
+  const stageId = startStage("generateOutline", { dateString, categorySlug });
   const systemPrompt = `${SYSTEM_RULES}\nTask: Create a staged article outline for ${dateString} category ${categorySlug}.`;
   
   let retryMsg = "";
@@ -46,6 +48,7 @@ Return JSON only.
       
       if (totalWords < 800) throw new Error("total targetWordCount < 800");
       
+      endStage(stageId, { sections: outline.sections.length });
       return outline;
 
     } catch (e) {
@@ -55,10 +58,12 @@ Return JSON only.
     }
   }
   
+  endStage(stageId, { error: lastErr?.message });
   throw new Error(`Outline generation failed after retries: ${lastErr?.message}`);
 }
 
 export async function generateSection(section, sources, outline, previousSectionSummaries) {
+  const stageId = startStage("generateSection", { sectionId: section.id });
   const systemPrompt = `${SYSTEM_RULES}\nEnglish Section Generator: ${section.title}`;
   const summariesText = previousSectionSummaries.length > 0
     ? previousSectionSummaries.map(s => `[${s.id}]: ${s.summary}`).join("\n")
@@ -83,10 +88,12 @@ Return JSON { "body": "Markdown string" }
   }
   const raw = await callAi(systemPrompt, userPrompt, { responseFormat: { type: "json_object" } });
   const res = await parseJsonWithRepair({ text: raw, label: `section [${section.id}] en` });
+  endStage(stageId);
   return res.body;
 }
 
 export async function translateSection(enBody, lang, sectionId) {
+  const stageId = startStage("translateSection", { sectionId, lang });
   const systemPrompt = `${SYSTEM_RULES}\nTranslation: Senior tech editor for ${lang}.`;
   
   let retryMsg = "";
@@ -132,10 +139,12 @@ Return JSON { "body": "Markdown string" }
     finalBody = "Translation incomplete.";
   }
   
+  endStage(stageId);
   return finalBody;
 }
 
 export async function expandSection(sectionId, currentBody, lang) {
+  const stageId = startStage("expandSection", { sectionId, lang });
   const systemPrompt = `${SYSTEM_RULES}\nContent Evolution: Add 30% more technical depth to this section.`;
   const userPrompt = `
 Language: ${lang}
@@ -147,6 +156,7 @@ Return JSON { "body": "Updated markdown string" }
 `;
   const raw = await callAi(systemPrompt, userPrompt, { responseFormat: { type: "json_object" } });
   const res = await parseJsonWithRepair({ text: raw, label: `expansion [${sectionId}] ${lang}` });
+  endStage(stageId);
   return res.body;
 }
 

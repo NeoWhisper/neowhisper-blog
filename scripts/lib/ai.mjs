@@ -1,13 +1,16 @@
 import { API_BASE_URL, API_KEY, MODEL } from "./config.mjs";
 import { DEFAULT_GENERATION_MAX_TOKENS, MODEL_FETCH_RETRY_ATTEMPTS, MODEL_FETCH_RETRY_DELAY_MS } from "./constants.mjs";
+import { startStage, endStage, recordApiCall, MetricsState } from "./metrics.mjs";
 
 export const AiState = {
-  totalTokensUsed: 0
+  get totalTokensUsed() { return MetricsState.totalTokensUsed; }
 };
 
 export async function callAi(sys, user, opts = {}) {
   const { maxTokens = DEFAULT_GENERATION_MAX_TOKENS, temperature = 0.5, responseFormat } = opts;
   let lastErr;
+  const stageId = startStage("callAi", { model: MODEL });
+
   for (let a = 1; a <= MODEL_FETCH_RETRY_ATTEMPTS; a++) {
     try {
       const r = await fetch(`${API_BASE_URL}/chat/completions`, {
@@ -17,15 +20,17 @@ export async function callAi(sys, user, opts = {}) {
       });
       if (!r.ok) throw new Error(await r.text());
       const p = await r.json();
-      if (p.usage) {
-        AiState.totalTokensUsed += (p.usage.prompt_tokens || 0) + (p.usage.completion_tokens || 0);
-      }
+      const tokens = (p.usage?.prompt_tokens || 0) + (p.usage?.completion_tokens || 0);
+      recordApiCall(tokens, false);
+      endStage(stageId, { attempt: a, success: true, tokens });
       return p?.choices?.[0]?.message?.content?.trim() || "";
     } catch (e) {
       lastErr = e;
+      recordApiCall(0, true);
       await new Promise(res => setTimeout(res, MODEL_FETCH_RETRY_DELAY_MS * a));
     }
   }
+  endStage(stageId, { success: false, error: lastErr?.message || "Unknown error" });
   throw lastErr;
 }
 

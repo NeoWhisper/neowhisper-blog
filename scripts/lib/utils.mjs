@@ -11,7 +11,7 @@ export function computeWordCounts(sections, lang) {
   return countWords(Object.values(sections).join("\n"), lang);
 }
 
-export function selectSectionsToExpand(sections, lang) {
+export function selectSectionsToExpand(sections) {
   const targetId = Object.keys(sections).find(id => id.startsWith("trend"));
   return targetId ? [targetId] : [];
 }

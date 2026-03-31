@@ -26,7 +26,7 @@ export async function loadConfig(filename, defaultValue = []) {
     const filePath = path.join(CONFIG_DIR, filename);
     const content = await fs.readFile(filePath, "utf8");
     return JSON.parse(content);
-  } catch (error) {
+  } catch {
     console.warn(`[daily-trends] Warning: Could not load config ${filename}, using default.`);
     return defaultValue;
   }
@@ -34,8 +34,18 @@ export async function loadConfig(filename, defaultValue = []) {
 
 export async function initializeConfigs() {
   ConfigState.FEEDS = await loadConfig("feeds.json");
-  ConfigState.CATEGORY_DEFINITIONS = await loadConfig("categories.json");
-  ConfigState.KEYWORDS = await loadConfig("keywords.json", { trend: [], art: [], politics: [], finance: [] });
+
+  const rawCategories = await loadConfig("categories.json");
+  ConfigState.CATEGORY_DEFINITIONS = rawCategories.map(c => ({
+    ...c,
+    keywords: (c.keywords || []).map(k => k.trim())
+  }));
+
+  const rawKeywords = await loadConfig("keywords.json", { trend: [], art: [], politics: [], finance: [] });
+  ConfigState.KEYWORDS = Object.fromEntries(
+    Object.entries(rawKeywords).map(([key, list]) => [key, list.map(k => k.trim())])
+  );
+
   ConfigState.CATEGORY_MAP = new Map(ConfigState.CATEGORY_DEFINITIONS.map(c => [c.slug, c]));
 }
 

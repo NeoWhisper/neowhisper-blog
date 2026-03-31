@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { MODEL } from "./config.mjs";
+import { MAX_TOKENS_PER_RUN, TARGET_WORD_COUNT } from "./constants.mjs";
 
 export const MetricsState = {
   sessionId: new Date().toISOString().replace(/[:.]/g, "-"),
@@ -39,6 +41,11 @@ export async function flushMetrics() {
   const data = {
     sessionId: MetricsState.sessionId,
     timestamp: new Date().toISOString(),
+    config: {
+      model: MODEL,
+      maxTokensPerRun: MAX_TOKENS_PER_RUN,
+      targetWordCount: TARGET_WORD_COUNT
+    },
     totalTokensUsed: MetricsState.totalTokensUsed,
     apiCalls: MetricsState.apiCalls,
     errors: MetricsState.errors,

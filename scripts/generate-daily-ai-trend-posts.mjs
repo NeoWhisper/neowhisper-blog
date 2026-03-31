@@ -9,15 +9,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-import { 
-  API_BASE_URL, 
-  DRY_RUN, 
-  POSTS_DIR, 
-  COVER_IMAGE, 
-  AUTHOR_NAME, 
-  initializeConfigs, 
-  ConfigState, 
-  isOfficialOpenAiBaseUrl 
+import {
+  API_BASE_URL,
+  DRY_RUN,
+  POSTS_DIR,
+  COVER_IMAGE,
+  AUTHOR_NAME,
+  initializeConfigs,
+  ConfigState,
+  isOfficialOpenAiBaseUrl
 } from "./lib/config.mjs";
 import { fetchFeed } from "./lib/feed.mjs";
 import { AiState } from "./lib/ai.mjs";
@@ -45,7 +45,7 @@ async function main() {
   const rawSources = (await Promise.allSettled(ConfigState.FEEDS.map(f => fetchFeed(f))))
     .filter(r => r.status === "fulfilled")
     .flatMap(r => r.value);
-    
+
   const ranked = rawSources
     .filter(s => ConfigState.KEYWORDS.trend.some(k => s.title.toLowerCase().includes(k)))
     .slice(0, 6)
@@ -63,17 +63,11 @@ async function main() {
   for (const lang of LANGUAGE_ORDER) {
     const meta = LANGUAGE_LABELS[lang];
     const finalBody = Object.values(content[lang].sections).join("\n\n");
-    const safeTitle = content[lang].title
-      .replace(/\\/g, "\\\\")
-      `title: "${yamlString(content[lang].title)}"`,
-    const safeExcerpt = content[lang].excerpt
-      `excerpt: "${yamlString(content[lang].excerpt)}"`,
-      `category: "${yamlString(category[meta.categoryNameKey])}"`,
-      `coverImage: "${yamlString(COVER_IMAGE)}"`,
+    const doc = [
       "---",
-      `  name: "${yamlString(AUTHOR_NAME)}"`,
+      `title: "${yamlString(content[lang].title)}"`,
       `date: "${dateString}"`,
-      `excerpt: "${safeExcerpt}"`,
+      `excerpt: "${yamlString(content[lang].excerpt)}"`,
       `category: "${category[meta.categoryNameKey]}"`,
       `coverImage: "${COVER_IMAGE}"`,
       "author:",
@@ -91,14 +85,14 @@ async function main() {
     const filePath = path.join(POSTS_DIR, `${baseSlug}${meta.fileSuffix}.mdx`);
     if (DRY_RUN) {
       console.log(`[DRY RUN] ${filePath}`);
-    } else { 
-      await fs.writeFile(filePath, doc); 
-      console.log(`[daily-trends] wrote ${filePath}`); 
+    } else {
+      await fs.writeFile(filePath, doc);
+      console.log(`[daily-trends] wrote ${filePath}`);
     }
   }
-  
+
   console.log(`[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: en/ja/ar`);
-  
+
   await flushMetrics();
 }
 

@@ -1,0 +1,98 @@
+[
+  {
+    "name": "OpenAI News",
+    "url": "https://openai.com/news/rss.xml"
+  },
+  {
+    "name": "Google Developer Tools",
+    "url": "https://blog.google/technology/developers/rss/"
+  },
+  {
+    "name": "NVIDIA Technical Blog",
+    "url": "https://developer.nvidia.com/blog/feed/"
+  },
+  {
+    "name": "Hacker News (AI)",
+    "url": "https://hnrss.org/newest?q=AI"
+  },
+  {
+    "name": "TechCrunch (AI)",
+    "url": "https://techcrunch.com/category/artificial-intelligence/feed/"
+  },
+  {
+    "name": "AI News",
+    "url": "https://www.artificialintelligence-news.com/feed/"
+  },
+  {
+    "name": "Apple Developer News",
+    "url": "https://developer.apple.com/news/rss/news.rss"
+  },
+  {
+    "name": "Apple ML Research",
+    "url": "https://machinelearning.apple.com/rss.xml"
+  },
+  {
+    "name": "AWS Machine Learning",
+    "url": "https://aws.amazon.com/blogs/machine-learning/feed/"
+  },
+  {
+    "name": "React Blog",
+    "url": "https://react.dev/rss.xml"
+  },
+  {
+    "name": "Next.js Blog",
+    "url": "https://nextjs.org/feed.xml"
+  },
+  {
+    "name": "Vercel Blog",
+    "url": "https://vercel.com/atom"
+  },
+  {
+    "name": "Tailwind CSS Blog",
+    "url": "https://tailwindcss.com/blog"
+  },
+  {
+    "name": "InfoQ (AI & Dev)",
+    "url": "https://www.infoq.com/feed/"
+  },
+  {
+    "name": "InfoWorld ML",
+    "url": "https://www.infoworld.com/artificial-intelligence/"
+  },
+  {
+    "name": "Ars Technica (Biz & IT)",
+    "url": "https://feeds.arstechnica.com/arstechnica/index"
+  },
+  {
+    "name": "ZDNet (AI & Tech)",
+    "url": "https://www.zdnet.com/news/rss.xml"
+  },
+  {
+    "name": "ITmedia (JP)",
+    "url": "http://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml"
+  },
+  {
+    "name": "ASCII.jp (JP)",
+    "url": "https://ascii.jp/rss.xml"
+  },
+  {
+    "name": "Impress Watch (JP)",
+    "url": "https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf"
+  },
+  {
+    "name": "Tech-WD (AR)",
+    "url": "https://www.tech-wd.com/feed"
+  },
+  {
+    "name": "AITNews (AR)",
+    "url": "https://aitnews.com/feed/"
+  },
+  {
+    "name": "Unlimit-Tech (AR)",
+    "url": "https://www.unlimit-tech.com/feed"
+  },
+  {
+    "name": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml"
+  }
+]

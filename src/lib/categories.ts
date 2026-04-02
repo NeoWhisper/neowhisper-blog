@@ -69,22 +69,28 @@ export const categories: Category[] = [
 ];
 
 export function buildCategorySlug(name: string) {
-  const lowered = name.toLowerCase();
+  const normalizedName = String(name ?? "").normalize("NFKC").trim();
+  const lowered = normalizedName.toLowerCase();
 
   // Prefer the canonical mapping when possible (matches any locale name)
   const match = categories.find((c) =>
-    [c.nameEn, c.nameJa, c.nameAr].some((n) => n && n.toLowerCase() === lowered)
+    [c.nameEn, c.nameJa, c.nameAr].some((n) =>
+      n && n.normalize("NFKC").trim().toLowerCase() === lowered
+    )
   );
   if (match) return match.slug;
 
-  if (name === 'Next.js') return 'next.js';
+  if (normalizedName === "Next.js") return "next.js";
 
-  // Replace full-width and normal ampersands with "and", strip punctuation,
-  // then collapse whitespace into hyphens.
-  return name
-    .replace(/[＆&]/g, 'and')
+  // Unicode-safe fallback: keep letters/numbers across locales.
+  const slug = normalizedName
+    .replace(/[＆&]/g, "and")
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
     .trim()
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return slug || "tech-tips";
 }

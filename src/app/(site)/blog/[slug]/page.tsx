@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-config";
 import {
   getHybridLanguageVariants,
   getHybridPost,
@@ -8,7 +9,7 @@ import {
 } from "@/lib/posts-hybrid";
 import { getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 interface PageProps {
   params: Promise<{

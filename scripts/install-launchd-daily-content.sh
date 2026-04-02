@@ -15,12 +15,26 @@ if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set +a
 fi
 
-OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:11434/v1}"
-OPENAI_MODEL="${OPENAI_MODEL:-gpt-oss:20b}"
-OPENAI_API_MODE="${OPENAI_API_MODE:-chat}"
-OPENAI_API_KEY="${OPENAI_API_KEY:-sk-local}"
+OPENAI_BASE_URL="${OPENAI_BASE_URL:-}"
+OPENAI_MODEL="${OPENAI_MODEL:-}"
+OPENAI_API_MODE="${OPENAI_API_MODE:-}"
+OPENAI_API_KEY="${OPENAI_API_KEY:-}"
 NODE_BINARY="${NODE_BINARY:-$(command -v node || true)}"
 NPM_BINARY="${NPM_BINARY:-$(command -v npm || true)}"
+
+declare -a REQUIRED_VARS=("OPENAI_BASE_URL" "OPENAI_MODEL" "OPENAI_API_MODE")
+for var in "${REQUIRED_VARS[@]}"; do
+  if [[ -z "${!var:-}" ]]; then
+    echo "Missing required environment variable: ${var}"
+    echo "Set it in .env.local (recommended) or export it before installing."
+    exit 1
+  fi
+done
+
+if [[ "${OPENAI_BASE_URL}" == "https://api.openai.com/v1" ]] && [[ -z "${OPENAI_API_KEY}" ]]; then
+  echo "OPENAI_API_KEY is required when using official OpenAI endpoint."
+  exit 1
+fi
 
 if [[ -z "${NODE_BINARY}" || -z "${NPM_BINARY}" ]]; then
   echo "Node.js and npm are required to run the daily content job."

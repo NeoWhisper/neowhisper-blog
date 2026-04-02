@@ -1,4 +1,9 @@
-[
+export type FeedConfig = {
+  name: string;
+  url: string;
+};
+
+export const feeds: FeedConfig[] = [
   {
     "name": "OpenAI News",
     "url": "https://openai.com/news/rss.xml"
@@ -95,4 +100,4 @@
     "name": "The Verge",
     "url": "https://www.theverge.com/rss/index.xml"
   }
-]
+];

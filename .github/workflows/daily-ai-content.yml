@@ -49,9 +49,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${FORCE_INPUT}" = "true" ]; then
-            node scripts/generate-daily-ai-trend-posts.mjs --force
+            node --import tsx scripts/generate-daily-ai-trend-posts.ts --force
           else
-            node scripts/generate-daily-ai-trend-posts.mjs
+            node --import tsx scripts/generate-daily-ai-trend-posts.ts
           fi
 
       - name: Detect changes

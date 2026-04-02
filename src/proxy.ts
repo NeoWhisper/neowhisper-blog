@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
+import { SITE_ORIGINS } from "@/lib/site-config";
 
 function hasSupabaseEnv() {
   return Boolean(
@@ -111,10 +112,7 @@ function applyMetadataCorsFix(request: NextRequest, response: NextResponse) {
     return;
   }
 
-  const allowedOrigins = new Set([
-    "https://www.neowhisper.net",
-    "https://neowhisper.net",
-  ]);
+  const allowedOrigins = new Set(SITE_ORIGINS);
   const requestOrigin = request.headers.get("origin");
 
   if (requestOrigin && allowedOrigins.has(requestOrigin)) {

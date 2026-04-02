@@ -27,20 +27,43 @@ import type { FeedItem } from "./lib/feed";
 import { AiState } from "./lib/ai";
 import { flushMetrics } from "./lib/metrics";
 import { createStagedArticle } from "./lib/article-builder";
-import { LANGUAGE_ORDER, LANGUAGE_LABELS } from "./lib/constants";
+import {
+  LANGUAGE_ORDER,
+  LANGUAGE_LABELS,
+  type LanguageCode,
+} from "./lib/constants";
+import contentSafety from "./lib/content-safety";
+
+const { normalizeMetadataText, sanitizeGeneratedMarkdown } = contentSafety;
 
 const TocConfigSchema = z.object({
   excludedHeadings: z.array(z.string())
 });
 
-const loadTocConfig = () => TocConfigSchema.parse(tocConfig);
+type TocConfig = z.infer<typeof TocConfigSchema>;
+type CategoryDefinition = (typeof ConfigState.CATEGORY_DEFINITIONS)[number];
+type LocalizedContent = {
+  title: unknown;
+  excerpt: unknown;
+  sections: Record<string, string>;
+};
+type StagedArticle = {
+  categorySlug: string;
+  slugSuffix: string;
+  sections: Array<unknown>;
+  en: LocalizedContent;
+  ja: LocalizedContent;
+  ar: LocalizedContent;
+};
 
-const yamlString = (value) => {
+const loadTocConfig = (): TocConfig => TocConfigSchema.parse(tocConfig);
+
+const yamlString = (value: unknown): string => {
   const json = JSON.stringify(String(value));
   return json.slice(1, -1);
 };
 
-const headingToAnchor = (text) =>
+const headingToAnchor = (text: string): string =>
   text
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
@@ -48,14 +71,15 @@ const headingToAnchor = (text) =>
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-const createShouldExcludeHeading = (excludedHeadings) =>
-  (text) => excludedHeadings.some(excluded => text.toLowerCase().includes(excluded));
+const createShouldExcludeHeading = (excludedHeadings: string[]) =>
+  (text: string) =>
+    excludedHeadings.some((excluded) => text.toLowerCase().includes(excluded));
 
-const createGenerateToc = (excludedHeadings) => {
+const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
-  return (markdownBody, tocHeading) => {
-    const headings = Array.from(markdownBody.matchAll(/^##\s+(.+)$/gm))
-      .map(match => match[1].trim())
+  return (markdownBody: string, tocHeading: string): string => {
+    const headings = [...markdownBody.matchAll(/^##\s+(.+)$/gm)]
+      .map((match: RegExpMatchArray) => (match[1] ?? "").trim())
       .filter(text => !shouldExclude(text))
       .map(text => ({
         text,
@@ -68,12 +92,19 @@ const createGenerateToc = (excludedHeadings) => {
   };
 };
 
-const buildFrontmatter = (content, meta, category, dateString) => [
+type FrontmatterInput = {
+  title: string;
+  excerpt: string;
+  categoryName: string;
+  dateString: string;
+};
+
+const buildFrontmatter = ({ title, excerpt, categoryName, dateString }: FrontmatterInput): string[] => [
   "---",
-  `title: "${yamlString(content[meta.lang].title)}"`,
+  `title: "${yamlString(title)}"`,
   `date: "${dateString}"`,
-  `excerpt: "${yamlString(content[meta.lang].excerpt)}"`,
-  `category: "${category[meta.categoryNameKey]}"`,
+  `excerpt: "${yamlString(excerpt)}"`,
+  `category: "${categoryName}"`,
   `coverImage: "${COVER_IMAGE}"`,
   "author:",
   `  name: "${AUTHOR_NAME}"`,
@@ -81,9 +112,21 @@ const buildFrontmatter = (content, meta, category, dateString) => [
   "---",
 ];
 
-const writePostFile = async (filePath, doc) =>
+const getCategoryDisplayName = (
+  category: CategoryDefinition,
+  lang: LanguageCode
+): string => {
+  const keyByLang: Record<LanguageCode, keyof CategoryDefinition> = {
+    en: "nameEn",
+    ja: "nameJa",
+    ar: "nameAr",
+  };
+  return String(category[keyByLang[lang]]);
+};
+
+const writePostFile = async (filePath: string, doc: string): Promise<void> =>
   DRY_RUN
-    ? console.log(`[DRY RUN] ${filePath}`)
+    ? void console.log(`[DRY RUN] ${filePath}`)
     : fs.writeFile(filePath, doc).then(() => console.log(`[daily-trends] wrote ${filePath}`));
 
 const guardApiKey = () => {
@@ -93,9 +136,9 @@ const guardApiKey = () => {
 
 const MIN_SOURCES_REQUIRED = Number.parseInt(process.env.TREND_MIN_SOURCES ?? "3", 10);
 
-const guardMinSources = (sources) => {
+const guardMinSources = (sources: RankedSource[]): RankedSource[] => {
   return sources.length < Math.max(1, MIN_SOURCES_REQUIRED)
-    ? (console.log("Low sources, skip"), process.exit(0))
+    ? (console.log("Low sources, skip"), process.exit(0), [])
     : sources;
 };
 
@@ -174,17 +217,24 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
   return fallbackPool;
 };
 
-const parseLangFlag = () => {
+const isLanguageCode = (value: string): value is LanguageCode =>
+  (LANGUAGE_ORDER as readonly string[]).includes(value);
+
+const parseLangFlag = (): LanguageCode | null => {
   const arg = process.argv.find((entry) => entry.startsWith("--lang="));
   if (!arg) return null;
-  return arg.slice("--lang=".length).trim().toLowerCase();
+  const normalized = arg.slice("--lang=".length).trim().toLowerCase();
+  return isLanguageCode(normalized) ? normalized : null;
 };
 
-const resolveTargetLanguages = () => {
+const resolveTargetLanguages = (): LanguageCode[] => {
+  const explicitArg = process.argv.find((entry) => entry.startsWith("--lang="));
   const selectedLang = parseLangFlag();
-  if (!selectedLang) return LANGUAGE_ORDER;
-  if (!LANGUAGE_ORDER.includes(selectedLang)) {
-    throw new Error(`Unsupported --lang value "${selectedLang}". Use one of: ${LANGUAGE_ORDER.join(", ")}`);
+
+  if (!explicitArg) return [...LANGUAGE_ORDER];
+  if (!selectedLang) {
+    const badValue = explicitArg.slice("--lang=".length).trim();
+    throw new Error(`Unsupported --lang value "${badValue}". Use one of: ${LANGUAGE_ORDER.join(", ")}`);
   }
   return [selectedLang];
 };
@@ -208,7 +258,7 @@ async function main() {
   console.log(`[daily-trends] starting ${dateString}`);
 
   const rawSources = (await Promise.allSettled(ConfigState.FEEDS.map(f => fetchFeed(f))))
-    .filter(r => r.status === "fulfilled")
+    .filter((r): r is PromiseFulfilledResult<FeedItem[]> => r.status === "fulfilled")
     .flatMap(r => r.value);
 
   const ranked = guardMinSources(pickRankedSources(rawSources));
@@ -217,22 +267,39 @@ async function main() {
     dateString,
     sources: ranked,
     targetLanguages
-  });
+  }) as StagedArticle;
   const category = ConfigState.CATEGORY_MAP.get(content.categorySlug)
-    ?? ConfigState.CATEGORY_DEFINITIONS[0];
+    ?? (ConfigState.CATEGORY_DEFINITIONS[0] as CategoryDefinition);
 
   void (!ConfigState.CATEGORY_MAP.has(content.categorySlug) && console.warn(`[daily-trends] Category slug "${content.categorySlug}" not found — falling back to "${category.slug}".`));
 
   const baseSlug = `ai-it-trend-brief-${dateString}-${content.slugSuffix.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-  const referencesSection = ranked.map(s => `- [${s.title}](${s.url})`).join("\n");
-
   await Promise.all(
-    targetLanguages.map(async (lang) => {
+    targetLanguages.map(async (lang: LanguageCode) => {
       const meta = LANGUAGE_LABELS[lang];
-      const finalBody = Object.values(content[lang].sections).join("\n\n");
+      const localized = content[lang] as LocalizedContent;
+      const finalBody = sanitizeGeneratedMarkdown(
+        Object.values(localized.sections).join("\n\n")
+      );
       const toc = generateToc(finalBody, meta.tocHeading);
-      const doc = [
-        ...buildFrontmatter(content, { ...meta, lang }, category, dateString),
+      const fallbackTitle = normalizeMetadataText(content.en.title, "Daily AI Trend Brief");
+      const title = normalizeMetadataText(
+        localized.title,
+        fallbackTitle
+      );
+      const excerptFallback = finalBody.split("\n").find((line) => line.trim() && !line.startsWith("#"))?.trim() ?? "";
+      const excerpt = normalizeMetadataText(localized.excerpt, excerptFallback);
+      const referencesSection = ranked
+        .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
+        .join("\n");
+
+      const doc = sanitizeGeneratedMarkdown([
+        ...buildFrontmatter({
+          title,
+          excerpt,
+          categoryName: getCategoryDisplayName(category, lang),
+          dateString
+        }),
         "",
         toc,
         finalBody,
@@ -240,7 +307,7 @@ async function main() {
         meta.referencesHeading,
         "",
         referencesSection
-      ].join("\n");
+      ].join("\n"));
 
       const filePath = path.join(POSTS_DIR, `${baseSlug}${meta.fileSuffix}.mdx`);
       await writePostFile(filePath, doc);

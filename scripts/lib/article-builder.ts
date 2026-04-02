@@ -1,7 +1,15 @@
 import process from "node:process";
 import { callAi, parseJsonWithRepair, AiState } from "./ai";
 import { startStage, endStage } from "./metrics";
-import { SYSTEM_RULES, CONTENT_CONSTRAINTS, MAX_TOKENS_PER_RUN, LANGUAGE_ORDER, MIN_WORDS_THRESHOLD, EXPANSION_RETRY_LIMIT } from "./constants";
+import {
+  SYSTEM_RULES,
+  CONTENT_CONSTRAINTS,
+  MAX_TOKENS_PER_RUN,
+  LANGUAGE_ORDER,
+  MIN_WORDS_THRESHOLD,
+  EXPANSION_RETRY_LIMIT,
+  type LanguageCode
+} from "./constants";
 import { pickCategory, computeWordCounts, selectSectionsToExpand, polishMetadata } from "./utils";
 
 const validateSection = (sec) =>
@@ -264,12 +272,22 @@ async function polishAllLanguages(stagedContent, processingLanguages) {
   );
 }
 
-const normalizeTargetLanguages = (targetLanguages = LANGUAGE_ORDER) => {
-  const filtered = targetLanguages.filter((lang) => LANGUAGE_ORDER.includes(lang));
+const normalizeTargetLanguages = (targetLanguages: readonly LanguageCode[] = LANGUAGE_ORDER): LanguageCode[] => {
+  const filtered = targetLanguages.filter((lang): lang is LanguageCode =>
+    (LANGUAGE_ORDER as readonly string[]).includes(lang)
+  );
   return filtered.length > 0 ? [...new Set(filtered)] : [...LANGUAGE_ORDER];
 };
 
-export async function createStagedArticle({ dateString, sources, targetLanguages = LANGUAGE_ORDER }) {
+export async function createStagedArticle({
+  dateString,
+  sources,
+  targetLanguages = LANGUAGE_ORDER
+}: {
+  dateString: string;
+  sources: Array<{ title: string; url: string; source: string; summary?: string }>;
+  targetLanguages?: readonly LanguageCode[];
+}) {
   const selectedLanguages = normalizeTargetLanguages(targetLanguages);
   const processingLanguages = [...new Set(["en", ...selectedLanguages])];
   const category = pickCategory(null, sources);

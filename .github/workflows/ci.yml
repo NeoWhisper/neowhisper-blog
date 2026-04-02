@@ -40,6 +40,9 @@ jobs:
       - name: Test Content Generator Flags
         run: npm run content:test-flags
 
+      - name: Test Content Safety Guardrails
+        run: npm run content:test-safety
+
       - name: Smoke Test Site URL Wiring
         run: npm run content:test-site-url
 

@@ -9,8 +9,18 @@ export const MIN_WORDS_THRESHOLD = 900;
 export const SECTION_RETRY_LIMIT = 2;
 export const EXPANSION_RETRY_LIMIT = 2;
 
-export const LANGUAGE_ORDER = ["en", "ja", "ar"];
-export const LANGUAGE_LABELS = {
+export const LANGUAGE_ORDER = ["en", "ja", "ar"] as const;
+export type LanguageCode = (typeof LANGUAGE_ORDER)[number];
+export type CategoryNameKey = "nameEn" | "nameJa" | "nameAr";
+
+export type LanguageLabel = {
+  tocHeading: string;
+  referencesHeading: string;
+  categoryNameKey: CategoryNameKey;
+  fileSuffix: string;
+};
+
+export const LANGUAGE_LABELS: Record<LanguageCode, LanguageLabel> = {
   en: { tocHeading: "## Table of Contents", referencesHeading: "## References", categoryNameKey: "nameEn", fileSuffix: "" },
   ja: { tocHeading: "## 目次", referencesHeading: "## 参考リンク", categoryNameKey: "nameJa", fileSuffix: "-ja" },
   ar: { tocHeading: "## المحتويات", referencesHeading: "## المراجع", categoryNameKey: "nameAr", fileSuffix: "-ar" },

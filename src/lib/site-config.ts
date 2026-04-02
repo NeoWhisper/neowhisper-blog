@@ -1,4 +1,9 @@
 const DEFAULT_SITE_URL = "https://www.neowhisper.net";
+const DEFAULT_CANONICAL_REDIRECT_SKIP_HOSTS = [
+  "localhost",
+  "127.0.0.1",
+  ".vercel.app",
+];
 
 /**
  * Site-level URL config only.
@@ -14,3 +19,11 @@ export const SITE_ORIGINS = Object.freeze([
   SITE_URL,
   SITE_URL.replace("://www.", "://")
 ]);
+
+const rawSkipHosts =
+  process.env.CANONICAL_REDIRECT_SKIP_HOSTS
+    ?.split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean) ?? DEFAULT_CANONICAL_REDIRECT_SKIP_HOSTS;
+
+export const CANONICAL_REDIRECT_SKIP_HOSTS = Object.freeze(rawSkipHosts);

@@ -12,46 +12,103 @@ import {
 } from "./constants";
 import { pickCategory, computeWordCounts, selectSectionsToExpand, polishMetadata } from "./utils";
 
-const validateSection = (sec) =>
-  typeof sec.id === "string" &&
-  typeof sec.title === "string" &&
-  typeof sec.intent === "string" &&
-  typeof sec.targetWordCount === "number";
+type SourceItem = {
+  title: string;
+  url: string;
+  source: string;
+  summary?: string;
+};
 
-const validateOutline = (outline) => {
-  if (!Array.isArray(outline.sections) || outline.sections.length < 3) {
+type OutlineSection = {
+  id: string;
+  title: string;
+  intent: string;
+  targetWordCount: number;
+};
+
+type Outline = {
+  title_hint: string;
+  slugSuffix: string;
+  sections: OutlineSection[];
+};
+
+type SectionSummary = {
+  id: string;
+  summary: string;
+};
+
+type LanguageBucket = {
+  sections: Record<string, string>;
+  title?: string;
+  excerpt?: string;
+};
+
+type StagedContent = {
+  en: LanguageBucket;
+  ja: LanguageBucket;
+  ar: LanguageBucket;
+  targetLanguages: LanguageCode[];
+};
+
+const asErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const validateSection = (sec: unknown): sec is OutlineSection =>
+  typeof sec === "object" &&
+  sec !== null &&
+  typeof (sec as Record<string, unknown>).id === "string" &&
+  typeof (sec as Record<string, unknown>).title === "string" &&
+  typeof (sec as Record<string, unknown>).intent === "string" &&
+  typeof (sec as Record<string, unknown>).targetWordCount === "number";
+
+const validateOutline = (outline: unknown): outline is Outline => {
+  if (!outline || typeof outline !== "object") {
+    return false;
+  }
+  const candidate = outline as { sections?: unknown };
+  if (!Array.isArray(candidate.sections) || candidate.sections.length < 3) {
     return false;
   }
 
-  const allSectionsValid = outline.sections.every(validateSection);
-  const noDuplicateIds = new Set(outline.sections.map(s => s.id)).size === outline.sections.length;
-  const minWords = outline.sections.reduce((sum, s) => sum + s.targetWordCount, 0) >= 800;
+  const sections = candidate.sections as unknown[];
+  const typedSections = sections.filter(validateSection);
+  if (typedSections.length !== sections.length) {
+    return false;
+  }
 
-  return allSectionsValid && noDuplicateIds && minWords;
+  const noDuplicateIds = new Set(typedSections.map((s) => s.id)).size === typedSections.length;
+  const minWords = typedSections.reduce((sum, s) => sum + s.targetWordCount, 0) >= 800;
+
+  return noDuplicateIds && minWords;
 };
 
-const countStructureElements = (text) => ({
+const countStructureElements = (text: string): { headings: number; lists: number } => ({
   headings: (text.match(/^(##|###)\s/gm) || []).length,
   lists: (text.match(/^[-*]\s/gm) || []).length
 });
 
-const structuresMatch = (text1, text2, tolerance = 2) => {
+const structuresMatch = (text1: string, text2: string, tolerance = 2): boolean => {
   const s1 = countStructureElements(text1);
   const s2 = countStructureElements(text2);
   return s1.headings === s2.headings && Math.abs(s1.lists - s2.lists) <= tolerance;
 };
 
-const logVerbose = (msg) =>
-  process.argv.includes("--verbose") && console.log(msg);
+const logVerbose = (msg: string): void =>
+  void (process.argv.includes("--verbose") && console.log(msg));
 
-const LANGUAGE_TRANSLATION_RULES = {
+const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
   ja: "Output ONLY Japanese. Do not include English, Chinese, or Arabic sentences except product names and URLs.",
   ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs."
 };
 
-async function retryOutlineGeneration(sources, constraint, dateString, categorySlug) {
+async function retryOutlineGeneration(
+  sources: SourceItem[],
+  constraint: string,
+  dateString: string,
+  categorySlug: string
+): Promise<Outline> {
   const attempts = [0, 1, 2];
-  const errors = [];
+  const errors: string[] = [];
 
   for (const attempt of attempts) {
     const retryMsg = attempt > 0
@@ -80,56 +137,73 @@ Return JSON only.
         userPrompt,
         { responseFormat: { type: "json_object" } }
       );
-      const outline = await parseJsonWithRepair({ text: raw, label: "outline generation" });
+      const parsed = await parseJsonWithRepair({ text: raw, label: "outline generation" });
 
-      void (validateOutline(outline) || (() => {
+      if (!validateOutline(parsed)) {
+        const outline = parsed as { sections?: unknown[] };
         throw new Error(
           !Array.isArray(outline.sections) || outline.sections.length < 3
             ? "Sections array must have at least 3 items"
-            : outline.sections.some(s => !validateSection(s))
+            : outline.sections.some((s) => !validateSection(s))
               ? "Missing required section fields"
-              : new Set(outline.sections.map(s => s.id)).size !== outline.sections.length
+              : new Set((outline.sections as OutlineSection[]).map((s) => s.id)).size !== outline.sections.length
                 ? "Duplicate section ids"
                 : "total targetWordCount < 800"
         );
-      })());
+      }
 
-      return outline;
-    } catch (e) {
-      errors.push(e.message);
-      console.warn(`[daily-trends] outline validation failed on attempt ${attempt}: ${e.message}`);
+      return parsed;
+    } catch (e: unknown) {
+      const message = asErrorMessage(e);
+      errors.push(message);
+      console.warn(`[daily-trends] outline validation failed on attempt ${attempt}: ${message}`);
     }
   }
 
   throw new Error(`Outline generation failed after retries: ${errors.join(" | ")}`);
 }
 
-export async function generateOutline({ dateString, sources, categorySlug }) {
+export async function generateOutline({
+  dateString,
+  sources,
+  categorySlug
+}: {
+  dateString: string;
+  sources: SourceItem[];
+  categorySlug: string;
+}): Promise<Outline> {
   const stageId = startStage("generateOutline", { dateString, categorySlug });
   try {
     const outline = await retryOutlineGeneration(sources, CONTENT_CONSTRAINTS, dateString, categorySlug);
     endStage(stageId, { sections: outline.sections.length });
     return outline;
-  } catch (error) {
-    endStage(stageId, { error: error?.message });
+  } catch (error: unknown) {
+    endStage(stageId, { error: asErrorMessage(error) });
     throw error;
   }
 }
 
-export async function generateSection(section, sources, outline, previousSectionSummaries) {
+export async function generateSection(
+  section: OutlineSection,
+  sources: SourceItem[],
+  outline: Outline,
+  previousSectionSummaries: SectionSummary[]
+): Promise<string> {
   const stageId = startStage("generateSection", { sectionId: section.id });
   const systemPrompt = `${SYSTEM_RULES}\nEnglish Section Generator: ${section.title}`;
   const summariesText = previousSectionSummaries.length > 0
-    ? previousSectionSummaries.map(s => `[${s.id}]: ${s.summary}`).join("\n")
+    ? previousSectionSummaries.map((s) => `[${s.id}]: ${s.summary}`).join("\n")
     : "None yet.";
 
   const userPrompt = `
 Section ID: ${section.id}
 Outline: ${JSON.stringify(outline.sections)}
-Sources Data Summary: ${sources.map(s => s.title).join(", ")}
+Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
 
 Generate about ${section.targetWordCount} words of detailed technical content.
-Include "Imagine..." for trends and "What this means for your team" bullets.
+Use one concrete, grounded example per section when helpful.
+Do not use repetitive marketing framing.
+Add "What this means for your team" bullets.
 Table section must be markdown.
 
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
@@ -142,12 +216,17 @@ Return JSON { "body": "Markdown string" }
   logVerbose(`[VERBOSE] section [${section.id}] prompt:\n${userPrompt}\n`);
 
   const raw = await callAi(systemPrompt, userPrompt, { responseFormat: { type: "json_object" } });
-  const res = await parseJsonWithRepair({ text: raw, label: `section [${section.id}] en` });
+  const res = await parseJsonWithRepair({ text: raw, label: `section [${section.id}] en` }) as { body?: string };
   endStage(stageId);
-  return res.body;
+  return res.body ?? "";
 }
 
-const retryTranslation = (lang, sectionId, enBody, attempt = 0) => async () => {
+const retryTranslation = (
+  lang: LanguageCode,
+  sectionId: string,
+  enBody: string,
+  attempt = 0
+) => async (): Promise<string> => {
   const retryMsg = attempt > 0
     ? "\nThe previous translation had structural issues. Preserve the same heading structure and list structure as the source."
     : "";
@@ -168,7 +247,7 @@ Return JSON { "body": "Markdown string" }
     userPrompt,
     { responseFormat: { type: "json_object" } }
   );
-  const res = await parseJsonWithRepair({ text: raw, label: `section [${sectionId}] ${lang}` });
+  const res = await parseJsonWithRepair({ text: raw, label: `section [${sectionId}] ${lang}` }) as { body?: string };
   const body = res.body ?? "";
 
   return (structuresMatch(body, enBody) && body.trim())
@@ -178,18 +257,18 @@ Return JSON { "body": "Markdown string" }
       : body;
 };
 
-export async function translateSection(enBody, lang, sectionId) {
+export async function translateSection(enBody: string, lang: LanguageCode, sectionId: string): Promise<string> {
   const stageId = startStage("translateSection", { sectionId, lang });
   const finalBody = await retryTranslation(lang, sectionId, enBody)();
 
-  const isValid = finalBody.trim() && structuresMatch(finalBody, enBody);
+  const isValid = Boolean(finalBody.trim() && structuresMatch(finalBody, enBody));
   void (!isValid && console.warn(`[daily-trends] translation parity check failed for ${lang} section ${sectionId}. Continuing anyway.`));
 
   endStage(stageId);
   return isValid ? finalBody : "Translation incomplete.";
 }
 
-export async function expandSection(sectionId, currentBody, lang) {
+export async function expandSection(sectionId: string, currentBody: string, lang: LanguageCode): Promise<string> {
   const stageId = startStage("expandSection", { sectionId, lang });
   const userPrompt = `
 Language: ${lang}
@@ -204,12 +283,18 @@ Return JSON { "body": "Updated markdown string" }
     userPrompt,
     { responseFormat: { type: "json_object" } }
   );
-  const res = await parseJsonWithRepair({ text: raw, label: `expansion [${sectionId}] ${lang}` });
+  const res = await parseJsonWithRepair({ text: raw, label: `expansion [${sectionId}] ${lang}` }) as { body?: string };
   endStage(stageId);
-  return res.body;
+  return res.body ?? currentBody;
 }
 
-async function generateSectionWithSummary(section, sources, outline, completedEn, stagedContent) {
+async function generateSectionWithSummary(
+  section: OutlineSection,
+  sources: SourceItem[],
+  outline: Outline,
+  completedEn: SectionSummary[],
+  stagedContent: StagedContent
+): Promise<void> {
   void ((AiState.totalTokensUsed > MAX_TOKENS_PER_RUN) && (() => {
     console.log("[COST GUARD] Token limit reached. Assembling article with sections completed so far.");
     throw new Error("TOKEN_LIMIT_REACHED");
@@ -224,8 +309,8 @@ async function generateSectionWithSummary(section, sources, outline, completedEn
     `Summarize this in 2-3 sentences:\n${en.slice(0, 2000)}\nReturn JSON { "summary": "..." }`,
     { responseFormat: { type: "json_object" } }
   );
-  const summaryRes = await parseJsonWithRepair({ text: summaryRaw, label: `summary [${section.id}]` });
-  completedEn.push({ id: section.id, summary: summaryRes.summary });
+  const summaryRes = await parseJsonWithRepair({ text: summaryRaw, label: `summary [${section.id}]` }) as { summary?: string };
+  completedEn.push({ id: section.id, summary: summaryRes.summary ?? "" });
 
   const translationLanguages = stagedContent.targetLanguages.filter((lang) => lang !== "en");
   await Promise.all(
@@ -235,7 +320,7 @@ async function generateSectionWithSummary(section, sources, outline, completedEn
   );
 }
 
-async function expandUndersizedContent(lang, stagedContent) {
+async function expandUndersizedContent(lang: LanguageCode, stagedContent: StagedContent): Promise<void> {
   let total = computeWordCounts(stagedContent[lang].sections, lang);
   let attempts = 0;
 
@@ -262,7 +347,10 @@ async function expandUndersizedContent(lang, stagedContent) {
   }
 }
 
-async function polishAllLanguages(stagedContent, processingLanguages) {
+async function polishAllLanguages(
+  stagedContent: StagedContent,
+  processingLanguages: LanguageCode[]
+): Promise<void> {
   await Promise.all(
     processingLanguages.map(async (lang) => {
       const fullBody = Object.values(stagedContent[lang].sections).join("\n\n");
@@ -285,29 +373,29 @@ export async function createStagedArticle({
   targetLanguages = LANGUAGE_ORDER
 }: {
   dateString: string;
-  sources: Array<{ title: string; url: string; source: string; summary?: string }>;
+  sources: SourceItem[];
   targetLanguages?: readonly LanguageCode[];
 }) {
   const selectedLanguages = normalizeTargetLanguages(targetLanguages);
-  const processingLanguages = [...new Set(["en", ...selectedLanguages])];
+  const processingLanguages: LanguageCode[] = [...new Set(["en", ...selectedLanguages] as LanguageCode[])];
   const category = pickCategory(null, sources);
   const outline = await generateOutline({ dateString, sources, categorySlug: category.slug });
 
-  const stagedContent = Object.freeze({
+  const stagedContent: StagedContent = {
     en: { sections: {} },
     ja: { sections: {} },
     ar: { sections: {} },
     targetLanguages: selectedLanguages
-  });
+  };
 
-  const completedEn = [];
+  const completedEn: SectionSummary[] = [];
 
   try {
     for (const section of outline.sections) {
       await generateSectionWithSummary(section, sources, outline, completedEn, stagedContent);
     }
-  } catch (e) {
-    void ((e.message !== "TOKEN_LIMIT_REACHED") && (() => { throw e; })());
+  } catch (e: unknown) {
+    void ((asErrorMessage(e) !== "TOKEN_LIMIT_REACHED") && (() => { throw e; })());
   }
 
   await Promise.all(

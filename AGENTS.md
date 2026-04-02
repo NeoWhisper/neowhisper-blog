@@ -64,6 +64,14 @@ Only apply edits after the user explicitly says: `apply this diff`.
 - Arabic: Modern Standard Arabic (الفصحى) only.
 - Never mix Arabic output with Chinese, Japanese, or English paragraphs
   (except product names/URLs).
+- Never fabricate facts, benchmarks, prices, limits, or partner/customer usage.
+- Do not present roadmap ideas as already deployed production reality.
+- Do not use precise metrics (for example: `40%`, `<50ms`, `100,000 users`)
+  unless the metric is explicitly supported by a cited primary source.
+- If a metric is not sourced, rewrite with qualitative language
+  (for example: `lower latency`, `faster iteration`, `reduced overhead`).
+- Clearly label uncertain items as `example`, `estimate`, or `hypothesis`.
+- Prefer neutral implementation guidance over self-promotional claims.
 
 For multilingual generation:
 
@@ -96,3 +104,5 @@ If a check is skipped or fails, report it clearly.
   `scripts/config/*.ts`.
 - Keep behavior deterministic and transparent; avoid hidden fallbacks that mask
   errors.
+- Generated posts must remain source-grounded: avoid unsourced exact
+  performance/cost numbers and avoid unverified “we already do this” claims.

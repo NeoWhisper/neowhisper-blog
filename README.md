@@ -205,6 +205,7 @@ Optional options:
 - `--force`: generate a same-day variant if today's slug already exists
 - `--lang=en|ja|ar`: generate only one language variant
 - `TOPIC_HINT="your angle"`: guide the editorial angle for that day
+- `TREND_MIN_SOURCES=2`: temporarily lower required source count (default: `3`)
 
 Validate config/schema only (no feed fetch, no generation):
 

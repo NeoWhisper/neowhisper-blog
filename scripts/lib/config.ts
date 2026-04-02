@@ -12,7 +12,9 @@ export const API_KEY = runtimeConfig.apiKey;
 export const FORCE = process.argv.includes("--force");
 export const DRY_RUN = process.argv.includes("--dry-run");
 
-const createCategoryMap = (definitions) =>
+type CategoryDefinition = (typeof runtimeConfig.categoryDefinitions)[number];
+
+const createCategoryMap = (definitions: CategoryDefinition[]) =>
   new Map(definitions.map((category) => [category.slug, category]));
 
 export const ConfigState = Object.freeze({

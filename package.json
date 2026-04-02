@@ -15,6 +15,7 @@
     "content:daily": "node --import tsx --env-file-if-exists=.env.local scripts/generate-daily-ai-trend-posts.ts",
     "content:check": "node --import tsx --env-file-if-exists=.env.local scripts/generate-daily-ai-trend-posts.ts --dry-run --validate-config --lang=en",
     "content:test-flags": "node --test scripts/tests/content-flags.test.mjs",
+    "content:typecheck": "tsc -p tsconfig.scripts.json --noEmit",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
     "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
     "content:sync-main": "bash scripts/sync-local-main.sh",

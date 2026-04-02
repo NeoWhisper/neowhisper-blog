@@ -2,14 +2,34 @@ import { API_BASE_URL, API_KEY, MODEL } from "./config";
 import { DEFAULT_GENERATION_MAX_TOKENS, MODEL_FETCH_RETRY_ATTEMPTS, MODEL_FETCH_RETRY_DELAY_MS } from "./constants";
 import { startStage, endStage, recordApiCall, MetricsState } from "./metrics";
 
+type ApiResponseFormat = { type: "json_object" } | undefined;
+
+type CallAiOptions = {
+  maxTokens?: number;
+  temperature?: number;
+  responseFormat?: ApiResponseFormat;
+};
+
+type CompletionResponse = {
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+  };
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+};
+
 export const AiState = {
   get totalTokensUsed() { return MetricsState.totalTokensUsed; }
 };
 
-const extractJsonFromCodeblock = (text) =>
+const extractJsonFromCodeblock = (text: string) =>
   text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)?.[1] ?? text;
 
-const cleanJsonText = (text) => {
+const cleanJsonText = (text: string) => {
   const extracted = extractJsonFromCodeblock(text).trim();
   // Remove control characters and invalid escape sequences
   return extracted
@@ -19,7 +39,11 @@ const cleanJsonText = (text) => {
     .trim();
 };
 
-const sendApiRequest = async (systemPrompt, userPrompt, opts) => {
+const sendApiRequest = async (
+  systemPrompt: string,
+  userPrompt: string,
+  opts: Required<Pick<CallAiOptions, "maxTokens" | "temperature">> & Pick<CallAiOptions, "responseFormat">
+): Promise<CompletionResponse> => {
   const { maxTokens, temperature, responseFormat } = opts;
   const response = await fetch(`${API_BASE_URL}/chat/completions`, {
     method: "POST",
@@ -40,26 +64,30 @@ const sendApiRequest = async (systemPrompt, userPrompt, opts) => {
   });
 
   return response.ok
-    ? response.json()
+    ? response.json() as Promise<CompletionResponse>
     : Promise.reject(new Error(await response.text()));
 };
 
-const retryWithExponentialBackoff = async (fn, maxAttempts, delayMs) => {
-  let lastError;
+const retryWithExponentialBackoff = async <T>(
+  fn: (attempt: number) => Promise<T>,
+  maxAttempts: number,
+  delayMs: number
+): Promise<T> => {
+  let lastError: Error | undefined;
 
   for (const attempt of Array.from({ length: maxAttempts }, (_, i) => i + 1)) {
     try {
       return await fn(attempt);
     } catch (e) {
-      lastError = e;
+      lastError = e instanceof Error ? e : new Error(String(e));
       await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
     }
   }
 
-  throw lastError;
+  throw (lastError ?? new Error("Unknown retry error"));
 };
 
-export async function callAi(sys, user, opts = {}) {
+export async function callAi(sys: string, user: string, opts: CallAiOptions = {}): Promise<string> {
   const { maxTokens = DEFAULT_GENERATION_MAX_TOKENS, temperature = 0.5, responseFormat } = opts;
   const stageId = startStage("callAi", { model: MODEL });
 
@@ -78,12 +106,13 @@ export async function callAi(sys, user, opts = {}) {
     return result;
   } catch (error) {
     recordApiCall(0, true);
-    endStage(stageId, { success: false, error: error?.message ?? "Unknown error" });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    endStage(stageId, { success: false, error: message });
     throw error;
   }
 }
 
-export async function parseJsonWithRepair({ text, label }) {
+export async function parseJsonWithRepair({ text, label }: { text: string; label: string }) {
   const attempt = async () => {
     const clean = cleanJsonText(text);
     return JSON.parse(clean);

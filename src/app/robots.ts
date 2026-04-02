@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site-config";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,8 +9,8 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ["/content-planning/", "/.git/"],
     },
     sitemap: [
-      "https://www.neowhisper.net/sitemap.xml",
-      "https://www.neowhisper.net/image-sitemap.xml",
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/image-sitemap.xml`,
     ],
   };
 }

@@ -34,5 +34,20 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Validate Content Generator Config
+        run: npm run content:check
+
+      - name: Test Content Generator Flags
+        run: npm run content:test-flags
+
+      - name: Test Content Safety Guardrails
+        run: npm run content:test-safety
+
+      - name: Smoke Test Site URL Wiring
+        run: npm run content:test-site-url
+
+      - name: Typecheck Content Scripts
+        run: npm run content:typecheck
+
       - name: Build
         run: npm run build

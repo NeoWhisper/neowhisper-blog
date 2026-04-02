@@ -12,8 +12,9 @@ import ArticleCard from "@/components/ArticleCard";
 import { buildCategorySlug } from "@/lib/categories";
 import AuthorBio from "@/components/AuthorBio";
 import { normalizeLang } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-config";
 
-const siteUrl = "https://www.neowhisper.net";
+const siteUrl = SITE_URL;
 
 function flattenText(node: ReactNode): string {
   if (typeof node === "string" || typeof node === "number") return String(node);
@@ -93,6 +94,14 @@ function estimateWordCount(mdxSource: string): number {
   return plain ? plain.split(" ").length : 0;
 }
 
+function stripLeadingDuplicateTitleHeading(mdxSource: string, title: string): string {
+  const escapedTitle = title
+    .trim()
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const duplicateHeadingPattern = new RegExp(`^#\\s+${escapedTitle}\\s*\\n+`, "i");
+  return mdxSource.replace(duplicateHeadingPattern, "");
+}
+
 function isLowValueBriefSlug(slug?: string): boolean {
   if (!slug) return false;
   return /(^|-)ai-(it-)?trend-brief-/.test(slug);
@@ -138,10 +147,11 @@ export default function BlogPostTemplate({
   languageSwitchMode = "suffix",
   canonicalUrl,
 }: BlogPostTemplateProps) {
+  const displayContent = stripLeadingDuplicateTitleHeading(content, title);
   const ui = getUiText(lang);
   const currentLang = normalizeLang(lang);
-  const wordCount = estimateWordCount(content);
-  const showAd = shouldRenderAd(content, slug);
+  const wordCount = estimateWordCount(displayContent);
+  const showAd = shouldRenderAd(displayContent, slug);
   const authorName = getAuthorDisplayName(lang);
   const resolvedCanonicalUrl =
     canonicalUrl ??
@@ -334,7 +344,7 @@ export default function BlogPostTemplate({
                 <div dangerouslySetInnerHTML={{ __html: renderedHtml }} />
               ) : (
                 <MDXRemote
-                  source={content}
+                  source={displayContent}
                   components={{
                     h2: (props) => (
                       <h2

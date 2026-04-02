@@ -14,8 +14,9 @@ import CookieBanner from "@/components/CookieBanner";
 import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
 import { outfit, geistMono } from "@/lib/fonts";
+import { SITE_URL } from "@/lib/site-config";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.neowhisper.net";
+const siteUrl = SITE_URL;
 const siteName = "NeoWhisper";
 
 export const metadata: Metadata = {

@@ -45,6 +45,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -68,3 +69,6 @@ TODO.md
 # Operational/deployment docs (personal configuration - not part of template)
 DNS-SETUP-CHECKLIST.md
 scripts/logs/*.json
+
+# Claude Code local instructions – keep private
+CLAUDE.md

@@ -1,0 +1,16 @@
+const DEFAULT_SITE_URL = "https://www.neowhisper.net";
+
+/**
+ * Site-level URL config only.
+ *
+ * Keep this module narrowly scoped to canonical site URL/origin resolution.
+ * Do NOT add unrelated app settings, feature flags, or content constants here.
+ * Create dedicated modules for those concerns to avoid a "god config" file.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL)
+  .replace(/\/+$/, "");
+
+export const SITE_ORIGINS = Object.freeze([
+  SITE_URL,
+  SITE_URL.replace("://www.", "://")
+]);

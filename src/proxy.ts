@@ -1,7 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
-import { SITE_ORIGINS } from "@/lib/site-config";
+import {
+  CANONICAL_REDIRECT_SKIP_HOSTS,
+  SITE_ORIGINS,
+  SITE_URL,
+} from "@/lib/site-config";
 
 function hasSupabaseEnv() {
   return Boolean(
@@ -153,6 +157,36 @@ function redirectWithSecurityHeaders({
   return redirectResponse;
 }
 
+function shouldSkipCanonicalRedirect(host: string): boolean {
+  const normalized = host.toLowerCase();
+  return CANONICAL_REDIRECT_SKIP_HOSTS.some((pattern) => {
+    const p = pattern.toLowerCase();
+    return p.startsWith(".") ? normalized.endsWith(p) : normalized.includes(p);
+  });
+}
+
+function canonicalRedirectUrl(request: NextRequest): URL | null {
+  const hostHeader = request.headers.get("host");
+  if (!hostHeader || shouldSkipCanonicalRedirect(hostHeader)) {
+    return null;
+  }
+
+  const canonical = new URL(SITE_URL);
+  const requestedHost = hostHeader.toLowerCase();
+  const canonicalHost = canonical.host.toLowerCase();
+
+  if (requestedHost === canonicalHost) {
+    return null;
+  }
+
+  // Keep path/query intact; normalize only scheme + host to canonical.
+  const url = request.nextUrl.clone();
+  url.protocol = canonical.protocol;
+  url.hostname = canonical.hostname;
+  url.port = canonical.port;
+  return url;
+}
+
 export async function proxy(request: NextRequest) {
   const isDev = process.env.NODE_ENV === "development";
   const nonce = crypto.randomUUID().replace(/-/g, "");
@@ -161,6 +195,11 @@ export async function proxy(request: NextRequest) {
     isDev,
     supabaseOrigin: getSupabaseOrigin(),
   });
+
+  const canonicalUrl = canonicalRedirectUrl(request);
+  if (canonicalUrl) {
+    return redirectWithSecurityHeaders({ request, url: canonicalUrl, csp });
+  }
 
   const response = NextResponse.next({
     request: {

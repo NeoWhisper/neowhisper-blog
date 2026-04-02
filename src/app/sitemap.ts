@@ -2,8 +2,9 @@ import type { MetadataRoute } from "next";
 import { getPosts, getBaseSlug } from "@/lib/posts";
 import { categories as canonicalCategories } from "@/lib/categories";
 import { getHybridSitemapBlogEntries } from "@/lib/posts-hybrid";
+import { SITE_URL } from "@/lib/site-config";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 // Helper function to create a slug from a category name
 // Normalise category names to canonical slugs. Prefer the canonical mapping

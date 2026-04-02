@@ -12,8 +12,9 @@ import CategoryNav from "@/components/CategoryNav";
 import { buildCategorySlug } from "@/lib/categories";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getHybridPosts } from "@/lib/posts-hybrid";
+import { SITE_URL } from "@/lib/site-config";
 
-const siteUrl = "https://www.neowhisper.net";
+const siteUrl = SITE_URL;
 
 type BlogCopy = {
   metaTitle: string;

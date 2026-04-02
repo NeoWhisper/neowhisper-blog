@@ -3,8 +3,9 @@ import Image from "next/image";
 import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
+import { SITE_URL } from "@/lib/site-config";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 const copy = {
   en: {

@@ -12,8 +12,9 @@ import ArticleCard from "@/components/ArticleCard";
 import { buildCategorySlug } from "@/lib/categories";
 import AuthorBio from "@/components/AuthorBio";
 import { normalizeLang } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-config";
 
-const siteUrl = "https://www.neowhisper.net";
+const siteUrl = SITE_URL;
 
 function flattenText(node: ReactNode): string {
   if (typeof node === "string" || typeof node === "number") return String(node);

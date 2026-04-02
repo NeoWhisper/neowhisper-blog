@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-config";
 
 const LAST_UPDATED = "2026-03-25";
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 const copyByLang: Record<
   SupportedLang,

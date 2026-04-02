@@ -12,7 +12,10 @@
     "lint": "eslint",
     "test": "jest",
     "test:e2e": "playwright test",
-    "content:daily": "node --env-file-if-exists=.env.local scripts/generate-daily-ai-trend-posts.mjs",
+    "content:daily": "node --import tsx --env-file-if-exists=.env.local scripts/generate-daily-ai-trend-posts.ts",
+    "content:check": "node --import tsx --env-file-if-exists=.env.local scripts/generate-daily-ai-trend-posts.ts --dry-run --validate-config --lang=en",
+    "content:test-flags": "node --test scripts/tests/content-flags.test.mjs",
+    "content:typecheck": "tsc -p tsconfig.scripts.json --noEmit",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
     "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
     "content:sync-main": "bash scripts/sync-local-main.sh",
@@ -42,7 +45,8 @@
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "striptags": "^3.2.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
@@ -69,6 +73,7 @@
     "tailwindcss": "^4",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.6",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   },
   "overrides": {

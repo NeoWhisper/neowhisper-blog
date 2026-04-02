@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { MODEL } from "./config.mjs";
-import { MAX_TOKENS_PER_RUN, TARGET_WORD_COUNT } from "./constants.mjs";
+import { MODEL } from "./config";
+import { MAX_TOKENS_PER_RUN, TARGET_WORD_COUNT } from "./constants";
 
 export const MetricsState = {
   sessionId: new Date().toISOString().replace(/[:.]/g, "-"),

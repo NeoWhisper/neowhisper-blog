@@ -18,18 +18,22 @@ if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set +a
 fi
 
-if [[ -f "${REPO_ROOT}/.env.local" ]]; then
-  set -a
-  source "${REPO_ROOT}/.env.local"
-  set +a
-fi
+declare -a REQUIRED_VARS=("OPENAI_BASE_URL" "OPENAI_MODEL" "OPENAI_API_MODE")
+for var in "${REQUIRED_VARS[@]}"; do
+  if [[ -z "${!var:-}" ]]; then
+    echo "[daily-local] Error: Required environment variable '${var}' is not set."
+    echo "[daily-local] Set it in .env.local or export it before running this script."
+    exit 1
+  fi
+done
 
-OPENAI_BASE_URL="${OPENAI_BASE_URL:-http://127.0.0.1:11434/v1}"
-OPENAI_MODEL="${OPENAI_MODEL:-gpt-oss:20b}"
-OPENAI_API_MODE="${OPENAI_API_MODE:-chat}"
-OPENAI_API_KEY="${OPENAI_API_KEY:-sk-local}"
 NODE_BINARY="${NODE_BINARY:-$(command -v node || true)}"
 NPM_BINARY="${NPM_BINARY:-$(command -v npm || true)}"
+
+if [[ "${OPENAI_BASE_URL}" == "https://api.openai.com/v1" ]] && [[ -z "${OPENAI_API_KEY:-}" ]]; then
+  echo "[daily-local] Error: OPENAI_API_KEY is required when using official OpenAI endpoint."
+  exit 1
+fi
 
 export OPENAI_BASE_URL
 export OPENAI_MODEL
@@ -120,9 +124,9 @@ fi
 
 echo "[daily-local] Generating daily EN/JA/AR drafts..."
 if (( ${#GEN_ARGS[@]} > 0 )); then
-  "${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs "${GEN_ARGS[@]}"
+  "${NODE_BINARY}" --import tsx scripts/generate-daily-ai-trend-posts.ts "${GEN_ARGS[@]}"
 else
-  "${NODE_BINARY}" scripts/generate-daily-ai-trend-posts.mjs
+  "${NODE_BINARY}" --import tsx scripts/generate-daily-ai-trend-posts.ts
 fi
 
 if git diff --quiet -- src/content/posts && [[ -z "$(git ls-files --others --exclude-standard -- src/content/posts)" ]]; then

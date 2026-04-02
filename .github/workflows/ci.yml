@@ -34,5 +34,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Validate Content Generator Config
+        run: npm run content:check
+
+      - name: Test Content Generator Flags
+        run: npm run content:test-flags
+
+      - name: Typecheck Content Scripts
+        run: npm run content:typecheck
+
       - name: Build
         run: npm run build

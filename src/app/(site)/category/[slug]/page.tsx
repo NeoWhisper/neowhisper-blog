@@ -4,8 +4,9 @@ import { categories, buildCategorySlug } from '@/lib/categories';
 import Link from 'next/link';
 import { normalizeLang } from '@/lib/i18n';
 import type { Metadata } from 'next';
+import { SITE_URL } from "@/lib/site-config";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 interface PageProps {
     params: Promise<{ slug: string }>;

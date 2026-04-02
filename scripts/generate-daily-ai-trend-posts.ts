@@ -18,10 +18,12 @@ import {
   POSTS_DIR,
   COVER_IMAGE,
   AUTHOR_NAME,
+  TOPIC_HINT,
   initializeConfigs,
   ConfigState,
 } from "./lib/config";
 import { fetchFeed } from "./lib/feed";
+import type { FeedItem } from "./lib/feed";
 import { AiState } from "./lib/ai";
 import { flushMetrics } from "./lib/metrics";
 import { createStagedArticle } from "./lib/article-builder";
@@ -89,8 +91,87 @@ const guardApiKey = () => {
   return !((isOfficialOpenAi && !API_KEY) && (console.log("OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation."), process.exit(0)));
 };
 
+const MIN_SOURCES_REQUIRED = Number.parseInt(process.env.TREND_MIN_SOURCES ?? "3", 10);
+
 const guardMinSources = (sources) => {
-  return sources.length < 3 ? (console.log("Low sources, skip"), process.exit(0)) : sources;
+  return sources.length < Math.max(1, MIN_SOURCES_REQUIRED)
+    ? (console.log("Low sources, skip"), process.exit(0))
+    : sources;
+};
+
+type RankedSource = {
+  title: string;
+  url: string;
+  source: string;
+  summary?: string;
+};
+
+const toRankedSource = (source: FeedItem): RankedSource => ({
+  title: source.title,
+  url: source.link,
+  source: source.feed,
+  summary: source.description,
+});
+
+const uniqueByUrl = (sources: RankedSource[]) =>
+  Array.from(new Map(sources.map((item) => [item.url, item])).values());
+
+const normalizeWord = (value: string) => value.trim().toLowerCase();
+
+const topicHintTerms = TOPIC_HINT
+  .split(/[\s,]+/)
+  .map(normalizeWord)
+  .filter((term) => term.length >= 3);
+
+const allConfiguredKeywords = Object.values(ConfigState.KEYWORDS)
+  .flat()
+  .map(normalizeWord);
+
+const includesAnyKeyword = (text: string, keywords: string[]) =>
+  keywords.some((keyword) => text.includes(keyword));
+
+const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
+  const normalized = rawSources.map(toRankedSource);
+  const trendKeywords = ConfigState.KEYWORDS.trend.map(normalizeWord);
+
+  const byTrend = uniqueByUrl(
+    normalized.filter((item) =>
+      includesAnyKeyword(
+        `${item.title} ${item.summary ?? ""}`.toLowerCase(),
+        trendKeywords
+      )
+    )
+  );
+  console.log(`[daily-trends] source pool: raw=${normalized.length}, trend=${byTrend.length}`);
+  if (byTrend.length >= MIN_SOURCES_REQUIRED) {
+    return byTrend.slice(0, 6);
+  }
+
+  const expandedKeywords = Array.from(
+    new Set([...allConfiguredKeywords, ...topicHintTerms])
+  );
+  const byExpanded = uniqueByUrl(
+    normalized.filter((item) =>
+      includesAnyKeyword(
+        `${item.title} ${item.summary ?? ""}`.toLowerCase(),
+        expandedKeywords
+      )
+    )
+  );
+  console.log(`[daily-trends] source pool: expanded=${byExpanded.length}`);
+  if (byExpanded.length >= MIN_SOURCES_REQUIRED) {
+    console.warn("[daily-trends] trend-only sources were low; using expanded keyword matching.");
+    return byExpanded.slice(0, 6);
+  }
+
+  const fallbackPool = uniqueByUrl(normalized);
+  console.log(`[daily-trends] source pool: fallback=${fallbackPool.length}, min_required=${Math.max(1, MIN_SOURCES_REQUIRED)}`);
+  if (fallbackPool.length >= MIN_SOURCES_REQUIRED) {
+    console.warn("[daily-trends] keyword-matched sources were low; using top feed items fallback.");
+    return fallbackPool.slice(0, 6);
+  }
+
+  return fallbackPool;
 };
 
 const parseLangFlag = () => {
@@ -130,12 +211,7 @@ async function main() {
     .filter(r => r.status === "fulfilled")
     .flatMap(r => r.value);
 
-  const ranked = guardMinSources(
-    rawSources
-      .filter(s => ConfigState.KEYWORDS.trend.some(k => s.title.toLowerCase().includes(k)))
-      .slice(0, 6)
-      .map(s => ({ title: s.title, url: s.link, source: s.feed, summary: s.description }))
-  );
+  const ranked = guardMinSources(pickRankedSources(rawSources));
 
   const content = await createStagedArticle({
     dateString,

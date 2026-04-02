@@ -1,4 +1,12 @@
-[
+export type CategoryConfig = {
+  slug: string;
+  nameEn: string;
+  nameJa: string;
+  nameAr: string;
+  keywords: string[];
+};
+
+export const categories: CategoryConfig[] = [
   {
     "slug": "software-development",
     "nameEn": "Software Development",
@@ -209,4 +217,4 @@
       "impact"
     ]
   }
-]
+];

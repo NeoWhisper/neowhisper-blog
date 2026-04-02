@@ -1,6 +1,7 @@
 import { getHybridPosts } from "@/lib/posts-hybrid";
+import { SITE_URL } from "@/lib/site-config";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 function buildPostUrl(
   slug: string,

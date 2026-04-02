@@ -8,10 +8,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getPosts, getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
+import { SITE_URL } from "@/lib/site-config";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getProjects } from "@/data/projects";
 
-const siteUrl = "https://www.neowhisper.net";
+const siteUrl = SITE_URL;
 
 const translations = {
   en: {

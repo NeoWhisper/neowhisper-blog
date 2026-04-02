@@ -1,4 +1,11 @@
-{
+export type KeywordBuckets = {
+  trend: string[];
+  art: string[];
+  politics: string[];
+  finance: string[];
+};
+
+export const keywords: KeywordBuckets = {
   "trend": [
     "ai",
     "artificial intelligence",
@@ -82,4 +89,4 @@
     "mortgage",
     "interest rate"
   ]
-}
+};

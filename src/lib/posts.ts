@@ -15,6 +15,17 @@ const postsDirectory = path.join(process.cwd(), "src/content/posts");
 import { Post } from "@/types";
 import { buildCategorySlug } from "@/lib/categories";
 
+function sanitizeMdxContent(content: unknown): string {
+    return String(content ?? "").replace(/<(?=\s*\d)/g, "&lt;");
+}
+
+function safeFrontmatterString(value: unknown, fallback = ""): string {
+    if (typeof value !== "string") return fallback;
+    const normalized = value.trim();
+    if (!normalized || normalized === "[object Object]") return fallback;
+    return normalized;
+}
+
 // Function to retrieve all posts, sorted by date
 export function getPosts(): Post[] {
     // Create directory if it doesn't exist to prevent errors
@@ -39,16 +50,16 @@ export function getPosts(): Post[] {
 
         return {
             slug,
-            title: data.title || "Untitled Post",
+            title: safeFrontmatterString(data.title, "Untitled Post"),
             // Convert date to string to avoid serialization issues
             date: data.date
                 ? new Date(data.date).toISOString()
                 : new Date().toISOString(),
-            excerpt: data.excerpt || "",
+            excerpt: safeFrontmatterString(data.excerpt),
             coverImage: data.coverImage || null,
-            category: data.category || null,
+            category: safeFrontmatterString(data.category) || null,
             readTime: stats.text,
-            content,
+            content: sanitizeMdxContent(content),
         } as Post;
     });
 
@@ -73,15 +84,15 @@ export function getPostBySlug(slug: string): Post | null {
 
     return {
         slug,
-        title: data.title,
+        title: safeFrontmatterString(data.title, "Untitled Post"),
         date: data.date
             ? new Date(data.date).toISOString()
             : new Date().toISOString(),
-        excerpt: data.excerpt || "",
+        excerpt: safeFrontmatterString(data.excerpt),
         coverImage: data.coverImage || null,
-        category: data.category || null,
+        category: safeFrontmatterString(data.category) || null,
         readTime: stats.text,
-        content,
+        content: sanitizeMdxContent(content),
     } as Post;
 }
 

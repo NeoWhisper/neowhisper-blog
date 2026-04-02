@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-config";
 
-const baseUrl = "https://www.neowhisper.net";
+const baseUrl = SITE_URL;
 
 const translations = {
     en: {

@@ -31,9 +31,10 @@ import {
   LANGUAGE_ORDER,
   LANGUAGE_LABELS,
   type LanguageCode,
+  type ArticlePattern,
 } from "./lib/constants";
 import contentSafety from "./lib/content-safety";
-import { resolveCategoryByInput } from "./lib/utils";
+import { resolveCategoryByInput, parsePatternFlag } from "./lib/utils";
 
 const {
   normalizeExcerptText,
@@ -424,6 +425,7 @@ async function main() {
     sources: ranked,
     targetLanguages,
     preferredCategorySlug: requestedCategory?.slug ?? null,
+    pattern: parsePatternFlag(),
   })) as StagedArticle;
   const category =
     ConfigState.CATEGORY_MAP.get(content.categorySlug) ??

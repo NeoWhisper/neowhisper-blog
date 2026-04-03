@@ -33,6 +33,7 @@ import {
   type LanguageCode,
 } from "./lib/constants";
 import contentSafety from "./lib/content-safety";
+import { resolveCategoryByInput } from "./lib/utils";
 
 const { normalizeExcerptText, normalizeMetadataText, sanitizeGeneratedMarkdown } = contentSafety;
 
@@ -135,6 +136,7 @@ const guardApiKey = () => {
 };
 
 const MIN_SOURCES_REQUIRED = Number.parseInt(process.env.TREND_MIN_SOURCES ?? "3", 10);
+const DEFAULT_RECENT_DAYS = Number.parseInt(process.env.TREND_RECENT_DAYS ?? "3", 10);
 
 const guardMinSources = (sources: RankedSource[]): RankedSource[] => {
   return sources.length < Math.max(1, MIN_SOURCES_REQUIRED)
@@ -147,6 +149,7 @@ type RankedSource = {
   url: string;
   source: string;
   summary?: string;
+  publishedAt?: string;
 };
 
 const toRankedSource = (source: FeedItem): RankedSource => ({
@@ -154,6 +157,7 @@ const toRankedSource = (source: FeedItem): RankedSource => ({
   url: source.link,
   source: source.feed,
   summary: source.description,
+  publishedAt: source.publishedAt,
 });
 
 const uniqueByUrl = (sources: RankedSource[]) =>
@@ -217,6 +221,76 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
   return fallbackPool;
 };
 
+const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const parseCategoryFlag = (): string | null => {
+  const arg = process.argv.find((entry) => entry.startsWith("--category="));
+  if (!arg) return null;
+  const raw = arg.slice("--category=".length).trim();
+  return raw.length > 0 ? raw : null;
+};
+
+const parseRecentDays = (): number => {
+  const arg = process.argv.find((entry) => entry.startsWith("--recent-days="));
+  const value = arg?.slice("--recent-days=".length);
+  return parsePositiveInt(value, DEFAULT_RECENT_DAYS);
+};
+
+const isRecentSource = (source: RankedSource, recentDays: number, nowMs: number): boolean => {
+  if (!source.publishedAt) return false;
+  const publishedMs = new Date(source.publishedAt).getTime();
+  if (Number.isNaN(publishedMs)) return false;
+  const cutoffMs = nowMs - recentDays * 24 * 60 * 60 * 1000;
+  return publishedMs >= cutoffMs;
+};
+
+const pickSourcesByCategoryAndRecency = (
+  sources: RankedSource[],
+  categoryKeywords: string[],
+  recentDays: number
+): RankedSource[] => {
+  const nowMs = Date.now();
+  const normalizedKeywords = categoryKeywords.map((keyword) => keyword.toLowerCase());
+  const withSignals = sources.map((source) => {
+    const text = `${source.title} ${source.summary ?? ""}`.toLowerCase();
+    const keywordHits = normalizedKeywords.reduce(
+      (sum, keyword) => sum + (text.includes(keyword) ? 1 : 0),
+      0
+    );
+    const recent = isRecentSource(source, recentDays, nowMs);
+    return { source, keywordHits, recent };
+  });
+
+  const strictMatches = withSignals.filter((item) => item.recent && item.keywordHits > 0);
+  if (strictMatches.length >= Math.max(1, MIN_SOURCES_REQUIRED)) {
+    return strictMatches
+      .sort((a, b) => b.keywordHits - a.keywordHits)
+      .map((item) => item.source)
+      .slice(0, 6);
+  }
+
+  const recentOnly = withSignals.filter((item) => item.recent);
+  if (recentOnly.length >= Math.max(1, MIN_SOURCES_REQUIRED)) {
+    return recentOnly
+      .sort((a, b) => b.keywordHits - a.keywordHits)
+      .map((item) => item.source)
+      .slice(0, 6);
+  }
+
+  const keywordOnly = withSignals.filter((item) => item.keywordHits > 0);
+  if (keywordOnly.length >= Math.max(1, MIN_SOURCES_REQUIRED)) {
+    return keywordOnly
+      .sort((a, b) => b.keywordHits - a.keywordHits)
+      .map((item) => item.source)
+      .slice(0, 6);
+  }
+
+  return sources.slice(0, 6);
+};
+
 const isLanguageCode = (value: string): value is LanguageCode =>
   (LANGUAGE_ORDER as readonly string[]).includes(value);
 
@@ -246,8 +320,19 @@ async function main() {
   await initializeConfigs();
 
   const targetLanguages = resolveTargetLanguages();
+  const requestedCategoryInput = parseCategoryFlag();
+  const recentDays = parseRecentDays();
   const resolvedTocConfig = loadTocConfig();
   const generateToc = createGenerateToc(resolvedTocConfig.excludedHeadings);
+  const requestedCategory = requestedCategoryInput
+    ? resolveCategoryByInput(requestedCategoryInput)
+    : null;
+
+  if (requestedCategoryInput && !requestedCategory) {
+    throw new Error(
+      `Unsupported --category value "${requestedCategoryInput}". Use one of configured category slugs/names.`
+    );
+  }
 
   if (VALIDATE_CONFIG_ONLY) {
     console.log(`[daily-trends] config validation OK (languages: ${targetLanguages.join(", ")})`);
@@ -261,12 +346,24 @@ async function main() {
     .filter((r): r is PromiseFulfilledResult<FeedItem[]> => r.status === "fulfilled")
     .flatMap(r => r.value);
 
-  const ranked = guardMinSources(pickRankedSources(rawSources));
+  const baseRanked = pickRankedSources(rawSources);
+  const ranked = guardMinSources(
+    requestedCategory
+      ? pickSourcesByCategoryAndRecency(baseRanked, requestedCategory.keywords, recentDays)
+      : baseRanked
+  );
+
+  if (requestedCategory) {
+    console.log(
+      `[daily-trends] selected category=${requestedCategory.slug}, recent_days=${recentDays}, sources=${ranked.length}`
+    );
+  }
 
   const content = await createStagedArticle({
     dateString,
     sources: ranked,
-    targetLanguages
+    targetLanguages,
+    preferredCategorySlug: requestedCategory?.slug ?? null,
   }) as StagedArticle;
   const category = ConfigState.CATEGORY_MAP.get(content.categorySlug)
     ?? (ConfigState.CATEGORY_DEFINITIONS[0] as CategoryDefinition);

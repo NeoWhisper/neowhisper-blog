@@ -61,6 +61,7 @@
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/he": "^1.2.3",
     "@types/jest": "^30.0.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25",

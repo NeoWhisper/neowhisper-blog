@@ -9,7 +9,9 @@ import {
   LANGUAGE_ORDER,
   MIN_WORDS_THRESHOLD,
   EXPANSION_RETRY_LIMIT,
+  OUTLINE_TEMPLATES,
   type LanguageCode,
+  type ArticlePattern,
 } from "./constants";
 import {
   pickCategory,
@@ -135,9 +137,11 @@ async function retryOutlineGeneration(
   constraint: string,
   dateString: string,
   categorySlug: string,
+  pattern: ArticlePattern,
 ): Promise<Outline> {
   const attempts = [0, 1, 2];
   const errors: string[] = [];
+  const template = OUTLINE_TEMPLATES[pattern];
 
   for (const attempt of attempts) {
     const retryMsg =
@@ -151,11 +155,12 @@ ${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}`).join("\n")}
 
 ${constraint}
 
+Pattern: ${pattern} - ${template.description}
 Create a structured JSON outline:
 - title_hint (string)
 - slugSuffix (string)
 - sections: Array of { id: string, title: string, intent: string, targetWordCount: number }
-Required IDs: "intro", (3-4 "trend-*"), "neowhisper", "closing", "table"
+Required IDs: ${template.requiredIds.join(", ")}
 ${retryMsg}
 
 Return JSON only.
@@ -205,18 +210,25 @@ export async function generateOutline({
   dateString,
   sources,
   categorySlug,
+  pattern = "brief",
 }: {
   dateString: string;
   sources: SourceItem[];
   categorySlug: string;
+  pattern?: ArticlePattern;
 }): Promise<Outline> {
-  const stageId = startStage("generateOutline", { dateString, categorySlug });
+  const stageId = startStage("generateOutline", {
+    dateString,
+    categorySlug,
+    pattern,
+  });
   try {
     const outline = await retryOutlineGeneration(
       sources,
       CONTENT_CONSTRAINTS,
       dateString,
       categorySlug,
+      pattern,
     );
     endStage(stageId, { sections: outline.sections.length });
     return outline;
@@ -233,7 +245,11 @@ export async function generateSection(
   previousSectionSummaries: SectionSummary[],
 ): Promise<string> {
   const stageId = startStage("generateSection", { sectionId: section.id });
-  const systemPrompt = `${SYSTEM_RULES}\nEnglish Section Generator: ${section.title}`;
+  const systemPrompt = `${SYSTEM_RULES}
+You are an English Section Generator for: ${section.title}
+
+CRITICAL: You MUST return ONLY valid JSON. No markdown, no explanations, no conversational text.
+Required format: {"body": "markdown content here"}`;
   const summariesText =
     previousSectionSummaries.length > 0
       ? previousSectionSummaries
@@ -250,6 +266,15 @@ Generate about ${section.targetWordCount} words of detailed technical content.
 Use one concrete, grounded example per section when helpful.
 Do not use repetitive marketing framing.
 Add "What this means for your team" bullets.
+
+SPECIAL FORMAT FOR "highlights" SECTION:
+If section id is "highlights", create a "Key Features" or "Key Highlights" section that:
+- Uses bullet points with emojis where appropriate
+- Extracts the 4-6 most important features/benefits from the sources
+- Format: "• [Feature name]: [Brief description]"
+- Include practical benefits, not just technical specs
+- End with a notable differentiator (e.g., licensing, cost, accessibility)
+
 Table section must be markdown.
 
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
@@ -262,7 +287,8 @@ IMPORTANT FACT RULE:
 Do not repeat or rephrase content already covered in the following accepted sections:
 ${summariesText}
 
-Return JSON { "body": "Markdown string" }
+OUTPUT FORMAT - ONLY THIS JSON:
+{"body": "Your markdown content here. Escape quotes properly."}
 `;
   logVerbose(`[VERBOSE] section [${section.id}] prompt:\n${userPrompt}\n`);
 
@@ -481,11 +507,13 @@ export async function createStagedArticle({
   sources,
   targetLanguages = LANGUAGE_ORDER,
   preferredCategorySlug = null,
+  pattern = "brief",
 }: {
   dateString: string;
   sources: SourceItem[];
   targetLanguages?: readonly LanguageCode[];
   preferredCategorySlug?: string | null;
+  pattern?: ArticlePattern;
 }) {
   const selectedLanguages = normalizeTargetLanguages(targetLanguages);
   const processingLanguages: LanguageCode[] = [
@@ -499,6 +527,7 @@ export async function createStagedArticle({
     dateString,
     sources,
     categorySlug: category.slug,
+    pattern,
   });
 
   const stagedContent: StagedContent = {

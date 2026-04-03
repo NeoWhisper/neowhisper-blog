@@ -13,17 +13,73 @@ export const LANGUAGE_ORDER = ["en", "ja", "ar"] as const;
 export type LanguageCode = (typeof LANGUAGE_ORDER)[number];
 export type CategoryNameKey = "nameEn" | "nameJa" | "nameAr";
 
+export const ARTICLE_PATTERNS = ["brief", "tutorial", "analysis"] as const;
+export type ArticlePattern = (typeof ARTICLE_PATTERNS)[number];
+
+export const OUTLINE_TEMPLATES: Record<
+  ArticlePattern,
+  { requiredIds: string[]; description: string }
+> = {
+  brief: {
+    requiredIds: ["intro", "(3-4 trend-*)", "highlights", "closing", "table"],
+    description: "News brief: Hook → Trends → Highlights → Takeaways",
+  },
+  tutorial: {
+    requiredIds: [
+      "intro",
+      "problem",
+      "solution",
+      "steps",
+      "examples",
+      "troubleshooting",
+      "closing",
+    ],
+    description: "Tutorial: Problem → Solution → Steps → Examples",
+  },
+  analysis: {
+    requiredIds: [
+      "intro",
+      "context",
+      "comparison",
+      "tradeoffs",
+      "recommendations",
+      "closing",
+    ],
+    description:
+      "Deep analysis: Context → Comparison → Trade-offs → Recommendations",
+  },
+};
+
 export type LanguageLabel = {
   tocHeading: string;
+  highlightsHeading: string;
   referencesHeading: string;
   categoryNameKey: CategoryNameKey;
   fileSuffix: string;
 };
 
 export const LANGUAGE_LABELS: Record<LanguageCode, LanguageLabel> = {
-  en: { tocHeading: "## Table of Contents", referencesHeading: "## References", categoryNameKey: "nameEn", fileSuffix: "" },
-  ja: { tocHeading: "## 目次", referencesHeading: "## 参考リンク", categoryNameKey: "nameJa", fileSuffix: "-ja" },
-  ar: { tocHeading: "## المحتويات", referencesHeading: "## المراجع", categoryNameKey: "nameAr", fileSuffix: "-ar" },
+  en: {
+    tocHeading: "## Table of Contents",
+    highlightsHeading: "Key Highlights",
+    referencesHeading: "## References",
+    categoryNameKey: "nameEn",
+    fileSuffix: "",
+  },
+  ja: {
+    tocHeading: "## 目次",
+    highlightsHeading: "主なハイライト",
+    referencesHeading: "## 参考リンク",
+    categoryNameKey: "nameJa",
+    fileSuffix: "-ja",
+  },
+  ar: {
+    tocHeading: "## المحتويات",
+    highlightsHeading: "أبرز المميزات",
+    referencesHeading: "## المراجع",
+    categoryNameKey: "nameAr",
+    fileSuffix: "-ar",
+  },
 };
 
 export const SYSTEM_RULES = `
@@ -35,6 +91,14 @@ Truthfulness Constraints:
 - Do not invent exact numbers unless explicitly present in the provided sources.
 - If exact numbers are unavailable, use qualitative phrasing and clearly mark estimates/hypotheses.
 - Distinguish clearly between what is currently available vs roadmap/speculative ideas.
+
+Highlights Section Format (when section id is "highlights"):
+- Create a "Key Features" or "Key Highlights" section with 4-6 bullet points
+- Format: "• [Feature name]: [Brief description with practical benefit]"
+- Use emojis where appropriate (⚡ 🌍 🔒 🛠️ 📊 etc.)
+- Include: size/scale options, language support, key capabilities, licensing/accessibility
+- End with the most notable differentiator
+- Keep descriptions concise but informative
 `;
 
 export const CONTENT_CONSTRAINTS = `

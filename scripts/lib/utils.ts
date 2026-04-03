@@ -1,5 +1,9 @@
 import { callAi, parseJsonWithRepair } from "./ai";
-import { SYSTEM_RULES } from "./constants";
+import {
+  SYSTEM_RULES,
+  ARTICLE_PATTERNS,
+  type ArticlePattern,
+} from "./constants";
 import { ConfigState } from "./config";
 
 const LANGUAGE_WORD_DENOMINATORS: Partial<Record<string, number>> = { ja: 2.5 };
@@ -21,11 +25,16 @@ export function countWords(text: string, lang: string): number {
     : text.split(/\s+/).filter(Boolean).length;
 }
 
-export function computeWordCounts(sections: Record<string, string>, lang: string): number {
+export function computeWordCounts(
+  sections: Record<string, string>,
+  lang: string,
+): number {
   return countWords(Object.values(sections).join("\n"), lang);
 }
 
-export function selectSectionsToExpand(sections: Record<string, string>): string[] {
+export function selectSectionsToExpand(
+  sections: Record<string, string>,
+): string[] {
   return Object.entries(sections)
     .filter(([id]) => id.startsWith("trend"))
     .map(([id]) => id);
@@ -34,31 +43,34 @@ export function selectSectionsToExpand(sections: Record<string, string>): string
 export async function polishMetadata(
   body: string,
   language: string,
-  metadataType: "title" | "excerpt"
+  metadataType: "title" | "excerpt",
 ): Promise<string> {
   const raw = await callAi(
     `${SYSTEM_RULES}\nGenerate ${metadataType} for the content.`,
     `Language: ${language}\nContent: ${body.slice(0, 3000)}\nReturn JSON { "result": "..." }`,
-    { responseFormat: { type: "json_object" } }
+    { responseFormat: { type: "json_object" } },
   );
-  return (await parseJsonWithRepair({ text: raw, label: `polish ${metadataType}` })).result;
+  return (
+    await parseJsonWithRepair({ text: raw, label: `polish ${metadataType}` })
+  ).result;
 }
 
-export function resolveCategoryByInput(input: string): CategoryDefinition | null {
+export function resolveCategoryByInput(
+  input: string,
+): CategoryDefinition | null {
   const normalizedInput = normalize(input);
-  return ConfigState.CATEGORY_DEFINITIONS.find((category) =>
-    [
-      category.slug,
-      category.nameEn,
-      category.nameJa,
-      category.nameAr,
-    ].some((value) => normalize(String(value)) === normalizedInput)
-  ) ?? null;
+  return (
+    ConfigState.CATEGORY_DEFINITIONS.find((category) =>
+      [category.slug, category.nameEn, category.nameJa, category.nameAr].some(
+        (value) => normalize(String(value)) === normalizedInput,
+      ),
+    ) ?? null
+  );
 }
 
 export function pickCategory(
   preferredCategory: CategoryDefinition | null,
-  sources: SourceItem[]
+  sources: SourceItem[],
 ): CategoryDefinition {
   if (preferredCategory) {
     return preferredCategory;
@@ -68,14 +80,25 @@ export function pickCategory(
     .map((x) => `${x.title} ${x.summary ?? ""}`.toLowerCase())
     .join(" ");
 
-  return ConfigState.CATEGORY_DEFINITIONS
-    .map(category => ({
+  return (
+    ConfigState.CATEGORY_DEFINITIONS.map((category) => ({
       category,
       score: category.keywords.reduce(
         (sum, keyword) => sum + (aggregatedContent.includes(keyword) ? 1 : 0),
-        0
-      )
+        0,
+      ),
     }))
-    .sort((a, b) => b.score - a.score)
-    .at(0)?.category ?? ConfigState.CATEGORY_DEFINITIONS[0];
+      .sort((a, b) => b.score - a.score)
+      .at(0)?.category ?? ConfigState.CATEGORY_DEFINITIONS[0]
+  );
+}
+
+export function parsePatternFlag(): ArticlePattern {
+  const arg = process.argv.find((entry: string) =>
+    entry.startsWith("--pattern="),
+  );
+  const value = arg?.slice("--pattern=".length).trim().toLowerCase();
+  return (ARTICLE_PATTERNS as readonly string[]).includes(value ?? "")
+    ? (value as ArticlePattern)
+    : "brief";
 }

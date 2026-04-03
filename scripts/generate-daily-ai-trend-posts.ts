@@ -34,7 +34,7 @@ import {
 } from "./lib/constants";
 import contentSafety from "./lib/content-safety";
 
-const { normalizeMetadataText, sanitizeGeneratedMarkdown } = contentSafety;
+const { normalizeExcerptText, normalizeMetadataText, sanitizeGeneratedMarkdown } = contentSafety;
 
 const TocConfigSchema = z.object({
   excludedHeadings: z.array(z.string())
@@ -288,7 +288,7 @@ async function main() {
         fallbackTitle
       );
       const excerptFallback = finalBody.split("\n").find((line) => line.trim() && !line.startsWith("#"))?.trim() ?? "";
-      const excerpt = normalizeMetadataText(localized.excerpt, excerptFallback);
+      const excerpt = normalizeExcerptText(localized.excerpt, excerptFallback);
       const referencesSection = ranked
         .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
         .join("\n");

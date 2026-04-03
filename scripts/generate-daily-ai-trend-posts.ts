@@ -35,10 +35,14 @@ import {
 import contentSafety from "./lib/content-safety";
 import { resolveCategoryByInput } from "./lib/utils";
 
-const { normalizeExcerptText, normalizeMetadataText, sanitizeGeneratedMarkdown } = contentSafety;
+const {
+  normalizeExcerptText,
+  normalizeMetadataText,
+  sanitizeGeneratedMarkdown,
+} = contentSafety;
 
 const TocConfigSchema = z.object({
-  excludedHeadings: z.array(z.string())
+  excludedHeadings: z.array(z.string()),
 });
 
 type TocConfig = z.infer<typeof TocConfigSchema>;
@@ -72,8 +76,8 @@ const headingToAnchor = (text: string): string =>
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-const createShouldExcludeHeading = (excludedHeadings: string[]) =>
-  (text: string) =>
+const createShouldExcludeHeading =
+  (excludedHeadings: string[]) => (text: string) =>
     excludedHeadings.some((excluded) => text.toLowerCase().includes(excluded));
 
 const createGenerateToc = (excludedHeadings: string[]) => {
@@ -81,15 +85,15 @@ const createGenerateToc = (excludedHeadings: string[]) => {
   return (markdownBody: string, tocHeading: string): string => {
     const headings = [...markdownBody.matchAll(/^##\s+(.+)$/gm)]
       .map((match: RegExpMatchArray) => (match[1] ?? "").trim())
-      .filter(text => !shouldExclude(text))
-      .map(text => ({
+      .filter((text) => !shouldExclude(text))
+      .map((text) => ({
         text,
-        anchor: headingToAnchor(text)
+        anchor: headingToAnchor(text),
       }));
 
     return headings.length === 0
       ? ""
-      : `${tocHeading}\n\n${headings.map(h => `- [${h.text}](#${h.anchor})`).join("\n")}\n\n---\n\n`;
+      : `${tocHeading}\n\n${headings.map((h) => `- [${h.text}](#${h.anchor})`).join("\n")}\n\n---\n\n`;
   };
 };
 
@@ -100,7 +104,12 @@ type FrontmatterInput = {
   dateString: string;
 };
 
-const buildFrontmatter = ({ title, excerpt, categoryName, dateString }: FrontmatterInput): string[] => [
+const buildFrontmatter = ({
+  title,
+  excerpt,
+  categoryName,
+  dateString,
+}: FrontmatterInput): string[] => [
   "---",
   `title: "${yamlString(title)}"`,
   `date: "${dateString}"`,
@@ -115,7 +124,7 @@ const buildFrontmatter = ({ title, excerpt, categoryName, dateString }: Frontmat
 
 const getCategoryDisplayName = (
   category: CategoryDefinition,
-  lang: LanguageCode
+  lang: LanguageCode,
 ): string => {
   const keyByLang: Record<LanguageCode, keyof CategoryDefinition> = {
     en: "nameEn",
@@ -128,15 +137,30 @@ const getCategoryDisplayName = (
 const writePostFile = async (filePath: string, doc: string): Promise<void> =>
   DRY_RUN
     ? void console.log(`[DRY RUN] ${filePath}`)
-    : fs.writeFile(filePath, doc).then(() => console.log(`[daily-trends] wrote ${filePath}`));
+    : fs
+        .writeFile(filePath, doc)
+        .then(() => console.log(`[daily-trends] wrote ${filePath}`));
 
 const guardApiKey = () => {
   const isOfficialOpenAi = new URL(API_BASE_URL).hostname === "api.openai.com";
-  return !((isOfficialOpenAi && !API_KEY) && (console.log("OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation."), process.exit(0)));
+  return !(
+    isOfficialOpenAi &&
+    !API_KEY &&
+    (console.log(
+      "OPENAI_API_KEY is not set for official OpenAI endpoint; skipping daily trend draft generation.",
+    ),
+    process.exit(0))
+  );
 };
 
-const MIN_SOURCES_REQUIRED = Number.parseInt(process.env.TREND_MIN_SOURCES ?? "3", 10);
-const DEFAULT_RECENT_DAYS = Number.parseInt(process.env.TREND_RECENT_DAYS ?? "3", 10);
+const MIN_SOURCES_REQUIRED = Number.parseInt(
+  process.env.TREND_MIN_SOURCES ?? "3",
+  10,
+);
+const DEFAULT_RECENT_DAYS = Number.parseInt(
+  process.env.TREND_RECENT_DAYS ?? "3",
+  10,
+);
 
 const guardMinSources = (sources: RankedSource[]): RankedSource[] => {
   return sources.length < Math.max(1, MIN_SOURCES_REQUIRED)
@@ -165,8 +189,7 @@ const uniqueByUrl = (sources: RankedSource[]) =>
 
 const normalizeWord = (value: string) => value.trim().toLowerCase();
 
-const topicHintTerms = TOPIC_HINT
-  .split(/[\s,]+/)
+const topicHintTerms = TOPIC_HINT.split(/[\s,]+/)
   .map(normalizeWord)
   .filter((term) => term.length >= 3);
 
@@ -185,61 +208,80 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
     normalized.filter((item) =>
       includesAnyKeyword(
         `${item.title} ${item.summary ?? ""}`.toLowerCase(),
-        trendKeywords
-      )
-    )
+        trendKeywords,
+      ),
+    ),
   );
-  console.log(`[daily-trends] source pool: raw=${normalized.length}, trend=${byTrend.length}`);
+  console.log(
+    `[daily-trends] source pool: raw=${normalized.length}, trend=${byTrend.length}`,
+  );
   if (byTrend.length >= MIN_SOURCES_REQUIRED) {
     return byTrend.slice(0, 6);
   }
 
   const expandedKeywords = Array.from(
-    new Set([...allConfiguredKeywords, ...topicHintTerms])
+    new Set([...allConfiguredKeywords, ...topicHintTerms]),
   );
   const byExpanded = uniqueByUrl(
     normalized.filter((item) =>
       includesAnyKeyword(
         `${item.title} ${item.summary ?? ""}`.toLowerCase(),
-        expandedKeywords
-      )
-    )
+        expandedKeywords,
+      ),
+    ),
   );
   console.log(`[daily-trends] source pool: expanded=${byExpanded.length}`);
   if (byExpanded.length >= MIN_SOURCES_REQUIRED) {
-    console.warn("[daily-trends] trend-only sources were low; using expanded keyword matching.");
+    console.warn(
+      "[daily-trends] trend-only sources were low; using expanded keyword matching.",
+    );
     return byExpanded.slice(0, 6);
   }
 
   const fallbackPool = uniqueByUrl(normalized);
-  console.log(`[daily-trends] source pool: fallback=${fallbackPool.length}, min_required=${Math.max(1, MIN_SOURCES_REQUIRED)}`);
+  console.log(
+    `[daily-trends] source pool: fallback=${fallbackPool.length}, min_required=${Math.max(1, MIN_SOURCES_REQUIRED)}`,
+  );
   if (fallbackPool.length >= MIN_SOURCES_REQUIRED) {
-    console.warn("[daily-trends] keyword-matched sources were low; using top feed items fallback.");
+    console.warn(
+      "[daily-trends] keyword-matched sources were low; using top feed items fallback.",
+    );
     return fallbackPool.slice(0, 6);
   }
 
   return fallbackPool;
 };
 
-const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+const parsePositiveInt = (
+  value: string | undefined,
+  fallback: number,
+): number => {
   const parsed = Number.parseInt(value ?? "", 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
 const parseCategoryFlag = (): string | null => {
-  const arg = process.argv.find((entry) => entry.startsWith("--category="));
+  const arg = process.argv.find((entry: string) =>
+    entry.startsWith("--category="),
+  );
   if (!arg) return null;
   const raw = arg.slice("--category=".length).trim();
   return raw.length > 0 ? raw : null;
 };
 
 const parseRecentDays = (): number => {
-  const arg = process.argv.find((entry) => entry.startsWith("--recent-days="));
+  const arg = process.argv.find((entry: string) =>
+    entry.startsWith("--recent-days="),
+  );
   const value = arg?.slice("--recent-days=".length);
   return parsePositiveInt(value, DEFAULT_RECENT_DAYS);
 };
 
-const isRecentSource = (source: RankedSource, recentDays: number, nowMs: number): boolean => {
+const isRecentSource = (
+  source: RankedSource,
+  recentDays: number,
+  nowMs: number,
+): boolean => {
   if (!source.publishedAt) return false;
   const publishedMs = new Date(source.publishedAt).getTime();
   if (Number.isNaN(publishedMs)) return false;
@@ -250,21 +292,25 @@ const isRecentSource = (source: RankedSource, recentDays: number, nowMs: number)
 const pickSourcesByCategoryAndRecency = (
   sources: RankedSource[],
   categoryKeywords: string[],
-  recentDays: number
+  recentDays: number,
 ): RankedSource[] => {
   const nowMs = Date.now();
-  const normalizedKeywords = categoryKeywords.map((keyword) => keyword.toLowerCase());
+  const normalizedKeywords = categoryKeywords.map((keyword) =>
+    keyword.toLowerCase(),
+  );
   const withSignals = sources.map((source) => {
     const text = `${source.title} ${source.summary ?? ""}`.toLowerCase();
     const keywordHits = normalizedKeywords.reduce(
       (sum, keyword) => sum + (text.includes(keyword) ? 1 : 0),
-      0
+      0,
     );
     const recent = isRecentSource(source, recentDays, nowMs);
     return { source, keywordHits, recent };
   });
 
-  const strictMatches = withSignals.filter((item) => item.recent && item.keywordHits > 0);
+  const strictMatches = withSignals.filter(
+    (item) => item.recent && item.keywordHits > 0,
+  );
   if (strictMatches.length >= Math.max(1, MIN_SOURCES_REQUIRED)) {
     return strictMatches
       .sort((a, b) => b.keywordHits - a.keywordHits)
@@ -295,20 +341,24 @@ const isLanguageCode = (value: string): value is LanguageCode =>
   (LANGUAGE_ORDER as readonly string[]).includes(value);
 
 const parseLangFlag = (): LanguageCode | null => {
-  const arg = process.argv.find((entry) => entry.startsWith("--lang="));
+  const arg = process.argv.find((entry: string) => entry.startsWith("--lang="));
   if (!arg) return null;
   const normalized = arg.slice("--lang=".length).trim().toLowerCase();
   return isLanguageCode(normalized) ? normalized : null;
 };
 
 const resolveTargetLanguages = (): LanguageCode[] => {
-  const explicitArg = process.argv.find((entry) => entry.startsWith("--lang="));
+  const explicitArg = process.argv.find((entry: string) =>
+    entry.startsWith("--lang="),
+  );
   const selectedLang = parseLangFlag();
 
   if (!explicitArg) return [...LANGUAGE_ORDER];
   if (!selectedLang) {
     const badValue = explicitArg.slice("--lang=".length).trim();
-    throw new Error(`Unsupported --lang value "${badValue}". Use one of: ${LANGUAGE_ORDER.join(", ")}`);
+    throw new Error(
+      `Unsupported --lang value "${badValue}". Use one of: ${LANGUAGE_ORDER.join(", ")}`,
+    );
   }
   return [selectedLang];
 };
@@ -330,45 +380,61 @@ async function main() {
 
   if (requestedCategoryInput && !requestedCategory) {
     throw new Error(
-      `Unsupported --category value "${requestedCategoryInput}". Use one of configured category slugs/names.`
+      `Unsupported --category value "${requestedCategoryInput}". Use one of configured category slugs/names.`,
     );
   }
 
   if (VALIDATE_CONFIG_ONLY) {
-    console.log(`[daily-trends] config validation OK (languages: ${targetLanguages.join(", ")})`);
+    console.log(
+      `[daily-trends] config validation OK (languages: ${targetLanguages.join(", ")})`,
+    );
     return;
   }
 
   const dateString = new Date().toISOString().slice(0, 10);
   console.log(`[daily-trends] starting ${dateString}`);
 
-  const rawSources = (await Promise.allSettled(ConfigState.FEEDS.map(f => fetchFeed(f))))
-    .filter((r): r is PromiseFulfilledResult<FeedItem[]> => r.status === "fulfilled")
-    .flatMap(r => r.value);
+  const rawSources = (
+    await Promise.allSettled(ConfigState.FEEDS.map((f) => fetchFeed(f)))
+  )
+    .filter(
+      (r): r is PromiseFulfilledResult<FeedItem[]> => r.status === "fulfilled",
+    )
+    .flatMap((r) => r.value);
 
   const baseRanked = pickRankedSources(rawSources);
   const ranked = guardMinSources(
     requestedCategory
-      ? pickSourcesByCategoryAndRecency(baseRanked, requestedCategory.keywords, recentDays)
-      : baseRanked
+      ? pickSourcesByCategoryAndRecency(
+          baseRanked,
+          requestedCategory.keywords,
+          recentDays,
+        )
+      : baseRanked,
   );
 
   if (requestedCategory) {
     console.log(
-      `[daily-trends] selected category=${requestedCategory.slug}, recent_days=${recentDays}, sources=${ranked.length}`
+      `[daily-trends] selected category=${requestedCategory.slug}, recent_days=${recentDays}, sources=${ranked.length}`,
     );
   }
 
-  const content = await createStagedArticle({
+  const content = (await createStagedArticle({
     dateString,
     sources: ranked,
     targetLanguages,
     preferredCategorySlug: requestedCategory?.slug ?? null,
-  }) as StagedArticle;
-  const category = ConfigState.CATEGORY_MAP.get(content.categorySlug)
-    ?? (ConfigState.CATEGORY_DEFINITIONS[0] as CategoryDefinition);
+  })) as StagedArticle;
+  const category =
+    ConfigState.CATEGORY_MAP.get(content.categorySlug) ??
+    (ConfigState.CATEGORY_DEFINITIONS[0] as CategoryDefinition);
 
-  void (!ConfigState.CATEGORY_MAP.has(content.categorySlug) && console.warn(`[daily-trends] Category slug "${content.categorySlug}" not found — falling back to "${category.slug}".`));
+  void (
+    !ConfigState.CATEGORY_MAP.has(content.categorySlug) &&
+    console.warn(
+      `[daily-trends] Category slug "${content.categorySlug}" not found — falling back to "${category.slug}".`,
+    )
+  );
 
   const baseSlug = `ai-it-trend-brief-${dateString}-${content.slugSuffix.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   await Promise.all(
@@ -376,42 +442,53 @@ async function main() {
       const meta = LANGUAGE_LABELS[lang];
       const localized = content[lang] as LocalizedContent;
       const finalBody = sanitizeGeneratedMarkdown(
-        Object.values(localized.sections).join("\n\n")
+        Object.values(localized.sections).join("\n\n"),
       );
       const toc = generateToc(finalBody, meta.tocHeading);
-      const fallbackTitle = normalizeMetadataText(content.en.title, "Daily AI Trend Brief");
-      const title = normalizeMetadataText(
-        localized.title,
-        fallbackTitle
+      const fallbackTitle = normalizeMetadataText(
+        content.en.title,
+        "Daily AI Trend Brief",
       );
-      const excerptFallback = finalBody.split("\n").find((line) => line.trim() && !line.startsWith("#"))?.trim() ?? "";
+      const title = normalizeMetadataText(localized.title, fallbackTitle);
+      const excerptFallback =
+        finalBody
+          .split("\n")
+          .find((line) => line.trim() && !line.startsWith("#"))
+          ?.trim() ?? "";
       const excerpt = normalizeExcerptText(localized.excerpt, excerptFallback);
       const referencesSection = ranked
         .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
         .join("\n");
 
-      const doc = sanitizeGeneratedMarkdown([
-        ...buildFrontmatter({
-          title,
-          excerpt,
-          categoryName: getCategoryDisplayName(category, lang),
-          dateString
-        }),
-        "",
-        toc,
-        finalBody,
-        "",
-        meta.referencesHeading,
-        "",
-        referencesSection
-      ].join("\n"));
+      const doc = sanitizeGeneratedMarkdown(
+        [
+          ...buildFrontmatter({
+            title,
+            excerpt,
+            categoryName: getCategoryDisplayName(category, lang),
+            dateString,
+          }),
+          "",
+          toc,
+          finalBody,
+          "",
+          meta.referencesHeading,
+          "",
+          referencesSection,
+        ].join("\n"),
+      );
 
-      const filePath = path.join(POSTS_DIR, `${baseSlug}${meta.fileSuffix}.mdx`);
+      const filePath = path.join(
+        POSTS_DIR,
+        `${baseSlug}${meta.fileSuffix}.mdx`,
+      );
       await writePostFile(filePath, doc);
-    })
+    }),
   );
 
-  console.log(`[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: ${targetLanguages.join("/")}`);
+  console.log(
+    `[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: ${targetLanguages.join("/")}`,
+  );
 
   await flushMetrics();
 }

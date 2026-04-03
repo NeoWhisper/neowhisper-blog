@@ -101,6 +101,16 @@ const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
   ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs."
 };
 
+const hasCrossLanguageArtifacts = (lang: LanguageCode, text: string): boolean => {
+  if (lang === "ar") {
+    return /[\u3040-\u30ff\u4e00-\u9fff]/u.test(text);
+  }
+  if (lang === "ja") {
+    return /[\u0600-\u06ff]/u.test(text);
+  }
+  return false;
+};
+
 async function retryOutlineGeneration(
   sources: SourceItem[],
   constraint: string,
@@ -208,6 +218,11 @@ Table section must be markdown.
 
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
 
+IMPORTANT FACT RULE:
+- Do not invent exact percentages, hard latency numbers, user counts, benchmark scores, or cost numbers.
+- If a number is not clearly supported by provided sources, rewrite qualitatively.
+- Distinguish clearly between currently available capabilities and forward-looking possibilities.
+
 Do not repeat or rephrase content already covered in the following accepted sections:
 ${summariesText}
 
@@ -228,7 +243,7 @@ const retryTranslation = (
   attempt = 0
 ) => async (): Promise<string> => {
   const retryMsg = attempt > 0
-    ? "\nThe previous translation had structural issues. Preserve the same heading structure and list structure as the source."
+    ? "\nThe previous translation had structural or language issues. Preserve structure and output ONLY the target language."
     : "";
   const languageRule = LANGUAGE_TRANSLATION_RULES[lang] ?? `Output ONLY ${lang}.`;
 
@@ -238,6 +253,7 @@ ${enBody}
 
 Ensure natural flow, correct terminology, and preservation of markdown structure.
 ${languageRule}
+Do not introduce unsupported exact numeric claims in translation.
 ${retryMsg}
 Return JSON { "body": "Markdown string" }
 `;
@@ -249,8 +265,9 @@ Return JSON { "body": "Markdown string" }
   );
   const res = await parseJsonWithRepair({ text: raw, label: `section [${sectionId}] ${lang}` }) as { body?: string };
   const body = res.body ?? "";
+  const hasArtifacts = hasCrossLanguageArtifacts(lang, body);
 
-  return (structuresMatch(body, enBody) && body.trim())
+  return (structuresMatch(body, enBody) && body.trim() && !hasArtifacts)
     ? body
     : attempt < 1
       ? await retryTranslation(lang, sectionId, enBody, attempt + 1)()
@@ -261,8 +278,9 @@ export async function translateSection(enBody: string, lang: LanguageCode, secti
   const stageId = startStage("translateSection", { sectionId, lang });
   const finalBody = await retryTranslation(lang, sectionId, enBody)();
 
-  const isValid = Boolean(finalBody.trim() && structuresMatch(finalBody, enBody));
-  void (!isValid && console.warn(`[daily-trends] translation parity check failed for ${lang} section ${sectionId}. Continuing anyway.`));
+  const hasArtifacts = hasCrossLanguageArtifacts(lang, finalBody);
+  const isValid = Boolean(finalBody.trim() && structuresMatch(finalBody, enBody) && !hasArtifacts);
+  void (!isValid && console.warn(`[daily-trends] translation parity/language check failed for ${lang} section ${sectionId}. Continuing anyway.`));
 
   endStage(stageId);
   return isValid ? finalBody : "Translation incomplete.";
@@ -276,6 +294,7 @@ Content:
 ${currentBody}
 
 Requirements: Add 30% more technical depth with more examples and analysis. Keep style consistent.
+Do not add unsupported exact numeric claims.
 Return JSON { "body": "Updated markdown string" }
 `;
   const raw = await callAi(

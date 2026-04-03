@@ -20,24 +20,31 @@ interface PageProps {
   }>;
 }
 
-function isLowValueBriefPost(slug: string, content: string): boolean {
-  const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
-  if (!isBrief) return false;
+const BRIEF_NOINDEX_MIN_WORDS = Number.parseInt(
+  process.env.BRIEF_NOINDEX_MIN_WORDS ?? "650",
+  10,
+);
 
+function countPostWords(slug: string, content: string): number {
   const cleanContent = content
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
     .trim();
 
-  let wordCount;
   if (slug.endsWith("-ja")) {
-    wordCount = Math.round(cleanContent.length / 2.5);
-  } else {
-    wordCount = cleanContent.split(/\s+/).filter(Boolean).length;
+    return Math.round(cleanContent.length / 2.5);
   }
 
-  return wordCount < 900;
+  return cleanContent.split(/\s+/).filter(Boolean).length;
+}
+
+function isLowValueBriefPost(slug: string, content: string): boolean {
+  const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
+  if (!isBrief) return false;
+
+  const wordCount = countPostWords(slug, content);
+  return wordCount < Math.max(450, BRIEF_NOINDEX_MIN_WORDS);
 }
 
 function resolveLanguage(slug: string, lang?: string | null): SupportedLang {

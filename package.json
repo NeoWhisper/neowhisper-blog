@@ -18,8 +18,10 @@
     "content:test-safety": "node --import tsx --test scripts/tests/content-safety.test.mjs",
     "content:test-site-url": "node --import tsx --test scripts/tests/site-url-smoke.test.mjs",
     "content:typecheck": "tsc -p tsconfig.scripts.json --noEmit",
+    "content:list-categories": "node --import tsx scripts/list-categories-with-counts.ts",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
     "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
+    "content:pattern:pr": "bash scripts/pattern-content-pr.sh",
     "content:sync-main": "bash scripts/sync-local-main.sh",
     "content:sync-main:install-launchd": "bash scripts/install-launchd-sync-main.sh",
     "prepare": "husky"
@@ -61,6 +63,7 @@
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/he": "^1.2.3",
     "@types/jest": "^30.0.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25",

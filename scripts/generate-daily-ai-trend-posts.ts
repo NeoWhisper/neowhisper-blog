@@ -31,7 +31,6 @@ import {
   LANGUAGE_ORDER,
   LANGUAGE_LABELS,
   type LanguageCode,
-  type ArticlePattern,
 } from "./lib/constants";
 import contentSafety from "./lib/content-safety";
 import { resolveCategoryByInput, parsePatternFlag } from "./lib/utils";

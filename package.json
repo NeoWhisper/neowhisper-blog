@@ -18,6 +18,7 @@
     "content:test-safety": "node --import tsx --test scripts/tests/content-safety.test.mjs",
     "content:test-site-url": "node --import tsx --test scripts/tests/site-url-smoke.test.mjs",
     "content:typecheck": "tsc -p tsconfig.scripts.json --noEmit",
+    "content:list-categories": "node --import tsx scripts/list-categories-with-counts.ts",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
     "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
     "content:sync-main": "bash scripts/sync-local-main.sh",

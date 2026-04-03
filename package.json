@@ -21,6 +21,7 @@
     "content:list-categories": "node --import tsx scripts/list-categories-with-counts.ts",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",
     "content:daily:install-launchd": "bash scripts/install-launchd-daily-content.sh",
+    "content:pattern:pr": "bash scripts/pattern-content-pr.sh",
     "content:sync-main": "bash scripts/sync-local-main.sh",
     "content:sync-main:install-launchd": "bash scripts/install-launchd-sync-main.sh",
     "prepare": "husky"

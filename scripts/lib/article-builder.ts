@@ -257,6 +257,11 @@ Required format: {"body": "markdown content here"}`;
           .join("\n")
       : "None yet.";
 
+  const teamImpactInstruction = 
+    section.id === "closing" || section.id === "conclusion" 
+      ? 'Add a comprehensive "What this means for your team" section with actionable bullets.' 
+      : 'Do NOT add a "What this means for your team" section; focus strictly on technical analysis.';
+
   const userPrompt = `
 Section ID: ${section.id}
 Outline: ${JSON.stringify(outline.sections)}
@@ -265,17 +270,17 @@ Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
 Generate about ${section.targetWordCount} words of detailed technical content.
 Use one concrete, grounded example per section when helpful.
 Do not use repetitive marketing framing.
-Add "What this means for your team" bullets.
+${teamImpactInstruction}
 
 SPECIAL FORMAT FOR "highlights" SECTION:
-If section id is "highlights", create a "Key Features" or "Key Highlights" section that:
+If section id is "highlights", create a "Key Features" section that:
 - Uses bullet points with emojis where appropriate
 - Extracts the 4-6 most important features/benefits from the sources
 - Format: "• [Feature name]: [Brief description]"
 - Include practical benefits, not just technical specs
 - End with a notable differentiator (e.g., licensing, cost, accessibility)
 
-Table section must be markdown.
+Table section must be simple, valid markdown.
 
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
 
@@ -313,6 +318,10 @@ const retryTranslation =
     const languageRule =
       LANGUAGE_TRANSLATION_RULES[lang] ?? `Output ONLY ${lang}.`;
 
+    const tableRule = lang === "ar" 
+      ? "\nSTRICT TABLE RULE: Ensure markdown pipes (|) are correctly placed and balanced. Do not add extra spaces around pipes that could break the alignment in RTL view." 
+      : "";
+
     const userPrompt = `
 Translate to ${lang}:
 ${enBody}
@@ -320,6 +329,7 @@ ${enBody}
 Ensure natural flow, correct terminology, and preservation of markdown structure.
 ${languageRule}
 Do not introduce unsupported exact numeric claims in translation.
+${tableRule}
 ${retryMsg}
 Return JSON { "body": "Markdown string" }
 `;

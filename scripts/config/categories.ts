@@ -42,7 +42,14 @@ export const categories: CategoryConfig[] = [
       "prompt",
       "rag",
       "vector",
-      "embedding"
+      "embedding",
+      "ollama",
+      "agentic",
+      "reasoning",
+      "multimodality",
+      "rlvr",
+      "mlx",
+      "trends"
     ]
   },
   {

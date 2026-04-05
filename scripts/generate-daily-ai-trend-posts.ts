@@ -32,8 +32,9 @@ import {
   LANGUAGE_LABELS,
   type LanguageCode,
 } from "./lib/constants";
-import contentSafety from "./lib/content-safety";
 import { resolveCategoryByInput, parsePatternFlag } from "./lib/utils";
+import contentSafety from "./lib/content-safety";
+import { generateCoverImage } from "./lib/image-gen";
 
 const {
   normalizeExcerptText,
@@ -102,6 +103,7 @@ type FrontmatterInput = {
   excerpt: string;
   categoryName: string;
   dateString: string;
+  coverImage: string;
 };
 
 const buildFrontmatter = ({
@@ -109,13 +111,14 @@ const buildFrontmatter = ({
   excerpt,
   categoryName,
   dateString,
+  coverImage,
 }: FrontmatterInput): string[] => [
   "---",
   `title: "${yamlString(title)}"`,
   `date: "${dateString}"`,
   `excerpt: "${yamlString(excerpt)}"`,
   `category: "${categoryName}"`,
-  `coverImage: "${COVER_IMAGE}"`,
+  `coverImage: "${coverImage}"`,
   "author:",
   `  name: "${AUTHOR_NAME}"`,
   '  picture: "/images/author.png"',
@@ -438,6 +441,15 @@ async function main() {
   );
 
   const baseSlug = `ai-it-trend-brief-${dateString}-${content.slugSuffix.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
+  // Generate cover image using Ollama if configured
+  const generatedCoverImage = await generateCoverImage(
+    content.en.title as string,
+    content.en.excerpt as string,
+    dateString,
+  );
+  const coverImage = generatedCoverImage ?? COVER_IMAGE;
+
   await Promise.all(
     targetLanguages.map(async (lang: LanguageCode) => {
       const meta = LANGUAGE_LABELS[lang];
@@ -468,6 +480,7 @@ async function main() {
             excerpt,
             categoryName: getCategoryDisplayName(category, lang),
             dateString,
+            coverImage,
           }),
           "",
           toc,

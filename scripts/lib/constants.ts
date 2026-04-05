@@ -21,8 +21,8 @@ export const OUTLINE_TEMPLATES: Record<
   { requiredIds: string[]; description: string }
 > = {
   brief: {
-    requiredIds: ["intro", "(3-4 trend-*)", "highlights", "closing", "table"],
-    description: "News brief: Hook → Trends → Highlights → Takeaways",
+    requiredIds: ["tldr", "intro", "(3-4 trend-*)", "highlights", "closing", "table"],
+    description: "News brief: TL;DR → Hook → Trends → Highlights → Takeaways",
   },
   tutorial: {
     requiredIds: [
@@ -91,6 +91,11 @@ Truthfulness Constraints:
 - Do not invent exact numbers unless explicitly present in the provided sources.
 - If exact numbers are unavailable, use qualitative phrasing and clearly mark estimates/hypotheses.
 - Distinguish clearly between what is currently available vs roadmap/speculative ideas.
+
+TL;DR Section Format (when section id is "tldr"):
+- Create a "TL;DR" (or localized equivalent) section with 3-4 ultra-concise bullet points
+- Use emojis for each point (e.g., ⚡, 🔍, 🎯, 🚀)
+- Summarize the most critical takeaways in one sentence each
 
 Highlights Section Format (when section id is "highlights"):
 - Create a "Key Features" or "Key Highlights" section with 4-6 bullet points

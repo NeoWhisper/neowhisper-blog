@@ -257,10 +257,16 @@ Required format: {"body": "markdown content here"}`;
           .join("\n")
       : "None yet.";
 
-  const teamImpactInstruction = 
-    section.id === "closing" || section.id === "conclusion" 
-      ? 'Add a comprehensive "What this means for your team" section with actionable bullets.' 
-      : 'Do NOT add a "What this means for your team" section; focus strictly on technical analysis.';
+  const specialInstructions = [
+    section.id === "closing" || section.id === "conclusion"
+      ? 'Add a comprehensive "What this means for your team" section with actionable bullets.'
+      : 'Do NOT add a "What this means for your team" section; focus strictly on technical analysis.',
+    section.id === "tldr"
+      ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). One sentence per point.'
+      : '',
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const userPrompt = `
 Section ID: ${section.id}
@@ -270,7 +276,7 @@ Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
 Generate about ${section.targetWordCount} words of detailed technical content.
 Use one concrete, grounded example per section when helpful.
 Do not use repetitive marketing framing.
-${teamImpactInstruction}
+${specialInstructions}
 
 SPECIAL FORMAT FOR "highlights" SECTION:
 If section id is "highlights", create a "Key Features" section that:
@@ -387,9 +393,14 @@ Language: ${lang}
 Content:
 ${currentBody}
 
-Requirements: Add 30% more technical depth with more examples and analysis. Keep style consistent.
-Do not add unsupported exact numeric claims.
-Return JSON { "body": "Updated markdown string" }
+Requirements:
+- Add 30% more technical depth with more examples and analysis.
+- Keep the existing style and tone consistent.
+- Do NOT repeat the section heading (##) multiple times.
+- Return a SINGLE, UNIFIED markdown block that incorporates both the old and new content seamlessly.
+- Do NOT simply append the new content to the old content.
+
+Return JSON { "body": "Expanded and unified markdown string" }
 `;
   const raw = await callAi(
     `${SYSTEM_RULES}\nContent Evolution: Add 30% more technical depth to this section.`,

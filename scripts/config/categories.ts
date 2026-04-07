@@ -42,7 +42,14 @@ export const categories: CategoryConfig[] = [
       "prompt",
       "rag",
       "vector",
-      "embedding"
+      "embedding",
+      "ollama",
+      "agentic",
+      "reasoning",
+      "multimodality",
+      "rlvr",
+      "mlx",
+      "trends"
     ]
   },
   {
@@ -168,6 +175,86 @@ export const categories: CategoryConfig[] = [
       "tsconfig",
       "eslint",
       "compiler"
+    ]
+  },
+  {
+    "slug": "mobile-development",
+    "nameEn": "Mobile Development",
+    "nameJa": "モバイル開発",
+    "nameAr": "تطوير تطبيقات الجوال",
+    "keywords": [
+      "ios",
+      "android",
+      "swift",
+      "kotlin",
+      "react native",
+      "flutter",
+      "mobile app",
+      "app store",
+      "play store"
+    ]
+  },
+  {
+    "slug": "ai-policy-governance",
+    "nameEn": "AI Policy & Governance",
+    "nameJa": "AIポリシー・ガバナンス",
+    "nameAr": "سياسات وحوكمة الذكاء الاصطناعي",
+    "keywords": [
+      "policy",
+      "regulation",
+      "governance",
+      "compliance",
+      "risk",
+      "safety",
+      "privacy",
+      "audit"
+    ]
+  },
+  {
+    "slug": "hardware-edge",
+    "nameEn": "Hardware & Edge AI",
+    "nameJa": "ハードウェア・エッジAI",
+    "nameAr": "العتاد والذكاء الاصطناعي على الحافة",
+    "keywords": [
+      "chip",
+      "gpu",
+      "npu",
+      "edge",
+      "embedded",
+      "on-device",
+      "accelerator",
+      "inference hardware"
+    ]
+  },
+  {
+    "slug": "data-science-analytics",
+    "nameEn": "Data Science & Analytics",
+    "nameJa": "データサイエンス・分析",
+    "nameAr": "علم البيانات والتحليلات",
+    "keywords": [
+      "analytics",
+      "data science",
+      "notebook",
+      "feature engineering",
+      "forecasting",
+      "classification",
+      "clustering",
+      "bi"
+    ]
+  },
+  {
+    "slug": "open-source",
+    "nameEn": "Open Source",
+    "nameJa": "オープンソース",
+    "nameAr": "المصدر المفتوح",
+    "keywords": [
+      "open source",
+      "github",
+      "maintainer",
+      "community",
+      "license",
+      "repository",
+      "release notes"
     ]
   },
   {

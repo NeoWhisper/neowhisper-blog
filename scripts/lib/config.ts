@@ -9,6 +9,7 @@ export const AUTHOR_NAME = runtimeConfig.authorName;
 export const TOPIC_HINT = runtimeConfig.topicHint;
 export const API_BASE_URL = runtimeConfig.apiBaseUrl;
 export const API_KEY = runtimeConfig.apiKey;
+export const OLLAMA_IMAGE_MODEL = runtimeConfig.ollamaImageModel;
 export const FORCE = process.argv.includes("--force");
 export const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -30,7 +31,7 @@ export async function initializeConfigs() {
   void ConfigState.CATEGORY_MAP;
 }
 
-export function isOfficialOpenAiBaseUrl(baseUrl) {
+export function isOfficialOpenAiBaseUrl(baseUrl: string) {
   try {
     const parsed = new URL(baseUrl);
     return parsed.hostname === "api.openai.com";

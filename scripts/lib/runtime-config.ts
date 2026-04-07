@@ -43,6 +43,7 @@ const EnvSchema = z.object({
   TREND_POST_AUTHOR_NAME: z.string().min(1).default("NeoWhisper"),
   OPENAI_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
   OPENAI_API_KEY: z.string().min(1).default("sk-local"),
+  OLLAMA_IMAGE_MODEL: z.string().optional().default(""),
   TOPIC_HINT: z.string().optional().default("")
 });
 
@@ -60,7 +61,8 @@ const loadEnvConfig = () => {
     authorName: env.TREND_POST_AUTHOR_NAME,
     topicHint: env.TOPIC_HINT.trim(),
     apiBaseUrl,
-    apiKey: env.OPENAI_API_KEY
+    apiKey: env.OPENAI_API_KEY,
+    ollamaImageModel: env.OLLAMA_IMAGE_MODEL
   };
 };
 
@@ -99,6 +101,7 @@ type RuntimeConfig = {
   topicHint: string;
   apiBaseUrl: string;
   apiKey: string;
+  ollamaImageModel: string;
   feeds: FeedConfig[];
   categoryDefinitions: CategoryConfig[];
   keywords: KeywordBuckets;
@@ -113,6 +116,7 @@ export const runtimeConfig = Object.freeze({
   topicHint: envConfig.topicHint,
   apiBaseUrl: envConfig.apiBaseUrl,
   apiKey: envConfig.apiKey,
+  ollamaImageModel: envConfig.ollamaImageModel,
   feeds: staticConfig.feeds,
   categoryDefinitions: staticConfig.categoryDefinitions,
   keywords: staticConfig.keywords

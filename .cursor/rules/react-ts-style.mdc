@@ -1,0 +1,44 @@
+# React + TypeScript Style Rules (NeoWhisper Blog)
+
+## Scope
+
+- Applies to all .tsx and .ts files
+- Especially components, pages, and hooks
+
+## Core Principles
+
+- Always use functional components with hooks
+- **Server Components First**: Prefer Server Components; use 'use client' and hooks ONLY when interactivity is required.
+- Prefer shadcn/ui components when available
+- No new dependencies unless absolutely necessary and approved
+- Keep components small and single-responsibility
+- Use existing naming conventions (@/ alias for imports)
+
+## TypeScript Rules
+
+- Strict mode only — no any, no implicit any
+- Use interface for props, type for everything else
+- Prefer const assertions and as const when possible
+- Export types/interfaces at top level when reused
+
+## React Rules
+
+- Always use function component syntax (no class components)
+- Hooks must be at top level, no conditional hooks
+- All forms use react-hook-form + zod validation
+- No inline styles — use Tailwind only
+- Components must accept className prop and forward it (cn utility)
+
+## File Structure
+
+- Keep related files close (component + test + story in same folder)
+- Use @/ alias for imports (never relative paths deeper than 2 levels)
+
+## AI Instructions
+
+Before suggesting any change:
+1. Read this rule file
+2. Check existing code style in the same folder
+3. Only suggest changes that match the current project flow
+4. Never introduce new libraries or patterns without explicit approval
+5. Output diff only, never full file unless asked

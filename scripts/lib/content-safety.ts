@@ -6,6 +6,20 @@ export function sanitizeGeneratedMarkdown(markdown: string): string {
     .replace(/<(?=\s*\d)/g, "&lt;");
 }
 
+const collapseWhitespace = (text: string): string =>
+  text.replace(/\s+/g, " ").trim();
+
+export function normalizeExcerptText(value: unknown, fallback = ""): string {
+  const normalized = normalizeMetadataText(value, fallback)
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+
+  const singleLine = collapseWhitespace(normalized);
+  return singleLine.length > 260 ? `${singleLine.slice(0, 257)}...` : singleLine;
+}
+
 export function normalizeMetadataText(value: unknown, fallback = ""): string {
   if (typeof value === "string") {
     const normalized = value.trim();
@@ -30,6 +44,7 @@ export function normalizeMetadataText(value: unknown, fallback = ""): string {
 const contentSafety = {
   sanitizeGeneratedMarkdown,
   normalizeMetadataText,
+  normalizeExcerptText,
 };
 
 export default contentSafety;

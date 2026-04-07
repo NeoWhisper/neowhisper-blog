@@ -13,6 +13,10 @@ import { buildCategorySlug } from "@/lib/categories";
 import AuthorBio from "@/components/AuthorBio";
 import { normalizeLang } from "@/lib/i18n";
 import { SITE_URL } from "@/lib/site-config";
+import { ScrollProgress } from "@/components/ScrollProgress";
+import { StickyToc } from "@/components/StickyToc";
+import { ShareSocial } from "@/components/ShareSocial";
+import { ImageZoom } from "@/components/ImageZoom";
 
 const siteUrl = SITE_URL;
 
@@ -217,8 +221,27 @@ export default function BlogPostTemplate({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <ScrollProgress />
+      <StickyToc isRTL={isRTL} />
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
-        <article className="max-w-3xl mx-auto w-full">
+        <div className="relative">
+          {/* Sticky Share Widget - Hidden on mobile, shown on desktop */}
+          <div
+            className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
+            style={{
+              [isRTL ? "right" : "left"]: "calc((100vw - 1024px) / 2 - 60px)",
+            }}
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4 whitespace-nowrap">
+              {isRTL ? "شارك" : "Share"}
+            </span>
+            <ShareSocial
+              title={title}
+              url={resolvedCanonicalUrl}
+            />
+          </div>
+
+          <article className="max-w-3xl mx-auto w-full">
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -281,7 +304,7 @@ export default function BlogPostTemplate({
                 />
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-8 mt-4 leading-tight">
                 {title}
               </h1>
 
@@ -324,13 +347,13 @@ export default function BlogPostTemplate({
               className={`px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none
             prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
             prose-h1:text-[3rem] prose-h1:leading-[1.2] prose-h1:mb-10 prose-h1:tracking-[-0.025em]
-            prose-h2:text-4xl prose-h2:mt-32 prose-h2:mb-16 prose-h2:font-bold
-            prose-h3:text-2xl prose-h3:mt-20 prose-h3:mb-10
-            prose-p:text-lg prose-p:leading-[2.5] prose-p:mb-16
+            prose-h2:text-3xl sm:prose-h2:text-4xl prose-h2:mt-16 sm:prose-h2:mt-20 prose-h2:mb-12 prose-h2:font-bold
+            prose-h3:text-2xl prose-h3:mt-12 sm:prose-h3:mt-16 prose-h3:mb-8
+            prose-p:text-lg prose-p:leading-[1.8] prose-p:mb-10
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
             prose-strong:font-bold prose-strong:text-gray-900 dark:prose-strong:text-white
-            prose-li:text-lg prose-li:mb-16 prose-li:leading-[2.5] marker:text-purple-500
-            prose-ul:my-16 prose-ol:my-16
+            prose-li:text-lg prose-li:mb-6 prose-li:leading-[1.8] marker:text-purple-500
+            prose-ul:my-10 prose-ol:my-10
             prose-hr:my-32 prose-hr:border-gray-200 dark:prose-hr:border-gray-800
             prose-table:my-0 prose-table:w-full prose-table:border-collapse prose-table:text-base prose-table:leading-[1.65]
             prose-thead:bg-gray-100/70 dark:prose-thead:bg-gray-800/50
@@ -346,13 +369,21 @@ export default function BlogPostTemplate({
                 <MDXRemote
                   source={displayContent}
                   components={{
-                    h2: (props) => (
-                      <h2
-                        id={headingToId(props.children)}
-                        className="text-4xl font-bold mt-24 mb-16 scroll-mt-28"
-                        {...props}
-                      />
-                    ),
+                    h2: (props) => {
+                      const text = flattenText(props.children);
+                      const isToc = ["Table of Contents", "目次", "المحتويات"].includes(text.trim());
+                      return (
+                        <h2
+                          id={headingToId(props.children)}
+                          className={
+                            isToc 
+                              ? "text-xl font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest py-4 border-y border-gray-200 dark:border-gray-800 mt-12 mb-8 scroll-mt-28"
+                              : "text-3xl sm:text-4xl font-bold mt-16 sm:mt-20 mb-12 scroll-mt-28"
+                          }
+                          {...props}
+                        />
+                      );
+                    },
                     h3: (props) => (
                       <h3
                         id={headingToId(props.children)}
@@ -368,6 +399,14 @@ export default function BlogPostTemplate({
                     ),
                     ol: (props) => (
                       <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />
+                    ),
+                    img: (props) => (
+                      <ImageZoom
+                        src={props.src || ""}
+                        alt={props.alt || ""}
+                        title={props.title}
+                        className="my-12 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-full h-auto"
+                      />
                     ),
                     a: ({ href, children, ...props }) => {
                       const isExternal = href?.startsWith("http");
@@ -400,9 +439,9 @@ export default function BlogPostTemplate({
                       );
                     },
                     table: ({ className, ...props }) => (
-                      <div className="mt-8 mb-16 overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
+                      <div className="mt-8 mb-16 overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700 w-full scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                         <table
-                          className={`w-full min-w-[680px] border-collapse text-base leading-[1.65] ${className ?? ""}`}
+                          className={`w-full min-w-[500px] border-collapse text-base leading-[1.65] ${className ?? ""}`}
                           {...props}
                         />
                       </div>
@@ -427,7 +466,7 @@ export default function BlogPostTemplate({
                     ),
                     td: ({ className, ...props }) => (
                       <td
-                        className={`${className ?? ""} px-4 py-3 align-top ${isRTL ? "text-right" : "text-left"}`}
+                        className={`${className ?? ""} px-4 py-3 align-top whitespace-normal break-words first:font-medium first:text-gray-900 dark:first:text-gray-100 ${isRTL ? "text-right" : "text-left"}`}
                         {...props}
                       />
                     ),
@@ -443,10 +482,22 @@ export default function BlogPostTemplate({
                         </div>
                       </div>
                     ),
-                    Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success', children: ReactNode }) => {
+                    Callout: ({ type = 'info', children }: { type?: 'info' | 'warning' | 'success' | 'tldr', children: ReactNode }) => {
                       let styles: string;
+                      let icon: ReactNode = null;
 
                       switch (type) {
+                        case 'tldr':
+                          styles = 'bg-purple-50/60 border-purple-300 dark:bg-purple-900/15 dark:border-purple-700/50 text-purple-900 dark:text-purple-200';
+                          icon = (
+                            <div className="flex items-center gap-2 mb-4 text-purple-600 dark:text-purple-400 font-bold text-sm uppercase tracking-widest">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              TL;DR
+                            </div>
+                          );
+                          break;
                         case 'warning':
                           styles = 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50 text-amber-800 dark:text-amber-300';
                           break;
@@ -461,6 +512,7 @@ export default function BlogPostTemplate({
 
                       return (
                         <div className={`my-12 p-8 rounded-2xl border ${styles} leading-[2.2]`}>
+                          {icon}
                           {children}
                         </div>
                       );
@@ -495,6 +547,17 @@ export default function BlogPostTemplate({
           {/* Author Bio */}
           <AuthorBio lang={lang} isRTL={isRTL} />
 
+          {/* Share Widget - Mobile Only */}
+          <div className={`lg:hidden mt-8 py-8 border-t border-gray-200 dark:border-gray-700 flex ${isRTL ? "justify-end" : "justify-start"} items-center gap-4`}>
+            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              {isRTL ? "شارك" : "Share"}
+            </span>
+            <ShareSocial
+              title={title}
+              url={resolvedCanonicalUrl}
+            />
+          </div>
+
           {/* Bottom Ad Unit */}
           {showAd && (
             <div className="mt-8">
@@ -502,6 +565,7 @@ export default function BlogPostTemplate({
             </div>
           )}
         </article>
+        </div>
 
         {/* Related Posts Section */}
         {relatedPosts.length > 0 && (

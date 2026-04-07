@@ -328,12 +328,17 @@ export async function generateSection(
     .join("\n");
 
   const userPrompt = `
-Section ID: ${section.id}
-Outline: ${JSON.stringify(outline.sections)}
+Section ID: ${section.id} (Title: ${section.title})
+Article Outline Context: ${JSON.stringify(outline.sections.map(s => s.id + ": " + s.title))}
 Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
+
+CRITICAL: You are generating ONLY the content for the section [${section.id}]. 
+DO NOT generate the entire article. DO NOT generate content for other sections in the outline.
+If you generate the whole article, the build will fail. ONLY write the section [${section.id}]!
 
 Generate about ${section.targetWordCount} words of detailed technical content.
 Use one concrete, grounded example per section when helpful.
+Start exactly with the content for this section, including its markdown heading (e.g. ## ${section.title}).
 
 IMPORTANT: Do NOT repeat content from previous sections:
 ${previousSectionSummaries.map((s) => `- [${s.id}]: ${s.summary}`).join("\n")}

@@ -26,7 +26,7 @@ import { fetchFeed } from "./lib/feed";
 import type { FeedItem } from "./lib/feed";
 import { AiState } from "./lib/ai";
 import { flushMetrics } from "./lib/metrics";
-import { createStagedArticle } from "./lib/article-builder";
+import { createStagedArticle, loadRecentTopics, shouldSkipTopic, loadRecentPosts, shouldSkipSource } from "./lib/article-builder";
 import {
   LANGUAGE_ORDER,
   LANGUAGE_LABELS,
@@ -397,6 +397,14 @@ async function main() {
   const dateString = new Date().toISOString().slice(0, 10);
   console.log(`[daily-trends] starting ${dateString}`);
 
+  // Load recent topics to avoid repetition
+  const recentTopics = await loadRecentTopics();
+  console.log(`[dedup] recent topics: ${[...recentTopics].join(", ") || "none"}`);
+
+  // Load recent posts for aggressive cross-post dedup
+  const recentPosts = await loadRecentPosts();
+  console.log(`[dedup] recent posts (${recentPosts.length}): ${recentPosts.map((p) => p.title).slice(0, 4).join(", ") || "none"}`);
+
   const rawSources = (
     await Promise.allSettled(ConfigState.FEEDS.map((f) => fetchFeed(f)))
   )
@@ -405,7 +413,14 @@ async function main() {
     )
     .flatMap((r) => r.value);
 
-  const baseRanked = pickRankedSources(rawSources);
+  // Filter out sources that match recent topics or are too similar to recent posts
+  const filteredSources = rawSources.filter((source) =>
+    !shouldSkipTopic(source.title, recentTopics) &&
+    !shouldSkipSource(source.title, source.description ?? "", recentPosts)
+  );
+  console.log(`[dedup] filtered sources: ${rawSources.length} -> ${filteredSources.length}`);
+
+  const baseRanked = pickRankedSources(filteredSources);
   const ranked = guardMinSources(
     requestedCategory
       ? pickSourcesByCategoryAndRecency(
@@ -428,7 +443,9 @@ async function main() {
     targetLanguages,
     preferredCategorySlug: requestedCategory?.slug ?? null,
     pattern: parsePatternFlag(),
+    recentTopics,
   })) as StagedArticle;
+
   const category =
     ConfigState.CATEGORY_MAP.get(content.categorySlug) ??
     (ConfigState.CATEGORY_DEFINITIONS[0] as CategoryDefinition);

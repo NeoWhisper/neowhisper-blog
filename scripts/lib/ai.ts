@@ -168,6 +168,11 @@ export async function parseJsonWithRepair({
       `Return only valid JSON based on this: ${text}`,
       { temperature: 0 },
     );
-    return JSON.parse(cleanJsonText(repaired));
+    try {
+      return JSON.parse(cleanJsonText(repaired));
+    } catch {
+      console.warn(`[daily-trends] JSON repair still invalid for ${label}, returning fallback`);
+      return { body: text.trim() };
+    }
   }
 }

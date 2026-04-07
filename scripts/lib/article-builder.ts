@@ -1,3 +1,12 @@
+#!/usr/bin/env node
+
+/**
+ * NeoWhisper Staged Article Builder
+ * Generates multi-language technical articles with reduced repetition
+ */
+
+import fs from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
 import { callAi, parseJsonWithRepair, AiState } from "./ai";
 import { startStage, endStage } from "./metrics";
@@ -19,6 +28,98 @@ import {
   selectSectionsToExpand,
   polishMetadata,
 } from "./utils";
+
+const POSTS_DIR = path.join(process.cwd(), "src/content/posts");
+const RECENT_DAYS = 7;
+
+export type RecentPost = {
+  title: string;
+  date: string;
+  terms: string[];
+};
+
+/** Extract topic keywords from recent post titles */
+export async function loadRecentTopics(): Promise<Set<string>> {
+  try {
+    const entries = await fs.readdir(POSTS_DIR);
+    const topicTerms = [
+      "gemma", "gemini", "veo", "lyria", "claude", "gpt", "llama",
+      "deepseek", "grok", "anthropic", "openai", "microsoft", "meta",
+      "nvidia", "agent", "api", "mcp",
+    ];
+
+    const topics = new Set<string>();
+    for (const entry of entries) {
+      if (!entry.endsWith(".mdx")) continue;
+
+      const content = await fs.readFile(path.join(POSTS_DIR, entry), "utf-8");
+      const titleMatch = content.match(/^title:\s*"([^"]+)"/m);
+      if (titleMatch) {
+        const title = titleMatch[1].toLowerCase();
+        for (const term of topicTerms) {
+          if (title.includes(term)) topics.add(term);
+        }
+      }
+    }
+    return topics;
+  } catch (e) {
+    console.log("[dedup] could not load recent topics:", e);
+    return new Set();
+  }
+}
+
+/** Load recent posts for aggressive cross-post dedup */
+export async function loadRecentPosts(): Promise<RecentPost[]> {
+  try {
+    const entries = await fs.readdir(POSTS_DIR);
+    const recent: RecentPost[] = [];
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - RECENT_DAYS);
+
+    for (const entry of entries) {
+      if (!entry.endsWith(".mdx")) continue;
+
+      const content = await fs.readFile(path.join(POSTS_DIR, entry), "utf-8");
+      const titleMatch = content.match(/^title:\s*"([^"]+)"/m);
+      const dateMatch = content.match(/^date:\s*"([^"]+)"/m);
+      if (titleMatch && dateMatch) {
+        const dt = new Date(dateMatch[1]);
+        if (dt >= cutoff) {
+          const title = titleMatch[1].toLowerCase();
+          const terms = title
+            .split(/[\s\-:]+/)
+            .filter((t) => t.length > 3);
+          recent.push({ title, date: dateMatch[1], terms });
+        }
+      }
+    }
+    return recent;
+  } catch (e) {
+    console.log("[dedup] could not load recent posts:", e);
+    return [];
+  }
+}
+
+/** Filter sources matching recent topics to avoid repetition */
+export function shouldSkipTopic(title: string, recentTopics: Set<string>): boolean {
+  const normalized = title.toLowerCase();
+  const skipTerms = [
+    "gemma", "gemini", "veo", "lyria", "flash live", "agent skills",
+    "mcp", "claude", "gpt", "llama", "deepseek", "grok",
+    "anthropic", "openai", "microsoft", "meta", "nvidia",
+  ];
+  return skipTerms.some(term => normalized.includes(term) && recentTopics.has(term));
+}
+
+/** Aggressive dedup: skip sources too similar to recent posts */
+export function shouldSkipSource(title: string, summary: string, recentPosts: RecentPost[]): boolean {
+  const text = `${title} ${summary}`.toLowerCase();
+  for (const post of recentPosts) {
+    const hits = post.terms.filter((t) => text.includes(t)).length;
+    if (hits >= 2) return true;
+  }
+  return false;
+}
 
 type SourceItem = {
   title: string;
@@ -70,65 +171,39 @@ const validateSection = (sec: unknown): sec is OutlineSection =>
   typeof (sec as Record<string, unknown>).targetWordCount === "number";
 
 const validateOutline = (outline: unknown): outline is Outline => {
-  if (!outline || typeof outline !== "object") {
-    return false;
-  }
+  if (!outline || typeof outline !== "object") return false;
   const candidate = outline as { sections?: unknown };
-  if (!Array.isArray(candidate.sections) || candidate.sections.length < 3) {
-    return false;
-  }
+  if (!Array.isArray(candidate.sections) || candidate.sections.length < 3) return false;
 
   const sections = candidate.sections as unknown[];
   const typedSections = sections.filter(validateSection);
-  if (typedSections.length !== sections.length) {
-    return false;
-  }
+  if (typedSections.length !== sections.length) return false;
 
-  const noDuplicateIds =
-    new Set(typedSections.map((s) => s.id)).size === typedSections.length;
-  const minWords =
-    typedSections.reduce((sum, s) => sum + s.targetWordCount, 0) >= 800;
+  const noDuplicateIds = new Set(typedSections.map((s) => s.id)).size === typedSections.length;
+  const minWords = typedSections.reduce((sum, s) => sum + s.targetWordCount, 0) >= 800;
 
   return noDuplicateIds && minWords;
 };
 
-const countStructureElements = (
-  text: string,
-): { headings: number; lists: number } => ({
+const countStructureElements = (text: string): { headings: number; lists: number } => ({
   headings: (text.match(/^(##|###)\s/gm) || []).length,
   lists: (text.match(/^[-*]\s/gm) || []).length,
 });
 
-const structuresMatch = (
-  text1: string,
-  text2: string,
-  tolerance = 2,
-): boolean => {
+const structuresMatch = (text1: string, text2: string, tolerance = 2): boolean => {
   const s1 = countStructureElements(text1);
   const s2 = countStructureElements(text2);
-  return (
-    s1.headings === s2.headings && Math.abs(s1.lists - s2.lists) <= tolerance
-  );
+  return s1.headings === s2.headings && Math.abs(s1.lists - s2.lists) <= tolerance;
 };
-
-const logVerbose = (msg: string): void =>
-  void (process.argv.includes("--verbose") && console.log(msg));
 
 const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
   ja: "Output ONLY Japanese. Do not include English, Chinese, or Arabic sentences except product names and URLs.",
   ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs.",
 };
 
-const hasCrossLanguageArtifacts = (
-  lang: LanguageCode,
-  text: string,
-): boolean => {
-  if (lang === "ar") {
-    return /[\u3040-\u30ff\u4e00-\u9fff]/u.test(text);
-  }
-  if (lang === "ja") {
-    return /[\u0600-\u06ff]/u.test(text);
-  }
+const hasCrossLanguageArtifacts = (lang: LanguageCode, text: string): boolean => {
+  if (lang === "ar") return /[\u3040-\u30ff\u4e00-\u9fff]/u.test(text);
+  if (lang === "ja") return /[\u0600-\u06ff]/u.test(text);
   return false;
 };
 
@@ -138,22 +213,26 @@ async function retryOutlineGeneration(
   dateString: string,
   categorySlug: string,
   pattern: ArticlePattern,
+  recentTopics?: Set<string>,
 ): Promise<Outline> {
   const attempts = [0, 1, 2];
   const errors: string[] = [];
   const template = OUTLINE_TEMPLATES[pattern];
 
   for (const attempt of attempts) {
-    const retryMsg =
-      attempt > 0
-        ? "\nThe previous outline was rejected. Ensure every section has id, title, intent, and targetWordCount fields."
-        : "";
+    const retryMsg = attempt > 0
+      ? "\nThe previous outline was rejected. Ensure every section has id, title, intent, and targetWordCount fields."
+      : "";
+
+    const topicConstraint = recentTopics?.size
+      ? `\n\nIMPORTANT: Avoid covering topics already discussed recently. Recent topics include: ${[...recentTopics].join(", ")}. Choose fresh angles or different sources.`
+      : "";
 
     const userPrompt = `
 Sources:
 ${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}`).join("\n")}
 
-${constraint}
+${constraint}${topicConstraint}
 
 Pattern: ${pattern} - ${template.description}
 Create a structured JSON outline:
@@ -172,10 +251,7 @@ Return JSON only.
         userPrompt,
         { responseFormat: { type: "json_object" } },
       );
-      const parsed = await parseJsonWithRepair({
-        text: raw,
-        label: "outline generation",
-      });
+      const parsed = await parseJsonWithRepair({ text: raw, label: "outline generation" });
 
       if (!validateOutline(parsed)) {
         const outline = parsed as { sections?: unknown[] };
@@ -184,26 +260,20 @@ Return JSON only.
             ? "Sections array must have at least 3 items"
             : outline.sections.some((s) => !validateSection(s))
               ? "Missing required section fields"
-              : new Set((outline.sections as OutlineSection[]).map((s) => s.id))
-                    .size !== outline.sections.length
+              : new Set((outline.sections as OutlineSection[]).map((s) => s.id)).size !== outline.sections.length
                 ? "Duplicate section ids"
                 : "total targetWordCount < 800",
         );
       }
-
       return parsed;
     } catch (e: unknown) {
       const message = asErrorMessage(e);
       errors.push(message);
-      console.warn(
-        `[daily-trends] outline validation failed on attempt ${attempt}: ${message}`,
-      );
+      console.warn(`[daily-trends] outline validation failed on attempt ${attempt}: ${message}`);
     }
   }
 
-  throw new Error(
-    `Outline generation failed after retries: ${errors.join(" | ")}`,
-  );
+  throw new Error(`Outline generation failed after retries: ${errors.join(" | ")}`);
 }
 
 export async function generateOutline({
@@ -211,17 +281,15 @@ export async function generateOutline({
   sources,
   categorySlug,
   pattern = "brief",
+  recentTopics,
 }: {
   dateString: string;
   sources: SourceItem[];
   categorySlug: string;
   pattern?: ArticlePattern;
+  recentTopics?: Set<string>;
 }): Promise<Outline> {
-  const stageId = startStage("generateOutline", {
-    dateString,
-    categorySlug,
-    pattern,
-  });
+  const stageId = startStage("generateOutline", { dateString, categorySlug, pattern });
   try {
     const outline = await retryOutlineGeneration(
       sources,
@@ -229,6 +297,7 @@ export async function generateOutline({
       dateString,
       categorySlug,
       pattern,
+      recentTopics,
     );
     endStage(stageId, { sections: outline.sections.length });
     return outline;
@@ -245,88 +314,71 @@ export async function generateSection(
   previousSectionSummaries: SectionSummary[],
 ): Promise<string> {
   const stageId = startStage("generateSection", { sectionId: section.id });
-  const systemPrompt = `${SYSTEM_RULES}
-You are an English Section Generator for: ${section.title}
-
-CRITICAL: You MUST return ONLY valid JSON. No markdown, no explanations, no conversational text.
-Required format: {"body": "markdown content here"}`;
-  const summariesText =
-    previousSectionSummaries.length > 0
-      ? previousSectionSummaries
-          .map((s) => `[${s.id}]: ${s.summary}`)
-          .join("\n")
-      : "None yet.";
 
   const specialInstructions = [
     section.id === "closing" || section.id === "conclusion"
-      ? 'Add a comprehensive "What this means for your team" section with actionable bullets.'
-      : 'Do NOT add a "What this means for your team" section; focus strictly on technical analysis.',
-    section.id === "tldr"
-      ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). One sentence per point.'
-      : '',
+      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets.'
+      : section.id === "tldr"
+        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). One sentence per point. NO framing paragraphs.'
+        : section.id === "intro"
+          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point.'
+          : null,
   ]
     .filter(Boolean)
     .join("\n");
 
   const userPrompt = `
-Section ID: ${section.id}
-Outline: ${JSON.stringify(outline.sections)}
+Section ID: ${section.id} (Title: ${section.title})
+Article Outline Context: ${JSON.stringify(outline.sections.map(s => s.id + ": " + s.title))}
 Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
+
+CRITICAL: You are generating ONLY the content for the section [${section.id}]. 
+DO NOT generate the entire article. DO NOT generate content for other sections in the outline.
+If you generate the whole article, the build will fail. ONLY write the section [${section.id}]!
 
 Generate about ${section.targetWordCount} words of detailed technical content.
 Use one concrete, grounded example per section when helpful.
-Do not use repetitive marketing framing.
+Start exactly with the content for this section, including its markdown heading (e.g. ## ${section.title}).
+
+IMPORTANT: Do NOT repeat content from previous sections:
+${previousSectionSummaries.map((s) => `- [${s.id}]: ${s.summary}`).join("\n")}
+
+Do not use repetitive marketing framing. Avoid phrases like "Imagine...", "The landscape is evolving", "Rapidly changing world".
 ${specialInstructions}
 
 SPECIAL FORMAT FOR "highlights" SECTION:
-If section id is "highlights", create a "Key Features" section that:
+Create a "Key Features" section that:
 - Uses bullet points with emojis where appropriate
 - Extracts the 4-6 most important features/benefits from the sources
 - Format: "• [Feature name]: [Brief description]"
 - Include practical benefits, not just technical specs
-- End with a notable differentiator (e.g., licensing, cost, accessibility)
+- End with the most notable differentiator
 
 Table section must be simple, valid markdown.
-
-IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article (e.g., Gemini, Lyria, etc.). Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool - NeoWhisper is the company/site name, not a product.
-
-IMPORTANT FACT RULE:
-- Do not invent exact percentages, hard latency numbers, user counts, benchmark scores, or cost numbers.
-- If a number is not clearly supported by provided sources, rewrite qualitatively.
-- Distinguish clearly between currently available capabilities and forward-looking possibilities.
-
-Do not repeat or rephrase content already covered in the following accepted sections:
-${summariesText}
+IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article. Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool.
 
 OUTPUT FORMAT - ONLY THIS JSON:
 {"body": "Your markdown content here. Escape quotes properly."}
 `;
-  logVerbose(`[VERBOSE] section [${section.id}] prompt:\n${userPrompt}\n`);
 
-  const raw = await callAi(systemPrompt, userPrompt, {
-    responseFormat: { type: "json_object" },
-  });
-  const res = (await parseJsonWithRepair({
-    text: raw,
-    label: `section [${section.id}] en`,
-  })) as { body?: string };
+  const raw = await callAi(
+    `${SYSTEM_RULES}\nTask: Write section [${section.id}] for a technical article.`,
+    userPrompt,
+    { responseFormat: { type: "json_object" } },
+  );
+  const res = (await parseJsonWithRepair({ text: raw, label: `section [${section.id}] en` })) as { body?: string };
   endStage(stageId);
-  return res.body ?? "";
+  const body = typeof res.body === "string" ? res.body : "";
+  return body || `[Section ${section.id} content unavailable.]`;
 }
 
 const retryTranslation =
   (lang: LanguageCode, sectionId: string, enBody: string, attempt = 0) =>
   async (): Promise<string> => {
-    const retryMsg =
-      attempt > 0
-        ? "\nThe previous translation had structural or language issues. Preserve structure and output ONLY the target language."
-        : "";
-    const languageRule =
-      LANGUAGE_TRANSLATION_RULES[lang] ?? `Output ONLY ${lang}.`;
-
-    const tableRule = lang === "ar" 
-      ? "\nSTRICT TABLE RULE: Ensure markdown pipes (|) are correctly placed and balanced. Do not add extra spaces around pipes that could break the alignment in RTL view." 
+    const retryMsg = attempt > 0
+      ? "\nThe previous translation had structural or language issues. Preserve structure and output ONLY the target language."
       : "";
+    const languageRule = LANGUAGE_TRANSLATION_RULES[lang] ?? `Output ONLY ${lang}.`;
 
     const userPrompt = `
 Translate to ${lang}:
@@ -335,7 +387,6 @@ ${enBody}
 Ensure natural flow, correct terminology, and preservation of markdown structure.
 ${languageRule}
 Do not introduce unsupported exact numeric claims in translation.
-${tableRule}
 ${retryMsg}
 Return JSON { "body": "Markdown string" }
 `;
@@ -345,14 +396,11 @@ Return JSON { "body": "Markdown string" }
       userPrompt,
       { responseFormat: { type: "json_object" } },
     );
-    const res = (await parseJsonWithRepair({
-      text: raw,
-      label: `section [${sectionId}] ${lang}`,
-    })) as { body?: string };
+    const res = (await parseJsonWithRepair({ text: raw, label: `section [${sectionId}] ${lang}` })) as { body?: string };
     const body = res.body ?? "";
     const hasArtifacts = hasCrossLanguageArtifacts(lang, body);
 
-    return structuresMatch(body, enBody) && body.trim() && !hasArtifacts
+    return (structuresMatch(body, enBody) && body.trim() && !hasArtifacts)
       ? body
       : attempt < 1
         ? await retryTranslation(lang, sectionId, enBody, attempt + 1)()
@@ -368,15 +416,11 @@ export async function translateSection(
   const finalBody = await retryTranslation(lang, sectionId, enBody)();
 
   const hasArtifacts = hasCrossLanguageArtifacts(lang, finalBody);
-  const isValid = Boolean(
-    finalBody.trim() && structuresMatch(finalBody, enBody) && !hasArtifacts,
-  );
-  void (
-    !isValid &&
-    console.warn(
-      `[daily-trends] translation parity/language check failed for ${lang} section ${sectionId}. Continuing anyway.`,
-    )
-  );
+  const isValid = Boolean(finalBody.trim() && structuresMatch(finalBody, enBody) && !hasArtifacts);
+
+  if (!isValid) {
+    console.warn(`[daily-trends] translation parity/language check failed for ${lang} section ${sectionId}. Continuing anyway.`);
+  }
 
   endStage(stageId);
   return isValid ? finalBody : "Translation incomplete.";
@@ -396,9 +440,8 @@ ${currentBody}
 Requirements:
 - Add 30% more technical depth with more examples and analysis.
 - Keep the existing style and tone consistent.
-- Do NOT repeat the section heading (##) multiple times.
-- Return a SINGLE, UNIFIED markdown block that incorporates both the old and new content seamlessly.
-- Do NOT simply append the new content to the old content.
+- Do NOT repeat section headings.
+- Return a SINGLE, UNIFIED markdown block.
 
 Return JSON { "body": "Expanded and unified markdown string" }
 `;
@@ -407,10 +450,7 @@ Return JSON { "body": "Expanded and unified markdown string" }
     userPrompt,
     { responseFormat: { type: "json_object" } },
   );
-  const res = (await parseJsonWithRepair({
-    text: raw,
-    label: `expansion [${sectionId}] ${lang}`,
-  })) as { body?: string };
+  const res = (await parseJsonWithRepair({ text: raw, label: `expansion [${sectionId}] ${lang}` })) as { body?: string };
   endStage(stageId);
   return res.body ?? currentBody;
 }
@@ -422,15 +462,10 @@ async function generateSectionWithSummary(
   completedEn: SectionSummary[],
   stagedContent: StagedContent,
 ): Promise<void> {
-  void (
-    AiState.totalTokensUsed > MAX_TOKENS_PER_RUN &&
-    (() => {
-      console.log(
-        "[COST GUARD] Token limit reached. Assembling article with sections completed so far.",
-      );
-      throw new Error("TOKEN_LIMIT_REACHED");
-    })()
-  );
+  if (AiState.totalTokensUsed > MAX_TOKENS_PER_RUN) {
+    console.log("[COST GUARD] Token limit reached. Assembling article with sections completed so far.");
+    throw new Error("TOKEN_LIMIT_REACHED");
+  }
 
   console.log(`[daily-trends] creating section ${section.id}...`);
   const en = await generateSection(section, sources, outline, completedEn);
@@ -438,25 +473,16 @@ async function generateSectionWithSummary(
 
   const summaryRaw = await callAi(
     "You are a summarizer.",
-    `Summarize this in 2-3 sentences:\n${en.slice(0, 2000)}\nReturn JSON { "summary": "..." }`,
+    `Summarize this in 2-3 sentences:\n${String(en).slice(0, 2000)}\nReturn JSON { "summary": "..." }`,
     { responseFormat: { type: "json_object" } },
   );
-  const summaryRes = (await parseJsonWithRepair({
-    text: summaryRaw,
-    label: `summary [${section.id}]`,
-  })) as { summary?: string };
+  const summaryRes = (await parseJsonWithRepair({ text: summaryRaw, label: `summary [${section.id}]` })) as { summary?: string };
   completedEn.push({ id: section.id, summary: summaryRes.summary ?? "" });
 
-  const translationLanguages = stagedContent.targetLanguages.filter(
-    (lang) => lang !== "en",
-  );
+  const translationLanguages = stagedContent.targetLanguages.filter(lang => lang !== "en");
   await Promise.all(
     translationLanguages.map(async (lang) => {
-      stagedContent[lang].sections[section.id] = await translateSection(
-        en,
-        lang,
-        section.id,
-      );
+      stagedContent[lang].sections[section.id] = await translateSection(en, lang, section.id);
     }),
   );
 }
@@ -478,14 +504,8 @@ async function expandUndersizedContent(
     if (targets.length === 0) return false;
 
     const targetId = targets[0];
-    console.log(
-      `[daily-trends] ${lang} under length (${total}w), expanding ${targetId}...`,
-    );
-    stagedContent[lang].sections[targetId] = await expandSection(
-      targetId,
-      stagedContent[lang].sections[targetId],
-      lang,
-    );
+    console.log(`[daily-trends] ${lang} under length (${total}w), expanding ${targetId}...`);
+    stagedContent[lang].sections[targetId] = await expandSection(targetId, stagedContent[lang].sections[targetId], lang);
     total = computeWordCounts(stagedContent[lang].sections, lang);
     attempts++;
     return true;
@@ -505,21 +525,13 @@ async function polishAllLanguages(
     processingLanguages.map(async (lang) => {
       const fullBody = Object.values(stagedContent[lang].sections).join("\n\n");
       stagedContent[lang].title = await polishMetadata(fullBody, lang, "title");
-      stagedContent[lang].excerpt = await polishMetadata(
-        fullBody,
-        lang,
-        "excerpt",
-      );
+      stagedContent[lang].excerpt = await polishMetadata(fullBody, lang, "excerpt");
     }),
   );
 }
 
-const normalizeTargetLanguages = (
-  targetLanguages: readonly LanguageCode[] = LANGUAGE_ORDER,
-): LanguageCode[] => {
-  const filtered = targetLanguages.filter((lang): lang is LanguageCode =>
-    (LANGUAGE_ORDER as readonly string[]).includes(lang),
-  );
+const normalizeTargetLanguages = (targetLanguages: readonly LanguageCode[] = LANGUAGE_ORDER): LanguageCode[] => {
+  const filtered = targetLanguages.filter((lang): lang is LanguageCode => LANGUAGE_ORDER.includes(lang));
   return filtered.length > 0 ? [...new Set(filtered)] : [...LANGUAGE_ORDER];
 };
 
@@ -529,26 +541,26 @@ export async function createStagedArticle({
   targetLanguages = LANGUAGE_ORDER,
   preferredCategorySlug = null,
   pattern = "brief",
+  recentTopics,
 }: {
   dateString: string;
   sources: SourceItem[];
   targetLanguages?: readonly LanguageCode[];
   preferredCategorySlug?: string | null;
   pattern?: ArticlePattern;
+  recentTopics?: Set<string>;
 }) {
   const selectedLanguages = normalizeTargetLanguages(targetLanguages);
-  const processingLanguages: LanguageCode[] = [
-    ...new Set(["en", ...selectedLanguages] as LanguageCode[]),
-  ];
-  const preferredCategory = preferredCategorySlug
-    ? (ConfigState.CATEGORY_MAP.get(preferredCategorySlug) ?? null)
-    : null;
+  const processingLanguages: LanguageCode[] = [...new Set(["en", ...selectedLanguages] as LanguageCode[])];
+  const preferredCategory = preferredCategorySlug ? ConfigState.CATEGORY_MAP.get(preferredCategorySlug) ?? null : null;
   const category = pickCategory(preferredCategory, sources);
+
   const outline = await generateOutline({
     dateString,
     sources,
     categorySlug: category.slug,
     pattern,
+    recentTopics,
   });
 
   const stagedContent: StagedContent = {
@@ -562,27 +574,16 @@ export async function createStagedArticle({
 
   try {
     for (const section of outline.sections) {
-      await generateSectionWithSummary(
-        section,
-        sources,
-        outline,
-        completedEn,
-        stagedContent,
-      );
+      await generateSectionWithSummary(section, sources, outline, completedEn, stagedContent);
     }
   } catch (e: unknown) {
-    void (
-      asErrorMessage(e) !== "TOKEN_LIMIT_REACHED" &&
-      (() => {
-        throw e;
-      })()
-    );
+    if (asErrorMessage(e) !== "TOKEN_LIMIT_REACHED") {
+      throw e;
+    }
   }
 
   await Promise.all(
-    processingLanguages.map((lang) =>
-      expandUndersizedContent(lang, stagedContent),
-    ),
+    processingLanguages.map((lang) => expandUndersizedContent(lang, stagedContent)),
   );
 
   await polishAllLanguages(stagedContent, processingLanguages);

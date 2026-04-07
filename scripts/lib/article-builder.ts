@@ -319,7 +319,7 @@ export async function generateSection(
     section.id === "closing" || section.id === "conclusion"
       ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets.'
       : section.id === "tldr"
-        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). One sentence per point. NO framing paragraphs.'
+        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag.'
         : section.id === "intro"
           ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point.'
           : null,

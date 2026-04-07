@@ -159,3 +159,43 @@
 .adsbygoogle-block {
     display: block;
 }
+
+/* ── Dark mode code block contrast boost ────────────────────────────────── */
+.dark .prose pre {
+    background-color: #0d1117 !important;   /* GitHub-dark true black */
+    border-color: rgba(255,255,255,0.08) !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.dark .prose code:not(pre code) {
+    background-color: rgba(110, 118, 129, 0.15);
+    color: #e6edf3;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+}
+
+/* ── CSS-only Image Zoom ─────────────────────────────────────────────────── */
+.prose img {
+    cursor: zoom-in;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: 0.75rem;
+}
+
+.prose img:hover {
+    transform: scale(1.015);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+}
+
+/* Full-screen lightbox via :target trick */
+.prose img:focus {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    background: rgba(0,0,0,0.88);
+    cursor: zoom-out;
+    border-radius: 0;
+    transform: none;
+}

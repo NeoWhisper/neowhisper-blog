@@ -21,6 +21,13 @@ export const keywords: KeywordBuckets = {
     "microsoft",
     "meta",
     "nvidia",
+    "ollama",
+    "gpt-5",
+    "claude 4",
+    "llama 4",
+    "gemini 3",
+    "grok",
+    "deepseek",
     "cloud",
     "developer",
     "cybersecurity",
@@ -29,6 +36,8 @@ export const keywords: KeywordBuckets = {
     "gpu",
     "inference",
     "api",
+    "rlvr",
+    "autonomous",
     "react",
     "next.js",
     "nextjs",
@@ -46,7 +55,8 @@ export const keywords: KeywordBuckets = {
     "database",
     "scaling",
     "saas",
-    "serverless"
+    "serverless",
+    "trends"
   ],
   "art": [
     "design",

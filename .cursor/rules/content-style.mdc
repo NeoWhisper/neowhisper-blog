@@ -1,0 +1,37 @@
+# Multilingual Blog Content Style (NeoWhisper)
+
+## Scope
+
+- Applies to all .mdx blog posts
+- Especially in src/content/posts
+
+## Content Principles
+
+- **Language Alignment**: Heading structure and meaning must be identical across EN, JA, and AR versions.
+- **Multilingual Standards**:
+  - **Arabic**: Modern Standard Arabic (Fusha) only — no dialects.
+  - **Japanese**: Polite (Desu/Masu) and technical-natural (no translationese).
+  - **English**: Concise, professional, senior-expert tone.
+- **No Mixing**: Never mix languages in a single paragraph (except product names).
+
+## AdSense Quality Rules
+
+- **No Thin Content**: Each post must be substantial (~1000+ words across versions).
+- **No AI Clichés**: Avoid "rapidly evolving landscape," "testament to," or generic buzzwords.
+- **Truthfulness**:
+  - Never fabricate facts, benchmarks, or pricing.
+  - Use qualitative phrasing if exact numbers aren't in the provided sources.
+  - Clearly mark estimates or hypotheses as such.
+
+## Formatting Rules
+
+- **Markdown Hierachy**: Single H1 (frontmatter), use H2 for major sections.
+- **Tables**: Use standard markdown tables for data comparisons (like model rankings).
+- **Links**: Use @lang=ja or @lang=ar query params for localized external references.
+
+## AI Instructions
+
+1. Preserve markdown structure and heading parity across all translations.
+2. Check word count and ensure value-adding substantial content.
+3. Label all non-sourced metrics as example/estimate.
+4. Output diff only for existing posts.

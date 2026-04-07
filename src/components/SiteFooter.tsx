@@ -136,17 +136,17 @@ export default function SiteFooter() {
             <h3 className="text-sm font-bold uppercase tracking-widest text-white">
               {getSectionLabel("links", currentLang)}
             </h3>
-            <div className="flex flex-col gap-2" dir="ltr">
-              <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/privacy", currentLang)}>
+            <div className="flex flex-col gap-2 text-xs" dir="ltr">
+              <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/privacy", currentLang)}>
                 {getLabel("privacy", currentLang)}
               </Link>
-              <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/terms", currentLang)}>
+              <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/terms", currentLang)}>
                 {getLabel("terms", currentLang)}
               </Link>
-              <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/contact", currentLang)}>
+              <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/contact", currentLang)}>
                 {getLabel("contact", currentLang)}
               </Link>
-              <Link className="hover:text-white transition-colors text-zinc-400" href={withLang("/editorial-policy", currentLang)}>
+              <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/editorial-policy", currentLang)}>
                 {getLabel("editorial", currentLang)}
               </Link>
             </div>

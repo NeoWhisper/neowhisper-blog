@@ -106,3 +106,97 @@ If a check is skipped or fails, report it clearly.
   errors.
 - Generated posts must remain source-grounded: avoid unsourced exact
   performance/cost numbers and avoid unverified “we already do this” claims.
+
+## Generation Agent (Draft Creation)
+
+When generating new blog posts (EN/JA/AR), follow these specifications
+to minimize rework during editorial review.
+
+### Structural Requirements
+
+1. **Frontmatter**
+   - Include complete title, date, excerpt, category, coverImage, author
+   - Excerpt: 1-2 sentences, no markdown, max 160 characters
+
+2. **Table of Contents**
+   - Generate after the frontmatter separator (---)
+   - Format: `## Table of Contents` / `## 目次` / `## المحتويات`
+   - Bullet list with proper anchor links: `[Title](#anchor-text)`
+   - Anchors must match heading text exactly (kebab-case for EN, as-is for JA/AR)
+
+3. **TL;DR Section**
+   - Wrap in `<Callout type="tldr">`
+   - Each bullet on its own line with blank line between
+   - Format: `- ⚡ **Bold label:** Description sentence.`
+   - 4 bullets maximum, actionable and specific
+
+4. **"What This Means" Section**
+   - Use Markdown hyphen lists (`-`) not middle dots (`•`)
+   - Each bullet starts with bold action phrase
+   - Include concrete example where applicable
+
+### Language-Specific Generation Rules
+
+**English:**
+
+- Active voice, present tense for descriptions
+- Avoid: "leveraging", "unlocking", "delving", "landscape"
+- Prefer: "enables", "reduces", "allows", "simplifies"
+
+**Japanese:**
+
+- Use です／ます調 consistently
+- Product names: katakana for foreign terms (スティッチ, ミューズスパーク)
+- First mention: English (Katakana), then katakana only
+
+**Arabic:**
+
+- Modern Standard Arabic (الفصحى), avoid dialect
+- Product names: transliterated Arabic with English parenthetical
+  - First: "ستيتش (Stitch)", then "ستيتش"
+  - First: "ميوز سبارك (Muse Spark)", then "ميوز سبارك"
+
+### Cross-Language Parity
+
+- Section structure must match across EN/JA/AR (same headings in same order)
+- Key features table: identical rows across languages
+- Reference links: same sources, translated link text only
+
+## Editorial QA Agent (Post Review)
+
+When you are asked to review or finalize a blog post (any language),
+you are now acting as the editorial QA agent for published posts.
+
+Scope: All posts in English, Japanese, and Arabic across all categories.
+
+### Review Checklist
+
+1. **Structural integrity** (Critical)
+   - Verify TOC anchors match section headings exactly (no empty `[]()`)
+   - Ensure TL;DR is formatted as proper bullet list (separate lines, no run-on)
+   - Confirm table headers are populated (no empty rows)
+   - Check heading hierarchy matches TOC
+
+2. **Cross-language consistency**
+   - Product names: first mention = "Name (Local Name)", then local name only
+     - Example: "Stitch (ستيتش)" → "ستيتش", "Muse Spark (ميوز سبارك)" → "ميوز سبارك"
+   - Technical terms follow NeoWhisper house style (LLM, inference, embeddings)
+   - Section structure parity across EN/JA/AR
+
+3. **Language quality**
+   - **English:** Clear, concise tech tone. No filler phrases ("leveraging the power of...").
+   - **Japanese:** Natural polite business Japanese (です／ます調), avoid literal translation tone.
+   - **Arabic:** عربية فصحى طبيعية, clear for technical readers, avoid literal translation tone.
+
+4. **Formatting**
+   - "What This Means" bullets use `-` not `•`
+   - Tables render correctly (no empty header rows)
+   - Short paragraphs, scannable structure
+
+5. **Safety**
+   - Do not change URLs, dates, cited sources
+   - Flag contradictory claims in comments, don't silently fix
+   - Preserve all factual claims; don't invent new numbers/metrics
+
+Apply this checklist to every new or updated post in EN/JA/AR
+before publication. Do not mark a post as "final" if any item fails.

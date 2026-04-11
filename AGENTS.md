@@ -122,18 +122,22 @@ to minimize rework during editorial review.
    - Generate after the frontmatter separator (---)
    - Format: `## Table of Contents` / `## 目次` / `## المحتويات`
    - Bullet list with proper anchor links: `[Title](#anchor-text)`
-   - Anchors must match heading text exactly (kebab-case for EN, as-is for JA/AR)
+   - **CRITICAL:** Anchors must match heading text exactly (kebab-case for EN, as-is for JA/AR)
+   - **NEVER use empty anchors** like `[Title](#)` - always generate valid anchor text
 
 3. **TL;DR Section**
-   - Wrap in `<Callout type="tldr">`
+   - Wrap in `<Callout type="tldr">` with blank lines after opening and before closing tags
+   - Use Markdown hyphen lists (`-`) **NOT** middle dots (`•`)
    - Each bullet on its own line with blank line between
    - Format: `- ⚡ **Bold label:** Description sentence.`
    - 4 bullets maximum, actionable and specific
+   - **VALIDATION:** Check for `•` characters and replace with `-` before output
 
-4. **"What This Means" Section**
-   - Use Markdown hyphen lists (`-`) not middle dots (`•`)
-   - Each bullet starts with bold action phrase
+4. **"Key Features" and "What This Means" Sections**
+   - Use Markdown hyphen lists (`-`) **NOT** middle dots (`•`) for ALL bullet points
+   - Each bullet starts with bold action phrase (`**Bold label:**`)
    - Include concrete example where applicable
+   - **VALIDATION:** Scan entire post for `•` characters - none should exist
 
 ### Language-Specific Generation Rules
 

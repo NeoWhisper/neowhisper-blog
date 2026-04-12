@@ -176,6 +176,51 @@ type Outline = {
   sections: OutlineSection[];
 };
 
+const createFallbackOutline = (
+  sources: SourceItem[],
+  categorySlug: string,
+  dateString: string,
+): Outline => {
+  const slugSuffix = `${dateString}-${categorySlug}-ai-trends`;
+  const titles = sources.slice(0, 3).map((s) => s.title);
+  const title_hint =
+    titles.length > 0
+      ? `AI Trends: ${titles[0].substring(0, 40)}`
+      : `AI Trends Brief - ${dateString}`;
+
+  return {
+    title_hint,
+    slugSuffix,
+    sections: [
+      {
+        id: "intro",
+        title: "Introduction",
+        intent: `Provide context on recent AI developments for ${dateString}, based on available sources`,
+        targetWordCount: 200,
+      },
+      {
+        id: "trends",
+        title: "Key Trends",
+        intent: `Analyze main AI trends from sources: ${titles.slice(0, 2).join("; ")}`,
+        targetWordCount: 400,
+      },
+      {
+        id: "implications",
+        title: "What This Means",
+        intent:
+          "Explain practical implications for developers and organizations",
+        targetWordCount: 300,
+      },
+      {
+        id: "conclusion",
+        title: "Summary",
+        intent: "Brief wrap-up of key takeaways",
+        targetWordCount: 150,
+      },
+    ],
+  };
+};
+
 type SectionSummary = {
   id: string;
   summary: string;
@@ -301,16 +346,24 @@ Return JSON only.
         userPrompt,
         { responseFormat: { type: "json_object" } },
       );
+      console.log(
+        `[daily-trends] raw AI response (attempt ${attempt}):`,
+        raw.substring(0, 500),
+      );
       const parsed = await parseJsonWithRepair({
         text: raw,
         label: "outline generation",
       });
+      console.log(
+        `[daily-trends] parsed outline (attempt ${attempt}):`,
+        JSON.stringify(parsed).substring(0, 500),
+      );
 
       if (!validateOutline(parsed)) {
         const outline = parsed as { sections?: unknown[] };
         throw new Error(
           !Array.isArray(outline.sections) || outline.sections.length < 3
-            ? "Sections array must have at least 3 items"
+            ? `Sections array must have at least 3 items (got ${outline.sections?.length ?? 0})`
             : outline.sections.some((s) => !validateSection(s))
               ? "Missing required section fields"
               : new Set((outline.sections as OutlineSection[]).map((s) => s.id))
@@ -329,9 +382,10 @@ Return JSON only.
     }
   }
 
-  throw new Error(
-    `Outline generation failed after retries: ${errors.join(" | ")}`,
+  console.warn(
+    `[daily-trends] Outline generation failed after retries: ${errors.join(" | ")}. Using fallback.`,
   );
+  return createFallbackOutline(sources, categorySlug, dateString);
 }
 
 export async function generateOutline({

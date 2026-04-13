@@ -21,13 +21,16 @@ author:
 
 ---
 
-
 ## TL;DR
+
 <Callout type="tldr">
-- ⚡ **SageMaker HyperPod**: Enables distributed training at scale, reducing compute bottlenecks for massive seismic models.
-- 🔍 **Expanded Context Windows**: Processes larger seismic surveys in a single pass, preserving critical geological context.
-- 🎯 **Domain-Specific Models**: Outperforms general LLMs on geoscience tasks, yielding more accurate subsurface predictions.
-- 🚀 **Optimized Infrastructure**: Aligns compute architecture with domain demands, ensuring cost-efficient scaling.
+  - ⚡ **SageMaker HyperPod**: Enables distributed training at scale, reducing
+  compute bottlenecks for massive seismic models. - 🔍 **Expanded Context
+  Windows**: Processes larger seismic surveys in a single pass, preserving
+  critical geological context. - 🎯 **Domain-Specific Models**: Outperforms
+  general LLMs on geoscience tasks, yielding more accurate subsurface
+  predictions. - 🚀 **Optimized Infrastructure**: Aligns compute architecture
+  with domain demands, ensuring cost-efficient scaling.
 </Callout>
 
 ## The Shift to Domain-Specific Foundation Models
@@ -58,22 +61,22 @@ This domain adaptation extends beyond pre-training. Fine-tuning on basin-specifi
 
 ## Infrastructure vs. Domain Model Requirements
 
-| Requirement | General-Purpose LLM | Geoscience Foundation Model |
-|---|---|---|
-| Context Window | 4K–32K tokens | 128K+ tokens for continuous seismic volumes |
-| Training Stability | Standard checkpointing | Fault-tolerant persistent clusters (HyperPod) |
-| Physical Constraints | None | Inductive biases for stratigraphic continuity |
-| Data Granularity | Text chunks | 3D seismic volumes with spatial coordinates |
-| Fine-Tuning Target | Task-specific prompts | Basin-specific depositional patterns |
+| Requirement          | General-Purpose LLM    | Geoscience Foundation Model                   |
+| -------------------- | ---------------------- | --------------------------------------------- |
+| Context Window       | 4K–32K tokens          | 128K+ tokens for continuous seismic volumes   |
+| Training Stability   | Standard checkpointing | Fault-tolerant persistent clusters (HyperPod) |
+| Physical Constraints | None                   | Inductive biases for stratigraphic continuity |
+| Data Granularity     | Text chunks            | 3D seismic volumes with spatial coordinates   |
+| Fine-Tuning Target   | Task-specific prompts  | Basin-specific depositional patterns          |
 
 Processing a 3D seismic survey across multiple fault blocks requires context windows large enough to capture the full structural framework—standard token limits fragment the data at fault boundaries, losing critical geological relationships.
 
 ## Key Highlights
 
-• ⚡ Fault-Tolerant Clusters: HyperPod's automatic node recovery and checkpointing prevent compute losses during multi-GPU seismic training
-• 🌍 Extended Context Windows: Process larger 3D volumes in one pass, preserving fault continuity without boundary artifacts
-• 🛠️ Basin-Specific Adaptation: Regional fine-tuning on depositional data creates specialized geological interpreters
-• 🔒 Physics-Informed Architecture: Inductive biases enforce stratigraphic continuity, eliminating physically impossible subsurface predictions
+- ⚡ **Fault-Tolerant Clusters**: HyperPod's automatic node recovery and checkpointing prevent compute losses during multi-GPU seismic training
+- 🌍 **Extended Context Windows**: Process larger 3D volumes in one pass, preserving fault continuity without boundary artifacts
+- 🛠️ **Basin-Specific Adaptation**: Regional fine-tuning on depositional data creates specialized geological interpreters
+- 🔒 **Physics-Informed Architecture**: Inductive biases enforce stratigraphic continuity, reducing physically impossible subsurface predictions
 
 ## What this means for your team
 
@@ -84,8 +87,3 @@ Processing a 3D seismic survey across multiple fault blocks requires context win
 ## References
 
 - [Scaling seismic foundation models on AWS: Distributed training with Amazon SageMaker HyperPod and expanding context windows](https://aws.amazon.com/blogs/machine-learning/scaling-seismic-foundation-models-on-aws-distributed-training-with-amazon-sagemaker-hyperpod-and-expanding-context-windows/)
-- [New Requirements for Social Media Apps in Australia](https://developer.apple.com/news/?id=y1bckxf8)
-- [Hello Developer: June 2025](https://developer.apple.com/news/?id=4hac2w7l)
-- [Apple Entrepreneur Camp applications are now open](https://developer.apple.com/news/?id=49500drc)
-- [Today @ WWDC25: Day 4](https://developer.apple.com/news/?id=8kawba5a)
-- [Today @ WWDC24: Day 5](https://developer.apple.com/news/?id=tc8qyt2t)

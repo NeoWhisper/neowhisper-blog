@@ -10,6 +10,8 @@ export const TOPIC_HINT = runtimeConfig.topicHint;
 export const API_BASE_URL = runtimeConfig.apiBaseUrl;
 export const API_KEY = runtimeConfig.apiKey;
 export const OLLAMA_IMAGE_MODEL = runtimeConfig.ollamaImageModel;
+export const MFLUX_MODEL = runtimeConfig.mfluxModel;
+export const LM_STUDIO_IMAGE_URL = runtimeConfig.lmStudioImageUrl;
 export const FORCE = process.argv.includes("--force");
 export const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -24,7 +26,7 @@ export const ConfigState = Object.freeze({
   KEYWORDS: runtimeConfig.keywords,
   get CATEGORY_MAP() {
     return createCategoryMap(this.CATEGORY_DEFINITIONS);
-  }
+  },
 });
 
 export async function initializeConfigs() {

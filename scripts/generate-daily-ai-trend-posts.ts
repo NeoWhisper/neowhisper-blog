@@ -513,7 +513,19 @@ async function main() {
           .find((line) => line.trim() && !line.startsWith("#"))
           ?.trim() ?? "";
       const excerpt = normalizeExcerptText(localized.excerpt, excerptFallback);
-      const referencesSection = ranked
+
+      // Filter references to only include sources actually cited in content
+      const bodyLower = finalBody.toLowerCase();
+      const relevantRefs = ranked.filter(
+        (s) =>
+          bodyLower.includes(
+            s.title.toLowerCase().split(" ").slice(0, 3).join(" "),
+          ) || bodyLower.includes(new URL(s.url).hostname.toLowerCase()),
+      );
+      // Fallback to first source if none explicitly cited
+      const finalRefs =
+        relevantRefs.length > 0 ? relevantRefs : ranked.slice(0, 2);
+      const referencesSection = finalRefs
         .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
         .join("\n");
 

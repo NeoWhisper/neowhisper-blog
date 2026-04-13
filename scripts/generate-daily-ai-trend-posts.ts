@@ -26,7 +26,13 @@ import { fetchFeed } from "./lib/feed";
 import type { FeedItem } from "./lib/feed";
 import { AiState } from "./lib/ai";
 import { flushMetrics } from "./lib/metrics";
-import { createStagedArticle, loadRecentTopics, shouldSkipTopic, loadRecentPosts, shouldSkipSource } from "./lib/article-builder";
+import {
+  createStagedArticle,
+  loadRecentTopics,
+  shouldSkipTopic,
+  loadRecentPosts,
+  shouldSkipSource,
+} from "./lib/article-builder";
 import {
   LANGUAGE_ORDER,
   LANGUAGE_LABELS,
@@ -190,6 +196,15 @@ const toRankedSource = (source: FeedItem): RankedSource => ({
 const uniqueByUrl = (sources: RankedSource[]) =>
   Array.from(new Map(sources.map((item) => [item.url, item])).values());
 
+const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 const normalizeWord = (value: string) => value.trim().toLowerCase();
 
 const topicHintTerms = TOPIC_HINT.split(/[\s,]+/)
@@ -219,7 +234,7 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
     `[daily-trends] source pool: raw=${normalized.length}, trend=${byTrend.length}`,
   );
   if (byTrend.length >= MIN_SOURCES_REQUIRED) {
-    return byTrend.slice(0, 6);
+    return shuffleArray(byTrend).slice(0, 6);
   }
 
   const expandedKeywords = Array.from(
@@ -238,7 +253,7 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
     console.warn(
       "[daily-trends] trend-only sources were low; using expanded keyword matching.",
     );
-    return byExpanded.slice(0, 6);
+    return shuffleArray(byExpanded).slice(0, 6);
   }
 
   const fallbackPool = uniqueByUrl(normalized);
@@ -249,10 +264,10 @@ const pickRankedSources = (rawSources: FeedItem[]): RankedSource[] => {
     console.warn(
       "[daily-trends] keyword-matched sources were low; using top feed items fallback.",
     );
-    return fallbackPool.slice(0, 6);
+    return shuffleArray(fallbackPool).slice(0, 6);
   }
 
-  return fallbackPool;
+  return shuffleArray(fallbackPool);
 };
 
 const parsePositiveInt = (
@@ -399,11 +414,20 @@ async function main() {
 
   // Load recent topics to avoid repetition
   const recentTopics = await loadRecentTopics();
-  console.log(`[dedup] recent topics: ${[...recentTopics].join(", ") || "none"}`);
+  console.log(
+    `[dedup] recent topics: ${[...recentTopics].join(", ") || "none"}`,
+  );
 
   // Load recent posts for aggressive cross-post dedup
   const recentPosts = await loadRecentPosts();
-  console.log(`[dedup] recent posts (${recentPosts.length}): ${recentPosts.map((p) => p.title).slice(0, 4).join(", ") || "none"}`);
+  console.log(
+    `[dedup] recent posts (${recentPosts.length}): ${
+      recentPosts
+        .map((p) => p.title)
+        .slice(0, 4)
+        .join(", ") || "none"
+    }`,
+  );
 
   const rawSources = (
     await Promise.allSettled(ConfigState.FEEDS.map((f) => fetchFeed(f)))
@@ -414,11 +438,14 @@ async function main() {
     .flatMap((r) => r.value);
 
   // Filter out sources that match recent topics or are too similar to recent posts
-  const filteredSources = rawSources.filter((source) =>
-    !shouldSkipTopic(source.title, recentTopics) &&
-    !shouldSkipSource(source.title, source.description ?? "", recentPosts)
+  const filteredSources = rawSources.filter(
+    (source) =>
+      !shouldSkipTopic(source.title, recentTopics) &&
+      !shouldSkipSource(source.title, source.description ?? "", recentPosts),
   );
-  console.log(`[dedup] filtered sources: ${rawSources.length} -> ${filteredSources.length}`);
+  console.log(
+    `[dedup] filtered sources: ${rawSources.length} -> ${filteredSources.length}`,
+  );
 
   const baseRanked = pickRankedSources(filteredSources);
   const ranked = guardMinSources(

@@ -346,18 +346,10 @@ Return JSON only.
         userPrompt,
         { responseFormat: { type: "json_object" } },
       );
-      console.log(
-        `[daily-trends] raw AI response (attempt ${attempt}):`,
-        raw.substring(0, 500),
-      );
       const parsed = await parseJsonWithRepair({
         text: raw,
         label: "outline generation",
       });
-      console.log(
-        `[daily-trends] parsed outline (attempt ${attempt}):`,
-        JSON.stringify(parsed).substring(0, 500),
-      );
 
       if (!validateOutline(parsed)) {
         const outline = parsed as { sections?: unknown[] };

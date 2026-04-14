@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - "src/content/posts/**"
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,11 +22,22 @@ concurrency:
 
 jobs:
   send:
+    if: >
+      github.event_name != 'pull_request_target' ||
+      (
+        github.event.pull_request.merged == true &&
+        (
+          github.event.pull_request.head.ref == 'contents' ||
+          github.event.pull_request.head.ref == 'dev'
+        )
+      )
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

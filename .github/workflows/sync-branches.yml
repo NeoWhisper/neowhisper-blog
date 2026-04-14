@@ -8,6 +8,7 @@ on:
 
 jobs:
   backmerge:
+    if: github.repository == 'NeoWhisper/neowhisper-blog'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

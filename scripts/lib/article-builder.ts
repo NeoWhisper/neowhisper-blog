@@ -176,6 +176,51 @@ type Outline = {
   sections: OutlineSection[];
 };
 
+const createFallbackOutline = (
+  sources: SourceItem[],
+  categorySlug: string,
+  dateString: string,
+): Outline => {
+  const slugSuffix = `${dateString}-${categorySlug}-ai-trends`;
+  const titles = sources.slice(0, 3).map((s) => s.title);
+  const title_hint =
+    titles.length > 0
+      ? `AI Trends: ${titles[0].substring(0, 40)}`
+      : `AI Trends Brief - ${dateString}`;
+
+  return {
+    title_hint,
+    slugSuffix,
+    sections: [
+      {
+        id: "intro",
+        title: "Introduction",
+        intent: `Provide context on recent AI developments for ${dateString}, based on available sources`,
+        targetWordCount: 200,
+      },
+      {
+        id: "trends",
+        title: "Key Trends",
+        intent: `Analyze main AI trends from sources: ${titles.slice(0, 2).join("; ")}`,
+        targetWordCount: 400,
+      },
+      {
+        id: "implications",
+        title: "What This Means",
+        intent:
+          "Explain practical implications for developers and organizations",
+        targetWordCount: 300,
+      },
+      {
+        id: "conclusion",
+        title: "Summary",
+        intent: "Brief wrap-up of key takeaways",
+        targetWordCount: 150,
+      },
+    ],
+  };
+};
+
 type SectionSummary = {
   id: string;
   summary: string;
@@ -310,7 +355,7 @@ Return JSON only.
         const outline = parsed as { sections?: unknown[] };
         throw new Error(
           !Array.isArray(outline.sections) || outline.sections.length < 3
-            ? "Sections array must have at least 3 items"
+            ? `Sections array must have at least 3 items (got ${outline.sections?.length ?? 0})`
             : outline.sections.some((s) => !validateSection(s))
               ? "Missing required section fields"
               : new Set((outline.sections as OutlineSection[]).map((s) => s.id))
@@ -329,9 +374,10 @@ Return JSON only.
     }
   }
 
-  throw new Error(
-    `Outline generation failed after retries: ${errors.join(" | ")}`,
+  console.warn(
+    `[daily-trends] Outline generation failed after retries: ${errors.join(" | ")}. Using fallback.`,
   );
+  return createFallbackOutline(sources, categorySlug, dateString);
 }
 
 export async function generateOutline({
@@ -379,12 +425,12 @@ export async function generateSection(
 
   const specialInstructions = [
     section.id === "closing" || section.id === "conclusion"
-      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets.'
+      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.'
       : section.id === "tldr"
-        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag.'
+        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.'
         : section.id === "intro"
-          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point.'
-          : null,
+          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).'
+          : 'Keep paragraphs short (3-4 sentences max) for better readability.',
   ]
     .filter(Boolean)
     .join("\n");
@@ -412,11 +458,12 @@ SPECIAL FORMAT FOR "highlights" SECTION:
 Create a "Key Features" section that:
 - Uses bullet points with emojis where appropriate
 - Extracts the 4-6 most important features/benefits from the sources
-- Format: "• [Feature name]: [Brief description]"
+- Format EXACTLY: "- **[Emoji] [Feature name]:** [Brief description]"
+- DO NOT use middle dots (•) or asterisks (*). ALWAYS use hyphens (-).
 - Include practical benefits, not just technical specs
 - End with the most notable differentiator
 
-Table section must be simple, valid markdown.
+Table section must be simple, valid markdown with EXACTLY 4 columns (e.g., Approach/Tool, Paradigm, Mechanism, Benefit). Do NOT output empty first or last columns (e.g., | | ... | |).
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article. Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool.
 
 OUTPUT FORMAT - ONLY THIS JSON:

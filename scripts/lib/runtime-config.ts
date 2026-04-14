@@ -5,9 +5,12 @@ import { z } from "zod";
 import { feeds as feedConfig, type FeedConfig } from "../config/feeds";
 import {
   categories as categoryConfig,
-  type CategoryConfig
+  type CategoryConfig,
 } from "../config/categories";
-import { keywords as keywordConfig, type KeywordBuckets } from "../config/keywords";
+import {
+  keywords as keywordConfig,
+  type KeywordBuckets,
+} from "../config/keywords";
 
 const DOTENV_PATH = path.join(process.cwd(), ".env.local");
 const POSTS_DIR = path.join(process.cwd(), "src/content/posts");
@@ -18,7 +21,7 @@ if (fs.existsSync(DOTENV_PATH) && typeof process.loadEnvFile === "function") {
 
 const FeedItemSchema = z.object({
   name: z.string().min(1),
-  url: z.string().url()
+  url: z.string().url(),
 });
 
 const CategorySchema = z.object({
@@ -26,14 +29,14 @@ const CategorySchema = z.object({
   nameEn: z.string().min(1),
   nameJa: z.string().min(1),
   nameAr: z.string().min(1),
-  keywords: z.array(z.string()).default([])
+  keywords: z.array(z.string()).default([]),
 });
 
 const KeywordsSchema = z.object({
   trend: z.array(z.string()).default([]),
   art: z.array(z.string()).default([]),
   politics: z.array(z.string()).default([]),
-  finance: z.array(z.string()).default([])
+  finance: z.array(z.string()).default([]),
 });
 
 const EnvSchema = z.object({
@@ -44,7 +47,9 @@ const EnvSchema = z.object({
   OPENAI_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
   OPENAI_API_KEY: z.string().min(1).default("sk-local"),
   OLLAMA_IMAGE_MODEL: z.string().optional().default(""),
-  TOPIC_HINT: z.string().optional().default("")
+  MFLUX_MODEL: z.string().optional().default(""),
+  LM_STUDIO_IMAGE_URL: z.string().optional().default(""),
+  TOPIC_HINT: z.string().optional().default(""),
 });
 
 const normalizeKeywordList = (list: string[]) =>
@@ -52,7 +57,8 @@ const normalizeKeywordList = (list: string[]) =>
 
 const loadEnvConfig = () => {
   const env = EnvSchema.parse(process.env);
-  const apiBaseUrl = env.OPENAI_BASE_URL.replace(/\/+$/, "").replace(/\/v1$/, "") + "/v1";
+  const apiBaseUrl =
+    env.OPENAI_BASE_URL.replace(/\/+$/, "").replace(/\/v1$/, "") + "/v1";
 
   return {
     model: env.OPENAI_MODEL,
@@ -62,7 +68,9 @@ const loadEnvConfig = () => {
     topicHint: env.TOPIC_HINT.trim(),
     apiBaseUrl,
     apiKey: env.OPENAI_API_KEY,
-    ollamaImageModel: env.OLLAMA_IMAGE_MODEL
+    ollamaImageModel: env.OLLAMA_IMAGE_MODEL,
+    mfluxModel: env.MFLUX_MODEL,
+    lmStudioImageUrl: env.LM_STUDIO_IMAGE_URL,
   };
 };
 
@@ -73,19 +81,19 @@ const loadStaticConfig = () => {
 
   const categoryDefinitions = categories.map((category) => ({
     ...category,
-    keywords: normalizeKeywordList(category.keywords)
+    keywords: normalizeKeywordList(category.keywords),
   }));
   const keywords = Object.freeze({
     trend: normalizeKeywordList(keywordsRaw.trend),
     art: normalizeKeywordList(keywordsRaw.art),
     politics: normalizeKeywordList(keywordsRaw.politics),
-    finance: normalizeKeywordList(keywordsRaw.finance)
+    finance: normalizeKeywordList(keywordsRaw.finance),
   });
 
   return {
     feeds,
     categoryDefinitions,
-    keywords
+    keywords,
   };
 };
 
@@ -102,6 +110,8 @@ type RuntimeConfig = {
   apiBaseUrl: string;
   apiKey: string;
   ollamaImageModel: string;
+  mfluxModel: string;
+  lmStudioImageUrl: string;
   feeds: FeedConfig[];
   categoryDefinitions: CategoryConfig[];
   keywords: KeywordBuckets;
@@ -117,7 +127,9 @@ export const runtimeConfig = Object.freeze({
   apiBaseUrl: envConfig.apiBaseUrl,
   apiKey: envConfig.apiKey,
   ollamaImageModel: envConfig.ollamaImageModel,
+  mfluxModel: envConfig.mfluxModel,
+  lmStudioImageUrl: envConfig.lmStudioImageUrl,
   feeds: staticConfig.feeds,
   categoryDefinitions: staticConfig.categoryDefinitions,
-  keywords: staticConfig.keywords
+  keywords: staticConfig.keywords,
 }) satisfies RuntimeConfig;

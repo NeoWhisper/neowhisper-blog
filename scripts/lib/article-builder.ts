@@ -425,12 +425,12 @@ export async function generateSection(
 
   const specialInstructions = [
     section.id === "closing" || section.id === "conclusion"
-      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets.'
+      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.'
       : section.id === "tldr"
-        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag.'
+        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.'
         : section.id === "intro"
-          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point.'
-          : null,
+          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).'
+          : 'Keep paragraphs short (3-4 sentences max) for better readability.',
   ]
     .filter(Boolean)
     .join("\n");
@@ -458,11 +458,12 @@ SPECIAL FORMAT FOR "highlights" SECTION:
 Create a "Key Features" section that:
 - Uses bullet points with emojis where appropriate
 - Extracts the 4-6 most important features/benefits from the sources
-- Format: "• [Feature name]: [Brief description]"
+- Format EXACTLY: "- **[Emoji] [Feature name]:** [Brief description]"
+- DO NOT use middle dots (•) or asterisks (*). ALWAYS use hyphens (-).
 - Include practical benefits, not just technical specs
 - End with the most notable differentiator
 
-Table section must be simple, valid markdown.
+Table section must be simple, valid markdown with EXACTLY 4 columns (e.g., Approach/Tool, Paradigm, Mechanism, Benefit). Do NOT output empty first or last columns (e.g., | | ... | |).
 IMPORTANT: For the table section, ONLY include actual tools/products/services mentioned in the article. Do NOT include "NeoWhisper Insights" or any reference to NeoWhisper as a tool.
 
 OUTPUT FORMAT - ONLY THIS JSON:

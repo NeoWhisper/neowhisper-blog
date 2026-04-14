@@ -178,6 +178,29 @@ async function sendToSubscriber(subscriber: SubscriberRow, posts: HybridPost[]) 
   return true;
 }
 
+async function bootstrapSubscriberCursor(
+  subscriber: SubscriberRow,
+  latestPost: HybridPost,
+) {
+  const latestPublishedAt =
+    latestPost.publishedAt || latestPost.date || new Date().toISOString();
+  const update = await updateSubscriberLastSent(
+    subscriber.email,
+    latestPost.slug,
+    latestPublishedAt,
+  );
+  if (update.error) {
+    console.error(
+      `[send:subscribers] Failed to bootstrap cursor for ${subscriber.email}: ${update.error}`,
+    );
+    return false;
+  }
+  console.log(
+    `[send:subscribers] Bootstrapped cursor for ${subscriber.email} at ${latestPost.slug}`,
+  );
+  return true;
+}
+
 async function main() {
   let sentCount = 0;
 
@@ -194,6 +217,15 @@ async function main() {
 
     for (const subscriber of subscribers) {
       const lastSentTs = getLastSentTimestamp(subscriber);
+      if (lastSentTs === 0) {
+        // First-time subscribers should receive only future posts, not full history.
+        const latestPost = posts[0];
+        if (latestPost) {
+          await bootstrapSubscriberCursor(subscriber, latestPost);
+        }
+        continue;
+      }
+
       const newPosts = posts.filter((post) => getPostTimestamp(post) > lastSentTs);
       if (newPosts.length === 0) continue;
 

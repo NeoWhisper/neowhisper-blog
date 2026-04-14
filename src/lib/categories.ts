@@ -66,6 +66,12 @@ export const categories: Category[] = [
     nameJa: "プロダクト戦略",
     nameAr: "استراتيجية المنتج",
   },
+  {
+    slug: "apple",
+    nameEn: "Apple Ecosystem",
+    nameJa: "Appleエコシステム",
+    nameAr: "منظومة Apple",
+  },
 ];
 
 export function buildCategorySlug(name: string) {

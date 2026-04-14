@@ -195,6 +195,26 @@ export const categories: CategoryConfig[] = [
     ]
   },
   {
+    "slug": "apple",
+    "nameEn": "Apple Ecosystem",
+    "nameJa": "Appleエコシステム",
+    "nameAr": "منظومة Apple",
+    "keywords": [
+      "apple",
+      "iphone",
+      "ipad",
+      "mac",
+      "ios",
+      "ipados",
+      "macos",
+      "watchos",
+      "visionos",
+      "app store",
+      "wwdc",
+      "xcode"
+    ]
+  },
+  {
     "slug": "ai-policy-governance",
     "nameEn": "AI Policy & Governance",
     "nameJa": "AIポリシー・ガバナンス",

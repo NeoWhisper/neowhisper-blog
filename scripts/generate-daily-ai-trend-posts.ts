@@ -89,13 +89,13 @@ const createShouldExcludeHeading =
 
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
-  return (markdownBody: string, tocHeading: string): string => {
+  return (markdownBody: string, tocHeading: string, lang: string): string => {
     const headings = [...markdownBody.matchAll(/^##\s+(.+)$/gm)]
       .map((match: RegExpMatchArray) => (match[1] ?? "").trim())
       .filter((text) => !shouldExclude(text))
       .map((text) => ({
         text,
-        anchor: headingToAnchor(text),
+        anchor: lang === "en" ? headingToAnchor(text) : text,
       }));
 
     return headings.length === 0
@@ -501,7 +501,7 @@ async function main() {
       const finalBody = sanitizeGeneratedMarkdown(
         Object.values(localized.sections).join("\n\n"),
       );
-      const toc = generateToc(finalBody, meta.tocHeading);
+      const toc = generateToc(finalBody, meta.tocHeading, lang);
       const fallbackTitle = normalizeMetadataText(
         content.en.title,
         "Daily AI Trend Brief",

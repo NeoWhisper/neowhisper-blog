@@ -17,6 +17,7 @@
     "content:test-flags": "node --test scripts/tests/content-flags.test.mjs",
     "content:test-safety": "node --import tsx --test scripts/tests/content-safety.test.mjs",
     "content:test-site-url": "node --import tsx --test scripts/tests/site-url-smoke.test.mjs",
+    "send:subscribers": "node --import tsx --env-file-if-exists=.env.local scripts/send-subscriber-updates.ts",
     "content:typecheck": "tsc -p tsconfig.scripts.json --noEmit",
     "content:list-categories": "node --import tsx scripts/list-categories-with-counts.ts",
     "content:daily:pr": "bash scripts/local-daily-content-pr.sh",

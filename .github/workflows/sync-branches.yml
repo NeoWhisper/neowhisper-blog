@@ -1,0 +1,50 @@
+name: Sync Main to Dev and Contents
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backmerge:
+    if: github.repository == 'NeoWhisper/neowhisper-blog'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync main into dev
+        run: |
+          # Checkout dev branch
+          git checkout dev || git checkout -b dev origin/dev
+          
+          # Merge main into dev (preferring main's history logically, though standard merge is fine)
+          git merge origin/main --no-edit -m "chore(sync): automated merge of main into dev"
+          
+          # Push the sync
+          git push origin dev
+        continue-on-error: true # Do not fail the workflow if there are merge conflicts
+
+      - name: Sync main into contents
+        run: |
+          # Checkout contents branch
+          git checkout contents || git checkout -b contents origin/contents
+          
+          # Merge main into contents
+          git merge origin/main --no-edit -m "chore(sync): automated merge of main into contents"
+          
+          # Push the sync
+          git push origin contents
+        continue-on-error: true

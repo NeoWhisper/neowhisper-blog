@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
+import EmailSubscriptionForm from "@/components/EmailSubscriptionForm";
 import { buildCategorySlug } from "@/lib/categories";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getHybridPosts } from "@/lib/posts-hybrid";
@@ -33,6 +34,8 @@ type BlogCopy = {
   qualitySummary: string;
   qualityBullets: [string, string, string];
   qualityCta: string;
+  subscriptionHeading: string;
+  subscriptionDescription: string;
 };
 
 const copyByLang: Record<SupportedLang, BlogCopy> = {
@@ -62,6 +65,9 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
       "EN/JA/AR localization review",
     ],
     qualityCta: "Read Editorial Policy",
+    subscriptionHeading: "Newsletter",
+    subscriptionDescription:
+      "Subscribe to receive each new English post in your inbox.",
   },
   ja: {
     metaTitle: "NeoWhisper ブログ | Next.js・React・TypeScript チュートリアル",
@@ -89,6 +95,9 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
       "EN/JA/ARの翻訳品質レビュー",
     ],
     qualityCta: "編集ポリシーを見る",
+    subscriptionHeading: "ニュースレター",
+    subscriptionDescription:
+      "日本語の記事をメールで受け取りたい場合はこちらから登録できます。",
   },
   ar: {
     metaTitle: "مدونة NeoWhisper | دروس Next.js وReact وTypeScript",
@@ -116,6 +125,9 @@ const copyByLang: Record<SupportedLang, BlogCopy> = {
       "مراجعة جودة EN/JA/AR",
     ],
     qualityCta: "قراءة سياسة التحرير",
+    subscriptionHeading: "النشرة البريدية",
+    subscriptionDescription:
+      "اشترك لتصلك المقالات العربية الجديدة مباشرة عبر البريد الإلكتروني.",
   },
 };
 
@@ -360,6 +372,23 @@ export default async function BlogHome({
                 {copy.qualityCta}
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <div
+            className="rounded-3xl border border-white/20 bg-white/60 p-8 shadow-sm backdrop-blur-lg dark:border-white/10 dark:bg-white/5"
+            dir={isRTL ? "rtl" : "ltr"}
+          >
+            <div className={`${isRTL ? "text-right" : "text-left"} mb-6`}>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
+                {copy.subscriptionHeading}
+              </p>
+              <p className="mt-3 text-base text-gray-700 dark:text-gray-200">
+                {copy.subscriptionDescription}
+              </p>
+            </div>
+            <EmailSubscriptionForm lang={currentLang} />
           </div>
         </section>
 

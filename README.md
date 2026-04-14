@@ -68,6 +68,7 @@ and a premium, modern aesthetic.
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
    # Comma-separated allowlist for /admin access
    ADMIN_EMAILS=you@example.com
    RESEND_API_KEY=your-resend-api-key
@@ -92,6 +93,29 @@ Open [http://localhost:3000](http://localhost:3000) to see the result.
 - Add `http://localhost:3000/auth/callback`
   and your production callback URL in Supabase redirect URLs.
 - `/admin` routes are protected by Supabase session + `ADMIN_EMAILS` allowlist.
+
+### Email Subscription Delivery
+
+- The blog page includes a localized subscription form that sends requests to `/api/subscribe`.
+- Subscriber preference is stored as `en`, `ja`, or `ar`, and each user receives only that language in email updates.
+- Create this table in Supabase:
+
+```sql
+create table if not exists public.post_subscribers (
+  email text primary key,
+  lang text not null default 'en',
+  subscribed_at timestamptz not null default now(),
+  last_sent_slug text,
+  last_sent_published_at timestamptz,
+  updated_at timestamptz not null default now()
+);
+```
+
+- Send new-post updates to subscribers:
+
+```bash
+npm run send:subscribers
+```
 
 ## 📝 Writing Posts
 

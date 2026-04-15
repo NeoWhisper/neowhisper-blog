@@ -330,14 +330,19 @@ ${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}`).join("\n")}
 ${constraint}${topicConstraint}
 
 Pattern: ${pattern} - ${template.description}
-Create a structured JSON outline:
-- title_hint (string)
-- slugSuffix (string)
-- sections: Array of { id: string, title: string, intent: string, targetWordCount: number }
-Required IDs: ${template.requiredIds.join(", ")}
+Create a structured JSON outline with these exact fields:
+- title_hint (string): Short engaging title
+- slugSuffix (string): kebab-case topic name
+- sections: Array of objects, each with { id: string, title: string, intent: string, targetWordCount: number }
+
+Required section IDs: ${template.requiredIds.join(", ")}
 ${retryMsg}
 
-Return JSON only.
+OUTPUT ONLY VALID JSON. No markdown code blocks, no explanations, no extra text.
+Start with { and end with }. All strings must use double quotes.
+
+EXAMPLE STRUCTURE:
+{"title_hint": "Title", "slugSuffix": "topic-name", "sections": [{"id": "intro", "title": "Introduction", "intent": "Hook", "targetWordCount": 200}]}
 `;
 
     try {
@@ -430,7 +435,7 @@ export async function generateSection(
         ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.'
         : section.id === "intro"
           ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).'
-          : 'Keep paragraphs short (3-4 sentences max) for better readability.',
+          : "Keep paragraphs short (3-4 sentences max) for better readability.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -440,7 +445,7 @@ Section ID: ${section.id} (Title: ${section.title})
 Article Outline Context: ${JSON.stringify(outline.sections.map((s) => s.id + ": " + s.title))}
 Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
 
-CRITICAL: You are generating ONLY the content for the section [${section.id}]. 
+CRITICAL: You are generating ONLY the content for the section [${section.id}].
 DO NOT generate the entire article. DO NOT generate content for other sections in the outline.
 If you generate the whole article, the build will fail. ONLY write the section [${section.id}]!
 

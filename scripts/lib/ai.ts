@@ -136,43 +136,79 @@ export async function callAi(
 export async function parseJsonWithRepair({
   text,
   label,
+  maxRetries = 2,
 }: {
   text: string;
   label: string;
+  maxRetries?: number;
 }) {
-  const attempt = async () => {
-    const clean = cleanJsonText(text);
-    return JSON.parse(clean);
-  };
-
+  // Attempt 1: Direct parse
   try {
-    return await attempt();
+    return JSON.parse(cleanJsonText(text));
   } catch {
-    console.log(`[daily-trends] Repairing JSON for ${label}...`);
-    // If text looks like plain content (starts with letter/number, not { or [), wrap it
-    const trimmed = text.trim();
-    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
-      // Try to extract body field if it exists
-      const bodyMatch = trimmed.match(/["']body["']\s*:\s*["']([^"']+)["']/i);
-      if (bodyMatch) {
-        return { body: bodyMatch[1] };
-      }
-      // Otherwise assume entire text is the body content
-      console.log(
-        `[daily-trends] Wrapping plain text as JSON body for ${label}`,
-      );
-      return { body: trimmed };
-    }
-    const repaired = await callAi(
-      "JSON Repairer.",
-      `Return only valid JSON based on this: ${text}`,
-      { temperature: 0 },
+    console.log(
+      `[daily-trends] JSON parse failed for ${label}, attempting repair...`,
     );
+  }
+
+  // Attempt 2: Handle plain text (wrap as body)
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    const bodyMatch = trimmed.match(/["']body["']\s*:\s*["']([^"']+)["']/i);
+    if (bodyMatch) {
+      console.log(
+        `[daily-trends] Extracted body field from plain text for ${label}`,
+      );
+      return { body: bodyMatch[1] };
+    }
+    console.log(`[daily-trends] Wrapping plain text as JSON body for ${label}`);
+    return { body: trimmed };
+  }
+
+  // Attempt 3: Strip markdown code blocks and retry
+  const withoutCodeBlocks = trimmed
+    .replace(/^```json\s*/i, "")
+    .replace(/\s*```$/, "");
+  if (withoutCodeBlocks !== trimmed) {
     try {
-      return JSON.parse(cleanJsonText(repaired));
+      const parsed = JSON.parse(cleanJsonText(withoutCodeBlocks));
+      console.log(
+        `[daily-trends] JSON repair succeeded (code block removed) for ${label}`,
+      );
+      return parsed;
     } catch {
-      console.warn(`[daily-trends] JSON repair still invalid for ${label}, returning fallback`);
-      return { body: text.trim() };
+      // Continue to next repair attempt
     }
   }
+
+  // Attempt 4-5: AI repair with different prompts
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const repairPrompt =
+      attempt === 1
+        ? `Fix this JSON to make it valid. Output ONLY the fixed JSON, no explanations:\n\n${text}`
+        : `Extract the JSON object from this text. Remove any markdown formatting, comments, or extra text. Output ONLY valid JSON:\n\n${text}`;
+
+    try {
+      const repaired = await callAi(
+        "JSON Repair Expert. You fix malformed JSON and output ONLY valid JSON.",
+        repairPrompt,
+        { temperature: 0, maxTokens: 2000 },
+      );
+      const parsed = JSON.parse(cleanJsonText(repaired));
+      console.log(
+        `[daily-trends] JSON repair succeeded (attempt ${attempt}) for ${label}`,
+      );
+      return parsed;
+    } catch {
+      console.log(
+        `[daily-trends] JSON repair attempt ${attempt} failed for ${label}`,
+      );
+    }
+  }
+
+  // Final fallback
+  console.warn(
+    `[daily-trends] All JSON repair attempts failed for ${label}, returning fallback`,
+  );
+  return { body: text.trim() };
 }

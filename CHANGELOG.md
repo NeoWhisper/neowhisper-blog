@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.2...v1.14.3) (2026-04-15)
+
+
+### Bug Fixes
+
+* **workflow:** change pull_request_target to pull_request for security ([#147](https://github.com/NeoWhisper/neowhisper-blog/issues/147)) ([67b2b1a](https://github.com/NeoWhisper/neowhisper-blog/commit/67b2b1a13c5a23e9d5031906788c35a842398ee3))
+
 ## [1.14.2](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.1...v1.14.2) (2026-03-27)
 
 

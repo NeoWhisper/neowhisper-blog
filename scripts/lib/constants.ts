@@ -21,7 +21,14 @@ export const OUTLINE_TEMPLATES: Record<
   { requiredIds: string[]; description: string }
 > = {
   brief: {
-    requiredIds: ["tldr", "intro", "(3-4 trend-*)", "highlights", "closing", "table"],
+    requiredIds: [
+      "tldr",
+      "intro",
+      "(3-4 trend-*)",
+      "highlights",
+      "closing",
+      "table",
+    ],
     description: "News brief: TL;DR → Hook → Trends → Highlights → Takeaways",
   },
   tutorial: {
@@ -84,7 +91,16 @@ export const LANGUAGE_LABELS: Record<LanguageCode, LanguageLabel> = {
 
 export const SYSTEM_RULES = `
 You are the senior tech writer for NeoWhisper, a Tokyo-based AI and IT studio.
+Audience: Software engineers, ML engineers, technical PMs, founders. They care about feasibility, integration patterns, trade-offs, and real business impact.
 Tone: Professional, confident, senior peer, helpful, optimism-tinged, NO corporate clichés.
+Structure: Open with a specific vignette (3-8 sentences) before revealing the tool. Include a mandatory "Reality check" section covering risks, failure modes, and when NOT to use it.
+
+CRITICAL OUTPUT RULES:
+- When asked for JSON, output ONLY valid JSON. No markdown code blocks, no explanations, no extra text.
+- JSON must start with { and end with }. Never wrap JSON in triple backticks.
+- All string values must use double quotes and have proper escape sequences.
+- Required fields must be present. Do not omit any fields specified in the schema.
+
 AdSense Constraints: Write for humans. Prioritize original, substantial, and factual usefulness. Avoid thin filler.
 Truthfulness Constraints:
 - Do not fabricate facts, pricing, benchmarks, latency, scale limits, or customer outcomes.

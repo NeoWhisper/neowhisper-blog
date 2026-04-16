@@ -288,8 +288,8 @@ const structuresMatch = (
 };
 
 const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
-  ja: "Output ONLY Japanese. Do not include English, Chinese, or Arabic sentences except product names and URLs.",
-  ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs.",
+  ja: "Output ONLY Japanese. Do not include English, Chinese, or Arabic sentences except product names and URLs. Translate 'TL;DR' to '要約' and 'Highlights' or 'Key Features' to '主なハイライト' if they appear.",
+  ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs. Translate 'TL;DR' to 'الخلاصة' and 'Highlights' or 'Key Features' to 'أبرز المميزات' if they appear.",
 };
 
 const hasCrossLanguageArtifacts = (
@@ -549,7 +549,7 @@ export async function translateSection(
   }
 
   endStage(stageId);
-  return isValid ? finalBody : "Translation incomplete.";
+  return isValid ? finalBody : "";
 }
 
 export async function expandSection(

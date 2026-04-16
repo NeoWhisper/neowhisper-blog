@@ -308,15 +308,6 @@ export default function BlogPostTemplate({
                 {title}
               </h1>
 
-              {/* Author byline — E-E-A-T signal for Google AdSense review */}
-              <p className={`mb-6 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? "text-right" : "text-left"}`}>
-                <Link
-                  href={currentLang === "en" ? "/about" : `/about?lang=${currentLang}`}
-                  className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors hover:underline"
-                >
-                  {authorName}
-                </Link>
-              </p>
 
               {/* Metadata */}
               <div

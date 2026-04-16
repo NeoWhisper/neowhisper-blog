@@ -220,7 +220,7 @@ export default function BlogPostTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8" lang={currentLang}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <ScrollProgress />
       <StickyToc isRTL={isRTL} />
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
@@ -241,7 +241,7 @@ export default function BlogPostTemplate({
             />
           </div>
 
-          <article className="max-w-3xl mx-auto w-full">
+          <article className="max-w-3xl mx-auto w-full" lang={currentLang}>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -312,7 +312,7 @@ export default function BlogPostTemplate({
               <p className={`mb-6 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? "text-right" : "text-left"}`}>
                 <Link
                   href={currentLang === "en" ? "/about" : `/about?lang=${currentLang}`}
-                  className="font-medium text-purple-600 dark:text-purple-400 hover:underline"
+                  className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors hover:underline"
                 >
                   {authorName}
                 </Link>

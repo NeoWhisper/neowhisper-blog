@@ -9,9 +9,11 @@
  * sufficient depth are indexed and surfaced to AdSense reviewers.
  */
 
-export const BRIEF_NOINDEX_MIN_WORDS = Number.parseInt(
-  process.env.BRIEF_NOINDEX_MIN_WORDS ?? "800",
-  10,
+// Emits noindex and excludes from sitemap if word count is below this threshold.
+// We enforce a hard floor of 450 words, but prefer the env-configured threshold.
+export const EFFECTIVE_BRIEF_NOINDEX_THRESHOLD = Math.max(
+  450,
+  Number.parseInt(process.env.BRIEF_NOINDEX_MIN_WORDS ?? "800", 10)
 );
 
 /**
@@ -19,7 +21,10 @@ export const BRIEF_NOINDEX_MIN_WORDS = Number.parseInt(
  * For Japanese slugs, uses character-based estimation (≈ 2.5 chars / word-equivalent).
  */
 export function countPostWords(slug: string, content: string): number {
-  const cleanContent = content
+  // Strip YAML frontmatter before counting to prevent inflated word counts
+  const contentWithoutFrontmatter = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "");
+
+  const cleanContent = contentWithoutFrontmatter
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ")
@@ -39,6 +44,9 @@ export function countPostWords(slug: string, content: string): number {
 export function isLowValueBriefPost(slug: string, content: string): boolean {
   const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
   if (!isBrief) return false;
+  
   const wordCount = countPostWords(slug, content);
-  return wordCount < Math.max(450, BRIEF_NOINDEX_MIN_WORDS);
+  
+  // Business rule: sub-threshold AI trend brief posts should not be indexed.
+  return wordCount < EFFECTIVE_BRIEF_NOINDEX_THRESHOLD;
 }

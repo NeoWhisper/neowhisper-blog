@@ -220,7 +220,7 @@ export default function BlogPostTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8" lang={currentLang}>
       <ScrollProgress />
       <StickyToc isRTL={isRTL} />
       <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
@@ -304,9 +304,19 @@ export default function BlogPostTemplate({
                 />
               </div>
 
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-8 mt-4 leading-tight">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 mt-4 leading-tight">
                 {title}
               </h1>
+
+              {/* Author byline — E-E-A-T signal for Google AdSense review */}
+              <p className={`mb-6 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? "text-right" : "text-left"}`}>
+                <Link
+                  href={currentLang === "en" ? "/about" : `/about?lang=${currentLang}`}
+                  className="font-medium text-purple-600 dark:text-purple-400 hover:underline"
+                >
+                  {authorName}
+                </Link>
+              </p>
 
               {/* Metadata */}
               <div

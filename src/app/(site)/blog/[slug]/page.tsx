@@ -8,6 +8,7 @@ import {
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
 import { getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
+import { isLowValueBriefPost } from "@/lib/brief-quality";
 
 const baseUrl = SITE_URL;
 
@@ -20,32 +21,8 @@ interface PageProps {
   }>;
 }
 
-const BRIEF_NOINDEX_MIN_WORDS = Number.parseInt(
-  process.env.BRIEF_NOINDEX_MIN_WORDS ?? "650",
-  10,
-);
-
-function countPostWords(slug: string, content: string): number {
-  const cleanContent = content
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/<[^>]+>/g, " ")
-    .trim();
-
-  if (slug.endsWith("-ja")) {
-    return Math.round(cleanContent.length / 2.5);
-  }
-
-  return cleanContent.split(/\s+/).filter(Boolean).length;
-}
-
-function isLowValueBriefPost(slug: string, content: string): boolean {
-  const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
-  if (!isBrief) return false;
-
-  const wordCount = countPostWords(slug, content);
-  return wordCount < Math.max(450, BRIEF_NOINDEX_MIN_WORDS);
-}
+// Word-count threshold and detection logic are centralised in @/lib/brief-quality
+// so that sitemap.ts and this page stay in sync without circular imports.
 
 function resolveLanguage(slug: string, lang?: string | null): SupportedLang {
   if (lang) return normalizeLang(lang);

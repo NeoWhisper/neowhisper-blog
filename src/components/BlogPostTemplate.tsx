@@ -241,7 +241,7 @@ export default function BlogPostTemplate({
             />
           </div>
 
-          <article className="max-w-3xl mx-auto w-full">
+          <article className="max-w-3xl mx-auto w-full" lang={currentLang}>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -304,9 +304,10 @@ export default function BlogPostTemplate({
                 />
               </div>
 
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-8 mt-4 leading-tight">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 mt-4 leading-tight">
                 {title}
               </h1>
+
 
               {/* Metadata */}
               <div

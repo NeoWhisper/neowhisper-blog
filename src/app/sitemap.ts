@@ -3,6 +3,7 @@ import { getPosts, getBaseSlug } from "@/lib/posts";
 import { categories as canonicalCategories } from "@/lib/categories";
 import { getHybridSitemapBlogEntries } from "@/lib/posts-hybrid";
 import { SITE_URL } from "@/lib/site-config";
+import { isLowValueBriefPost } from "@/lib/brief-quality";
 
 const baseUrl = SITE_URL;
 
@@ -58,7 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const posts = getPosts().filter((post) => getBaseSlug(post.slug) !== "welcome");
+  // Exclude sub-threshold brief posts from the sitemap: they are served with
+  // noindex headers, so including them wastes crawl budget and signals thin
+  // content to Google — a primary cause of the AdSense rejection.
+  const posts = getPosts()
+    .filter((post) => getBaseSlug(post.slug) !== "welcome")
+    .filter((post) => !isLowValueBriefPost(post.slug, post.content));
 
   // Build a union of category slugs derived from posts and the canonical
   // categories mapping. We intentionally only include categories that

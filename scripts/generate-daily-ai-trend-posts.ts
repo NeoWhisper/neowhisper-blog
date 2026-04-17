@@ -76,6 +76,7 @@ const yamlString = (value: unknown): string => {
   return json.slice(1, -1);
 };
 
+
 const headingToAnchor = (text: string): string => slugify(text);
 
 const createShouldExcludeHeading =
@@ -94,7 +95,7 @@ const createGenerateToc = (excludedHeadings: string[]) => {
       .filter((h) => !shouldExclude(h.text))
       .map((h) => ({
         ...h,
-        anchor: slugify(h.text),
+        anchor: headingToAnchor(h.text),
       }));
 
     if (headings.length === 0) return "";

@@ -22,9 +22,17 @@ function oldLogic(text: string, lang: string): string {
   return text.replace(/\s+/g, "-");
 }
 
+interface DriftItem {
+  file: string;
+  lang: string;
+  heading: string;
+  oldVal: string;
+  newVal: string;
+}
+
 async function runAudit() {
   const files = await fs.readdir(POSTS_DIR);
-  const drift: any[] = [];
+  const drift: DriftItem[] = [];
 
   for (const file of files) {
     if (!file.endsWith(".mdx")) continue;

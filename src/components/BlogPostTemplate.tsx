@@ -18,6 +18,7 @@ import { StickyToc } from "@/components/StickyToc";
 import { ShareSocial } from "@/components/ShareSocial";
 import { ImageZoom } from "@/components/ImageZoom";
 import { slugify } from "@/lib/slugs";
+import { SnapResolver } from "./SnapResolver";
 
 const siteUrl = SITE_URL;
 
@@ -94,15 +95,15 @@ function stripLeadingDuplicateTitleHeading(mdxSource: string, title: string): st
   const escapedTitle = title
     .trim()
     .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  
+
   // 1. Strip exact "# Title" match
   const duplicateHeadingPattern = new RegExp(`^#\\s+${escapedTitle}\\s*\\n+`, "i");
   let cleaned = mdxSource.replace(duplicateHeadingPattern, "");
-  
+
   // 2. Strip "TITLE: Article Title" or "Title: Article Title" artifacts
   const titleArtifactPattern = new RegExp(`^TITLE:\\s*${escapedTitle}\\s*\\n+`, "i");
   cleaned = cleaned.replace(titleArtifactPattern, "");
-  
+
   // 3. Strip generic "TITLE AI IT Trends..." artifact mentioned in audit
   const genericTitleArtifact = /^TITLE\s+AI\s+IT\s+Trends.*?\n+/i;
   cleaned = cleaned.replace(genericTitleArtifact, "");
@@ -166,6 +167,7 @@ export default function BlogPostTemplate({
     (slug
       ? `${siteUrl}/blog/${encodeURIComponent(slug)}`
       : `${siteUrl}/blog`);
+
   const blogHomeUrl =
     currentLang === "en" ? `${siteUrl}/blog` : `${siteUrl}/blog?lang=${currentLang}`;
   const categoryUrl = category ? `${siteUrl}${getCategoryUrl(category, currentLang)}` : undefined;
@@ -246,6 +248,7 @@ export default function BlogPostTemplate({
           </div>
 
           <article className="max-w-3xl mx-auto w-full" lang={currentLang}>
+            <SnapResolver />
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}

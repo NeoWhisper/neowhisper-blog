@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import rehypeHighlight from "rehype-highlight";
@@ -17,24 +17,11 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { StickyToc } from "@/components/StickyToc";
 import { ShareSocial } from "@/components/ShareSocial";
 import { ImageZoom } from "@/components/ImageZoom";
-import { slugify } from "@/lib/slugs";
 import { SnapResolver } from "./SnapResolver";
+import { headingToId, stripLeadingDuplicateTitleHeading, flattenText } from "@/lib/headings";
 
 const siteUrl = SITE_URL;
 
-function flattenText(node: ReactNode): string {
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(flattenText).join("");
-  if (node && typeof node === "object" && "props" in node) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return flattenText((node as any).props?.children);
-  }
-  return "";
-}
-
-function headingToId(value: ReactNode): string {
-  return slugify(flattenText(value));
-}
 
 function getCategoryUrl(category: string, lang: string): string {
   const slug = buildCategorySlug(category);
@@ -91,25 +78,6 @@ function estimateWordCount(mdxSource: string): number {
   return plain ? plain.split(" ").length : 0;
 }
 
-function stripLeadingDuplicateTitleHeading(mdxSource: string, title: string): string {
-  const escapedTitle = title
-    .trim()
-    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  // 1. Strip exact "# Title" match
-  const duplicateHeadingPattern = new RegExp(`^#\\s+${escapedTitle}\\s*\\n+`, "i");
-  let cleaned = mdxSource.replace(duplicateHeadingPattern, "");
-
-  // 2. Strip "TITLE: Article Title" or "Title: Article Title" artifacts
-  const titleArtifactPattern = new RegExp(`^TITLE:\\s*${escapedTitle}\\s*\\n+`, "i");
-  cleaned = cleaned.replace(titleArtifactPattern, "");
-
-  // 3. Strip generic "TITLE AI IT Trends..." artifact mentioned in audit
-  const genericTitleArtifact = /^TITLE\s+AI\s+IT\s+Trends.*?\n+/i;
-  cleaned = cleaned.replace(genericTitleArtifact, "");
-
-  return cleaned;
-}
 
 function isLowValueBriefSlug(slug?: string): boolean {
   if (!slug) return false;

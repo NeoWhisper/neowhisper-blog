@@ -9,6 +9,18 @@ author:
   picture: "/images/author.png"
 ---
 
+## Table of Contents
+
+- [Why "Local OK, Production Broken" Happens](#why-local-ok-production-broken-happens)
+- [Step 1: Measure Blast Radius with Route Probes](#step-1-measure-blast-radius-with-route-probes)
+- [Step 2: Reproduce in True Production Mode Locally](#step-2-reproduce-in-true-production-mode-locally)
+- [Step 3: Suspect Top-Level Imports in Failing Route Modules](#step-3-suspect-top-level-imports-in-failing-route-modules)
+- [Step 4: Prevent Cascading Failures in Error Paths](#step-4-prevent-cascading-failures-in-error-paths)
+- [Step 5: Add Deployment Smoke Checks](#step-5-add-deployment-smoke-checks)
+- [Production Debugging Checklist](#production-debugging-checklist)
+
+---
+
 Your app works perfectly on localhost. You deploy. A route returns `500`.
 
 This is one of the most common and frustrating failure modes in modern web apps, especially with server-rendered routes in Next.js App Router.

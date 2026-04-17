@@ -9,6 +9,20 @@ author:
   picture: "/images/author.png"
 ---
 
+## Table of Contents
+
+- [1. Start With an Explicit Threat Surface](#1-start-with-an-explicit-threat-surface)
+- [2. Roll Out CSP in Phases, Not All at Once](#2-roll-out-csp-in-phases-not-all-at-once)
+- [3. Treat CORS on Metadata Routes as a Security Detail](#3-treat-cors-on-metadata-routes-as-a-security-detail)
+- [4. Separate Compatibility Relaxations From Core Security](#4-separate-compatibility-relaxations-from-core-security)
+- [5. Harden Trust Pages and Operational Signals](#5-harden-trust-pages-and-operational-signals)
+- [6. Add Post-Deploy Security Smoke Checks](#6-add-post-deploy-security-smoke-checks)
+- [7. Recommended Baseline for Next.js on Vercel](#7-recommended-baseline-for-next-js-on-vercel)
+- [Common Mistakes We Stopped Making](#common-mistakes-we-stopped-making)
+- [Final Checklist](#final-checklist)
+
+---
+
 Security advice is easy to repeat and hard to apply.
 
 Most teams don't fail because they don't know what CSP or CORS is. They fail because they change too many things at once, break production, then roll everything back.

@@ -10,6 +10,7 @@ import path from "node:path";
 import process from "node:process";
 import { z } from "zod";
 import { tocConfig } from "./config/toc-config";
+import { slugify } from "../src/lib/slugs";
 
 import {
   API_BASE_URL,
@@ -75,13 +76,8 @@ const yamlString = (value: unknown): string => {
   return json.slice(1, -1);
 };
 
-const headingToAnchor = (text: string): string =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+
+const headingToAnchor = (text: string): string => slugify(text);
 
 const createShouldExcludeHeading =
   (excludedHeadings: string[]) => (text: string) =>
@@ -89,18 +85,27 @@ const createShouldExcludeHeading =
 
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
-  return (markdownBody: string, tocHeading: string, lang: string): string => {
-    const headings = [...markdownBody.matchAll(/^##\s+(.+)$/gm)]
-      .map((match: RegExpMatchArray) => (match[1] ?? "").trim())
-      .filter((text) => !shouldExclude(text))
-      .map((text) => ({
-        text,
-        anchor: lang === "en" ? headingToAnchor(text) : text.replace(/\s+/g, "-"),
+  return (markdownBody: string, tocHeading: string): string => {
+    // Match H2 and H3 headings
+    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+(.+)$/gm)]
+      .map((match: RegExpMatchArray) => ({
+        depth: match[1].length,
+        text: (match[2] ?? "").trim(),
+      }))
+      .filter((h) => !shouldExclude(h.text))
+      .map((h) => ({
+        ...h,
+        anchor: headingToAnchor(h.text),
       }));
 
-    return headings.length === 0
-      ? ""
-      : `${tocHeading}\n\n${headings.map((h) => `- [${h.text}](#${h.anchor})`).join("\n")}\n\n---\n\n`;
+    if (headings.length === 0) return "";
+
+    const tocLines = headings.map((h) => {
+      const indent = h.depth === 3 ? "  " : "";
+      return `${indent}- [${h.text}](#${h.anchor})`;
+    });
+
+    return `${tocHeading}\n\n${tocLines.join("\n")}\n\n---\n\n`;
   };
 };
 
@@ -501,7 +506,7 @@ async function main() {
       const finalBody = sanitizeGeneratedMarkdown(
         Object.values(localized.sections).join("\n\n"),
       );
-      const toc = generateToc(finalBody, meta.tocHeading, lang);
+      const toc = generateToc(finalBody, meta.tocHeading);
       const fallbackTitle = normalizeMetadataText(
         content.en.title,
         "Daily AI Trend Brief",

@@ -76,12 +76,17 @@ const yamlString = (value: unknown): string => {
 };
 
 const headingToAnchor = (text: string): string =>
+  // Match frontend headingToId logic exactly for case-insensitive, punctuation-stripped, hyphenated IDs
   text
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
+    .trim()
+    .replace(/[`"'’“”]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/^-|-$/g, "") || "section";
 
 const createShouldExcludeHeading =
   (excludedHeadings: string[]) => (text: string) =>
@@ -90,17 +95,26 @@ const createShouldExcludeHeading =
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
   return (markdownBody: string, tocHeading: string, lang: string): string => {
-    const headings = [...markdownBody.matchAll(/^##\s+(.+)$/gm)]
-      .map((match: RegExpMatchArray) => (match[1] ?? "").trim())
-      .filter((text) => !shouldExclude(text))
-      .map((text) => ({
-        text,
-        anchor: lang === "en" ? headingToAnchor(text) : text.replace(/\s+/g, "-"),
+    // Match H2 and H3 headings
+    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+(.+)$/gm)]
+      .map((match: RegExpMatchArray) => ({
+        depth: match[1].length,
+        text: (match[2] ?? "").trim(),
+      }))
+      .filter((h) => !shouldExclude(h.text))
+      .map((h) => ({
+        ...h,
+        anchor: headingToAnchor(h.text),
       }));
 
-    return headings.length === 0
-      ? ""
-      : `${tocHeading}\n\n${headings.map((h) => `- [${h.text}](#${h.anchor})`).join("\n")}\n\n---\n\n`;
+    if (headings.length === 0) return "";
+
+    const tocLines = headings.map((h) => {
+      const indent = h.depth === 3 ? "  " : "";
+      return `${indent}- [${h.text}](#${h.anchor})`;
+    });
+
+    return `${tocHeading}\n\n${tocLines.join("\n")}\n\n---\n\n`;
   };
 };
 

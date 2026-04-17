@@ -10,6 +10,7 @@ import path from "node:path";
 import process from "node:process";
 import { z } from "zod";
 import { tocConfig } from "./config/toc-config";
+import { slugify } from "../src/lib/slugs";
 
 import {
   API_BASE_URL,
@@ -75,18 +76,7 @@ const yamlString = (value: unknown): string => {
   return json.slice(1, -1);
 };
 
-const headingToAnchor = (text: string): string =>
-  // Match frontend headingToId logic exactly for case-insensitive, punctuation-stripped, hyphenated IDs
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[`"'’“”]/g, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\s/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "") || "section";
+const headingToAnchor = (text: string): string => slugify(text);
 
 const createShouldExcludeHeading =
   (excludedHeadings: string[]) => (text: string) =>
@@ -94,7 +84,7 @@ const createShouldExcludeHeading =
 
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
-  return (markdownBody: string, tocHeading: string, lang: string): string => {
+  return (markdownBody: string, tocHeading: string): string => {
     // Match H2 and H3 headings
     const headings = [...markdownBody.matchAll(/^(#{2,3})\s+(.+)$/gm)]
       .map((match: RegExpMatchArray) => ({
@@ -104,7 +94,7 @@ const createGenerateToc = (excludedHeadings: string[]) => {
       .filter((h) => !shouldExclude(h.text))
       .map((h) => ({
         ...h,
-        anchor: headingToAnchor(h.text),
+        anchor: slugify(h.text),
       }));
 
     if (headings.length === 0) return "";
@@ -515,7 +505,7 @@ async function main() {
       const finalBody = sanitizeGeneratedMarkdown(
         Object.values(localized.sections).join("\n\n"),
       );
-      const toc = generateToc(finalBody, meta.tocHeading, lang);
+      const toc = generateToc(finalBody, meta.tocHeading);
       const fallbackTitle = normalizeMetadataText(
         content.en.title,
         "Daily AI Trend Brief",

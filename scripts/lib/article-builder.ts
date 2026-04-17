@@ -447,6 +447,7 @@ Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
 
 CRITICAL: You are generating ONLY the content for the section [${section.id}].
 DO NOT generate the entire article. DO NOT generate content for other sections in the outline.
+DO NOT repeat the article title or generate a "TITLE" line at the start of the section.
 If you generate the whole article, the build will fail. ONLY write the section [${section.id}]!
 
 Generate about ${section.targetWordCount} words of detailed technical content.

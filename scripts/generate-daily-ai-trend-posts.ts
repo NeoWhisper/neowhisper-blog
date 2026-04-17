@@ -95,7 +95,7 @@ const createGenerateToc = (excludedHeadings: string[]) => {
       .filter((text) => !shouldExclude(text))
       .map((text) => ({
         text,
-        anchor: lang === "en" ? headingToAnchor(text) : text,
+        anchor: lang === "en" ? headingToAnchor(text) : text.replace(/\s+/g, "-"),
       }));
 
     return headings.length === 0

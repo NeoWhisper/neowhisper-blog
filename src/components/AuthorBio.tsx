@@ -19,7 +19,7 @@ interface AuthorContent {
 
 const content: Record<string, AuthorContent> = {
   en: {
-    title: "About the Author",
+    title: "About NeoWhisper",
     bio: "NeoWhisper is a registered IT services business in Tokyo. We provide software development, game development, app development, web/content production, and translation services for global clients.",
     expertise:
       "Expertise: Next.js • TypeScript • React • Node.js • Multilingual Sites • SEO • Performance Optimization",
@@ -33,7 +33,7 @@ const content: Record<string, AuthorContent> = {
     ],
   },
   ja: {
-    title: "著者について",
+    title: "NeoWhisperについて",
     bio: "NeoWhisperは東京都港区を拠点とする個人事業主です。税務署へ開業届を提出済みで、ソフトウェア開発・ゲーム開発・アプリ開発・Web/コンテンツ制作・翻訳サービスを提供しています。",
     expertise:
       "専門分野: Next.js • TypeScript • React • Node.js • 多言語サイト • SEO • パフォーマンス最適化",
@@ -47,7 +47,7 @@ const content: Record<string, AuthorContent> = {
     ],
   },
   ar: {
-    title: "عن المؤلف",
+    title: "عن NeoWhisper",
     bio: "نيو ويسبر نشاط خدمات تقنية معلومات مسجل في طوكيو. نقدم تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب/المحتوى والترجمة لعملاء من أسواق مختلفة.",
     expertise:
       "الخبرة: Next.js • TypeScript • React • Node.js • مواقع متعددة اللغات • SEO • تحسين الأداء",

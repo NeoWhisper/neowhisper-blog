@@ -62,6 +62,7 @@ src/lib/keyword-research.ts
 # Security audit reports (contains vulnerability details - keep private until fixed)
 AUDIT_REPORT.md
 IMMEDIATE_ACTIONS.md
+/AUDIT_REPORTS
 
 # Business strategy and planning (keep private for competitive advantage)
 TODO.md

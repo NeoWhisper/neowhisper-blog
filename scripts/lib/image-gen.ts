@@ -6,7 +6,7 @@ import {
   OLLAMA_IMAGE_MODEL,
   MFLUX_MODEL,
   LM_STUDIO_IMAGE_URL,
-  API_BASE_URL,
+  OLLAMA_BASE_URL,
 } from "./config";
 import { startStage, endStage } from "./metrics";
 
@@ -45,31 +45,26 @@ async function generateWithOllama(
   prompt: string,
   model: string,
 ): Promise<Buffer | null> {
-  const ollamaUrl = API_BASE_URL.replace("/v1", "").replace(/\/+$/, "");
+  const ollamaUrl = OLLAMA_BASE_URL;
 
   try {
     const response = await fetch(`${ollamaUrl}/api/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model,
-        prompt,
-        stream: false,
-      }),
+      body: JSON.stringify({ model, prompt, stream: false }),
     });
 
+    // Guard: HTTP error (early return)
     if (!response.ok) {
       console.warn(`[image-gen] Ollama API error: ${response.status}`);
       return null;
     }
 
+    // Functional extraction with optional chaining
     const data = (await response.json()) as OllamaImageResponse;
+    const firstImage = data.images?.[0];
 
-    if (data.images && data.images.length > 0) {
-      return Buffer.from(data.images[0], "base64");
-    }
-
-    return null;
+    return firstImage ? Buffer.from(firstImage, "base64") : null;
   } catch (error) {
     console.warn("[image-gen] Failed to generate image:", error);
     return null;
@@ -110,16 +105,15 @@ async function generateWithMflux(
       stderr += data.toString();
     });
 
+    // Functional result extraction (ternary over if-else)
     proc.on("close", (code) => {
-      if (code === 0) {
-        console.log(`[image-gen] mflux completed: ${outputPath}`);
-        resolve(true);
-      } else {
-        console.warn(
-          `[image-gen] mflux failed (code ${code}): ${stderr.slice(0, 200)}`,
-        );
-        resolve(false);
-      }
+      const success = code === 0;
+      console[success ? "log" : "warn"](
+        success
+          ? `[image-gen] mflux completed: ${outputPath}`
+          : `[image-gen] mflux failed (code ${code}): ${stderr.slice(0, 200)}`,
+      );
+      resolve(success);
     });
 
     proc.on("error", (err) => {
@@ -135,13 +129,14 @@ async function generateWithLMStudio(
   outputPath: string,
 ): Promise<boolean> {
   try {
-    const normalizedUrl =
-      lmStudioUrl.replace(/\/+$/, "").replace(/\/v1$/, "") + "/v1";
-    console.log(
-      `[image-gen] Calling LM Studio at ${normalizedUrl}/images/generations`,
-    );
+    const baseUrl = lmStudioUrl.replace(/\/+$/, "");
+    const finalEndpoint = baseUrl.endsWith("/images/generations")
+      ? baseUrl
+      : `${baseUrl.replace(/\/v1$/, "")}/v1/images/generations`;
 
-    const response = await fetch(`${normalizedUrl}/images/generations`, {
+    console.log(`[image-gen] Calling LM Studio at ${finalEndpoint}`);
+
+    const response = await fetch(finalEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -154,6 +149,7 @@ async function generateWithLMStudio(
       }),
     });
 
+    // Guard: HTTP error (early return)
     if (!response.ok) {
       console.warn(
         `[image-gen] LM Studio API error: ${response.status} ${response.statusText}`,
@@ -161,20 +157,18 @@ async function generateWithLMStudio(
       return false;
     }
 
+    // Functional extraction with optional chaining
     const data = (await response.json()) as {
       data?: Array<{ b64_json: string }>;
     };
-    if (data.data && data.data[0]?.b64_json) {
-      await fs.writeFile(
-        outputPath,
-        Buffer.from(data.data[0].b64_json, "base64"),
-      );
-      console.log(`[image-gen] LM Studio completed: ${outputPath}`);
-      return true;
-    }
+    const b64Image = data.data?.[0]?.b64_json;
 
-    console.warn("[image-gen] LM Studio returned no image data");
-    return false;
+    // Guard: No image data (early return)
+    if (!b64Image) return false;
+
+    await fs.writeFile(outputPath, Buffer.from(b64Image, "base64"));
+    console.log(`[image-gen] LM Studio completed: ${outputPath}`);
+    return true;
   } catch (error) {
     console.warn("[image-gen] LM Studio request failed:", error);
     return false;
@@ -186,18 +180,35 @@ export async function generateCoverImage(
   excerpt: string,
   dateString: string,
 ): Promise<string | null> {
-  // Priority: mflux > LM Studio > Ollama
-  const mfluxModel = MFLUX_MODEL;
-  const lmStudioUrl = LM_STUDIO_IMAGE_URL;
-  const ollamaModel = OLLAMA_IMAGE_MODEL;
+  // Priority configuration: data over control flow (DeMarco)
+  const generators = [
+    {
+      name: "mflux",
+      enabled: Boolean(MFLUX_MODEL?.trim()),
+      generate: async (prompt: string, filePath: string) =>
+        generateWithMflux(prompt, MFLUX_MODEL!, filePath),
+    },
+    {
+      name: "LM Studio",
+      enabled: Boolean(LM_STUDIO_IMAGE_URL?.trim()),
+      generate: async (prompt: string, filePath: string) =>
+        generateWithLMStudio(prompt, LM_STUDIO_IMAGE_URL!, filePath),
+    },
+    {
+      name: "ollama",
+      enabled: Boolean(OLLAMA_IMAGE_MODEL?.trim()),
+      generate: async (prompt: string, filePath: string) => {
+        const buffer = await generateWithOllama(prompt, OLLAMA_IMAGE_MODEL!);
+        if (buffer) await fs.writeFile(filePath, buffer);
+        return Boolean(buffer);
+      },
+    },
+  ] as const;
 
-  if (
-    (!mfluxModel || mfluxModel.trim() === "") &&
-    (!lmStudioUrl || lmStudioUrl.trim() === "") &&
-    (!ollamaModel || ollamaModel.trim() === "")
-  ) {
+  // Guard: No generators configured
+  if (!generators.some((g) => g.enabled)) {
     console.log(
-      "[image-gen] No image model configured (MFLUX_MODEL, LM_STUDIO_IMAGE_URL or OLLAMA_IMAGE_MODEL), skipping cover generation",
+      "[image-gen] No image model configured, skipping cover generation",
     );
     return null;
   }
@@ -212,36 +223,25 @@ export async function generateCoverImage(
     const filename = `${dateString}-${baseName}.png`;
     const filePath = path.join(IMAGES_DIR, filename);
 
-    // Try mflux first if configured
-    if (mfluxModel && mfluxModel.trim() !== "") {
-      const success = await generateWithMflux(prompt, mfluxModel, filePath);
+    // Data-driven iteration over generators (functional, not nested ifs)
+    for (let i = 0; i < generators.length; i++) {
+      const generator = generators[i];
+      if (!generator.enabled) continue;
+
+      const success = await generator.generate(prompt, filePath);
+
       if (success) {
-        console.log(`[image-gen] Saved cover image (mflux): ${filename}`);
+        console.log(
+          `[image-gen] Saved cover image (${generator.name}): ${filename}`,
+        );
         endStage(stage, true);
         return `/images/${filename}`;
       }
-      console.warn("[image-gen] mflux failed, falling back to LM Studio");
-    }
 
-    // Try LM Studio if configured
-    if (lmStudioUrl && lmStudioUrl.trim() !== "") {
-      const success = await generateWithLMStudio(prompt, lmStudioUrl, filePath);
-      if (success) {
-        console.log(`[image-gen] Saved cover image (LM Studio): ${filename}`);
-        endStage(stage, true);
-        return `/images/${filename}`;
-      }
-      console.warn("[image-gen] LM Studio failed, falling back to Ollama");
-    }
-
-    // Fallback to Ollama if configured
-    if (ollamaModel && ollamaModel.trim() !== "") {
-      const imageBuffer = await generateWithOllama(prompt, ollamaModel);
-      if (imageBuffer) {
-        await fs.writeFile(filePath, imageBuffer);
-        console.log(`[image-gen] Saved cover image (ollama): ${filename}`);
-        endStage(stage, true);
-        return `/images/${filename}`;
+      // Log fallback only if there's a next enabled generator
+      const nextEnabled = generators.slice(i + 1).some((g) => g.enabled);
+      if (nextEnabled) {
+        console.warn(`[image-gen] ${generator.name} failed, trying next...`);
       }
     }
 

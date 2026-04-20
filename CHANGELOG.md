@@ -1,3 +1,11 @@
+# [1.15.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.4...v1.15.0) (2026-04-20)
+
+
+### Features
+
+* **adsense:** add AI assistance disclosure to editorial policy ([f50a1cb](https://github.com/NeoWhisper/neowhisper-blog/commit/f50a1cb4d82b156a6bbe6e1d28fb047d3b67d892))
+* Content Quality Metrics & Audit Trail ([#157](https://github.com/NeoWhisper/neowhisper-blog/issues/157)) ([fb9d023](https://github.com/NeoWhisper/neowhisper-blog/commit/fb9d0235595a61fad7b57e3cd39c70d3c9c4156c)), closes [#59](https://github.com/NeoWhisper/neowhisper-blog/issues/59) [#61](https://github.com/NeoWhisper/neowhisper-blog/issues/61) [#72](https://github.com/NeoWhisper/neowhisper-blog/issues/72) [#74](https://github.com/NeoWhisper/neowhisper-blog/issues/74) [#75](https://github.com/NeoWhisper/neowhisper-blog/issues/75) [hi#quality](https://github.com/hi/issues/quality) [#79](https://github.com/NeoWhisper/neowhisper-blog/issues/79) [#82](https://github.com/NeoWhisper/neowhisper-blog/issues/82) [#86](https://github.com/NeoWhisper/neowhisper-blog/issues/86) [#89](https://github.com/NeoWhisper/neowhisper-blog/issues/89) [#99](https://github.com/NeoWhisper/neowhisper-blog/issues/99) [#100](https://github.com/NeoWhisper/neowhisper-blog/issues/100) [#101](https://github.com/NeoWhisper/neowhisper-blog/issues/101) [#103](https://github.com/NeoWhisper/neowhisper-blog/issues/103) [#98](https://github.com/NeoWhisper/neowhisper-blog/issues/98)
+
 ## [1.14.4](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.3...v1.14.4) (2026-04-15)
 
 

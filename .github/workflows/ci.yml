@@ -17,6 +17,15 @@ jobs:
   build-and-lint:
     runs-on: ubuntu-latest
 
+    env:
+      OPENAI_MODEL: google/gemma-4-e4b
+      OPENAI_API_MODE: lm-studio
+      TREND_POST_COVER_IMAGE: /images/default-cover.png
+      TREND_POST_AUTHOR_NAME: NeoWhisper AI
+      OPENAI_BASE_URL: http://127.0.0.1:1234/v1
+      OPENAI_API_KEY: dummy-key-for-ci
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -35,14 +44,6 @@ jobs:
 
       - name: Validate Content Generator Config
         run: npm run content:check
-        env:
-          OPENAI_MODEL: google/gemma-4-e4b
-          OPENAI_API_MODE: lm-studio
-          TREND_POST_COVER_IMAGE: /images/default-cover.png
-          TREND_POST_AUTHOR_NAME: NeoWhisper AI
-          OPENAI_BASE_URL: http://127.0.0.1:1234/v1
-          OPENAI_API_KEY: dummy-key-for-ci
-          OLLAMA_BASE_URL: http://127.0.0.1:11434
 
       - name: Test Content Generator Flags
         run: npm run content:test-flags

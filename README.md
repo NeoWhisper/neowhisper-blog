@@ -178,10 +178,33 @@ This repository includes a multilingual draft generator that can run:
 
    ```bash
    OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
-   OPENAI_MODEL=qwen3:14b \
+   OPENAI_MODEL=qwen3.6:latest \
    OPENAI_API_MODE=local \
    npm run content:daily:install-launchd
    ```
+
+### Local LM Studio mode (macOS)
+
+1. Start LM Studio and load a model (e.g., `qwen3.6-35b-a3b-ud-mlx`).
+2. Start the Local Inference Server in LM Studio (default port 1234).
+3. Run once manually:
+
+   ```bash
+   OPENAI_BASE_URL=http://127.0.0.1:1234/v1 \
+   OPENAI_MODEL=qwen3.6-35b-a3b-ud-mlx \
+   OLLAMA_BASE_URL=http://127.0.0.1:11434 \
+   npm run content:daily:pr
+   ```
+
+4. Install daily schedule:
+
+   ```bash
+   OPENAI_BASE_URL=http://127.0.0.1:1234/v1 \
+   OPENAI_MODEL=qwen3.6-35b-a3b-ud-mlx \
+   OLLAMA_BASE_URL=http://127.0.0.1:11434 \
+   npm run content:daily:install-launchd
+   ```
+
 
 5. Optional: keep local `main` synced daily (default 09:00 local time):
 

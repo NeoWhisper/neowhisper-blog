@@ -45,9 +45,10 @@ export async function polishMetadata(
   language: string,
   metadataType: "title" | "excerpt",
 ): Promise<string> {
-  const userPrompt = metadataType === "title"
-    ? `Language: ${language}\nContent: ${body.slice(0, 3000)}\n\nCRITICAL: Generate a short, plain-text title (max 60 characters). Do NOT include HTML tags, markdown, instructions, or subheadings. Return ONLY a single string.\nReturn JSON { "result": "The Title Here" }`
-    : `Language: ${language}\nContent: ${body.slice(0, 3000)}\n\nCRITICAL: Generate a plain-text excerpt (max 150 characters). Do NOT include HTML tags or markdown. Return ONLY a single string.\nReturn JSON { "result": "The excerpt here..." }`;
+  const userPrompt =
+    metadataType === "title"
+      ? `Language: ${language}\nContent: ${body.slice(0, 3000)}\n\nCRITICAL: Generate a short, plain-text title (max 60 characters). Do NOT include HTML tags, markdown, instructions, or subheadings. Return ONLY a single string.\nReturn JSON { "result": "The Title Here" }`
+      : `Language: ${language}\nContent: ${body.slice(0, 3000)}\n\nCRITICAL: Generate a plain-text excerpt (max 150 characters). Do NOT include HTML tags or markdown. Return ONLY a single string.\nReturn JSON { "result": "The excerpt here..." }`;
 
   const raw = await callAi(
     `${SYSTEM_RULES}\nTask: Generate ${metadataType} for the content.`,
@@ -76,9 +77,8 @@ export function pickCategory(
   preferredCategory: CategoryDefinition | null,
   sources: SourceItem[],
 ): CategoryDefinition {
-  if (preferredCategory) {
-    return preferredCategory;
-  }
+  // Nullish coalescing over if-statement (functional style)
+  if (preferredCategory) return preferredCategory;
 
   const aggregatedContent = sources
     .map((x) => `${x.title} ${x.summary ?? ""}`.toLowerCase())

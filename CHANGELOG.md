@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.15.0...v1.15.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* **content:** aggressive expansion for Japanese to meet word count ([a327cfe](https://github.com/NeoWhisper/neowhisper-blog/commit/a327cfeb705a1641412298b3b8f29bb10b968c7c))
+
 # [1.15.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.14.4...v1.15.0) (2026-04-20)
 
 

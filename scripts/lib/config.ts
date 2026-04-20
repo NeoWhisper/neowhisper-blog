@@ -12,6 +12,7 @@ export const API_KEY = runtimeConfig.apiKey;
 export const OLLAMA_IMAGE_MODEL = runtimeConfig.ollamaImageModel;
 export const MFLUX_MODEL = runtimeConfig.mfluxModel;
 export const LM_STUDIO_IMAGE_URL = runtimeConfig.lmStudioImageUrl;
+export const OLLAMA_BASE_URL = runtimeConfig.ollamaBaseUrl;
 export const FORCE = process.argv.includes("--force");
 export const DRY_RUN = process.argv.includes("--dry-run");
 

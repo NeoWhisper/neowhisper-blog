@@ -242,30 +242,50 @@ type StagedContent = {
 const asErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-const validateSection = (sec: unknown): sec is OutlineSection =>
-  typeof sec === "object" &&
-  sec !== null &&
-  typeof (sec as Record<string, unknown>).id === "string" &&
-  typeof (sec as Record<string, unknown>).title === "string" &&
-  typeof (sec as Record<string, unknown>).intent === "string" &&
-  typeof (sec as Record<string, unknown>).targetWordCount === "number";
+import {
+  isObject,
+  hasStringProperty,
+  hasNumberProperty,
+  hasMinLength,
+  hasNoDuplicates,
+  hasMinSum,
+} from "./validation";
+
+// Composed validator for OutlineSection using functional composition (Phase 2)
+const validateSection = (value: unknown): value is OutlineSection =>
+  isObject(value) &&
+  hasStringProperty("id")(value) &&
+  hasStringProperty("title")(value) &&
+  hasStringProperty("intent")(value) &&
+  hasNumberProperty("targetWordCount")(value);
+
+// Composed validator for Outline with predicates (Phase 2)
+const validateSectionsArray = (
+  value: unknown,
+): value is { sections: unknown[] } =>
+  isObject(value) &&
+  Array.isArray((value as { sections?: unknown[] }).sections);
 
 const validateOutline = (outline: unknown): outline is Outline => {
-  if (!outline || typeof outline !== "object") return false;
-  const candidate = outline as { sections?: unknown };
-  if (!Array.isArray(candidate.sections) || candidate.sections.length < 3)
-    return false;
+  if (!validateSectionsArray(outline)) return false;
 
-  const sections = candidate.sections as unknown[];
+  const sections = outline.sections;
   const typedSections = sections.filter(validateSection);
-  if (typedSections.length !== sections.length) return false;
 
-  const noDuplicateIds =
-    new Set(typedSections.map((s) => s.id)).size === typedSections.length;
-  const minWords =
-    typedSections.reduce((sum, s) => sum + s.targetWordCount, 0) >= 800;
+  // Predicate composition for array validations
+  const hasValidCount = hasMinLength<OutlineSection>(3);
+  const hasUniqueIds = hasNoDuplicates<OutlineSection, string>((s) => s.id);
+  const hasMinWordCount = hasMinSum<OutlineSection>(
+    (s) => s.targetWordCount,
+    800,
+  );
 
-  return noDuplicateIds && minWords;
+  return (
+    typedSections.length === sections.length &&
+    hasValidCount(typedSections) &&
+    hasUniqueIds(typedSections) &&
+    hasMinWordCount(typedSections)
+  );
 };
 
 const countStructureElements = (
@@ -292,13 +312,19 @@ const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
   ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs. Translate 'TL;DR' to 'الخلاصة' and 'Highlights' or 'Key Features' to 'أبرز المميزات' if they appear.",
 };
 
+// Pattern lookup table (DeMarco: data over control flow)
+const CROSS_LANG_PATTERNS: Record<LanguageCode, RegExp | undefined> = {
+  ar: /[\u3040-\u30ff\u4e00-\u9fff]/u, // Arabic text with Japanese chars
+  ja: /[\u0600-\u06ff]/u, // Japanese text with Arabic chars
+  en: undefined,
+};
+
 const hasCrossLanguageArtifacts = (
   lang: LanguageCode,
   text: string,
 ): boolean => {
-  if (lang === "ar") return /[\u3040-\u30ff\u4e00-\u9fff]/u.test(text);
-  if (lang === "ja") return /[\u0600-\u06ff]/u.test(text);
-  return false;
+  const pattern = CROSS_LANG_PATTERNS[lang];
+  return pattern ? pattern.test(text) : false;
 };
 
 async function retryOutlineGeneration(
@@ -358,16 +384,49 @@ EXAMPLE STRUCTURE:
 
       if (!validateOutline(parsed)) {
         const outline = parsed as { sections?: unknown[] };
-        throw new Error(
-          !Array.isArray(outline.sections) || outline.sections.length < 3
-            ? `Sections array must have at least 3 items (got ${outline.sections?.length ?? 0})`
-            : outline.sections.some((s) => !validateSection(s))
-              ? "Missing required section fields"
-              : new Set((outline.sections as OutlineSection[]).map((s) => s.id))
-                    .size !== outline.sections.length
-                ? "Duplicate section ids"
-                : "total targetWordCount < 800",
-        );
+
+        // Functional validation rules - data over control flow (DeMarco)
+        type ValidationRule = {
+          readonly check: (o: { sections?: unknown[] }) => boolean;
+          readonly message: string | ((o: { sections?: unknown[] }) => string);
+        };
+
+        const validationRules: readonly ValidationRule[] = [
+          {
+            check: (o) => !Array.isArray(o.sections) || o.sections.length < 3,
+            message: (o) =>
+              `Sections array must have at least 3 items (got ${o.sections?.length ?? 0})`,
+          },
+          {
+            check: (o) =>
+              Array.isArray(o.sections) &&
+              o.sections.some((s) => !validateSection(s)),
+            message: "Missing required section fields",
+          },
+          {
+            check: (o) =>
+              Array.isArray(o.sections) &&
+              new Set(
+                (o.sections as OutlineSection[]).map(
+                  (s: OutlineSection) => s.id,
+                ),
+              ).size !== o.sections.length,
+            message: "Duplicate section ids",
+          },
+          {
+            check: () => true, // Default case
+            message: "total targetWordCount < 800",
+          },
+        ];
+
+        // Find first matching rule (functional: no if-else chain)
+        const failedRule = validationRules.find((rule) => rule.check(outline));
+        const errorMessage =
+          typeof failedRule!.message === "function"
+            ? failedRule!.message(outline)
+            : failedRule!.message;
+
+        throw new Error(errorMessage);
       }
       return parsed;
     } catch (e: unknown) {
@@ -428,17 +487,21 @@ export async function generateSection(
 ): Promise<string> {
   const stageId = startStage("generateSection", { sectionId: section.id });
 
-  const specialInstructions = [
-    section.id === "closing" || section.id === "conclusion"
-      ? 'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.'
-      : section.id === "tldr"
-        ? 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.'
-        : section.id === "intro"
-          ? 'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).'
-          : "Keep paragraphs short (3-4 sentences max) for better readability.",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  // Section-specific instructions lookup table (DeMarco: data over control flow)
+  const SECTION_INSTRUCTIONS: Record<string, string> = {
+    closing:
+      'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.',
+    conclusion:
+      'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.',
+    tldr: 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.',
+    intro:
+      'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).',
+    default:
+      "Keep paragraphs short (3-4 sentences max) for better readability.",
+  };
+
+  const specialInstructions =
+    SECTION_INSTRUCTIONS[section.id] ?? SECTION_INSTRUCTIONS.default;
 
   const userPrompt = `
 Section ID: ${section.id} (Title: ${section.title})
@@ -523,11 +586,16 @@ Return JSON { "body": "Markdown string" }
     const body = res.body ?? "";
     const hasArtifacts = hasCrossLanguageArtifacts(lang, body);
 
-    return structuresMatch(body, enBody) && body.trim() && !hasArtifacts
-      ? body
-      : attempt < 1
-        ? await retryTranslation(lang, sectionId, enBody, attempt + 1)()
-        : body;
+    // Explicit control flow over nested ternary (DeMarco principle)
+    const isValid =
+      structuresMatch(body, enBody) && body.trim() && !hasArtifacts;
+    if (isValid) {
+      return body;
+    }
+    if (attempt < 1) {
+      return await retryTranslation(lang, sectionId, enBody, attempt + 1)();
+    }
+    return body;
   };
 
 export async function translateSection(

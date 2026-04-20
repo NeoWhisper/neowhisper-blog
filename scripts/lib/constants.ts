@@ -3,6 +3,8 @@ export const DEFAULT_GENERATION_MAX_TOKENS = 6500;
 export const JSON_REPAIR_MAX_ATTEMPTS = 3;
 export const MODEL_FETCH_RETRY_ATTEMPTS = 3;
 export const MODEL_FETCH_RETRY_DELAY_MS = 1500;
+export const MODEL_FETCH_TIMEOUT_MS = 300000; // 5 minutes
+
 
 export const TARGET_WORD_COUNT = 1100;
 export const MIN_WORDS_THRESHOLD = 900;

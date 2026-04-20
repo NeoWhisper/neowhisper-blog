@@ -40,16 +40,17 @@ const KeywordsSchema = z.object({
 });
 
 const EnvSchema = z.object({
-  OPENAI_MODEL: z.string().min(1).default("gpt-4.1-mini"),
-  OPENAI_API_MODE: z.string().min(1).default("auto"),
-  TREND_POST_COVER_IMAGE: z.string().min(1).default("/og-image.jpg"),
-  TREND_POST_AUTHOR_NAME: z.string().min(1).default("NeoWhisper"),
-  OPENAI_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
-  OPENAI_API_KEY: z.string().min(1).default("sk-local"),
-  OLLAMA_IMAGE_MODEL: z.string().optional().default(""),
-  MFLUX_MODEL: z.string().optional().default(""),
-  LM_STUDIO_IMAGE_URL: z.string().optional().default(""),
-  TOPIC_HINT: z.string().optional().default(""),
+  OPENAI_MODEL: z.string().min(1),
+  OPENAI_API_MODE: z.string().min(1),
+  TREND_POST_COVER_IMAGE: z.string().min(1),
+  TREND_POST_AUTHOR_NAME: z.string().min(1),
+  OPENAI_BASE_URL: z.string().url(),
+  OPENAI_API_KEY: z.string().min(1),
+  OLLAMA_IMAGE_MODEL: z.string().optional(),
+  MFLUX_MODEL: z.string().optional(),
+  LM_STUDIO_IMAGE_URL: z.string().optional(),
+  OLLAMA_BASE_URL: z.string().url(),
+  TOPIC_HINT: z.string().optional(),
 });
 
 const normalizeKeywordList = (list: string[]) =>
@@ -65,12 +66,13 @@ const loadEnvConfig = () => {
     apiMode: env.OPENAI_API_MODE.toLowerCase(),
     coverImage: env.TREND_POST_COVER_IMAGE,
     authorName: env.TREND_POST_AUTHOR_NAME,
-    topicHint: env.TOPIC_HINT.trim(),
+    topicHint: env.TOPIC_HINT?.trim() ?? "",
     apiBaseUrl,
     apiKey: env.OPENAI_API_KEY,
-    ollamaImageModel: env.OLLAMA_IMAGE_MODEL,
-    mfluxModel: env.MFLUX_MODEL,
-    lmStudioImageUrl: env.LM_STUDIO_IMAGE_URL,
+    ollamaImageModel: env.OLLAMA_IMAGE_MODEL ?? "",
+    mfluxModel: env.MFLUX_MODEL ?? "",
+    lmStudioImageUrl: env.LM_STUDIO_IMAGE_URL ?? "",
+    ollamaBaseUrl: env.OLLAMA_BASE_URL.replace(/\/+$/, ""),
   };
 };
 
@@ -112,6 +114,7 @@ type RuntimeConfig = {
   ollamaImageModel: string;
   mfluxModel: string;
   lmStudioImageUrl: string;
+  ollamaBaseUrl: string;
   feeds: FeedConfig[];
   categoryDefinitions: CategoryConfig[];
   keywords: KeywordBuckets;
@@ -129,6 +132,7 @@ export const runtimeConfig = Object.freeze({
   ollamaImageModel: envConfig.ollamaImageModel,
   mfluxModel: envConfig.mfluxModel,
   lmStudioImageUrl: envConfig.lmStudioImageUrl,
+  ollamaBaseUrl: envConfig.ollamaBaseUrl,
   feeds: staticConfig.feeds,
   categoryDefinitions: staticConfig.categoryDefinitions,
   keywords: staticConfig.keywords,

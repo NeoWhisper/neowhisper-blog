@@ -1,10 +1,55 @@
-import { API_BASE_URL, API_KEY, MODEL } from "./config";
+import { Agent, setGlobalDispatcher } from "undici";
+import { z } from "zod";
+import {
+  API_BASE_URL,
+  API_KEY,
+  MODEL,
+  isOfficialOpenAiBaseUrl,
+} from "./config";
+
 import {
   DEFAULT_GENERATION_MAX_TOKENS,
   MODEL_FETCH_RETRY_ATTEMPTS,
   MODEL_FETCH_RETRY_DELAY_MS,
+  MODEL_FETCH_TIMEOUT_MS,
 } from "./constants";
+
+// Zod schemas for runtime type validation (Phase 2)
+const CompletionUsageSchema = z.object({
+  prompt_tokens: z.number().optional(),
+  completion_tokens: z.number().optional(),
+});
+
+const CompletionMessageSchema = z.object({
+  content: z.string().optional(),
+});
+
+const CompletionChoiceSchema = z.object({
+  message: CompletionMessageSchema.optional(),
+});
+
+export const CompletionResponseSchema = z.object({
+  usage: CompletionUsageSchema.optional(),
+  choices: z.array(CompletionChoiceSchema).optional(),
+});
+
+// Type inference from schemas
+export type ValidatedCompletionResponse = z.infer<
+  typeof CompletionResponseSchema
+>;
+
+// Increase default timeouts for long-running AI generations (e.g., local 35B models)
+setGlobalDispatcher(
+  new Agent({
+    headersTimeout: MODEL_FETCH_TIMEOUT_MS,
+    bodyTimeout: MODEL_FETCH_TIMEOUT_MS,
+  }),
+);
+
 import { startStage, endStage, recordApiCall, MetricsState } from "./metrics";
+import { createLogger, classifyError } from "./errors";
+
+const logger = createLogger("ai");
 
 type ApiResponseFormat = { type: "json_object" } | undefined;
 
@@ -66,13 +111,31 @@ const sendApiRequest = async (
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      response_format: responseFormat,
+      // Only send response_format for OpenAI official API
+      // Local APIs (Ollama/LM Studio) handle JSON via system prompts
+      ...(responseFormat && isOfficialOpenAiBaseUrl(API_BASE_URL)
+        ? { response_format: responseFormat }
+        : {}),
     }),
   });
 
-  return response.ok
-    ? (response.json() as Promise<CompletionResponse>)
-    : Promise.reject(new Error(await response.text()));
+  // Guard: HTTP error (early return pattern)
+  if (!response.ok) {
+    return Promise.reject(new Error(await response.text()));
+  }
+
+  // Parse and validate with Zod (functional validation chain)
+  const rawJson = await response.json();
+  const parsed = CompletionResponseSchema.safeParse(rawJson);
+
+  // Guard: Schema validation failed (early return with context)
+  if (!parsed.success) {
+    return Promise.reject(
+      new Error(`Invalid API response format: ${parsed.error.message}`),
+    );
+  }
+
+  return parsed.data;
 };
 
 const retryWithExponentialBackoff = async <T>(
@@ -142,51 +205,53 @@ export async function parseJsonWithRepair({
   label: string;
   maxRetries?: number;
 }) {
-  // Attempt 1: Direct parse
+  // Attempt 1: Direct parse (guard clause pattern)
   try {
     return JSON.parse(cleanJsonText(text));
   } catch {
-    console.log(
-      `[daily-trends] JSON parse failed for ${label}, attempting repair...`,
-    );
+    logger.info("JSON parse failed, attempting repair", { operation: label });
   }
 
   // Attempt 2: Handle plain text (wrap as body)
   const trimmed = text.trim();
   if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
     const bodyMatch = trimmed.match(/["']body["']\s*:\s*["']([^"']+)["']/i);
+    // Guard: body field found (early return)
     if (bodyMatch) {
-      console.log(
-        `[daily-trends] Extracted body field from plain text for ${label}`,
-      );
+      logger.info("Extracted body field from plain text", { operation: label });
       return { body: bodyMatch[1] };
     }
-    console.log(`[daily-trends] Wrapping plain text as JSON body for ${label}`);
+    logger.info("Wrapping plain text as JSON body", { operation: label });
     return { body: trimmed };
   }
 
-  // Attempt 3: Strip markdown code blocks and retry
+  // Attempt 3: Strip markdown code blocks and retry (functional: only if changed)
   const withoutCodeBlocks = trimmed
     .replace(/^```json\s*/i, "")
     .replace(/\s*```$/, "");
-  if (withoutCodeBlocks !== trimmed) {
+
+  const codeBlockRemoved = withoutCodeBlocks !== trimmed;
+  if (codeBlockRemoved) {
     try {
       const parsed = JSON.parse(cleanJsonText(withoutCodeBlocks));
-      console.log(
-        `[daily-trends] JSON repair succeeded (code block removed) for ${label}`,
-      );
+      logger.info("JSON repair succeeded (code block removed)", {
+        operation: label,
+      });
       return parsed;
     } catch {
-      // Continue to next repair attempt
+      // Continue to AI repair - fall through intentionally
     }
   }
 
   // Attempt 4-5: AI repair with different prompts
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // Data-driven prompt selection (no nested ternary)
+    const repairPrompts = [
+      `Fix this JSON to make it valid. Output ONLY the fixed JSON, no explanations:\n\n${text}`,
+      `Extract the JSON object from this text. Remove any markdown formatting, comments, or extra text. Output ONLY valid JSON:\n\n${text}`,
+    ];
     const repairPrompt =
-      attempt === 1
-        ? `Fix this JSON to make it valid. Output ONLY the fixed JSON, no explanations:\n\n${text}`
-        : `Extract the JSON object from this text. Remove any markdown formatting, comments, or extra text. Output ONLY valid JSON:\n\n${text}`;
+      repairPrompts[Math.min(attempt - 1, repairPrompts.length - 1)];
 
     try {
       const repaired = await callAi(
@@ -195,20 +260,25 @@ export async function parseJsonWithRepair({
         { temperature: 0, maxTokens: 2000 },
       );
       const parsed = JSON.parse(cleanJsonText(repaired));
-      console.log(
-        `[daily-trends] JSON repair succeeded (attempt ${attempt}) for ${label}`,
-      );
+      logger.info("JSON repair succeeded via AI", {
+        operation: label,
+        attempt,
+      });
       return parsed;
-    } catch {
-      console.log(
-        `[daily-trends] JSON repair attempt ${attempt} failed for ${label}`,
-      );
+    } catch (error) {
+      logger.warn("JSON repair attempt failed", {
+        operation: label,
+        attempt,
+        error: classifyError(error, { operation: label, attempt }),
+      });
     }
   }
 
-  // Final fallback
-  console.warn(
-    `[daily-trends] All JSON repair attempts failed for ${label}, returning fallback`,
-  );
+  // Final fallback (structured warning for observability)
+  logger.warn("All JSON repair attempts failed, returning fallback", {
+    operation: label,
+    maxRetries,
+    bodyPreview: text.trim().slice(0, 100),
+  });
   return { body: text.trim() };
 }

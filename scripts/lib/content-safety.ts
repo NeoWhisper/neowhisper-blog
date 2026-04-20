@@ -1,9 +1,11 @@
 const METADATA_OBJECT_KEYS = ["result", "text", "excerpt", "title"] as const;
 
 export function sanitizeGeneratedMarkdown(markdown: string): string {
-  return String(markdown ?? "")
-    // MDX interprets "<50ms" style tokens as JSX starts and can crash render.
-    .replace(/<(?=\s*\d)/g, "&lt;");
+  return (
+    String(markdown ?? "")
+      // MDX interprets "<50ms" style tokens as JSX starts and can crash render.
+      .replace(/<(?=\s*\d)/g, "&lt;")
+  );
 }
 
 const collapseWhitespace = (text: string): string =>
@@ -17,28 +19,32 @@ export function normalizeExcerptText(value: unknown, fallback = ""): string {
     .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
 
   const singleLine = collapseWhitespace(normalized);
-  return singleLine.length > 260 ? `${singleLine.slice(0, 257)}...` : singleLine;
+  return singleLine.length > 260
+    ? `${singleLine.slice(0, 257)}...`
+    : singleLine;
 }
 
 export function normalizeMetadataText(value: unknown, fallback = ""): string {
+  // Guard: String type (most common case)
   if (typeof value === "string") {
     const normalized = value.trim();
-    if (!normalized || normalized === "[object Object]") return fallback;
-    return normalized;
+    const isInvalid = !normalized || normalized === "[object Object]";
+    return isInvalid ? fallback : normalized;
   }
 
-  if (value && typeof value === "object") {
-    const objectValue = value as Record<string, unknown>;
-    for (const key of METADATA_OBJECT_KEYS) {
-      const candidate = objectValue[key];
-      if (typeof candidate === "string" && candidate.trim()) {
-        return candidate.trim();
-      }
-    }
-    return fallback;
-  }
+  // Guard: Non-object types
+  if (!value || typeof value !== "object") return fallback;
 
-  return fallback;
+  // Functional search through metadata keys (data over control flow)
+  const objectValue = value as Record<string, unknown>;
+  const validCandidate = METADATA_OBJECT_KEYS.map(
+    (key) => objectValue[key],
+  ).find(
+    (candidate): candidate is string =>
+      typeof candidate === "string" && candidate.trim().length > 0,
+  );
+
+  return validCandidate?.trim() ?? fallback;
 }
 
 const contentSafety = {

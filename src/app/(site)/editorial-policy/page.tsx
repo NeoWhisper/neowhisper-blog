@@ -48,6 +48,15 @@ const copyByLang: Record<SupportedLang, PolicyCopy> = {
           "Recommendations are based on technical suitability, not ad pressure.",
         ],
       },
+      {
+        title: "AI Assistance & Human Review",
+        items: [
+          "Some articles are initially drafted with AI assistance from LLM tools.",
+          "All AI-generated content is reviewed, edited, and fact-checked by human editors.",
+          "We apply quality scoring and source attribution to ensure accuracy and value.",
+          "Human oversight ensures technical correctness and practical usefulness.",
+        ],
+      },
     ],
     contact: "Need a correction or clarification?",
     contactCta: "Contact Editorial Team",
@@ -82,6 +91,15 @@ const copyByLang: Record<SupportedLang, PolicyCopy> = {
           "推奨は広告都合ではなく技術的妥当性を優先します。",
         ],
       },
+      {
+        title: "AI支援と人間のレビュー",
+        items: [
+          "一部の記事はLLMツールによるAI支援で初期ドラフトを作成しています。",
+          "AI生成コンテンツはすべて人間の編集者がレビュー・編集・事実確認を行います。",
+          "品質スコアリングと情報源の明示により正確性と価値を確保しています。",
+          "人間の監視により技術的正確性と実用性を保証します。",
+        ],
+      },
     ],
     contact: "修正提案や補足が必要ですか？",
     contactCta: "編集チームへ連絡",
@@ -113,6 +131,15 @@ const copyByLang: Record<SupportedLang, PolicyCopy> = {
           "نفصل بوضوح بين المحتوى التعليمي والإعلانات.",
           "لا ننشر محتوى مدفوعاً دون توضيح صريح.",
           "التوصيات مبنية على الملاءمة التقنية وليس ضغط الإعلانات.",
+        ],
+      },
+      {
+        title: "الذكاء الاصطناعي والمراجعة البشرية",
+        items: [
+          "بعض المقالات تُكتب مسوداتها الأولية بمساعدة أدوات الذكاء الاصطناعي LLM.",
+          "جميع المحتوى المولد بالذكاء الاصطناعي يُراجع ويُحرر ويُدقق من قبل محررين بشريين.",
+          "نطبق تقييم الجودة وإسناد المصادر لضمان الدقة والقيمة.",
+          "الإشراف البشري يضمن الصحة التقنية والفائدة العملية.",
         ],
       },
     ],

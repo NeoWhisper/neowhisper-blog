@@ -20,6 +20,7 @@ import {
   COVER_IMAGE,
   AUTHOR_NAME,
   TOPIC_HINT,
+  MODEL,
   initializeConfigs,
   ConfigState,
 } from "./lib/config";
@@ -76,7 +77,6 @@ const yamlString = (value: unknown): string => {
   return json.slice(1, -1);
 };
 
-
 const headingToAnchor = (text: string): string => slugify(text);
 
 const createShouldExcludeHeading =
@@ -115,6 +115,8 @@ type FrontmatterInput = {
   categoryName: string;
   dateString: string;
   coverImage: string;
+  qualityScore: number;
+  sources: string[];
 };
 
 const buildFrontmatter = ({
@@ -123,6 +125,8 @@ const buildFrontmatter = ({
   categoryName,
   dateString,
   coverImage,
+  qualityScore,
+  sources,
 }: FrontmatterInput): string[] => [
   "---",
   `title: "${yamlString(title)}"`,
@@ -130,6 +134,9 @@ const buildFrontmatter = ({
   `excerpt: "${yamlString(excerpt)}"`,
   `category: "${categoryName}"`,
   `coverImage: "${coverImage}"`,
+  `qualityScore: ${qualityScore}`,
+  "sources:",
+  ...sources.map((s) => `  - "${yamlString(s)}"`),
   "author:",
   `  name: "${AUTHOR_NAME}"`,
   '  picture: "/images/author.png"',
@@ -146,6 +153,56 @@ const getCategoryDisplayName = (
     ar: "nameAr",
   };
   return String(category[keyByLang[lang]]);
+};
+
+// Content quality scoring (Phase 3)
+const calculateQualityScore = (content: string): number => {
+  const metrics = {
+    // Readability: penalize long sentences
+    avgSentenceLength:
+      content.split(/[.!?]/).reduce((sum, s) => sum + s.length, 0) /
+      content.split(/[.!?]/).length,
+    // Structure: reward headings and lists
+    hasHeadings: (content.match(/^#{2,3}\s/gm) || []).length,
+    hasLists: (content.match(/^-\s/gm) || []).length,
+    // SEO: reward internal links and proper formatting
+    internalLinks: (content.match(/\[.*?\]\(.*?\)/g) || []).length,
+    wordCount: content.split(/\s+/).length,
+  };
+
+  // Score 0-100 based on metrics
+  const readabilityScore = Math.max(
+    0,
+    30 - Math.min(30, metrics.avgSentenceLength / 10),
+  );
+  const structureScore = Math.min(
+    30,
+    metrics.hasHeadings * 5 + metrics.hasLists * 2,
+  );
+  const seoScore = Math.min(20, metrics.internalLinks * 5);
+  const lengthScore =
+    metrics.wordCount >= 800 ? 20 : (metrics.wordCount / 800) * 20;
+
+  return Math.round(readabilityScore + structureScore + seoScore + lengthScore);
+};
+
+// Audit trail logging (Phase 3)
+const AUDIT_LOG_PATH = path.join(
+  process.cwd(),
+  "scripts/logs/content-audit.log",
+);
+
+const appendAuditLog = async (entry: {
+  timestamp: string;
+  slug: string;
+  languages: string[];
+  qualityScore: number;
+  sources: string[];
+  tokensUsed: number;
+  model: string;
+}): Promise<void> => {
+  const logLine = JSON.stringify(entry) + "\n";
+  await fs.appendFile(AUDIT_LOG_PATH, logLine).catch(() => {});
 };
 
 const writePostFile = async (filePath: string, doc: string): Promise<void> =>
@@ -534,6 +591,12 @@ async function main() {
         .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
         .join("\n");
 
+      // Calculate quality score for this language variant
+      const qualityScore = calculateQualityScore(finalBody);
+
+      // Extract source URLs for attribution
+      const sourceAttribution = finalRefs.map((r) => r.url);
+
       const doc = sanitizeGeneratedMarkdown(
         [
           ...buildFrontmatter({
@@ -542,6 +605,8 @@ async function main() {
             categoryName: getCategoryDisplayName(category, lang),
             dateString,
             coverImage,
+            qualityScore,
+            sources: sourceAttribution,
           }),
           "",
           toc,
@@ -553,6 +618,7 @@ async function main() {
         ].join("\n"),
       );
 
+      // Write to posts directory
       const filePath = path.join(
         POSTS_DIR,
         `${baseSlug}${meta.fileSuffix}.mdx`,
@@ -561,8 +627,28 @@ async function main() {
     }),
   );
 
+  // Calculate overall quality score (average across all languages)
+  const overallQualityScore = Math.round(
+    targetLanguages.reduce((sum, lang) => {
+      const localized = content[lang] as LocalizedContent;
+      const body = Object.values(localized.sections).join("\n\n");
+      return sum + calculateQualityScore(body);
+    }, 0) / targetLanguages.length,
+  );
+
+  // Append audit trail entry (Phase 3 compliance)
+  await appendAuditLog({
+    timestamp: new Date().toISOString(),
+    slug: baseSlug,
+    languages: targetLanguages,
+    qualityScore: overallQualityScore,
+    sources: ranked.slice(0, 5).map((s) => s.url),
+    tokensUsed: AiState.totalTokensUsed,
+    model: MODEL,
+  });
+
   console.log(
-    `[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: ${targetLanguages.join("/")}`,
+    `[RUN COMPLETE] Total tokens used: ${AiState.totalTokensUsed} | Quality Score: ${overallQualityScore}/100 | Sections generated: ${Object.keys(content.en.sections).length}/${content.sections.length} | Languages: ${targetLanguages.join("/")}`,
   );
 
   await flushMetrics();

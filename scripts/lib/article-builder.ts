@@ -703,24 +703,36 @@ async function expandUndersizedContent(
   let total = computeWordCounts(stagedContent[lang].sections, lang);
   let attempts = 0;
 
+  // Japanese needs more aggressive expansion due to character-based word counting
+  const minThreshold =
+    lang === "ja" ? Math.round(MIN_WORDS_THRESHOLD * 0.8) : MIN_WORDS_THRESHOLD;
+  const maxAttempts =
+    lang === "ja" ? EXPANSION_RETRY_LIMIT + 2 : EXPANSION_RETRY_LIMIT;
+
   const shouldContinueExpanding = () =>
-    total < MIN_WORDS_THRESHOLD &&
-    attempts < EXPANSION_RETRY_LIMIT &&
+    total < minThreshold &&
+    attempts < maxAttempts &&
     AiState.totalTokensUsed <= MAX_TOKENS_PER_RUN;
 
   const executeExpansion = async () => {
     const targets = selectSectionsToExpand(stagedContent[lang].sections);
     if (targets.length === 0) return false;
 
-    const targetId = targets[0];
+    // Expand ALL eligible sections in parallel for faster growth
     console.log(
-      `[daily-trends] ${lang} under length (${total}w), expanding ${targetId}...`,
+      `[daily-trends] ${lang} under length (${total}w), expanding ${targets.length} sections...`,
     );
-    stagedContent[lang].sections[targetId] = await expandSection(
-      targetId,
-      stagedContent[lang].sections[targetId],
-      lang,
+
+    await Promise.all(
+      targets.map(async (targetId) => {
+        stagedContent[lang].sections[targetId] = await expandSection(
+          targetId,
+          stagedContent[lang].sections[targetId],
+          lang,
+        );
+      }),
     );
+
     total = computeWordCounts(stagedContent[lang].sections, lang);
     attempts++;
     return true;

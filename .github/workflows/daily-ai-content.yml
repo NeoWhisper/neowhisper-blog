@@ -1,8 +1,9 @@
 name: Daily AI Content Drafts
 
 on:
-  schedule:
-    - cron: "30 0 * * *" # Daily at 00:30 UTC (09:30 JST)
+  # Schedule disabled - running locally only
+  # schedule:
+  #   - cron: "30 0 * * *" # Daily at 00:30 UTC (09:30 JST)
   workflow_dispatch:
     inputs:
       force:

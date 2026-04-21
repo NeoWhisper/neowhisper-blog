@@ -23,6 +23,17 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: AI Agent Safety Check
+        run: |
+          echo " Running AI Agent Safety Check..."
+          # Prevent accidental pushes to main by the AI agent
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo " BLOCKED: AI agent cannot push directly to main branch"
+            echo "   AI agents must create PRs to 'contents' branch only."
+            exit 1
+          fi
+          echo " Safety check passed - not targeting main branch"
+
       - name: Checkout contents branch
         uses: actions/checkout@v6
         with:

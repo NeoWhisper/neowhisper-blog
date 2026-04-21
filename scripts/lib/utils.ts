@@ -6,7 +6,7 @@ import {
 } from "./constants";
 import { ConfigState } from "./config";
 
-const LANGUAGE_WORD_DENOMINATORS: Partial<Record<string, number>> = { ja: 2.5 };
+const LANGUAGE_WORD_DENOMINATORS: Partial<Record<string, number>> = { ja: 2.0 };
 
 type SourceItem = {
   title: string;
@@ -35,8 +35,9 @@ export function computeWordCounts(
 export function selectSectionsToExpand(
   sections: Record<string, string>,
 ): string[] {
+  // Expand any substantive section (not intro/closing)
   return Object.entries(sections)
-    .filter(([id]) => id.startsWith("trend"))
+    .filter(([id]) => !["intro", "tldr", "closing", "conclusion"].includes(id))
     .map(([id]) => id);
 }
 

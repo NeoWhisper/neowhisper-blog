@@ -61,8 +61,19 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
+# ── Text generation endpoint (LM Studio, Ollama, vLLM, etc.) ──
 if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://localhost:* ]]; then
-  OLLAMA_BASE="${OPENAI_BASE_URL%/v1}"
+  if ! curl -fsS "${OPENAI_BASE_URL%/v1}/v1/models" >/dev/null 2>&1; then
+    echo "[daily-local] Text endpoint at ${OPENAI_BASE_URL} is not reachable."
+    echo "[daily-local] Start your local model server first."
+    exit 1
+  fi
+  echo "[daily-local] Text endpoint reachable at ${OPENAI_BASE_URL}."
+fi
+
+# ── Image generation endpoint (Ollama) ──
+if [[ -n "${OLLAMA_BASE_URL:-}" ]]; then
+  OLLAMA_BASE="${OLLAMA_BASE_URL%/v1}"
   OLLAMA_TAGS_JSON="$(curl -fsS "${OLLAMA_BASE}/api/tags" || true)"
   if [[ -z "${OLLAMA_TAGS_JSON}" ]]; then
     echo "[daily-local] Ollama endpoint is not reachable at ${OLLAMA_BASE}."
@@ -70,25 +81,29 @@ if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://l
     exit 1
   fi
 
-  if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
-    let input = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => (input += chunk));
-    process.stdin.on("end", () => {
-      try {
-        const payload = JSON.parse(input);
-        const models = Array.isArray(payload.models) ? payload.models : [];
-        const selected = process.env.OPENAI_MODEL || "";
-        const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
-        process.exit(found ? 0 : 1);
-      } catch {
-        process.exit(1);
-      }
-    });
-  ' <<< "${OLLAMA_TAGS_JSON}"; then
-    echo "[daily-local] Model '${OPENAI_MODEL}' is not installed in Ollama."
-    echo "[daily-local] Install it first, for example: ollama pull ${OPENAI_MODEL}"
-    exit 1
+  IMAGE_MODEL="${OLLAMA_IMAGE_MODEL:-}"
+  if [[ -n "${IMAGE_MODEL}" ]]; then
+    if ! CHECK_MODEL="${IMAGE_MODEL}" "${NODE_BINARY}" -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => (input += chunk));
+      process.stdin.on("end", () => {
+        try {
+          const payload = JSON.parse(input);
+          const models = Array.isArray(payload.models) ? payload.models : [];
+          const selected = process.env.CHECK_MODEL || "";
+          const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
+          process.exit(found ? 0 : 1);
+        } catch {
+          process.exit(1);
+        }
+      });
+    ' <<< "${OLLAMA_TAGS_JSON}"; then
+      echo "[daily-local] Image model '${IMAGE_MODEL}' is not installed in Ollama."
+      echo "[daily-local] Install it first, for example: ollama pull ${IMAGE_MODEL}"
+      exit 1
+    fi
+    echo "[daily-local] Image model '${IMAGE_MODEL}' found in Ollama."
   fi
 fi
 

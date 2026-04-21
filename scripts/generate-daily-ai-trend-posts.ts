@@ -83,16 +83,26 @@ const createShouldExcludeHeading =
   (excludedHeadings: string[]) => (text: string) =>
     excludedHeadings.some((excluded) => text.toLowerCase().includes(excluded));
 
+const sanitizeTocText = (text: string): string => {
+  // Remove newlines, limit length, clean up for TOC display
+  return text
+    .replace(/\\n/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
+};
+
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
   return (markdownBody: string, tocHeading: string): string => {
-    // Match H2 and H3 headings
-    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+(.+)$/gm)]
+    // Match H2 and H3 headings - only first line of heading
+    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+([^\n]+)/gm)]
       .map((match: RegExpMatchArray) => ({
         depth: match[1].length,
-        text: (match[2] ?? "").trim(),
+        text: sanitizeTocText(match[2] ?? ""),
       }))
-      .filter((h) => !shouldExclude(h.text))
+      .filter((h) => !shouldExclude(h.text) && h.text.length > 0)
       .map((h) => ({
         ...h,
         anchor: headingToAnchor(h.text),

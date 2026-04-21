@@ -12,6 +12,15 @@ think first, show exact changes, then apply only with approval.
 
 ## Global Safety Rules
 
+### AI Agent Workflow Safety (CRITICAL)
+
+- **NEVER push directly to `main` branch.** The AI agent must ONLY work on the `contents` branch in its fork.
+- **ALWAYS create Pull Requests** from `codex/daily-YYYY-MM-DD` → `contents` (upstream).
+- **Human review is mandatory** - never merge your own PRs without human approval.
+- The AI agent fork has a read-only relationship with upstream `main`.
+
+### General Safety
+
 - Treat `.env`, `.env.local`, `.env.*` as read-only.
 - Never overwrite, recreate, or auto-format `.env.local`.
 - If new env vars are needed, update `README.md` and provide an

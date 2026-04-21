@@ -49,7 +49,7 @@ const EnvSchema = z.object({
   OLLAMA_IMAGE_MODEL: z.string().optional(),
   MFLUX_MODEL: z.string().optional(),
   LM_STUDIO_IMAGE_URL: z.string().optional(),
-  OLLAMA_BASE_URL: z.string().url(),
+  OLLAMA_BASE_URL: z.string().url().optional(),
   TOPIC_HINT: z.string().optional(),
 });
 
@@ -72,7 +72,7 @@ const loadEnvConfig = () => {
     ollamaImageModel: env.OLLAMA_IMAGE_MODEL ?? "",
     mfluxModel: env.MFLUX_MODEL ?? "",
     lmStudioImageUrl: env.LM_STUDIO_IMAGE_URL ?? "",
-    ollamaBaseUrl: env.OLLAMA_BASE_URL.replace(/\/+$/, ""),
+    ollamaBaseUrl: env.OLLAMA_BASE_URL?.replace(/\/+$/, "") ?? "",
   };
 };
 

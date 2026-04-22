@@ -4,6 +4,7 @@ import {
   API_BASE_URL,
   API_KEY,
   MODEL,
+  CONTEXT_LENGTH,
   isOfficialOpenAiBaseUrl,
 } from "./config";
 
@@ -97,26 +98,32 @@ const sendApiRequest = async (
     Pick<CallAiOptions, "responseFormat">,
 ): Promise<CompletionResponse> => {
   const { maxTokens, temperature, responseFormat } = opts;
+  const commonPayload = {
+    model: MODEL,
+    temperature,
+    max_tokens: maxTokens,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+  };
+
+  const isOfficial = isOfficialOpenAiBaseUrl(API_BASE_URL);
+  
+  const providerStrategies = {
+    official: () => (responseFormat ? { response_format: responseFormat } : {}),
+    local: () => ({ num_ctx: CONTEXT_LENGTH }),
+  };
+  
+  const providerPayload = providerStrategies[isOfficial ? "official" : "local"]();
+
   const response = await fetch(`${API_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: MODEL,
-      temperature,
-      max_tokens: maxTokens,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      // Only send response_format for OpenAI official API
-      // Local APIs (Ollama/LM Studio) handle JSON via system prompts
-      ...(responseFormat && isOfficialOpenAiBaseUrl(API_BASE_URL)
-        ? { response_format: responseFormat }
-        : {}),
-    }),
+    body: JSON.stringify({ ...commonPayload, ...providerPayload }),
   });
 
   // Guard: HTTP error (early return pattern)

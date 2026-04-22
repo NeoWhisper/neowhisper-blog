@@ -11,6 +11,7 @@ import {
   keywords as keywordConfig,
   type KeywordBuckets,
 } from "../config/keywords";
+import { DEFAULT_CONTEXT_LENGTH } from "./constants";
 
 const DOTENV_PATH = path.join(process.cwd(), ".env.local");
 const POSTS_DIR = path.join(process.cwd(), "src/content/posts");
@@ -51,6 +52,7 @@ const EnvSchema = z.object({
   LM_STUDIO_IMAGE_URL: z.string().optional(),
   OLLAMA_BASE_URL: z.string().url().optional(),
   TOPIC_HINT: z.string().optional(),
+  OPENAI_CONTEXT_LENGTH: z.string().optional(),
 });
 
 const normalizeKeywordList = (list: string[]) =>
@@ -73,6 +75,9 @@ const loadEnvConfig = () => {
     mfluxModel: env.MFLUX_MODEL ?? "",
     lmStudioImageUrl: env.LM_STUDIO_IMAGE_URL ?? "",
     ollamaBaseUrl: env.OLLAMA_BASE_URL?.replace(/\/+$/, "") ?? "",
+    contextLength: env.OPENAI_CONTEXT_LENGTH
+      ? Number.parseInt(env.OPENAI_CONTEXT_LENGTH, 10)
+      : DEFAULT_CONTEXT_LENGTH,
   };
 };
 
@@ -115,6 +120,7 @@ type RuntimeConfig = {
   mfluxModel: string;
   lmStudioImageUrl: string;
   ollamaBaseUrl: string;
+  contextLength: number;
   feeds: FeedConfig[];
   categoryDefinitions: CategoryConfig[];
   keywords: KeywordBuckets;
@@ -133,6 +139,7 @@ export const runtimeConfig = Object.freeze({
   mfluxModel: envConfig.mfluxModel,
   lmStudioImageUrl: envConfig.lmStudioImageUrl,
   ollamaBaseUrl: envConfig.ollamaBaseUrl,
+  contextLength: envConfig.contextLength,
   feeds: staticConfig.feeds,
   categoryDefinitions: staticConfig.categoryDefinitions,
   keywords: staticConfig.keywords,

@@ -351,14 +351,14 @@ async function retryOutlineGeneration(
 
     const userPrompt = `
 Sources:
-${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}`).join("\n")}
+${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}\n   Summary: ${s.summary || "No summary available"}`).join("\n\n")}
 
 ${constraint}${topicConstraint}
 
 Pattern: ${pattern} - ${template.description}
 Create a structured JSON outline with these exact fields:
 - title_hint (string): Short engaging title
-- slugSuffix (string): kebab-case topic name
+- slugSuffix (string): kebab-case topic name (must directly match the core topic of the title_hint)
 - sections: Array of objects, each with { id: string, title: string, intent: string, targetWordCount: number }
 
 Required section IDs: ${template.requiredIds.join(", ")}
@@ -506,7 +506,8 @@ export async function generateSection(
   const userPrompt = `
 Section ID: ${section.id} (Title: ${section.title})
 Article Outline Context: ${JSON.stringify(outline.sections.map((s) => s.id + ": " + s.title))}
-Sources Data Summary: ${sources.map((s) => s.title).join(", ")}
+Sources Data Summary:
+${sources.map((s, i) => `${i + 1}. [${s.source}] ${s.title}\n   Summary: ${s.summary || "No summary available"}`).join("\n\n")}
 
 CRITICAL: You are generating ONLY the content for the section [${section.id}].
 DO NOT generate the entire article. DO NOT generate content for other sections in the outline.
@@ -514,6 +515,8 @@ DO NOT repeat the article title or generate a "TITLE" line at the start of the s
 If you generate the whole article, the build will fail. ONLY write the section [${section.id}]!
 
 Generate about ${section.targetWordCount} words of detailed technical content.
+Base your content STRICTLY on the facts provided in the "Sources Data Summary". Do NOT extrapolate narrow updates into broad strategy articles.
+Acknowledge when sources are older; do not frame older events as breaking news happening today.
 Use one concrete, grounded example per section when helpful.
 Start exactly with the content for this section, including its markdown heading (e.g. ## ${section.title}).
 

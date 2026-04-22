@@ -115,6 +115,9 @@ If a check is skipped or fails, report it clearly.
   errors.
 - Generated posts must remain source-grounded: avoid unsourced exact
   performance/cost numbers and avoid unverified “we already do this” claims.
+- Forbid the fabrication of version numbers, release dates, or specific feature details not explicitly present in the sources.
+- Do NOT extrapolate narrow news updates into broad strategy articles unless the sources explicitly discuss broad strategy.
+- Acknowledge the age of sources; do not frame older events as breaking news from today.
 
 ## Generation Agent (Draft Creation)
 
@@ -153,7 +156,7 @@ to minimize rework during editorial review.
 **English:**
 
 - Active voice, present tense for descriptions
-- Avoid: "leveraging", "unlocking", "delving", "landscape"
+- Avoid: "leveraging", "unlocking", "delving", "landscape", "inextricably linked", "catastrophically"
 - Prefer: "enables", "reduces", "allows", "simplifies"
 
 **Japanese:**

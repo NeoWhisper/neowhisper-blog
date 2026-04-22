@@ -1,9 +1,10 @@
-export const MAX_TOKENS_PER_RUN = 200000;
-export const DEFAULT_GENERATION_MAX_TOKENS = 6500;
+export const MAX_TOKENS_PER_RUN = 500000;
+export const DEFAULT_GENERATION_MAX_TOKENS = 8192;
 export const JSON_REPAIR_MAX_ATTEMPTS = 3;
 export const MODEL_FETCH_RETRY_ATTEMPTS = 3;
 export const MODEL_FETCH_RETRY_DELAY_MS = 1500;
 export const MODEL_FETCH_TIMEOUT_MS = 300000; // 5 minutes
+export const DEFAULT_CONTEXT_LENGTH = 32768;
 
 
 export const TARGET_WORD_COUNT = 1100;
@@ -105,7 +106,7 @@ CRITICAL OUTPUT RULES:
 
 AdSense Constraints: Write for humans. Prioritize original, substantial, and factual usefulness. Avoid thin filler.
 Truthfulness Constraints:
-- Do not fabricate facts, pricing, benchmarks, latency, scale limits, or customer outcomes.
+- Do not fabricate facts, pricing, benchmarks, latency, scale limits, customer outcomes, version numbers, or release dates.
 - Do not invent exact numbers unless explicitly present in the provided sources.
 - If exact numbers are unavailable, use qualitative phrasing and clearly mark estimates/hypotheses.
 - Distinguish clearly between what is currently available vs roadmap/speculative ideas.
@@ -143,11 +144,13 @@ export const CONTENT_CONSTRAINTS = `
 - NO "Imagine..." framing paragraphs - get straight to the point
 - NO "The landscape is evolving" or similar generic intros
 - NO repetitive "What this means for your team" sections
-- NO "rapidly evolving", "cutting-edge", "groundbreaking" marketing speak
+- NO "rapidly evolving", "cutting-edge", "groundbreaking", "inextricably linked", or "catastrophically" filler language
 - Be specific and concrete - avoid vague statements
 - Each section must add unique value, not repeat previous sections
 - NO generic "TL;DR" followed by near-identical content later
 - NO model comparison tables that just list the same tools repeatedly
 - Focus on substantive analysis, not promotional framing
 - If covering the same topic as recent posts, find a genuinely different angle
+- Do NOT extrapolate narrow news updates into broad strategy articles unless explicitly discussed in the sources
+- Acknowledge if sources are from past months/years; do not frame them as breaking news from today
 `;

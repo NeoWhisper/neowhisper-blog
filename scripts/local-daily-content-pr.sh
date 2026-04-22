@@ -39,6 +39,11 @@ export OPENAI_BASE_URL
 export OPENAI_MODEL
 export OPENAI_API_MODE
 export OPENAI_API_KEY
+export OLLAMA_BASE_URL
+export OLLAMA_IMAGE_MODEL
+export OLLAMA_IMAGE_URL
+export LM_STUDIO_IMAGE_URL
+export MFLUX_MODEL
 
 if [[ -z "${NODE_BINARY}" ]]; then
   echo "[daily-local] Node.js is required but was not found."
@@ -204,9 +209,12 @@ EOF
 
 PR_TITLE="feat(content): daily AI trend draft (${TODAY})"
 echo "[daily-local] Opening PR to ${BASE_BRANCH}..."
+FORK_OWNER="${FORK_OWNER:-neowhisper-ai-bot}"
+UPSTREAM_REPO="${UPSTREAM_REPO:-NeoWhisper/neowhisper-blog}"
 gh pr create \
+  --repo "${UPSTREAM_REPO}" \
   --base "${BASE_BRANCH}" \
-  --head "${PR_BRANCH}" \
+  --head "${FORK_OWNER}:${PR_BRANCH}" \
   --title "${PR_TITLE}" \
   --body-file "${PR_BODY_FILE}" \
   --label enhancement

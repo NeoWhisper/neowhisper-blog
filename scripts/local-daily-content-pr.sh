@@ -211,7 +211,9 @@ PR_TITLE="feat(content): daily AI trend draft (${TODAY})"
 echo "[daily-local] Opening PR to ${BASE_BRANCH}..."
 FORK_OWNER="${FORK_OWNER:-neowhisper-ai-bot}"
 UPSTREAM_REPO="${UPSTREAM_REPO:-NeoWhisper/neowhisper-blog}"
-gh pr create \
+# Use bot token for PR creation against upstream (avoids permission errors)
+PR_GH_TOKEN="${PR_GH_TOKEN:-$(gh auth token --user "${FORK_OWNER}" 2>/dev/null || true)}"
+GH_TOKEN="${PR_GH_TOKEN}" gh pr create \
   --repo "${UPSTREAM_REPO}" \
   --base "${BASE_BRANCH}" \
   --head "${FORK_OWNER}:${PR_BRANCH}" \

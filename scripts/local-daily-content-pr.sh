@@ -11,6 +11,7 @@ AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
 PR_BRANCH_PREFIX="${PR_BRANCH_PREFIX:-daily-ai-content}"
+EXPECTED_GH_USER="${EXPECTED_GH_USER:-neowhisper-ai-bot}"
 
 if [[ -f "${REPO_ROOT}/.env.local" ]]; then
   set -a
@@ -53,6 +54,18 @@ fi
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "[daily-local] gh is not authenticated. Run: gh auth login"
+  exit 1
+fi
+
+GH_CURRENT_USER="$(gh api user --jq .login 2>/dev/null || true)"
+if [[ -z "${GH_CURRENT_USER}" ]]; then
+  echo "[daily-local] Unable to resolve authenticated GitHub user via gh."
+  exit 1
+fi
+
+if [[ "${GH_CURRENT_USER}" != "${EXPECTED_GH_USER}" ]]; then
+  echo "[daily-local] Authenticated GitHub user is '${GH_CURRENT_USER}', expected '${EXPECTED_GH_USER}'."
+  echo "[daily-local] Re-authenticate with: gh auth login --hostname github.com --web"
   exit 1
 fi
 

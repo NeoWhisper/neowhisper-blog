@@ -11,6 +11,7 @@ AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
 PR_BRANCH_PREFIX="${PR_BRANCH_PREFIX:-pattern-content}"
+EXPECTED_GH_USER="${EXPECTED_GH_USER:-neowhisper-ai-bot}"
 
 # Pattern and Category selection
 PATTERN="${PATTERN:-brief}"
@@ -57,6 +58,18 @@ fi
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "[pattern-local] gh is not authenticated. Run: gh auth login"
+  exit 1
+fi
+
+GH_CURRENT_USER="$(gh api user --jq .login 2>/dev/null || true)"
+if [[ -z "${GH_CURRENT_USER}" ]]; then
+  echo "[pattern-local] Unable to resolve authenticated GitHub user via gh."
+  exit 1
+fi
+
+if [[ "${GH_CURRENT_USER}" != "${EXPECTED_GH_USER}" ]]; then
+  echo "[pattern-local] Authenticated GitHub user is '${GH_CURRENT_USER}', expected '${EXPECTED_GH_USER}'."
+  echo "[pattern-local] Re-authenticate with: gh auth login --hostname github.com --web"
   exit 1
 fi
 

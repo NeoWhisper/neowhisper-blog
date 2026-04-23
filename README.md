@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Latest stable release: **v1.14.0**
+> Latest stable release: **v1.15.1**
 > (`dev` may contain unreleased changes; semantic-release cuts the next
 > version when merged to `main`)
 
@@ -253,6 +253,13 @@ Optional options:
 - `--lang=en|ja|ar`: generate only one language variant
 - `TOPIC_HINT="your angle"`: guide the editorial angle for that day
 - `TREND_MIN_SOURCES=2`: temporarily lower required source count (default: `3`)
+- `TREND_RECENT_DAYS=5`: bias source picking toward recent items (default: `3`)
+- `CONTENT_QA_MIN_SCORE=75`: raise/lower the blocking quality threshold (default: `70`)
+- `CONTENT_QA_STRICT=false`: allow PR creation even if QA has blocking issues (default: strict mode on)
+
+Daily PR scripts (`content:daily:pr` and `content:pattern:pr`) now include an
+`Automated QA Results` section sourced from `scripts/logs/content-audit.log` and
+`scripts/logs/content-qa.log`.
 
 Validate config/schema only (no feed fetch, no generation):
 

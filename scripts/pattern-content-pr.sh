@@ -122,35 +122,60 @@ if [[ ! "$PATTERN" =~ ^(brief|tutorial|analysis)$ ]]; then
   exit 1
 fi
 
-# Validate Ollama setup
+# Validate local model server setup
 if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://localhost:* ]]; then
-  OLLAMA_BASE="${OPENAI_BASE_URL%/v1}"
-  OLLAMA_TAGS_JSON="$(curl -fsS "${OLLAMA_BASE}/api/tags" || true)"
-  if [[ -z "${OLLAMA_TAGS_JSON}" ]]; then
-    echo "[pattern-local] Ollama endpoint is not reachable at ${OLLAMA_BASE}."
-    echo "[pattern-local] Start Ollama first (for example: ollama serve)."
-    exit 1
-  fi
+  OPENAI_BASE_TRIMMED="${OPENAI_BASE_URL%/}"
+  OPENAI_MODELS_JSON="$(curl -fsS "${OPENAI_BASE_TRIMMED}/models" || true)"
 
-  if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
-    let input = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => (input += chunk));
-    process.stdin.on("end", () => {
-      try {
-        const payload = JSON.parse(input);
-        const models = Array.isArray(payload.models) ? payload.models : [];
-        const selected = process.env.OPENAI_MODEL || "";
-        const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
-        process.exit(found ? 0 : 1);
-      } catch {
-        process.exit(1);
-      }
-    });
-  ' <<< "${OLLAMA_TAGS_JSON}"; then
-    echo "[pattern-local] Model '${OPENAI_MODEL}' is not installed in Ollama."
-    echo "[pattern-local] Install it first, for example: ollama pull ${OPENAI_MODEL}"
-    exit 1
+  if [[ -n "${OPENAI_MODELS_JSON}" ]]; then
+    if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => (input += chunk));
+      process.stdin.on("end", () => {
+        try {
+          const payload = JSON.parse(input);
+          const models = Array.isArray(payload.data) ? payload.data : [];
+          const selected = process.env.OPENAI_MODEL || "";
+          const found = models.some((m) => m && typeof m.id === "string" && m.id === selected);
+          process.exit(found ? 0 : 1);
+        } catch {
+          process.exit(1);
+        }
+      });
+    ' <<< "${OPENAI_MODELS_JSON}"; then
+      echo "[pattern-local] Model '${OPENAI_MODEL}' was not found at ${OPENAI_BASE_TRIMMED}/models."
+      exit 1
+    fi
+  else
+    OLLAMA_BASE="${OPENAI_BASE_TRIMMED%/v1}"
+    OLLAMA_TAGS_JSON="$(curl -fsS "${OLLAMA_BASE}/api/tags" || true)"
+    if [[ -z "${OLLAMA_TAGS_JSON}" ]]; then
+      echo "[pattern-local] Local model endpoint is not reachable at ${OPENAI_BASE_TRIMMED}."
+      echo "[pattern-local] Start your local OpenAI-compatible server (LM Studio or Ollama) first."
+      exit 1
+    fi
+
+    if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => (input += chunk));
+      process.stdin.on("end", () => {
+        try {
+          const payload = JSON.parse(input);
+          const models = Array.isArray(payload.models) ? payload.models : [];
+          const selected = process.env.OPENAI_MODEL || "";
+          const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
+          process.exit(found ? 0 : 1);
+        } catch {
+          process.exit(1);
+        }
+      });
+    ' <<< "${OLLAMA_TAGS_JSON}"; then
+      echo "[pattern-local] Model '${OPENAI_MODEL}' is not installed on the local Ollama server."
+      echo "[pattern-local] Install it first, for example: ollama pull ${OPENAI_MODEL}"
+      exit 1
+    fi
   fi
 fi
 

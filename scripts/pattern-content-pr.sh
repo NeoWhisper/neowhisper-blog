@@ -11,6 +11,7 @@ AUTO_PUSH_SYNC="${AUTO_PUSH_SYNC:-true}"
 RUN_BUILD_VALIDATION="${RUN_BUILD_VALIDATION:-true}"
 FORCE_GENERATE="${FORCE_GENERATE:-false}"
 PR_BRANCH_PREFIX="${PR_BRANCH_PREFIX:-pattern-content}"
+EXPECTED_GH_USER="${EXPECTED_GH_USER:-neowhisper-ai-bot}"
 
 # Pattern and Category selection
 PATTERN="${PATTERN:-brief}"
@@ -57,6 +58,18 @@ fi
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "[pattern-local] gh is not authenticated. Run: gh auth login"
+  exit 1
+fi
+
+GH_CURRENT_USER="$(gh api user --jq .login 2>/dev/null || true)"
+if [[ -z "${GH_CURRENT_USER}" ]]; then
+  echo "[pattern-local] Unable to resolve authenticated GitHub user via gh."
+  exit 1
+fi
+
+if [[ "${GH_CURRENT_USER}" != "${EXPECTED_GH_USER}" ]]; then
+  echo "[pattern-local] Authenticated GitHub user is '${GH_CURRENT_USER}', expected '${EXPECTED_GH_USER}'."
+  echo "[pattern-local] Re-authenticate with: gh auth login --hostname github.com --web"
   exit 1
 fi
 
@@ -109,35 +122,60 @@ if [[ ! "$PATTERN" =~ ^(brief|tutorial|analysis)$ ]]; then
   exit 1
 fi
 
-# Validate Ollama setup
+# Validate local model server setup
 if [[ "$OPENAI_BASE_URL" == http://127.0.0.1:* || "$OPENAI_BASE_URL" == http://localhost:* ]]; then
-  OLLAMA_BASE="${OPENAI_BASE_URL%/v1}"
-  OLLAMA_TAGS_JSON="$(curl -fsS "${OLLAMA_BASE}/api/tags" || true)"
-  if [[ -z "${OLLAMA_TAGS_JSON}" ]]; then
-    echo "[pattern-local] Ollama endpoint is not reachable at ${OLLAMA_BASE}."
-    echo "[pattern-local] Start Ollama first (for example: ollama serve)."
-    exit 1
-  fi
+  OPENAI_BASE_TRIMMED="${OPENAI_BASE_URL%/}"
+  OPENAI_MODELS_JSON="$(curl -fsS "${OPENAI_BASE_TRIMMED}/models" || true)"
 
-  if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
-    let input = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => (input += chunk));
-    process.stdin.on("end", () => {
-      try {
-        const payload = JSON.parse(input);
-        const models = Array.isArray(payload.models) ? payload.models : [];
-        const selected = process.env.OPENAI_MODEL || "";
-        const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
-        process.exit(found ? 0 : 1);
-      } catch {
-        process.exit(1);
-      }
-    });
-  ' <<< "${OLLAMA_TAGS_JSON}"; then
-    echo "[pattern-local] Model '${OPENAI_MODEL}' is not installed in Ollama."
-    echo "[pattern-local] Install it first, for example: ollama pull ${OPENAI_MODEL}"
-    exit 1
+  if [[ -n "${OPENAI_MODELS_JSON}" ]]; then
+    if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => (input += chunk));
+      process.stdin.on("end", () => {
+        try {
+          const payload = JSON.parse(input);
+          const models = Array.isArray(payload.data) ? payload.data : [];
+          const selected = process.env.OPENAI_MODEL || "";
+          const found = models.some((m) => m && typeof m.id === "string" && m.id === selected);
+          process.exit(found ? 0 : 1);
+        } catch {
+          process.exit(1);
+        }
+      });
+    ' <<< "${OPENAI_MODELS_JSON}"; then
+      echo "[pattern-local] Model '${OPENAI_MODEL}' was not found at ${OPENAI_BASE_TRIMMED}/models."
+      exit 1
+    fi
+  else
+    OLLAMA_BASE="${OPENAI_BASE_TRIMMED%/v1}"
+    OLLAMA_TAGS_JSON="$(curl -fsS "${OLLAMA_BASE}/api/tags" || true)"
+    if [[ -z "${OLLAMA_TAGS_JSON}" ]]; then
+      echo "[pattern-local] Local model endpoint is not reachable at ${OPENAI_BASE_TRIMMED}."
+      echo "[pattern-local] Start your local OpenAI-compatible server (LM Studio or Ollama) first."
+      exit 1
+    fi
+
+    if ! OPENAI_MODEL="${OPENAI_MODEL}" "${NODE_BINARY}" -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => (input += chunk));
+      process.stdin.on("end", () => {
+        try {
+          const payload = JSON.parse(input);
+          const models = Array.isArray(payload.models) ? payload.models : [];
+          const selected = process.env.OPENAI_MODEL || "";
+          const found = models.some((m) => m && typeof m.name === "string" && m.name === selected);
+          process.exit(found ? 0 : 1);
+        } catch {
+          process.exit(1);
+        }
+      });
+    ' <<< "${OLLAMA_TAGS_JSON}"; then
+      echo "[pattern-local] Model '${OPENAI_MODEL}' is not installed on the local Ollama server."
+      echo "[pattern-local] Install it first, for example: ollama pull ${OPENAI_MODEL}"
+      exit 1
+    fi
   fi
 fi
 
@@ -211,6 +249,76 @@ git add src/content/posts
 git commit -m "feat(content): add ${PATTERN} post (${TODAY})"
 git push -u origin "${PR_BRANCH}"
 
+QA_SUMMARY_FILE="$(mktemp)"
+TODAY="${TODAY}" "${NODE_BINARY}" -e '
+const fs = require("node:fs");
+const path = require("node:path");
+const today = process.env.TODAY;
+const root = process.cwd();
+
+const readJsonl = (filePath) => {
+  try {
+    const raw = fs.readFileSync(filePath, "utf8").trim();
+    if (!raw) return [];
+    return raw
+      .split(/\n+/)
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
+const slugPrefix = `ai-it-trend-brief-${today}-`;
+const auditEntries = readJsonl(path.join(root, "scripts/logs/content-audit.log"));
+const qaEntries = readJsonl(path.join(root, "scripts/logs/content-qa.log"));
+
+const latestAudit = auditEntries
+  .filter((entry) => typeof entry.slug === "string" && entry.slug.includes(slugPrefix))
+  .pop();
+const latestQa = qaEntries
+  .filter((entry) => typeof entry.slug === "string" && entry.slug.includes(slugPrefix))
+  .pop();
+
+if (!latestAudit) {
+  console.log("- QA telemetry not found for this run date.");
+  process.exit(0);
+}
+
+console.log(`- Overall quality score: ${latestAudit.qualityScore}/100`);
+if (latestAudit.tokensUsed !== undefined) {
+  console.log(`- Tokens used: ${latestAudit.tokensUsed}`);
+}
+
+const breakdown = latestAudit.scoreBreakdownByLanguage || {};
+const qaByLanguage = latestAudit.qaByLanguage || (latestQa ? latestQa.qaByLanguage : {});
+const langs = Object.keys(breakdown).length > 0
+  ? Object.keys(breakdown)
+  : Object.keys(qaByLanguage || {});
+
+if (langs.length > 0) {
+  console.log("");
+  console.log("Per-language QA:");
+  for (const lang of langs) {
+    const score = breakdown[lang]?.score;
+    const qa = qaByLanguage?.[lang];
+    const issues = Array.isArray(qa?.issues) ? qa.issues : [];
+    const errorCount = issues.filter((issue) => issue.level === "error").length;
+    const warnCount = issues.filter((issue) => issue.level === "warn").length;
+    const status = qa?.pass === false ? "FAIL" : "PASS";
+    const scoreText = score === undefined ? "n/a" : `${score}/100`;
+    console.log(`- ${lang.toUpperCase()}: ${status} | score ${scoreText} | errors ${errorCount} | warnings ${warnCount}`);
+  }
+}
+' > "${QA_SUMMARY_FILE}"
+QA_SUMMARY="$(cat "${QA_SUMMARY_FILE}")"
+
 PR_BODY_FILE="$(mktemp)"
 cat > "${PR_BODY_FILE}" <<EOF
 ## Summary
@@ -242,6 +350,10 @@ Automated pattern-based content generation using ${PATTERN} structure.
 - [x] Cross-language versions are aligned in meaning
 - [x] Language-specific links include correct query params where needed (\`?lang=ja\`, \`?lang=ar\`)
 
+## Automated QA Results
+
+${QA_SUMMARY}
+
 ## Notes
 
 - Generated by \`scripts/pattern-content-pr.sh\` using local model backend.
@@ -259,4 +371,5 @@ gh pr create \
   --label enhancement
 
 rm -f "${PR_BODY_FILE}"
+rm -f "${QA_SUMMARY_FILE}"
 echo "[pattern-local] Done."

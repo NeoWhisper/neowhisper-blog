@@ -70,6 +70,7 @@ TODO.md
 # Operational/deployment docs (personal configuration - not part of template)
 DNS-SETUP-CHECKLIST.md
 scripts/logs/*.json
+scripts/logs/*.log
 
 # Claude Code local instructions – keep private
 CLAUDE.md

@@ -1,8 +1,9 @@
 name: Daily AI Content Drafts
 
 on:
-  schedule:
-    - cron: "30 0 * * *" # Daily at 00:30 UTC (09:30 JST)
+  # Schedule disabled - running locally only
+  # schedule:
+  #   - cron: "30 0 * * *" # Daily at 00:30 UTC (09:30 JST)
   workflow_dispatch:
     inputs:
       force:
@@ -23,6 +24,17 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: AI Agent Safety Check
+        run: |
+          echo " Running AI Agent Safety Check..."
+          # Prevent accidental pushes to main by the AI agent
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo " BLOCKED: AI agent cannot push directly to main branch"
+            echo "   AI agents must create PRs to 'contents' branch only."
+            exit 1
+          fi
+          echo " Safety check passed - not targeting main branch"
+
       - name: Checkout contents branch
         uses: actions/checkout@v6
         with:
@@ -44,6 +56,8 @@ jobs:
           OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL || 'https://api.openai.com/v1' }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
           OPENAI_API_MODE: ${{ vars.OPENAI_API_MODE || 'auto' }}
+          CONTENT_QA_MIN_SCORE: ${{ vars.CONTENT_QA_MIN_SCORE || '70' }}
+          CONTENT_QA_STRICT: ${{ vars.CONTENT_QA_STRICT || 'true' }}
           TOPIC_HINT: ${{ github.event.inputs.topic_hint || '' }}
           FORCE_INPUT: ${{ github.event.inputs.force || 'false' }}
         run: |
@@ -62,6 +76,84 @@ jobs:
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Build QA summary for PR body
+        id: qa_summary
+        if: steps.detect_changes.outputs.has_changes == 'true'
+        run: |
+          node - <<'NODE' > /tmp/qa-summary.md
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const root = process.cwd();
+          const today = new Date().toISOString().slice(0, 10);
+          const slugPrefix = `ai-it-trend-brief-${today}-`;
+
+          const readJsonl = (filePath) => {
+            try {
+              const raw = fs.readFileSync(filePath, "utf8").trim();
+              if (!raw) return [];
+              return raw
+                .split(/\n+/)
+                .map((line) => {
+                  try {
+                    return JSON.parse(line);
+                  } catch {
+                    return null;
+                  }
+                })
+                .filter(Boolean);
+            } catch {
+              return [];
+            }
+          };
+
+          const auditEntries = readJsonl(path.join(root, "scripts/logs/content-audit.log"));
+          const qaEntries = readJsonl(path.join(root, "scripts/logs/content-qa.log"));
+
+          const latestAudit = auditEntries
+            .filter((entry) => typeof entry.slug === "string" && entry.slug.includes(slugPrefix))
+            .pop();
+          const latestQa = qaEntries
+            .filter((entry) => typeof entry.slug === "string" && entry.slug.includes(slugPrefix))
+            .pop();
+
+          if (!latestAudit) {
+            console.log("- QA telemetry not found for this run date.");
+            process.exit(0);
+          }
+
+          console.log(`- Overall quality score: ${latestAudit.qualityScore}/100`);
+          if (latestAudit.tokensUsed !== undefined) {
+            console.log(`- Tokens used: ${latestAudit.tokensUsed}`);
+          }
+
+          const breakdown = latestAudit.scoreBreakdownByLanguage || {};
+          const qaByLanguage = latestAudit.qaByLanguage || (latestQa ? latestQa.qaByLanguage : {});
+          const langs = Object.keys(breakdown).length > 0
+            ? Object.keys(breakdown)
+            : Object.keys(qaByLanguage || {});
+
+          if (langs.length > 0) {
+            console.log("");
+            console.log("Per-language QA:");
+            for (const lang of langs) {
+              const score = breakdown[lang]?.score;
+              const qa = qaByLanguage?.[lang];
+              const issues = Array.isArray(qa?.issues) ? qa.issues : [];
+              const errorCount = issues.filter((issue) => issue.level === "error").length;
+              const warnCount = issues.filter((issue) => issue.level === "warn").length;
+              const status = qa?.pass === false ? "FAIL" : "PASS";
+              const scoreText = score === undefined ? "n/a" : `${score}/100`;
+              console.log(`- ${lang.toUpperCase()}: ${status} | score ${scoreText} | errors ${errorCount} | warnings ${warnCount}`);
+            }
+          }
+          NODE
+
+          {
+            echo 'value<<EOF'
+            cat /tmp/qa-summary.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build validation
         if: steps.detect_changes.outputs.has_changes == 'true'
@@ -101,6 +193,10 @@ jobs:
             - [x] Excerpt length and clarity are appropriate for previews
             - [x] Cross-language versions are aligned in meaning
             - [x] Language-specific links include correct query params where needed (`?lang=ja`, `?lang=ar`)
+
+            ## Automated QA Results
+
+            ${{ steps.qa_summary.outputs.value }}
 
             ## Notes
 

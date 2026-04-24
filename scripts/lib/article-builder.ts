@@ -309,7 +309,7 @@ const structuresMatch = (
 
 const LANGUAGE_TRANSLATION_RULES: Partial<Record<LanguageCode, string>> = {
   ja: "Output ONLY Japanese. Do not include English, Chinese, or Arabic sentences except product names and URLs. Translate 'TL;DR' to '要約' and 'Highlights' or 'Key Features' to '主なハイライト' if they appear.",
-  ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs. Translate 'TL;DR' to 'الخلاصة' and 'Highlights' or 'Key Features' to 'أبرز المميزات' if they appear.",
+  ar: "Output ONLY Modern Standard Arabic (الفصحى). Do not include Chinese, Japanese, or English sentences except product names and URLs. Translate 'TL;DR' to 'الخلاصة' and 'Highlights' or 'Key Features' to 'أبرز المميزات' if they appear. STYLE RULES: Use concise, clear sentences. Split long English clauses into 2-3 shorter Arabic sentences. Avoid over-literal translation. Use natural Arabic connectors (لذلك، لهذا السبب، بالمقابل، على سبيل المثال). Keep technical terms (tRPC, API) in English but write Arabic text around them naturally.",
 };
 
 // Pattern lookup table (DeMarco: data over control flow)
@@ -493,7 +493,7 @@ export async function generateSection(
       'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.',
     conclusion:
       'Add a concise "What this means for your team" section with 2-3 actionable bullets. USE HYPHENS (-) FOR ALL BULLETS.',
-    tldr: 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. Wrap the ENTIRE TL;DR (after the H2 heading) inside a <Callout type="tldr">...your list...</Callout> JSX tag. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.',
+    tldr: 'Create an ultra-concise TL;DR section with 3-4 bullet points and emojis (⚡, 🔍, 🎯, 🚀). CRITICAL: USE HYPHENS (-) FOR BULLETS, NOT MIDDLE DOTS (•). Each point MUST include an outcome clause showing "why it matters" for CTOs, PMs, or engineering leads. After the H2 heading, add a blank line, then wrap the bullet list inside EXACTLY: <Callout type="tldr">\n\n- bullet1\n- bullet2\n\n</Callout>. DO NOT use "type = tldr" syntax. DO NOT generate introductory text like "Here is the TL;DR:" inside the callout.',
     intro:
       'Write a direct, factual opening paragraph. NO "Imagine..." framing. Get straight to the point. Keep paragraphs short (3-4 sentences max).',
     default:

@@ -83,16 +83,26 @@ const createShouldExcludeHeading =
   (excludedHeadings: string[]) => (text: string) =>
     excludedHeadings.some((excluded) => text.toLowerCase().includes(excluded));
 
+const sanitizeTocText = (text: string): string => {
+  // Remove newlines, limit length, clean up for TOC display
+  return text
+    .replace(/\\n/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
+};
+
 const createGenerateToc = (excludedHeadings: string[]) => {
   const shouldExclude = createShouldExcludeHeading(excludedHeadings);
   return (markdownBody: string, tocHeading: string): string => {
-    // Match H2 and H3 headings
-    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+(.+)$/gm)]
+    // Match H2 and H3 headings - only first line of heading
+    const headings = [...markdownBody.matchAll(/^(#{2,3})\s+([^\n]+)/gm)]
       .map((match: RegExpMatchArray) => ({
         depth: match[1].length,
-        text: (match[2] ?? "").trim(),
+        text: sanitizeTocText(match[2] ?? ""),
       }))
-      .filter((h) => !shouldExclude(h.text))
+      .filter((h) => !shouldExclude(h.text) && h.text.length > 0)
       .map((h) => ({
         ...h,
         anchor: headingToAnchor(h.text),
@@ -155,8 +165,53 @@ const getCategoryDisplayName = (
   return String(category[keyByLang[lang]]);
 };
 
+type QualityBreakdown = {
+  score: number;
+  readabilityScore: number;
+  structureScore: number;
+  seoScore: number;
+  lengthScore: number;
+  avgSentenceLength: number;
+  headingCount: number;
+  listCount: number;
+  linkCount: number;
+  wordCount: number;
+};
+
+type QaIssue = {
+  level: "error" | "warn";
+  code:
+    | "LOW_SCORE"
+    | "TOC_ANCHOR_MISMATCH"
+    | "MIDDLE_DOT_BULLETS"
+    | "TLDR_FORMAT"
+    | "CROSS_LANGUAGE_ARTIFACT"
+    | "UNSOURCED_EXACT_CLAIM";
+  message: string;
+};
+
+type QaResult = {
+  pass: boolean;
+  issues: QaIssue[];
+};
+
+type PreparedVariant = {
+  lang: LanguageCode;
+  finalBody: string;
+  toc: string;
+  title: string;
+  excerpt: string;
+  quality: QualityBreakdown;
+};
+
+const QA_MIN_SCORE = Number.parseInt(
+  process.env.CONTENT_QA_MIN_SCORE ?? "70",
+  10,
+);
+const QA_STRICT = (process.env.CONTENT_QA_STRICT ?? "true") !== "false";
+
 // Content quality scoring (Phase 3)
-const calculateQualityScore = (content: string): number => {
+const calculateQualityBreakdown = (content: string): QualityBreakdown => {
   const metrics = {
     // Readability: penalize long sentences
     avgSentenceLength:
@@ -183,7 +238,20 @@ const calculateQualityScore = (content: string): number => {
   const lengthScore =
     metrics.wordCount >= 800 ? 20 : (metrics.wordCount / 800) * 20;
 
-  return Math.round(readabilityScore + structureScore + seoScore + lengthScore);
+  return {
+    score: Math.round(
+      readabilityScore + structureScore + seoScore + lengthScore,
+    ),
+    readabilityScore,
+    structureScore,
+    seoScore,
+    lengthScore,
+    avgSentenceLength: metrics.avgSentenceLength,
+    headingCount: metrics.hasHeadings,
+    listCount: metrics.hasLists,
+    linkCount: metrics.internalLinks,
+    wordCount: metrics.wordCount,
+  };
 };
 
 // Audit trail logging (Phase 3)
@@ -191,6 +259,110 @@ const AUDIT_LOG_PATH = path.join(
   process.cwd(),
   "scripts/logs/content-audit.log",
 );
+const QA_LOG_PATH = path.join(process.cwd(), "scripts/logs/content-qa.log");
+
+const headingAnchors = (body: string): Set<string> =>
+  new Set(
+    [...body.matchAll(/^(#{2,3})\s+([^\n]+)/gm)].map((match) =>
+      headingToAnchor((match[2] ?? "").trim()),
+    ),
+  );
+
+const tocAnchors = (toc: string): Set<string> =>
+  new Set(
+    [...toc.matchAll(/\[[^\]]+\]\(#([^)]+)\)/g)].map((match) =>
+      (match[1] ?? "").trim(),
+    ),
+  );
+
+const findUnsourcedExactClaims = (
+  body: string,
+  sources: RankedSource[],
+): string[] => {
+  const sourceText = sources
+    .map((s) => `${s.title} ${s.summary ?? ""}`.toLowerCase())
+    .join(" ");
+  const claims = [
+    ...body.matchAll(
+      /\b\d+(?:\.\d+)?\s?(?:%|ms|s|seconds?|minutes?|hours?|k|m|b|users?|requests?)\b/gi,
+    ),
+  ].map((match) => (match[0] ?? "").trim());
+  return [...new Set(claims)].filter(
+    (claim) => claim && !sourceText.includes(claim.toLowerCase()),
+  );
+};
+
+const hasCrossLanguageArtifact = (lang: LanguageCode, body: string): boolean => {
+  if (lang === "ar") return /[\u3040-\u30ff\u4e00-\u9fff]/u.test(body);
+  if (lang === "ja") return /[\u0600-\u06ff]/u.test(body);
+  return false;
+};
+
+const runDeterministicQa = (
+  variant: PreparedVariant,
+  sourcePool: RankedSource[],
+): QaResult => {
+  const issues: QaIssue[] = [];
+  const anchorsInBody = headingAnchors(variant.finalBody);
+  const anchorsInToc = tocAnchors(variant.toc);
+  const missingAnchors = [...anchorsInToc].filter(
+    (anchor) => !anchorsInBody.has(anchor),
+  );
+
+  if (missingAnchors.length > 0) {
+    issues.push({
+      level: "error",
+      code: "TOC_ANCHOR_MISMATCH",
+      message: `TOC anchors missing in body: ${missingAnchors.join(", ")}`,
+    });
+  }
+
+  if (variant.finalBody.includes("•")) {
+    issues.push({
+      level: "error",
+      code: "MIDDLE_DOT_BULLETS",
+      message: "Found forbidden middle-dot bullets (•). Use hyphens (-).",
+    });
+  }
+
+  if (
+    variant.finalBody.includes('<Callout type="tldr">') &&
+    !/<Callout type="tldr">\n\n- /m.test(variant.finalBody)
+  ) {
+    issues.push({
+      level: "warn",
+      code: "TLDR_FORMAT",
+      message: "TL;DR callout format does not match expected style.",
+    });
+  }
+
+  if (hasCrossLanguageArtifact(variant.lang, variant.finalBody)) {
+    issues.push({
+      level: "error",
+      code: "CROSS_LANGUAGE_ARTIFACT",
+      message: `Detected cross-language artifact in ${variant.lang} output.`,
+    });
+  }
+
+  const unsourcedClaims = findUnsourcedExactClaims(variant.finalBody, sourcePool);
+  if (unsourcedClaims.length > 0) {
+    issues.push({
+      level: "warn",
+      code: "UNSOURCED_EXACT_CLAIM",
+      message: `Potential unsourced exact claims: ${unsourcedClaims.slice(0, 5).join(", ")}`,
+    });
+  }
+
+  if (variant.quality.score < QA_MIN_SCORE) {
+    issues.push({
+      level: "error",
+      code: "LOW_SCORE",
+      message: `Quality score ${variant.quality.score} is below threshold ${QA_MIN_SCORE}.`,
+    });
+  }
+
+  return { pass: issues.every((issue) => issue.level !== "error"), issues };
+};
 
 const appendAuditLog = async (entry: {
   timestamp: string;
@@ -198,11 +370,28 @@ const appendAuditLog = async (entry: {
   languages: string[];
   qualityScore: number;
   sources: string[];
+  scoreBreakdownByLanguage?: Record<string, QualityBreakdown>;
+  qaByLanguage?: Record<string, QaResult>;
   tokensUsed: number;
   model: string;
 }): Promise<void> => {
   const logLine = JSON.stringify(entry) + "\n";
+  await fs.mkdir(path.dirname(AUDIT_LOG_PATH), { recursive: true }).catch(() => {
+    // Intentionally ignore logging setup failures.
+  });
   await fs.appendFile(AUDIT_LOG_PATH, logLine).catch(() => {});
+};
+
+const appendQaLog = async (entry: {
+  timestamp: string;
+  slug: string;
+  qaByLanguage: Record<string, QaResult>;
+}): Promise<void> => {
+  const logLine = JSON.stringify(entry) + "\n";
+  await fs.mkdir(path.dirname(QA_LOG_PATH), { recursive: true }).catch(() => {
+    // Intentionally ignore logging setup failures.
+  });
+  await fs.appendFile(QA_LOG_PATH, logLine).catch(() => {});
 };
 
 const writePostFile = async (filePath: string, doc: string): Promise<void> =>
@@ -556,61 +745,102 @@ async function main() {
   );
   const coverImage = generatedCoverImage ?? COVER_IMAGE;
 
+  const preparedVariants = targetLanguages.map((lang: LanguageCode) => {
+    const meta = LANGUAGE_LABELS[lang];
+    const localized = content[lang] as LocalizedContent;
+    const finalBody = sanitizeGeneratedMarkdown(
+      Object.values(localized.sections).join("\n\n"),
+    );
+    const toc = generateToc(finalBody, meta.tocHeading);
+    const fallbackTitle = normalizeMetadataText(
+      content.en.title,
+      "Daily AI Trend Brief",
+    );
+    const title = normalizeMetadataText(localized.title, fallbackTitle);
+    const excerptFallback =
+      finalBody
+        .split("\n")
+        .find((line) => line.trim() && !line.startsWith("#"))
+        ?.trim() ?? "";
+    const excerpt = normalizeExcerptText(localized.excerpt, excerptFallback);
+    const quality = calculateQualityBreakdown(finalBody);
+
+    return {
+      lang,
+      finalBody,
+      toc,
+      title,
+      excerpt,
+      quality,
+    } satisfies PreparedVariant;
+  });
+
+  const enVariant =
+    preparedVariants.find((variant) => variant.lang === "en") ??
+    preparedVariants[0];
+
+  const canonicalRefs = ranked.filter((source) => {
+    const bodyLower = enVariant.finalBody.toLowerCase();
+    return (
+      bodyLower.includes(source.title.toLowerCase().split(" ").slice(0, 3).join(" ")) ||
+      bodyLower.includes(new URL(source.url).hostname.toLowerCase())
+    );
+  });
+  const finalCanonicalRefs =
+    canonicalRefs.length > 0 ? canonicalRefs : ranked.slice(0, 2);
+  const canonicalSourceUrls = finalCanonicalRefs.map((ref) => ref.url);
+
+  const qaByLanguage: Record<string, QaResult> = {};
+  const scoreBreakdownByLanguage: Record<string, QualityBreakdown> = {};
+
+  for (const variant of preparedVariants) {
+    scoreBreakdownByLanguage[variant.lang] = variant.quality;
+    qaByLanguage[variant.lang] = runDeterministicQa(variant, ranked);
+  }
+
+  const failedLanguages = Object.entries(qaByLanguage)
+    .filter(([, result]) => !result.pass)
+    .map(([lang]) => lang);
+
+  if (failedLanguages.length > 0) {
+    await appendQaLog({
+      timestamp: new Date().toISOString(),
+      slug: baseSlug,
+      qaByLanguage,
+    });
+    if (QA_STRICT) {
+      throw new Error(
+        `CONTENT_QA_STRICT gate failed for languages: ${failedLanguages.join(", ")}. See scripts/logs/content-qa.log`,
+      );
+    }
+    console.warn(
+      `[daily-trends] QA gate reported blocking issues for: ${failedLanguages.join(", ")} (continuing because CONTENT_QA_STRICT=false)`,
+    );
+  }
+
   await Promise.all(
-    targetLanguages.map(async (lang: LanguageCode) => {
-      const meta = LANGUAGE_LABELS[lang];
-      const localized = content[lang] as LocalizedContent;
-      const finalBody = sanitizeGeneratedMarkdown(
-        Object.values(localized.sections).join("\n\n"),
-      );
-      const toc = generateToc(finalBody, meta.tocHeading);
-      const fallbackTitle = normalizeMetadataText(
-        content.en.title,
-        "Daily AI Trend Brief",
-      );
-      const title = normalizeMetadataText(localized.title, fallbackTitle);
-      const excerptFallback =
-        finalBody
-          .split("\n")
-          .find((line) => line.trim() && !line.startsWith("#"))
-          ?.trim() ?? "";
-      const excerpt = normalizeExcerptText(localized.excerpt, excerptFallback);
-
-      // Filter references to only include sources actually cited in content
-      const bodyLower = finalBody.toLowerCase();
-      const relevantRefs = ranked.filter(
-        (s) =>
-          bodyLower.includes(
-            s.title.toLowerCase().split(" ").slice(0, 3).join(" "),
-          ) || bodyLower.includes(new URL(s.url).hostname.toLowerCase()),
-      );
-      // Fallback to first source if none explicitly cited
-      const finalRefs =
-        relevantRefs.length > 0 ? relevantRefs : ranked.slice(0, 2);
-      const referencesSection = finalRefs
-        .map((s) => `- [${sanitizeGeneratedMarkdown(s.title)}](${s.url})`)
+    preparedVariants.map(async (variant) => {
+      const meta = LANGUAGE_LABELS[variant.lang];
+      const referencesSection = finalCanonicalRefs
+        .map(
+          (source) => `- [${sanitizeGeneratedMarkdown(source.title)}](${source.url})`,
+        )
         .join("\n");
-
-      // Calculate quality score for this language variant
-      const qualityScore = calculateQualityScore(finalBody);
-
-      // Extract source URLs for attribution
-      const sourceAttribution = finalRefs.map((r) => r.url);
 
       const doc = sanitizeGeneratedMarkdown(
         [
           ...buildFrontmatter({
-            title,
-            excerpt,
-            categoryName: getCategoryDisplayName(category, lang),
+            title: variant.title,
+            excerpt: variant.excerpt,
+            categoryName: getCategoryDisplayName(category, variant.lang),
             dateString,
             coverImage,
-            qualityScore,
-            sources: sourceAttribution,
+            qualityScore: variant.quality.score,
+            sources: canonicalSourceUrls,
           }),
           "",
-          toc,
-          finalBody,
+          variant.toc,
+          variant.finalBody,
           "",
           meta.referencesHeading,
           "",
@@ -618,7 +848,6 @@ async function main() {
         ].join("\n"),
       );
 
-      // Write to posts directory
       const filePath = path.join(
         POSTS_DIR,
         `${baseSlug}${meta.fileSuffix}.mdx`,
@@ -629,11 +858,8 @@ async function main() {
 
   // Calculate overall quality score (average across all languages)
   const overallQualityScore = Math.round(
-    targetLanguages.reduce((sum, lang) => {
-      const localized = content[lang] as LocalizedContent;
-      const body = Object.values(localized.sections).join("\n\n");
-      return sum + calculateQualityScore(body);
-    }, 0) / targetLanguages.length,
+    preparedVariants.reduce((sum, variant) => sum + variant.quality.score, 0) /
+      preparedVariants.length,
   );
 
   // Append audit trail entry (Phase 3 compliance)
@@ -642,7 +868,9 @@ async function main() {
     slug: baseSlug,
     languages: targetLanguages,
     qualityScore: overallQualityScore,
-    sources: ranked.slice(0, 5).map((s) => s.url),
+    sources: canonicalSourceUrls,
+    scoreBreakdownByLanguage,
+    qaByLanguage,
     tokensUsed: AiState.totalTokensUsed,
     model: MODEL,
   });

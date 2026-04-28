@@ -547,7 +547,6 @@ export default function BlogPostTemplate({
                 url={resolvedCanonicalUrl}
               />
             </div>
-
             {/* Bottom Ad Unit */}
             {showAd && (
               <div className="mt-8">

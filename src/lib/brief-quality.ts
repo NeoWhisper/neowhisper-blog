@@ -61,7 +61,6 @@ export function isLowValueBriefPost(slug: string, content: string): boolean {
   if (!isBrief) return false;
 
   const wordCount = countPostWords(slug, content);
-
   // Business rule: sub-threshold AI trend brief posts should not be indexed.
   return wordCount < EFFECTIVE_BRIEF_NOINDEX_THRESHOLD;
 }

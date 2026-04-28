@@ -34,8 +34,10 @@ export default function Search({ posts, lang }: SearchProps) {
   const t = labels[currentLang];
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<(HTMLAnchorElement | null)[]>([]);
 
   // Initialize Fuse.js
   const fuse = useMemo(() => {
@@ -56,23 +58,60 @@ export default function Search({ posts, lang }: SearchProps) {
     return fuse.search(query).slice(0, 8); // Limit to 8 results
   }, [query, fuse]);
 
-  // Handle keyboard shortcut (Cmd/Ctrl + K)
+  // Reset selection when results change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: reset selection when query changes
+    setSelectedIndex(-1);
+  }, [query]);
+
+  // Handle keyboard shortcuts and navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setIsOpen(true);
-        inputRef.current?.focus();
+        setTimeout(() => inputRef.current?.focus(), 100);
+        return;
       }
       if (e.key === "Escape") {
         setIsOpen(false);
         setQuery("");
+        setSelectedIndex(-1);
+        return;
+      }
+
+      if (!isOpen || results.length === 0) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setSelectedIndex((prev) => {
+            const next = prev < results.length - 1 ? prev + 1 : 0;
+            resultsRef.current[next]?.scrollIntoView({ block: "nearest" });
+            return next;
+          });
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setSelectedIndex((prev) => {
+            const next = prev > 0 ? prev - 1 : results.length - 1;
+            resultsRef.current[next]?.scrollIntoView({ block: "nearest" });
+            return next;
+          });
+          break;
+        case "Enter":
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < results.length) {
+            const selectedPost = results[selectedIndex].item;
+            window.location.href = `/blog/${encodeURIComponent(selectedPost.slug)}`;
+          }
+          break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen, results, selectedIndex]);
 
   // Close search when clicking outside
   useEffect(() => {
@@ -143,16 +182,23 @@ export default function Search({ posts, lang }: SearchProps) {
                   <p className="text-sm">{t.noResults}</p>
                 </div>
               ) : (
-                <ul className="space-y-1">
-                  {results.map(({ item }) => (
-                    <li key={item.slug}>
+                <ul className="space-y-1" role="listbox">
+                  {results.map(({ item }, index) => (
+                    <li key={item.slug} role="option" aria-selected={selectedIndex === index}>
                       <Link
+                        ref={(el) => { resultsRef.current[index] = el; }}
                         href={`/blog/${encodeURIComponent(item.slug)}`}
                         onClick={() => {
                           setIsOpen(false);
                           setQuery("");
+                          setSelectedIndex(-1);
                         }}
-                        className="block rounded-lg p-3 transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        onMouseEnter={() => setSelectedIndex(index)}
+                        className={`block rounded-lg p-3 transition-colors ${
+                          selectedIndex === index
+                            ? "bg-purple-100 dark:bg-purple-900/30"
+                            : "hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        }`}
                       >
                         <div className="flex items-start gap-3">
                           {item.coverImage && (

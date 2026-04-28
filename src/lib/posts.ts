@@ -139,10 +139,10 @@ export function getPrevNextPosts(currentSlug: string): {
 
   const currentLanguage = getPostLanguage(currentSlug);
 
-  // Filter posts by same language, excluding current post
+  // Filter posts by same language (include current post to find its position)
   const sameLangPosts = allPosts.filter((post) => {
     const postLanguage = getPostLanguage(post.slug);
-    return post.slug !== currentSlug && postLanguage === currentLanguage;
+    return postLanguage === currentLanguage;
   });
 
   // Sort by date (newest first)
@@ -155,14 +155,18 @@ export function getPrevNextPosts(currentSlug: string): {
     (post) => post.slug === currentSlug,
   );
 
+  if (currentIndex === -1) {
+    return { prev: null, next: null };
+  }
+
+  // Prev post is newer (index - 1)
+  const prev = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+
   // Next post is older (index + 1)
   const next =
     currentIndex < sortedPosts.length - 1
       ? sortedPosts[currentIndex + 1]
       : null;
-
-  // Prev post is newer (index - 1)
-  const prev = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
   return { prev, next };
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
+import ThemeToggle from "./ThemeToggle";
 
 type NavKey = "services" | "projects" | "roadmap" | "blog" | "about" | "contact";
 
@@ -73,36 +74,41 @@ export default function SiteHeader() {
           NeoWhisper
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.15em] text-gray-600 dark:text-gray-300 md:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={withLang(item.href, currentLang)}
-              className={`rounded-full border px-3 py-1 transition-all duration-300 hover:-translate-y-0.5 ${isActive(item.href)
-                ? "border-purple-500 bg-purple-500 text-white shadow-lg shadow-purple-500/20"
-                : "border-white/20 bg-white/50 hover:bg-white dark:border-white/10 dark:bg-white/5"
-                }`}
-            >
-              {labels[item.key]}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex items-center gap-3">
+          {/* Desktop Navigation */}
+          <nav className="hidden items-center gap-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-600 dark:text-gray-300 md:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={withLang(item.href, currentLang)}
+                className={`rounded-full border px-3 py-1 transition-all duration-300 hover:-translate-y-0.5 ${isActive(item.href)
+                  ? "border-purple-500 bg-purple-500 text-white shadow-lg shadow-purple-500/20"
+                  : "border-white/20 bg-white/50 hover:bg-white dark:border-white/10 dark:bg-white/5"
+                  }`}
+              >
+                {labels[item.key]}
+              </Link>
+            ))}
+          </nav>
 
-        {/* Mobile Navigation (Pills) */}
-        <div className="flex flex-wrap items-center gap-2 md:hidden">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={withLang(item.href, currentLang)}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${isActive(item.href)
-                ? "border-purple-600 bg-purple-600 text-white"
-                : "border-white/20 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-                }`}
-            >
-              {labels[item.key]}
-            </Link>
-          ))}
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Mobile Navigation Toggle (simplified) */}
+          <div className="flex items-center gap-2 md:hidden">
+            {navItems.slice(0, 4).map((item) => (
+              <Link
+                key={item.href}
+                href={withLang(item.href, currentLang)}
+                className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors ${isActive(item.href)
+                  ? "border-purple-600 bg-purple-600 text-white"
+                  : "border-white/20 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                  }`}
+              >
+                {labels[item.key]}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </header>

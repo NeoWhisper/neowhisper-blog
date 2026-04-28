@@ -174,12 +174,19 @@ function canonicalRedirectUrl(request: NextRequest): URL | null {
   const canonical = new URL(SITE_URL);
   const requestedHost = hostHeader.toLowerCase();
   const canonicalHost = canonical.host.toLowerCase();
+  const requestProtocol = request.nextUrl.protocol.toLowerCase();
+  const canonicalProtocol = canonical.protocol.toLowerCase();
 
-  if (requestedHost === canonicalHost) {
+  // Check if protocol or host needs normalization
+  const needsProtocolRedirect = requestProtocol !== canonicalProtocol;
+  const needsHostRedirect = requestedHost !== canonicalHost;
+
+  if (!needsProtocolRedirect && !needsHostRedirect) {
     return null;
   }
 
-  // Keep path/query intact; normalize only scheme + host to canonical.
+  // Single redirect: normalize both protocol and host in one hop
+  // This prevents redirect chains (e.g., http://example.com → https://example.com → https://www.example.com)
   const url = request.nextUrl.clone();
   url.protocol = canonical.protocol;
   url.hostname = canonical.hostname;

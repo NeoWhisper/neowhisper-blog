@@ -11,30 +11,38 @@ const copy = {
   en: {
     label: "Projects",
     title: "Selected Work",
-    subtitle:
-      "Product experiments, client builds, and multi-platform releases.",
+    subtitle: "Shipped projects and products in production.",
     intro:
-      "Selected shipped projects by NEO WHISPER, a registered IT services sole proprietorship in Tokyo (since Dec 2025).",
+      "Live projects by NEO WHISPER, a registered IT services sole proprietorship in Tokyo.",
     back: "Back to Home",
     planned: "Planned",
+    liveSection: "Live Projects",
+    plannedSection: "Coming Soon",
+    plannedIntro: "Projects currently in development or planning phase.",
   },
   ja: {
     label: "プロジェクト",
     title: "選定プロジェクト",
-    subtitle: "プロダクト開発、クライアント案件、マルチプラットフォーム対応。",
+    subtitle: "リリース済みのプロジェクトと製品。",
     intro:
-      "NEO WHISPER（2025年12月に東京都港区にて開業したITサービス個人事業主）による、ローンチ済みの実績一覧。",
+      "NEO WHISPER（東京都港区のITサービス個人事業主）による、本番環境で稼働中のプロジェクト。",
     back: "ホームへ戻る",
     planned: "準備中",
+    liveSection: "稼働中のプロジェクト",
+    plannedSection: "開発中",
+    plannedIntro: "現在開発または計画中のプロジェクト。",
   },
   ar: {
     label: "المشاريع",
     title: "أعمال مختارة",
-    subtitle: "منتجات وتجارب ومشاريع متعددة المنصات.",
+    subtitle: "المشاريع والمنتجات المنشورة.",
     intro:
-      "مجموعة من المشاريع المنفذة بواسطة نيو ويسبر (NEO WHISPER)، وهي مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو (منذ ديسمبر 2025).",
+      "المشاريع الحية من نيو ويسبر (NEO WHISPER)، وهي مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو.",
     back: "العودة للرئيسية",
     planned: "قريبًا",
+    liveSection: "المشاريع الحية",
+    plannedSection: "قريباً",
+    plannedIntro: "المشاريع قيد التطوير أو التخطيط حالياً.",
   },
 } as const;
 
@@ -152,78 +160,122 @@ export default async function ProjectsPage({
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {projects.map((project) => (
-            <article
-              key={project.title}
-              className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${project.status === "planned"
-                ? "opacity-60 grayscale"
-                : "hover:-translate-y-1 hover:shadow-xl"
-                }`}
-            >
-              <div className="relative mb-4 h-40 w-full overflow-hidden rounded-2xl">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {project.title}
-                </h2>
-                {project.status === "planned" && (
-                  <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
-                    {t.planned}
-                  </span>
-                )}
-              </div>
-              <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-                {project.description}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {project.links.map((link) => {
-                  if (!link.href) {
-                    return (
+        {/* Live Projects Section */}
+        <section className="mb-16">
+          <h2 className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
+            {t.liveSection}
+          </h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            {projects
+              .filter((p) => p.status === "live")
+              .map((project) => (
+                <article
+                  key={project.title}
+                  className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
+                >
+                  <div className="relative mb-4 h-40 w-full overflow-hidden rounded-2xl">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {project.title}
+                  </h2>
+                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                    {project.description}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
                       <span
-                        key={link.label}
-                        className="rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-500 dark:border-white/10 dark:bg-white/10 dark:text-gray-400"
+                        key={tag}
+                        className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200"
                       >
-                        {link.label}
+                        {tag}
                       </span>
-                    );
-                  }
+                    ))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {project.links.map((link) => {
+                      if (!link.href) {
+                        return (
+                          <span
+                            key={link.label}
+                            className="rounded-full border border-white/30 bg-white/70 px-4 py-2 text-xs font-semibold text-gray-500 dark:border-white/10 dark:bg-white/10 dark:text-gray-400"
+                          >
+                            {link.label}
+                          </span>
+                        );
+                      }
 
-                  const isExternal = link.href.startsWith("http");
-                  return (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      className="rounded-full bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-                      {...(isExternal
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                    >
-                      {link.label}
-                    </a>
-                  );
-                })}
-              </div>
-            </article>
-          ))}
-        </div>
+                      const isExternal = link.href.startsWith("http");
+                      return (
+                        <a
+                          key={link.label}
+                          href={link.href}
+                          className="rounded-full bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+                          {...(isExternal
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                        >
+                          {link.label}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </article>
+              ))}
+          </div>
+        </section>
+
+        {/* Planned Projects Section */}
+        {projects.some((p) => p.status === "planned") && (
+          <section>
+            <div className="mb-6 flex items-center gap-3">
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                {t.plannedSection}
+              </h2>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {t.plannedIntro}
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {projects
+                .filter((p) => p.status === "planned")
+                .map((project) => (
+                  <article
+                    key={project.title}
+                    className="rounded-2xl border border-white/20 bg-white/40 p-5 opacity-70 transition-all duration-300 dark:border-white/10 dark:bg-white/5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                        {project.title}
+                      </h3>
+                      <span className="rounded-full border border-white/30 bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500 dark:border-white/10 dark:bg-white/10 dark:text-gray-400">
+                        {t.planned}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      {project.description}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {project.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

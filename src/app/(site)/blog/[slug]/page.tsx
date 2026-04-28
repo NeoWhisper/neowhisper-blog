@@ -7,7 +7,7 @@ import {
   getHybridPost,
   getHybridRelatedPosts,
 } from "@/lib/posts-hybrid";
-import { getPostLanguage, getPosts, getPostBySlug } from "@/lib/posts";
+import { getPostLanguage, getPosts, getPostBySlug, getPrevNextPosts } from "@/lib/posts";
 import { isLowValueBriefPost } from "@/lib/brief-quality";
 
 const baseUrl = SITE_URL;
@@ -206,7 +206,10 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
         }
       }
 
-      return { post, languageVariants, relatedPosts, renderedHtml };
+      // Get prev/next posts for navigation
+      const { prev, next } = getPrevNextPosts(decodedSlug);
+
+      return { post, languageVariants, relatedPosts, renderedHtml, prevPost: prev, nextPost: next };
     } catch (error) {
       console.error(`[BlogPost] CRITICAL RENDER ERROR for ${decodedSlug}:`, error);
 
@@ -217,6 +220,7 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
         const staticPost = getPostBySlug(decodedSlug);
         if (staticPost) {
           const lSuffix = getPostLanguage(staticPost.slug) as SupportedLang;
+          const { prev, next } = getPrevNextPosts(decodedSlug);
           return {
             post: {
               ...staticPost,
@@ -227,6 +231,8 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
             },
             languageVariants: [{ lang: lSuffix, slug: staticPost.slug }],
             relatedPosts: [],
+            prevPost: prev,
+            nextPost: next,
           };
         }
       } catch (fError) {
@@ -241,7 +247,7 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const { post, languageVariants, relatedPosts, renderedHtml } = data;
+  const { post, languageVariants, relatedPosts, renderedHtml, prevPost, nextPost } = data;
   try {
     const { default: BlogPostTemplate } = await import(
       "@/components/BlogPostTemplate"
@@ -260,6 +266,8 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
         isRTL={post.locale === "ar"}
         availableLanguages={languageVariants.map((variant) => variant.lang)}
         relatedPosts={relatedPosts}
+        prevPost={prevPost}
+        nextPost={nextPost}
         lang={post.locale}
         languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
         canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}

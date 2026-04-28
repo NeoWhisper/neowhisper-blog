@@ -10,6 +10,8 @@ import { getBaseSlug } from "@/lib/posts";
 import ArticleCard from "@/components/ArticleCard";
 import CategoryNav from "@/components/CategoryNav";
 import EmailSubscriptionForm from "@/components/EmailSubscriptionForm";
+import Search from "@/components/Search";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { buildCategorySlug } from "@/lib/categories";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 import { getHybridPosts } from "@/lib/posts-hybrid";
@@ -217,6 +219,14 @@ export default async function BlogHome({
     (post) => getBaseSlug(post.slug) !== "welcome",
   );
 
+  // Calculate category counts
+  const categoryCounts = filteredPosts.reduce((acc, post) => {
+    if (post.category) {
+      acc[post.category] = (acc[post.category] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
   const uniqueCategories = Array.from(
     new Set(filteredPosts.map((post) => post.category))
   )
@@ -224,6 +234,7 @@ export default async function BlogHome({
     .map((category) => ({
       name: category,
       slug: buildCategorySlug(category),
+      count: categoryCounts[category] || 0,
     }));
   const blogHomeUrl =
     currentLang === "en" ? `${siteUrl}/blog` : `${siteUrl}/blog?lang=${currentLang}`;
@@ -290,16 +301,11 @@ export default async function BlogHome({
       />
 
       <div className="mx-auto max-w-5xl" dir={isRTL ? "rtl" : "ltr"}>
-        <header className="mb-12 text-center">
-          <div className="mb-6 flex items-center justify-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-            <Link
-              href={currentLang === "en" ? "/" : `/?lang=${currentLang}`}
-              className="rounded-full border border-white/20 bg-white/60 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-            >
-              {copy.backToHome}
-            </Link>
-            <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">{copy.blogName}</span>
+        <Breadcrumbs lang={currentLang} />
+
+        <header className="mb-8 text-center">
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <Search posts={filteredPosts} lang={currentLang} />
           </div>
 
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 sm:text-6xl mb-4">

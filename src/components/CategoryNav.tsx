@@ -15,14 +15,17 @@ import { withLang, type SupportedLang } from "@/lib/i18n";
 interface Category {
     name: string;
     slug: string;
+    count?: number;
 }
 
 export default function CategoryNav({
     categories,
     lang,
+    showCounts = true,
 }: {
     categories: Category[];
     lang?: SupportedLang;
+    showCounts?: boolean;
 }) {
     const pathname = usePathname();
 
@@ -51,7 +54,19 @@ export default function CategoryNav({
                                     : "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:bg-purple-500/10 hover:border-purple-500/30 dark:hover:bg-purple-500/20 dark:hover:border-purple-500/50 hover:scale-105"
                             )}
                         >
-                            {cat.name}
+                            <span className="flex items-center gap-2">
+                                {cat.name}
+                                {showCounts && cat.count !== undefined && (
+                                    <span className={cn(
+                                        "rounded-full px-2 py-0.5 text-xs font-medium",
+                                        isActive
+                                            ? "bg-white/20 text-white"
+                                            : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                    )}>
+                                        {cat.count}
+                                    </span>
+                                )}
+                            </span>
                         </Link>
                     );
                 })}

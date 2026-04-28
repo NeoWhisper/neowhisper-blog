@@ -19,6 +19,8 @@ import { ShareSocial } from "@/components/ShareSocial";
 import { ImageZoom } from "@/components/ImageZoom";
 import { SnapResolver } from "./SnapResolver";
 import { headingToId, stripLeadingDuplicateTitleHeading, flattenText } from "@/lib/headings";
+import CopyLinkButton from "./CopyLinkButton";
+import PostNavigation from "./PostNavigation";
 
 const siteUrl = SITE_URL;
 
@@ -103,6 +105,8 @@ interface BlogPostTemplateProps {
   isRTL?: boolean;
   availableLanguages?: string[];
   relatedPosts?: Post[];
+  prevPost?: Post | null;
+  nextPost?: Post | null;
   lang?: string;
   languageSwitchMode?: "suffix" | "query";
   canonicalUrl?: string;
@@ -120,6 +124,8 @@ export default function BlogPostTemplate({
   isRTL = false,
   availableLanguages,
   relatedPosts = [],
+  prevPost,
+  nextPost,
   lang = "en",
   languageSwitchMode = "suffix",
   canonicalUrl,
@@ -523,6 +529,14 @@ export default function BlogPostTemplate({
             {/* Author Bio */}
             <AuthorBio lang={lang} isRTL={isRTL} />
 
+            {/* Copy Link Button */}
+            <div className={`mt-6 flex ${isRTL ? "justify-end" : "justify-start"}`}>
+              <CopyLinkButton url={resolvedCanonicalUrl} lang={lang} />
+            </div>
+
+            {/* Post Navigation */}
+            <PostNavigation prevPost={prevPost || null} nextPost={nextPost || null} lang={lang} />
+
             {/* Share Widget - Mobile Only */}
             <div className={`lg:hidden mt-8 py-8 border-t border-gray-200 dark:border-gray-700 flex ${isRTL ? "justify-end" : "justify-start"} items-center gap-4`}>
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
@@ -533,7 +547,6 @@ export default function BlogPostTemplate({
                 url={resolvedCanonicalUrl}
               />
             </div>
-
             {/* Bottom Ad Unit */}
             {showAd && (
               <div className="mt-8">

@@ -50,22 +50,25 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
               ? `مقالات وأدلة عملية حول ${title}.`
               : `Practical guides and articles about ${title}.`;
 
+    // Build absolute canonical URL to avoid relative canonical issues
+    const absoluteCanonical = `${baseUrl}${canonicalPath}`;
+
     return {
         title: `${title} | NeoWhisper Blog`,
         description,
         alternates: {
-            canonical: canonicalPath,
+            canonical: absoluteCanonical,
             languages: {
-                en: `/category/${encodeURIComponent(canonicalSlug)}`,
-                ja: `/category/${encodeURIComponent(canonicalSlug)}?lang=ja`,
-                ar: `/category/${encodeURIComponent(canonicalSlug)}?lang=ar`,
+                en: `${baseUrl}/category/${encodeURIComponent(canonicalSlug)}`,
+                ja: `${baseUrl}/category/${encodeURIComponent(canonicalSlug)}?lang=ja`,
+                ar: `${baseUrl}/category/${encodeURIComponent(canonicalSlug)}?lang=ar`,
             },
         },
         openGraph: {
             title: `${title} | NeoWhisper Blog`,
             description,
             type: "website",
-            url: `${baseUrl}${canonicalPath}`,
+            url: absoluteCanonical,
         },
     };
 }

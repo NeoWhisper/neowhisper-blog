@@ -57,8 +57,8 @@ test.describe("SEO Metadata", () => {
     // Could be "website" for home, "article" for posts
     expect(["website", "article"]).toContain(ogTypeContent);
 
-    // Check canonical link
-    const canonical = page.locator('link[rel="canonical"]');
+    // Check canonical link (use first() as there may be both site and page-specific)
+    const canonical = page.locator('link[rel="canonical"]').first();
     const canonicalHref = await canonical.getAttribute("href");
     expect(canonicalHref).toBeTruthy();
   });
@@ -141,8 +141,8 @@ test.describe("SEO Metadata", () => {
     const twitterDescContent = await twitterDesc.getAttribute("content");
     expect(twitterDescContent).toBeTruthy();
 
-    // Check Twitter Card type
-    const twitterCard = page.locator('meta[name="twitter:card"]');
+    // Check Twitter Card type (use first() as there may be duplicates)
+    const twitterCard = page.locator('meta[name="twitter:card"]').first();
     const twitterCardContent = await twitterCard.getAttribute("content");
     expect(twitterCardContent).toBeTruthy();
   });

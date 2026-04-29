@@ -1,7 +1,6 @@
 import {
   countPostWords,
   isLowValueBriefPost,
-  BRIEF_NOINDEX_ENABLED,
   EFFECTIVE_BRIEF_NOINDEX_THRESHOLD,
 } from "../brief-quality";
 

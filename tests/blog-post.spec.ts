@@ -133,8 +133,8 @@ test.describe("Blog Post Page", () => {
     const main = page.locator("main");
     await expect(main).toBeVisible();
 
-    // Check for article element
-    const article = page.locator("article");
+    // Check for article element (first one, as there may be multiple)
+    const article = page.locator("article").first();
     await expect(article).toBeVisible();
 
     // Check for time element with datetime attribute

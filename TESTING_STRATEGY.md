@@ -250,10 +250,12 @@ npm run test:unit -- --testPathPattern="src/lib/__tests__" --passWithNoTests
 When updating `package.json` version or dependencies:
 
 ### Before Update
+
 - [ ] Run `npm run test:all` to establish baseline
 - [ ] Check for breaking changes in CHANGELOG
 
 ### After Update
+
 - [ ] Run `npm run test:all` again
 - [ ] Verify build passes
 - [ ] Run E2E tests locally if major version bump
@@ -275,33 +277,37 @@ When updating `package.json` version or dependencies:
 
 ## 9. Missing Tests to Implement
 
+### ✅ Completed (This Branch)
+
+1. **Unit Tests:**
+   - ✅ `src/lib/posts.test.ts` - Language detection, slug utilities (17 tests)
+   - ✅ `src/lib/brief-quality.test.ts` - Word count, noindex logic (17 tests)
+
+2. **E2E Tests:**
+   - ✅ `tests/blog-post.spec.ts` - Full post rendering, 404 handling, JA/AR (6 tests)
+   - ✅ `tests/contact-form.spec.ts` - Form validation, accessibility (7 tests)
+   - ✅ `tests/seo.spec.ts` - Meta tags, Open Graph, structured data (7 tests)
+
 ### High Priority (Add Next)
 
 1. **Unit Tests:**
-   - `src/lib/posts.test.ts` - Post sorting, prev/next logic
-   - `src/lib/brief-quality.test.ts` - Word count, noindex logic
    - `src/lib/i18n.test.ts` - Language normalization (exists)
    - `src/lib/categories.test.ts` - Category slug building
-
-2. **E2E Tests:**
-   - `tests/blog-post.spec.ts` - Full post rendering
-   - `tests/contact-form.spec.ts` - Form validation
-   - `tests/seo.spec.ts` - Meta tags, Open Graph
+   - `src/lib/posts-hybrid.test.ts` - Hybrid post resolution
 
 ### Medium Priority (Add Later)
 
-3. **Unit Tests:**
-   - `src/lib/posts-hybrid.test.ts` - Hybrid post resolution
+1. **Unit Tests:**
    - `src/lib/markdown.test.ts` - MDX transformation
 
-4. **E2E Tests:**
+2. **E2E Tests:**
    - `tests/i18n.spec.ts` - Language switching
    - `tests/performance.spec.ts` - Core Web Vitals
    - `tests/accessibility.spec.ts` - A11y violations
 
 ### Low Priority (Nice to Have)
 
-5. **E2E Tests:**
+1. **E2E Tests:**
    - `tests/subscription.spec.ts` - Email signup
    - `tests/sitemap.spec.ts` - XML validity
 
@@ -356,6 +362,7 @@ npm run test:unit:coverage
 ## Summary
 
 **Current State:**
+
 - ✅ Basic unit tests for utilities
 - ✅ E2E tests for UI enhancements
 - ✅ Security header tests
@@ -363,6 +370,7 @@ npm run test:unit:coverage
 - ✅ Category page tests
 
 **Gaps to Fill:**
+
 - ❌ Post/brief-quality business logic unit tests
 - ❌ Blog post rendering E2E tests
 - ❌ SEO metadata E2E tests
@@ -371,6 +379,7 @@ npm run test:unit:coverage
 - ❌ Performance budgets
 
 **Recommended Priority:**
+
 1. Add posts/brief-quality unit tests
 2. Add blog-post.spec.ts E2E
 3. Add SEO validation E2E

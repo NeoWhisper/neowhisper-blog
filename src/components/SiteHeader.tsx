@@ -61,9 +61,11 @@ export default function SiteHeader() {
     setMounted(true);
   }, []);
 
-  // Get language from URL param
+  // Get language from URL param - only use detected lang after mount to avoid hydration mismatch
   const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
-  const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
+  const detectedLang = detectBlogSlugLang(pathname) ?? queryLang;
+  // Use "en" during SSR, switch to detected lang only after mount
+  const currentLang = mounted ? detectedLang : "en";
 
   // Compute base path for language switching - preserves current page but removes lang param
   const basePath = pathname || "/";

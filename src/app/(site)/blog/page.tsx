@@ -235,7 +235,12 @@ export default async function BlogHome({
       name: category,
       slug: buildCategorySlug(category),
       count: categoryCounts[category] || 0,
-    }));
+    }))
+    // Deduplicate by slug to prevent duplicate React keys
+    .filter((cat, index, self) =>
+      index === self.findIndex((c) => c.slug === cat.slug)
+    );
+
   const blogHomeUrl =
     currentLang === "en" ? `${siteUrl}/blog` : `${siteUrl}/blog?lang=${currentLang}`;
   const itemListSchema = {

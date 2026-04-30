@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 import ThemeToggle from "./ThemeToggle";
 
@@ -53,9 +54,33 @@ function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
 export default function SiteHeader() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Get language from URL param - only use detected lang after mount to avoid hydration mismatch
   const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
-  const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
+  const detectedLang = detectBlogSlugLang(pathname) ?? queryLang;
+  // Use "en" during SSR, switch to detected lang only after mount
+  const currentLang = mounted ? detectedLang : "en";
+
+  // Compute base path for language switching - preserves current page but removes lang param
+  const basePath = pathname || "/";
+  const searchWithoutLang = (() => {
+    if (!searchParams) return "";
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("lang");
+    const qs = params.toString();
+    return qs ? `?${qs}` : "";
+  })();
+  const currentPathWithoutLang = `${basePath}${searchWithoutLang}`;
   const labels = navLabels[currentLang];
+
+  // Don't render language switcher until mounted to avoid hydration mismatch
+  const showLangSwitcher = mounted;
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -90,6 +115,35 @@ export default function SiteHeader() {
               </Link>
             ))}
           </nav>
+
+          {/* Language Switcher - Client only to avoid hydration mismatch */}
+          {showLangSwitcher && (
+            <nav aria-label="Language" className="flex items-center gap-1" data-testid="language-switcher">
+              <Link
+                href={currentPathWithoutLang || "/"}
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "en" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+                hrefLang="en"
+              >
+                EN
+              </Link>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <Link
+                href={`${currentPathWithoutLang || "/"}?lang=ja`}
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "ja" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+                hrefLang="ja"
+              >
+                JA
+              </Link>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <Link
+                href={`${currentPathWithoutLang || "/"}?lang=ar`}
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "ar" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+                hrefLang="ar"
+              >
+                AR
+              </Link>
+            </nav>
+          )}
 
           {/* Theme Toggle */}
           <ThemeToggle />

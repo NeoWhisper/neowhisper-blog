@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 import ThemeToggle from "./ThemeToggle";
 
@@ -50,10 +51,25 @@ function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
   return "en";
 }
 
+// Hydration-safe hook that returns consistent value during SSR
+function useHydrationSafeLang(searchParams: ReturnType<typeof useSearchParams>): SupportedLang {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // During SSR and initial hydration, always return "en" for consistency
+  if (typeof window === "undefined" || !mounted) return "en";
+
+  return normalizeLang(searchParams?.get("lang")) as SupportedLang;
+}
+
 export default function SiteHeader() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
+  const queryLang = useHydrationSafeLang(searchParams);
   const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
   const labels = navLabels[currentLang];
 
@@ -89,6 +105,33 @@ export default function SiteHeader() {
                 {labels[item.key]}
               </Link>
             ))}
+          </nav>
+
+          {/* Language Switcher */}
+          <nav aria-label="Language" className="flex items-center gap-1" data-testid="language-switcher">
+            <Link
+              href={pathname || "/"}
+              className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "en" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+              hrefLang="en"
+            >
+              EN
+            </Link>
+            <span className="text-gray-300 dark:text-gray-600">|</span>
+            <Link
+              href={`${pathname || "/"}?lang=ja`}
+              className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "ja" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+              hrefLang="ja"
+            >
+              JA
+            </Link>
+            <span className="text-gray-300 dark:text-gray-600">|</span>
+            <Link
+              href={`${pathname || "/"}?lang=ar`}
+              className={`px-2 py-1 text-xs font-medium rounded transition-colors ${currentLang === "ar" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
+              hrefLang="ar"
+            >
+              AR
+            </Link>
           </nav>
 
           {/* Theme Toggle */}

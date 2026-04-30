@@ -277,33 +277,31 @@ When updating `package.json` version or dependencies:
 
 ## 9. Missing Tests to Implement
 
-### ✅ Completed (This Branch)
+### ✅ Completed (v1.16.0 Release)
 
 1. **Unit Tests:**
    - ✅ `src/lib/posts.test.ts` - Language detection, slug utilities (17 tests)
    - ✅ `src/lib/brief-quality.test.ts` - Word count, noindex logic (17 tests)
+   - ✅ `src/lib/i18n.test.ts` - Language normalization, withLang query building (10 tests)
+   - ✅ `src/lib/categories.test.ts` - Category slug building, localized names (15 tests)
+   - ✅ `src/lib/posts-hybrid.test.ts` - Hybrid post resolution, deduplication (15 tests)
 
 2. **E2E Tests:**
    - ✅ `tests/blog-post.spec.ts` - Full post rendering, 404 handling, JA/AR (6 tests)
    - ✅ `tests/contact-form.spec.ts` - Form validation, accessibility (7 tests)
    - ✅ `tests/seo.spec.ts` - Meta tags, Open Graph, structured data (7 tests)
+   - ✅ `tests/i18n.spec.ts` - Language switching, RTL support, hreflang (7 tests)
+   - ✅ `tests/performance.spec.ts` - Core Web Vitals, load times (10 tests)
+   - ✅ `tests/accessibility.spec.ts` - A11y violations, semantic HTML (10 tests)
 
 ### High Priority (Add Next)
 
-1. **Unit Tests:**
-   - `src/lib/i18n.test.ts` - Language normalization (exists)
-   - `src/lib/categories.test.ts` - Category slug building
-   - `src/lib/posts-hybrid.test.ts` - Hybrid post resolution
+*All high priority tests completed in v1.16.0*
 
 ### Medium Priority (Add Later)
 
 1. **Unit Tests:**
-   - `src/lib/markdown.test.ts` - MDX transformation
-
-2. **E2E Tests:**
-   - `tests/i18n.spec.ts` - Language switching
-   - `tests/performance.spec.ts` - Core Web Vitals
-   - `tests/accessibility.spec.ts` - A11y violations
+   - `src/lib/markdown.test.ts` - MDX transformation (deferred - ESM compatibility issues)
 
 ### Low Priority (Nice to Have)
 

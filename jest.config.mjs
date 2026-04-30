@@ -12,6 +12,9 @@ const customJestConfig = {
     },
     testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/tests/'],
     testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+    transformIgnorePatterns: [
+        'node_modules/(?!(isomorphic-dompurify|dompurify|@exodus)/)',
+    ],
 };
 
 export default createJestConfig(customJestConfig);

@@ -1,6 +1,6 @@
 # NeoWhisper - Modern Tech Blog
 
-> Latest stable release: **v1.15.1**
+> Latest stable release: **v1.16.0**
 > (`dev` may contain unreleased changes; semantic-release cuts the next
 > version when merged to `main`)
 
@@ -204,7 +204,6 @@ This repository includes a multilingual draft generator that can run:
    OLLAMA_BASE_URL=http://127.0.0.1:11434 \
    npm run content:daily:install-launchd
    ```
-
 
 5. Optional: keep local `main` synced daily (default 09:00 local time):
 

@@ -49,7 +49,7 @@
     "highlight.js": "^11.11.1",
     "isomorphic-dompurify": "^3.9.0",
     "lucide-react": "^1.12.0",
-    "marked": "^18.0.0",
+    "marked": "^18.0.2",
     "next": "^16.2.2",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.5",

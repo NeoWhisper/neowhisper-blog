@@ -126,6 +126,39 @@ export default async function RootLayout({
             crossOrigin="anonymous"
           />
         )}
+        {/* Client-side RTL direction updater for client-side navigation */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function updateDirection() {
+                  const path = window.location.pathname;
+                  const search = window.location.search;
+                  // Check for Arabic: either from slug suffix or query param
+                  const isArabicSlug = /-ar\\/?$/.test(path);
+                  const isArabicQuery = search.includes('lang=ar');
+                  const isArabic = isArabicSlug || isArabicQuery;
+                  // Check for Japanese: either from slug suffix or query param
+                  const isJapaneseSlug = /-ja\\/?$/.test(path);
+                  const isJapaneseQuery = search.includes('lang=ja');
+                  const isJapanese = isJapaneseSlug || isJapaneseQuery;
+                  const dir = isArabic ? 'rtl' : 'ltr';
+                  const lang = isArabic ? 'ar' : isJapanese ? 'ja' : 'en';
+                  if (document.documentElement.dir !== dir) {
+                    document.documentElement.dir = dir;
+                  }
+                  if (document.documentElement.lang !== lang) {
+                    document.documentElement.lang = lang;
+                  }
+                }
+                // Update immediately and then poll for changes
+                updateDirection();
+                setInterval(updateDirection, 100);
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
         <GoogleAnalytics nonce={nonce} />

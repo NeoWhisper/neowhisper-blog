@@ -15,6 +15,7 @@ import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
 import { outfit, geistMono } from "@/lib/fonts";
 import { SITE_URL } from "@/lib/site-config";
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
 
 const siteUrl = SITE_URL;
 const siteName = "NeoWhisper";
@@ -84,6 +85,18 @@ export const metadata: Metadata = {
   },
 };
 
+// Declarative pattern table: [regex, language] pairs
+const slugPatterns: Array<[RegExp, SupportedLang]> = [
+  [/-ja\/?$/, "ja"],
+  [/-ar\/?$/, "ar"],
+];
+
+function detectBlogSlugLang(pathname: string): SupportedLang | null {
+  if (!pathname?.startsWith("/blog/")) return null;
+  const match = slugPatterns.find(([pattern]) => pattern.test(pathname));
+  return match?.[1] ?? "en";
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -91,8 +104,17 @@ export default async function RootLayout({
 }>) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
+  // Get language from URL for SSR
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") || headerList.get("referer") || "";
+  const url = new URL(pathname, siteUrl);
+  const queryLang = normalizeLang(url.searchParams.get("lang")) as SupportedLang;
+  const slugLang = detectBlogSlugLang(url.pathname);
+  const lang = slugLang ?? queryLang;
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
   return (
-    <html lang="en" className={`${outfit.variable} ${geistMono.variable}`}>
+    <html lang={lang} dir={dir} className={`${outfit.variable} ${geistMono.variable}`}>
       <head>
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script

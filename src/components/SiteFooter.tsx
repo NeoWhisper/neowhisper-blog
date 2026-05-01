@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
 
 function getLabel(
@@ -94,8 +95,19 @@ function getBusinessText(lang: SupportedLang) {
 export default function SiteFooter() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Intentional: setState for hydration safety (runs once on mount)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  // Get language from URL param - only use detected lang after mount to avoid hydration mismatch
   const queryLang = normalizeLang(searchParams?.get("lang")) as SupportedLang;
-  const currentLang = detectBlogSlugLang(pathname) ?? queryLang;
+  const detectedLang = detectBlogSlugLang(pathname) ?? queryLang;
+  // Use "en" during SSR, switch to detected lang only after mount
+  const currentLang = mounted ? detectedLang : "en";
   const business = getBusinessText(currentLang);
 
   return (

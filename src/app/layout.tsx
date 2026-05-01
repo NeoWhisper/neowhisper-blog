@@ -104,12 +104,14 @@ export default async function RootLayout({
 }>) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
-  // Get language from URL for SSR
+  // Get language from URL for SSR (set by middleware)
   const headerList = await headers();
-  const pathname = headerList.get("x-pathname") || headerList.get("referer") || "";
-  const url = new URL(pathname, siteUrl);
-  const queryLang = normalizeLang(url.searchParams.get("lang")) as SupportedLang;
-  const slugLang = detectBlogSlugLang(url.pathname);
+  const pathname = headerList.get("x-pathname") || "/";
+  const searchParams = headerList.get("x-search-params") || "";
+  const queryLang = normalizeLang(
+    new URLSearchParams(searchParams).get("lang")
+  ) as SupportedLang;
+  const slugLang = detectBlogSlugLang(pathname);
   const lang = slugLang ?? queryLang;
   const dir = lang === "ar" ? "rtl" : "ltr";
 

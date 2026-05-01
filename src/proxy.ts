@@ -136,8 +136,9 @@ function applyMetadataCorsFix(request: NextRequest, response: NextResponse) {
 function addNonceToRequestHeaders(
   request: NextRequest,
   nonce: string,
+  existingHeaders?: Headers,
 ): Headers {
-  const requestHeaders = new Headers(request.headers);
+  const requestHeaders = existingHeaders ?? new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   return requestHeaders;
 }
@@ -194,9 +195,18 @@ function canonicalRedirectUrl(request: NextRequest): URL | null {
   return url;
 }
 
-export async function proxy(request: NextRequest) {
-  const isDev = process.env.NODE_ENV === "development";
+export default async function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replace(/-/g, "");
+  const isDev = process.env.NODE_ENV === "development";
+
+  // Add pathname headers for server components to detect language
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set(
+    "x-search-params",
+    request.nextUrl.searchParams.toString(),
+  );
+
   const csp = buildCsp({
     nonce,
     isDev,
@@ -210,7 +220,7 @@ export async function proxy(request: NextRequest) {
 
   const response = NextResponse.next({
     request: {
-      headers: addNonceToRequestHeaders(request, nonce),
+      headers: addNonceToRequestHeaders(request, nonce, requestHeaders),
     },
   });
   applySecurityHeaders(response, csp);

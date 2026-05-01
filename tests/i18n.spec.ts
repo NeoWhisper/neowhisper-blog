@@ -6,10 +6,14 @@ test.describe("i18n - Internationalization", () => {
     test("homepage shows language switcher or links", async ({ page }) => {
       await page.goto("/");
 
-      // Check for language-related elements (could be dropdown, links, or buttons)
+      // Wait for hydration to complete - language switcher renders after client mount
+      await page.waitForTimeout(100);
+
+      // Check for visible language-related elements (could be dropdown, links, or buttons)
+      // Note: Only target visible UI elements, not <link> meta tags in <head>
       const langElements = page
         .locator(
-          '[data-testid="language-switcher"], [href*="lang="], select[name*="lang"]',
+          '[data-testid="language-switcher"] a, nav[aria-label="Language"] a',
         )
         .first();
       const count = await langElements.count();
@@ -23,9 +27,15 @@ test.describe("i18n - Internationalization", () => {
     test("can navigate to Japanese version", async ({ page }) => {
       await page.goto("/blog");
 
-      // Look for Japanese language option
+      // Wait for hydration - language switcher renders after client mount
+      await page.waitForTimeout(100);
+
+      // Look for visible Japanese language option in the UI
+      // Target the language switcher nav specifically, not hreflang meta tags
       const jaLink = page
-        .locator('a[href*="lang=ja"], [hreflang="ja"]')
+        .locator(
+          'nav[aria-label="Language"] a[href*="lang=ja"], [data-testid="language-switcher"] a[href*="lang=ja"]',
+        )
         .first();
       const count = await jaLink.count();
 
@@ -42,9 +52,15 @@ test.describe("i18n - Internationalization", () => {
     test("can navigate to Arabic version", async ({ page }) => {
       await page.goto("/blog");
 
-      // Look for Arabic language option
+      // Wait for hydration - language switcher renders after client mount
+      await page.waitForTimeout(100);
+
+      // Look for visible Arabic language option in the UI
+      // Target the language switcher nav specifically, not hreflang meta tags
       const arLink = page
-        .locator('a[href*="lang=ar"], [hreflang="ar"]')
+        .locator(
+          'nav[aria-label="Language"] a[href*="lang=ar"], [data-testid="language-switcher"] a[href*="lang=ar"]',
+        )
         .first();
       const count = await arLink.count();
 
@@ -60,9 +76,15 @@ test.describe("i18n - Internationalization", () => {
     test("can navigate back to English version", async ({ page }) => {
       await page.goto("/blog?lang=ja");
 
-      // Look for English language option
+      // Wait for hydration - language switcher renders after client mount
+      await page.waitForTimeout(100);
+
+      // Look for visible English language option in the UI
+      // Target the language switcher nav specifically, not hreflang meta tags
       const enLink = page
-        .locator('a[href*="lang=en"], [hreflang="en"]')
+        .locator(
+          'nav[aria-label="Language"] a[hreflang="en"], [data-testid="language-switcher"] a[hreflang="en"]',
+        )
         .first();
       const count = await enLink.count();
 

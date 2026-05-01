@@ -56,8 +56,9 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // Intentional: setState for hydration safety (runs once on mount)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

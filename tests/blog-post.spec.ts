@@ -97,13 +97,17 @@ test.describe("Blog Post Page", () => {
     // Navigate to blog and look for Arabic post
     await page.goto("/blog");
 
-    // Look for link with -ar suffix
-    const arLink = page.locator("a[href*='-ar']").first();
+    // Look for Arabic language link in the language switcher
+    // This is more reliable than searching for -ar in href
+    const arLink = page.locator('a[href*="lang=ar"]').first();
     const arLinkCount = await arLink.count();
 
     if (arLinkCount > 0) {
       await arLink.click();
       await page.waitForLoadState("networkidle");
+
+      // Wait a moment for client-side script to update direction
+      await page.waitForTimeout(100);
 
       // Verify RTL direction for Arabic
       const html = page.locator("html");

@@ -115,10 +115,11 @@ export default function ContactForm({
       <input type="hidden" name="lang" value={lang} />
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+          <label htmlFor="name" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
             {copy.name}
           </label>
           <input
+            id="name"
             required
             name="name"
             type="text"
@@ -127,10 +128,11 @@ export default function ContactForm({
           />
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+          <label htmlFor="email" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
             {copy.email}
           </label>
           <input
+            id="email"
             required
             name="email"
             type="email"
@@ -142,10 +144,11 @@ export default function ContactForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+          <label htmlFor="company" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
             {copy.company}
           </label>
           <input
+            id="company"
             name="company"
             type="text"
             className="mt-2 w-full rounded-2xl border border-white/20 bg-white/70 px-4 py-3 text-sm text-gray-800 shadow-sm outline-none transition focus:border-purple-400 dark:border-white/10 dark:bg-white/10 dark:text-gray-100"
@@ -153,10 +156,11 @@ export default function ContactForm({
           />
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+          <label htmlFor="projectType" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
             {copy.projectType}
           </label>
           <select
+            id="projectType"
             name="projectType"
             className="mt-2 w-full rounded-2xl border border-white/20 bg-white/70 px-4 py-3 text-sm text-gray-800 shadow-sm outline-none transition focus:border-purple-400 dark:border-white/10 dark:bg-white/10 dark:text-gray-100"
           >
@@ -168,10 +172,11 @@ export default function ContactForm({
       </div>
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+        <label htmlFor="budget" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
           {copy.budget}
         </label>
         <select
+          id="budget"
           name="budget"
           className="mt-2 w-full rounded-2xl border border-white/20 bg-white/70 px-4 py-3 text-sm text-gray-800 shadow-sm outline-none transition focus:border-purple-400 dark:border-white/10 dark:bg-white/10 dark:text-gray-100"
         >
@@ -182,10 +187,11 @@ export default function ContactForm({
       </div>
 
       <div>
-        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+        <label htmlFor="details" className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
           {copy.details}
         </label>
         <textarea
+          id="details"
           required
           name="details"
           rows={5}

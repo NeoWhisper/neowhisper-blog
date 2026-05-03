@@ -102,7 +102,7 @@ test.describe("Search", () => {
 
     // Close with Escape
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(300);
 
     // Search modal should be closed
     const searchModal = page

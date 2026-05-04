@@ -100,9 +100,14 @@ test.describe("Search", () => {
     await searchButton.click();
     await page.waitForTimeout(100);
 
+    // Focus the search input
+    const searchInput = page.locator('input[type="text"]').first();
+    await searchInput.focus();
+    await page.waitForTimeout(100);
+
     // Close with Escape
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(500);
 
     // Search modal should be closed
     const searchModal = page

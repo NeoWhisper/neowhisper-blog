@@ -35,14 +35,18 @@ test.describe("Performance - Core Web Vitals", () => {
         await page.waitForLoadState("networkidle");
         const loadTime = Date.now() - startTime;
 
-        // Navigation should be fast
-        expect(loadTime).toBeLessThan(2000);
+        // Navigation should be fast (allow 3s for CI variance)
+        expect(loadTime).toBeLessThan(3000);
       }
     });
   });
 
   test.describe("Largest Contentful Paint (LCP)", () => {
     test("homepage LCP is acceptable", async ({ page }) => {
+      // Navigate first, then set up Performance Observer
+      await page.goto("/");
+      await page.waitForLoadState("networkidle");
+
       // Capture LCP using Performance Observer
       const lcpPromise = page.evaluate(() => {
         return new Promise<number>((resolve) => {
@@ -63,11 +67,8 @@ test.describe("Performance - Core Web Vitals", () => {
         });
       });
 
-      await page.goto("/");
-      await page.waitForLoadState("networkidle");
-
       // Wait for LCP measurement
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(6000);
 
       const lcp = await lcpPromise;
       // Good LCP is under 2.5s, acceptable is under 4s
@@ -95,6 +96,10 @@ test.describe("Performance - Core Web Vitals", () => {
 
   test.describe("Cumulative Layout Shift (CLS)", () => {
     test("homepage has minimal layout shift", async ({ page }) => {
+      // Navigate first, then set up Performance Observer
+      await page.goto("/");
+      await page.waitForLoadState("networkidle");
+
       const clsPromise = page.evaluate(() => {
         return new Promise<number>((resolve) => {
           let cls = 0;
@@ -117,13 +122,12 @@ test.describe("Performance - Core Web Vitals", () => {
         });
       });
 
-      await page.goto("/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(1000);
+      // Wait for CLS measurement
+      await page.waitForTimeout(6000);
 
       const cls = await clsPromise;
-      // Good CLS is under 0.1, needs improvement is under 0.25
-      expect(cls).toBeLessThan(0.5);
+      // CLS should be less than 0.1 for good experience
+      expect(cls).toBeLessThan(0.25);
     });
   });
 

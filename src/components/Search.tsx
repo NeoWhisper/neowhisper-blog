@@ -148,7 +148,7 @@ export default function Search({ posts, lang }: SearchProps) {
 
       {/* Search modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[15vh] backdrop-blur-sm">
+        <div role="dialog" aria-modal="true" aria-label="Search" className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[15vh] backdrop-blur-sm">
           <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
             {/* Search input */}
             <div className="flex items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-700">

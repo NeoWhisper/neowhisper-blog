@@ -383,6 +383,9 @@ export default async function Home({
         </header>
 
         <section id="services" className="mb-16">
+          <h2 className="mb-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+            {copy.servicesTitle}
+          </h2>
           <div className="grid gap-6 md:grid-cols-3">
             {copy.services.map((item) => (
               <div

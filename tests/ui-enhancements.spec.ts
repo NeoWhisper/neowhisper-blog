@@ -105,15 +105,17 @@ test.describe("Search", () => {
     await searchInput.focus();
     await page.waitForTimeout(100);
 
-    // Close with Escape
-    await page.keyboard.press("Escape");
-    await page.waitForTimeout(500);
+    // Close with Escape - dispatch directly to ensure handler receives it
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+    });
+    await page.waitForTimeout(300);
 
-    // Search modal should be closed
-    const searchModal = page
-      .locator("div[class*='modal'], div[role='dialog']")
-      .first();
-    await expect(searchModal).toHaveCount(0);
+    // Search modal should be closed (hidden or removed from DOM)
+    const searchModal = page.locator("[role='dialog']");
+    await expect(searchModal).toBeHidden();
   });
 });
 

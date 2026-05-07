@@ -6,20 +6,28 @@
  *  - src/app/sitemap.ts                   → exclude sub-threshold posts from sitemap
  *
  * Configuration via environment variables:
- *  - BRIEF_NOINDEX_ENABLED: Set to "true" to enable noindex for low-value briefs (default: false)
- *  - BRIEF_NOINDEX_MIN_WORDS: Minimum word count threshold (default: 300, floor: 150)
+ *  - BRIEF_NOINDEX_ENABLED: Set to "false" to disable low-value brief noindexing (default: true)
+ *  - BRIEF_NOINDEX_MIN_WORDS: Minimum word count threshold (default: 900, floor: 600)
  */
 
-// Feature flag: Set to "true" to enable noindex for sub-threshold brief posts.
-// Default is false to ensure all posts are indexed for AdSense compliance.
+const DEFAULT_BRIEF_NOINDEX_MIN_WORDS = 900;
+const BRIEF_NOINDEX_MIN_WORDS_FLOOR = 600;
+const GENERIC_BRIEF_COVER_IMAGE = "/og-image.jpg";
+
+// Feature flag: enabled by default while the AdSense remediation is active.
+// Set BRIEF_NOINDEX_ENABLED=false only after briefs have distinctive images,
+// source-grounded original analysis, and enough depth for policy review.
 export const BRIEF_NOINDEX_ENABLED =
-  process.env.BRIEF_NOINDEX_ENABLED === "true";
+  process.env.BRIEF_NOINDEX_ENABLED !== "false";
 
 // Emits noindex and excludes from sitemap if word count is below this threshold.
-// Lowered default to 300 words; enforce hard floor of 150 words minimum.
 export const EFFECTIVE_BRIEF_NOINDEX_THRESHOLD = Math.max(
-  150,
-  Number.parseInt(process.env.BRIEF_NOINDEX_MIN_WORDS ?? "300", 10),
+  BRIEF_NOINDEX_MIN_WORDS_FLOOR,
+  Number.parseInt(
+    process.env.BRIEF_NOINDEX_MIN_WORDS ??
+      String(DEFAULT_BRIEF_NOINDEX_MIN_WORDS),
+    10,
+  ),
 );
 
 /**
@@ -51,14 +59,19 @@ export function countPostWords(slug: string, content: string): number {
  * minimum word-count threshold for indexing.
  *
  * NOTE: This function respects the BRIEF_NOINDEX_ENABLED feature flag.
- * When disabled (default), all posts are considered indexable regardless of length.
+ * When disabled, all posts are considered indexable regardless of length.
  */
-export function isLowValueBriefPost(slug: string, content: string): boolean {
-  // Feature flag: disabled by default to ensure AdSense compliance
+export function isLowValueBriefPost(
+  slug: string,
+  content: string,
+  coverImage?: string | null,
+): boolean {
   if (!BRIEF_NOINDEX_ENABLED) return false;
 
   const isBrief = /(^|-)ai-(it-)?trend-brief-/.test(slug);
   if (!isBrief) return false;
+
+  if (coverImage === GENERIC_BRIEF_COVER_IMAGE) return true;
 
   const wordCount = countPostWords(slug, content);
   // Business rule: sub-threshold AI trend brief posts should not be indexed.

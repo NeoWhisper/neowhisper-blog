@@ -8,10 +8,24 @@ const baseUrl = SITE_URL;
 const translations = {
   en: {
     label: "About",
-    title: "Registered IT Services Business",
+    title: "Professional Profile",
     subtitle: "Registered in Japan as an IT services sole proprietorship.",
-    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Yousif Alqadi.",
+    intro: "NEO WHISPER is a Tokyo-based sole proprietorship delivering multilingual IT services with a truth-first operating approach.",
     back: "Back to Home",
+    identityTitle: "Business Identity",
+    identity: [
+      "Trade Name: NEO WHISPER",
+      "Founder: ALQADI YOUSIF MOHAMMED A",
+      "Business Category: IT Services (ITサービス業)",
+      "Opened: 2025-12",
+      "Location: Minato City, Tokyo",
+    ],
+    principlesTitle: "Operating Principles",
+    principles: [
+      "Truth-first delivery: no inflated claims, no unsupported numbers.",
+      "Multilingual execution: Japanese, English, and Arabic communication and production.",
+      "Practical scope control: clear deliverables from requirements to handoff.",
+    ],
     sections: [
       {
         title: "Who we are",
@@ -34,8 +48,22 @@ const translations = {
     label: "概要",
     title: "ITサービス個人事業",
     subtitle: "開業届上の職業区分: ITサービス業。",
-    intro: "NEO WHISPERは、2025年12月に東京都港区でアルカーディ ヨセフが開業したITサービス個人事業です。税務署へ開業届を提出済みです。",
+    intro: "NEO WHISPERは、東京を拠点に多言語でITサービスを提供する個人事業です。誇張のない実務重視の方針で運営しています。",
     back: "ホームへ戻る",
+    identityTitle: "事業者情報",
+    identity: [
+      "屋号: NEO WHISPER",
+      "代表者: ALQADI YOUSIF MOHAMMED A",
+      "職業区分: ITサービス業",
+      "開業: 2025年12月",
+      "所在地: 東京都港区",
+    ],
+    principlesTitle: "運営方針",
+    principles: [
+      "誇張しない説明: 根拠のない数値や実績表現を行わない。",
+      "多言語実行: 日本語・英語・アラビア語で一貫対応。",
+      "実務スコープ重視: 要件整理から引き渡しまでを明確化。",
+    ],
     sections: [
       {
         title: "私たちについて",
@@ -58,8 +86,22 @@ const translations = {
     label: "نبذة",
     title: "نشاط خدمات تقنية معلومات مسجل",
     subtitle: "نشاط مسجل في اليابان ضمن خدمات تقنية المعلومات.",
-    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل يوسف القاضي.",
+    intro: "نيو ويسبر (NEO WHISPER) مؤسسة فردية في طوكيو تقدم خدمات تقنية معلومات متعددة اللغات بمنهج عملي قائم على الدقة.",
     back: "العودة للرئيسية",
+    identityTitle: "الهوية المهنية",
+    identity: [
+      "الاسم التجاري: NEO WHISPER",
+      "المؤسس: ALQADI YOUSIF MOHAMMED A",
+      "فئة النشاط: خدمات تقنية معلومات (ITサービス業)",
+      "تاريخ البدء: 2025-12",
+      "الموقع: مدينة ميناتو، طوكيو",
+    ],
+    principlesTitle: "مبادئ التشغيل",
+    principles: [
+      "تنفيذ قائم على الحقيقة: بدون مبالغة وبدون أرقام غير موثقة.",
+      "تنفيذ متعدد اللغات: اليابانية والإنجليزية والعربية.",
+      "ضبط نطاق عملي: مخرجات واضحة من المتطلبات حتى التسليم.",
+    ],
     sections: [
       {
         title: "من نحن",
@@ -193,6 +235,24 @@ export default async function AboutPage({
           </p>
         </div>
 
+        <section className="mb-8 rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t.identityTitle}</h2>
+          <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
+            {t.identity.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="mb-12 rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t.principlesTitle}</h2>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-gray-700 dark:text-gray-300">
+            {t.principles.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+
         <div className="grid gap-6 md:grid-cols-3">
           {t.sections.map((section) => (
             <div key={section.title} className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
@@ -212,7 +272,7 @@ export default async function AboutPage({
                   Work with NEO WHISPER
                 </h2>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                  Ready to bridge the gap and build something world-class? Let&apos;s talk about your next project.
+                  If you need practical multilingual IT execution, let&apos;s discuss your next project.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

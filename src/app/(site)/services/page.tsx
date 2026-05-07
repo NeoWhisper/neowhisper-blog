@@ -8,111 +8,139 @@ const baseUrl = SITE_URL;
 const translations = {
   en: {
     label: "Services",
-    title: "What We Deliver",
-    subtitle:
-      "Official IT services scope: software, games, apps, web/content production, and translation.",
+    title: "Now Delivering",
+    subtitle: "Current service scope you can request today.",
     back: "Back to Home",
-    cards: [
+    nowTitle: "Now Delivering",
+    inProgressTitle: "In Progress",
+    plannedTitle: "Planned",
+    flowTitle: "Delivery Flow",
+    flow: "Discovery -> Scope -> Build -> Handoff",
+    nowCards: [
       {
-        title: "Software & Tools Development",
+        title: "Software and Web Application Development",
         description:
-          "Custom software solutions, automation tools, and integrated systems for business operations.",
-        bullets: [
-          "Internal dashboards",
-          "Automation tools",
-          "API integrations",
-        ],
+          "Custom business systems, internal tools, and web applications tailored to operational needs.",
+        includes: "Includes: scope definition, implementation, testing, deployment support.",
+        excludes: "Not included by default: long-term 24/7 operations, enterprise compliance audits.",
       },
       {
         title: "Game Development",
         description:
-          "Interactive experiences and game prototypes built for engagement and polish.",
-        bullets: [
-          "Casual mobile prototypes",
-          "Indie game MVPs",
-          "Production vertical slices",
-        ],
+          "Casual mobile prototypes and small indie gameplay builds for concept validation.",
+        includes: "Includes: gameplay prototype, iteration passes, build packaging.",
+        excludes: "Not included by default: full live-ops pipelines and large studio outsourcing.",
       },
       {
-        title: "Web & Content Production",
+        title: "Web Production and Content Systems",
         description:
-          "Modern web platforms and content systems optimized for clarity and reach.",
-        bullets: [
-          "Corporate sites",
-          "Landing pages",
-          "Multilingual blogs (like NeoWhisper Blog)",
-        ],
+          "Corporate sites, landing pages, and multilingual content platforms.",
+        includes: "Includes: UX structure, implementation, CMS/blog workflow setup.",
+        excludes: "Not included by default: high-volume ad media operations.",
       },
       {
         title: "Translation & Localization (EN/AR/JP)",
         description:
-          "Seamless adaptation of software, apps, websites, and content for global audiences with technical accuracy.",
-        bullets: [
-          "App UI strings",
-          "Technical documentation",
-          "Marketing pages",
-        ],
+          "Technical translation and software localization for English, Arabic, and Japanese.",
+        includes: "Includes: UI strings, documentation, and product content localization.",
+        excludes: "Not included by default: legal-certified translation services.",
       },
     ],
-    cta: "Tell me about your project",
+    inProgress: [
+      "Client dashboard templates for workflow and analytics are being refined.",
+    ],
+    planned: [
+      "Reusable localization kits for recurring EN/JA/AR launch workflows.",
+    ],
+    cta: "Start a Project",
   },
   ja: {
     label: "サービス",
-    title: "提供できること",
-    subtitle: "開業届の事業概要に沿ったITサービスを提供します。",
+    title: "現在提供中のサービス",
+    subtitle: "今日ご相談いただける提供範囲です。",
     back: "ホームへ戻る",
-    cards: [
+    nowTitle: "現在提供中",
+    inProgressTitle: "進行中",
+    plannedTitle: "計画",
+    flowTitle: "提供フロー",
+    flow: "ヒアリング -> 要件定義 -> 開発 -> 引き渡し",
+    nowCards: [
       {
-        title: "ソフトウェア・ツール開発",
-        description: "業務効率を改善するカスタムソフトウェアや自動化ツール、API連携システムを構築します。",
-        bullets: ["社内ダッシュボード", "業務自動化ツール", "各種API連携"],
+        title: "ソフトウェア・Webアプリ開発",
+        description: "業務システム、社内ツール、Webアプリを要件に合わせて実装します。",
+        includes: "含まれるもの: 要件整理、実装、テスト、公開支援。",
+        excludes: "標準では含まれないもの: 24時間運用保守、監査対応。",
       },
       {
         title: "ゲーム開発",
-        description: "エンゲージメントを高めるインタラクティブな体験や、高品質なゲームプロトタイプを制作します。",
-        bullets: ["カジュアルゲーム試作", "インディーゲームMVP", "垂直スライス版制作"],
+        description: "スマホ向けカジュアルゲーム試作や小規模インディー開発に対応します。",
+        includes: "含まれるもの: プロトタイプ制作、改善反映、ビルド提供。",
+        excludes: "標準では含まれないもの: 大規模ライブ運用体制の代行。",
       },
       {
         title: "Web・コンテンツ制作",
-        description: "情報の伝わりやすさとリーチを追求した、モダンなWebプラットフォームとコンテンツ基盤を提供します。",
-        bullets: ["コーポレートサイト", "ランディングページ", "多言語ブログ（NeoWhisper Blogなど）"],
+        description: "企業サイト、LP、多言語コンテンツ基盤を設計・実装します。",
+        includes: "含まれるもの: 情報設計、実装、CMS/ブログ運用構成。",
+        excludes: "標準では含まれないもの: 大量広告メディア運用。",
       },
       {
         title: "翻訳・ローカライズ (日本語/英語/アラビア語)",
-        description: "グローバルに展開する製品やコンテンツを、技術的正確さを保ちつつ多言語へ最適化します。",
-        bullets: ["アプリUI文言", "技術ドキュメント", "マーケティングページ"],
+        description: "英語・アラビア語・日本語の技術翻訳とプロダクト向けローカライズを提供します。",
+        includes: "含まれるもの: UI文言、技術文書、製品コンテンツ。",
+        excludes: "標準では含まれないもの: 法的証明付き翻訳。",
       },
     ],
-    cta: "プロジェクトについて相談する",
+    inProgress: [
+      "業務分析と可視化向けダッシュボード雛形を現在整備中です。",
+    ],
+    planned: [
+      "EN/JA/ARの反復案件向けローカライズキットを計画中です。",
+    ],
+    cta: "プロジェクト相談を始める",
   },
   ar: {
     label: "الخدمات",
-    title: "خدماتنا",
-    subtitle: "نقدم نطاق خدمات تقنية المعلومات وفقًا لوصف النشاط المسجل.",
+    title: "الخدمات المتاحة الآن",
+    subtitle: "هذا هو نطاق الخدمات الذي يمكن طلبه اليوم.",
     back: "العودة للرئيسية",
-    cards: [
+    nowTitle: "متاح الآن",
+    inProgressTitle: "قيد التنفيذ",
+    plannedTitle: "مخطط",
+    flowTitle: "آلية التنفيذ",
+    flow: "اكتشاف -> تحديد نطاق -> بناء -> تسليم",
+    nowCards: [
       {
-        title: "تطوير البرمجيات والأدوات",
-        description: "حلول برمجية مخصصة، أدوات أتمتة، وأنظمة متكاملة لعمليات الأعمال.",
-        bullets: ["لوحات تحكم داخلية", "أدوات الأتمتة", "ربط واجهات API"],
+        title: "تطوير البرمجيات وتطبيقات الويب",
+        description: "نطوّر أنظمة أعمال وأدوات داخلية وتطبيقات ويب حسب متطلبات التشغيل.",
+        includes: "يشمل: تحديد النطاق، التنفيذ، الاختبار، ودعم الإطلاق.",
+        excludes: "لا يشمل افتراضياً: تشغيل 24/7 أو تدقيقات امتثال مؤسسية.",
       },
       {
         title: "تطوير الألعاب",
-        description: "تجارب تفاعلية ونماذج ألعاب أولية مبنية بجودة وإتقان.",
-        bullets: ["نماذج ألعاب موبايل", "نسخ MVP للألعاب", "تطوير أنظمة اللعب"],
+        description: "نماذج أولية للألعاب المحمولة وتطوير ألعاب مستقلة صغيرة.",
+        includes: "يشمل: نموذج لعب أولي، جولات تحسين، وتسليم نسخ البناء.",
+        excludes: "لا يشمل افتراضياً: إدارة تشغيل مباشر واسعة النطاق.",
       },
       {
-        title: "إنتاج الويب والمحتوى",
-        description: "منصات ويب حديثة وأنظمة محتوى محسنة للوضوح والوصول.",
-        bullets: ["مواقع شركات", "صفحات هبوط (Landing Pages)", "مدونات متعددة اللغات"],
+        title: "إنتاج الويب وأنظمة المحتوى",
+        description: "تنفيذ مواقع الشركات وصفحات الهبوط ومنصات محتوى متعددة اللغات.",
+        includes: "يشمل: هيكلة المحتوى، التنفيذ، وإعداد سير تشغيل المنصة.",
+        excludes: "لا يشمل افتراضياً: تشغيل إعلام إعلاني عالي الحجم.",
       },
       {
         title: "الترجمة والتعريب (EN/AR/JP)",
-        description: "تكييف المنتجات والمحتوى للجمهور العالمي بدقة تقنية عالية.",
-        bullets: ["نصوص الواجهات", "الوثائق التقنية", "صفحات التسويق"],
+        description: "ترجمة تقنية وتعريب برمجي بين الإنجليزية والعربية واليابانية.",
+        includes: "يشمل: نصوص الواجهة، الوثائق التقنية، ومحتوى المنتج.",
+        excludes: "لا يشمل افتراضياً: الترجمة القانونية الموثقة.",
       },
     ],
-    cta: "أخبرني عن مشروعك",
+    inProgress: [
+      "نعمل حالياً على قوالب لوحات تشغيلية لمتابعة المهام والتحليلات.",
+    ],
+    planned: [
+      "إعداد حزم تعريب قابلة لإعادة الاستخدام لمشاريع EN/JA/AR المتكررة.",
+    ],
+    cta: "ابدأ طلب مشروع",
   },
 } as const;
 
@@ -220,8 +248,15 @@ export default async function ServicesPage({
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {t.cards.map((service) => (
+        <section className="mb-8 rounded-3xl border border-white/20 bg-purple-600/5 p-6 dark:border-white/10">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.flowTitle}</h2>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{t.flow}</p>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">{t.nowTitle}</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            {t.nowCards.map((service) => (
             <article
               key={service.title}
               className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg dark:border-white/10 dark:bg-white/5"
@@ -232,19 +267,37 @@ export default async function ServicesPage({
               <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
                 {service.description}
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {service.bullets.map((bullet) => (
-                  <span
-                    key={bullet}
-                    className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200"
-                  >
-                    {bullet}
-                  </span>
-                ))}
+              <div className="mt-4 space-y-2 text-xs">
+                <p className="rounded-xl border border-white/20 bg-white/70 px-3 py-2 text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200">
+                  {service.includes}
+                </p>
+                <p className="rounded-xl border border-white/20 bg-white/70 px-3 py-2 text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                  {service.excludes}
+                </p>
               </div>
             </article>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-10 grid gap-6 md:grid-cols-2">
+          <article className="rounded-3xl border border-white/20 bg-white/50 p-6 dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.inProgressTitle}</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700 dark:text-gray-300">
+              {t.inProgress.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+          <article className="rounded-3xl border border-white/20 bg-white/50 p-6 dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.plannedTitle}</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700 dark:text-gray-300">
+              {t.planned.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </section>
 
         <div className="mt-16 flex justify-center">
           <Link

@@ -17,13 +17,13 @@ const siteUrl = SITE_URL;
 const translations = {
   en: {
     studio: "NEO WHISPER",
-    heroTitle: "Build software, launch websites, and scale globally.",
+    heroTitle: "Tokyo-based multilingual IT partner for practical software delivery.",
     heroSubtitle:
-      "Tokyo-based IT services business (JP/EN/AR) providing software development, game development, app development, web production, web content production, and translation.",
+      "We deliver software, web systems, and localization in Japanese, English, and Arabic for startups, SMEs, and creators.",
     visitBlog: "Visit the Blog",
-    viewProjects: "See Projects",
-    viewServices: "View Services",
-    servicesTitle: "Services",
+    viewProjects: "View Work",
+    viewServices: "Start a Project",
+    servicesTitle: "Now Delivering",
     projectsTitle: "Featured Projects",
     projectsCta: "See more →",
     downloadsTitle: "Products & Downloads",
@@ -40,10 +40,17 @@ const translations = {
     contactTitle: "Let's Build Together",
     contactCopy:
       "Tell us about your product or collaboration idea, and we'll help you scope the next steps.",
-    contactButton: "Contact Us",
+    contactButton: "Start a Project",
     readBlog: "Read the Blog",
     plannedLabel: "Planned",
     exploreServices: "Explore Services →",
+    nowStripTitle: "Now",
+    nowStrip: [
+      "Software and web application development",
+      "Web production and multilingual content systems",
+      "Technical translation and localization (JP/EN/AR)",
+      "Small-scope game prototype development",
+    ],
     services: [
       {
         title: "Software & App Development",
@@ -88,13 +95,13 @@ const translations = {
   },
   ja: {
     studio: "NEO WHISPER",
-    heroTitle: "ソフトウェアとWebを開発し、世界へ。",
+    heroTitle: "東京拠点の多言語IT開発パートナー。",
     heroSubtitle:
-      "東京都港区を拠点とするITサービス業。ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービスを提供しています。",
+      "スタートアップ・中小企業・個人事業向けに、ソフトウェア開発、Web制作、多言語対応を提供します。",
     visitBlog: "ブログを見る",
-    viewProjects: "プロジェクトを見る",
-    viewServices: "サービスを見る",
-    servicesTitle: "サービス",
+    viewProjects: "実績を見る",
+    viewServices: "プロジェクト相談を始める",
+    servicesTitle: "現在提供中",
     projectsTitle: "注目プロジェクト",
     projectsCta: "もっと見る →",
     downloadsTitle: "プロダクト / ダウンロード",
@@ -111,10 +118,17 @@ const translations = {
     contactTitle: "一緒に作りましょう",
     contactCopy:
       "プロダクトやコラボレーションのご相談をお聞かせください。",
-    contactButton: "お問い合わせ",
+    contactButton: "プロジェクト相談を始める",
     readBlog: "ブログを読む",
     plannedLabel: "準備中",
     exploreServices: "サービスを見る →",
+    nowStripTitle: "Now",
+    nowStrip: [
+      "ソフトウェア・Webアプリ開発",
+      "Web制作・多言語コンテンツ基盤",
+      "技術翻訳・ローカライズ（JP/EN/AR）",
+      "小規模ゲームプロトタイプ開発",
+    ],
     services: [
       {
         title: "ソフトウェア・アプリ開発",
@@ -159,13 +173,13 @@ const translations = {
   },
   ar: {
     studio: "نيو ويسبر (NEO WHISPER)",
-    heroTitle: "نطوّر البرمجيات والويب ونتوسع عالميًا.",
+    heroTitle: "شريك تقني متعدد اللغات من طوكيو لتنفيذ برمجي عملي.",
     heroSubtitle:
-      "نشاط خدمات تقنية معلومات في طوكيو (اليابانية/الإنجليزية/العربية) يقدم تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب وإنتاج محتوى الويب والترجمة.",
+      "نقدّم تطوير البرمجيات وأنظمة الويب والتعريب باليابانية والإنجليزية والعربية للشركات الناشئة والصغيرة وصنّاع الأعمال.",
     visitBlog: "زيارة المدونة",
-    viewProjects: "عرض المشاريع",
-    viewServices: "عرض الخدمات",
-    servicesTitle: "الخدمات",
+    viewProjects: "عرض الأعمال",
+    viewServices: "ابدأ طلب مشروع",
+    servicesTitle: "متاح الآن",
     projectsTitle: "مشاريع مختارة",
     projectsCta: "المزيد →",
     downloadsTitle: "المنتجات والتنزيلات",
@@ -182,10 +196,17 @@ const translations = {
     contactTitle: "لنبدأ مشروعًا معًا",
     contactCopy:
       "أخبرنا عن فكرتك وسنساعدك في تحديد الخطوات القادمة.",
-    contactButton: "تواصل معنا",
+    contactButton: "ابدأ طلب مشروع",
     readBlog: "اقرأ المدونة",
     plannedLabel: "قريبًا",
     exploreServices: "استكشاف الخدمات →",
+    nowStripTitle: "Now",
+    nowStrip: [
+      "تطوير البرمجيات وتطبيقات الويب",
+      "إنتاج الويب وأنظمة المحتوى متعددة اللغات",
+      "الترجمة التقنية والتعريب (JP/EN/AR)",
+      "تطوير نماذج أولية صغيرة للألعاب",
+    ],
     services: [
       {
         title: "تطوير البرمجيات والتطبيقات",
@@ -314,6 +335,7 @@ export default async function Home({
   }).filter((post) => getBaseSlug(post.slug) !== "welcome");
   const posts = filteredPosts.slice(0, 3);
   const projects = getProjects(currentLang);
+  const nowProjects = projects.filter((project) => project.status === "now").slice(0, 3);
 
   return (
     <>
@@ -382,7 +404,7 @@ export default async function Home({
           </div>
         </header>
 
-        <section id="services" className="mb-16">
+        <section id="services" className="mb-8">
           <h2 className="mb-6 text-3xl font-extrabold text-gray-900 dark:text-white">
             {copy.servicesTitle}
           </h2>
@@ -412,6 +434,20 @@ export default async function Home({
           </div>
         </section>
 
+        <section className="mb-16 rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{copy.nowStripTitle}</h2>
+          <ul className="mt-4 grid gap-3 md:grid-cols-2">
+            {copy.nowStrip.map((item) => (
+              <li
+                key={item}
+                className="rounded-xl border border-white/20 bg-white/70 px-4 py-3 text-sm text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-gray-200"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section id="projects" className="mb-16">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -425,23 +461,15 @@ export default async function Home({
             </Link>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            {projects.map((item) => (
+            {nowProjects.map((item) => (
               <div
                 key={item.title}
-                className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${item.status === "planned"
-                  ? "opacity-60 grayscale"
-                  : "hover:-translate-y-1 hover:shadow-xl"
-                  }`}
+                className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {item.title}
                   </h3>
-                  {item.status === "planned" && (
-                    <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
-                      {copy.plannedLabel}
-                    </span>
-                  )}
                 </div>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                   {item.description}

@@ -10,39 +10,60 @@ const baseUrl = SITE_URL;
 const copy = {
   en: {
     label: "Projects",
-    title: "Selected Work",
-    subtitle: "Shipped projects and products in production.",
+    title: "Proof of Work",
+    subtitle: "Shipped implementation first, roadmap second.",
     intro:
-      "Live projects by NEO WHISPER, a registered IT services sole proprietorship in Tokyo.",
+      "Current shipped work by NEO WHISPER, a registered IT services sole proprietorship in Tokyo.",
     back: "Back to Home",
-    planned: "Planned",
-    liveSection: "Live Projects",
-    plannedSection: "Coming Soon",
-    plannedIntro: "Projects currently in development or planning phase.",
+    nowLabel: "Now",
+    inProgressLabel: "In Progress",
+    plannedLabel: "Planned",
+    nowSection: "Shipped Work",
+    roadmapSection: "Roadmap",
+    roadmapIntro: "These items are not yet delivered and are shown as future work only.",
+    primaryCta: "Start a Project",
+    challengeLabel: "Challenge",
+    scopeLabel: "Scope",
+    stackLabel: "Stack",
+    outcomeLabel: "Outcome",
   },
   ja: {
     label: "プロジェクト",
-    title: "選定プロジェクト",
-    subtitle: "リリース済みのプロジェクトと製品。",
+    title: "実績とロードマップ",
+    subtitle: "本番稼働中の実績を先に、将来計画を後に表示します。",
     intro:
-      "NEO WHISPER（東京都港区のITサービス個人事業主）による、本番環境で稼働中のプロジェクト。",
+      "NEO WHISPER（東京都港区のITサービス個人事業主）の現在の実装実績です。",
     back: "ホームへ戻る",
-    planned: "準備中",
-    liveSection: "稼働中のプロジェクト",
-    plannedSection: "開発中",
-    plannedIntro: "現在開発または計画中のプロジェクト。",
+    nowLabel: "提供中",
+    inProgressLabel: "進行中",
+    plannedLabel: "計画",
+    nowSection: "稼働中の実績",
+    roadmapSection: "ロードマップ",
+    roadmapIntro: "以下は未提供の将来項目です。現在提供中のサービスではありません。",
+    primaryCta: "プロジェクト相談を始める",
+    challengeLabel: "課題",
+    scopeLabel: "実装範囲",
+    stackLabel: "技術構成",
+    outcomeLabel: "成果",
   },
   ar: {
     label: "المشاريع",
-    title: "أعمال مختارة",
-    subtitle: "المشاريع والمنتجات المنشورة.",
+    title: "الأعمال المنفذة وخارطة الطريق",
+    subtitle: "نعرض ما تم تسليمه فعلياً أولاً، ثم العناصر المستقبلية بشكل منفصل.",
     intro:
-      "المشاريع الحية من نيو ويسبر (NEO WHISPER)، وهي مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو.",
+      "هذه هي الأعمال المنفذة حالياً لدى نيو ويسبر (NEO WHISPER)، وهي مؤسسة فردية مسجلة لخدمات تقنية المعلومات في طوكيو.",
     back: "العودة للرئيسية",
-    planned: "قريبًا",
-    liveSection: "المشاريع الحية",
-    plannedSection: "قريباً",
-    plannedIntro: "المشاريع قيد التطوير أو التخطيط حالياً.",
+    nowLabel: "متاح الآن",
+    inProgressLabel: "قيد التنفيذ",
+    plannedLabel: "مخطط",
+    nowSection: "أعمال تم تسليمها",
+    roadmapSection: "خارطة الطريق",
+    roadmapIntro: "العناصر التالية غير مسلّمة بعد وتُعرض كخطط مستقبلية فقط.",
+    primaryCta: "ابدأ طلب مشروع",
+    challengeLabel: "التحدي",
+    scopeLabel: "نطاق التنفيذ",
+    stackLabel: "التقنيات",
+    outcomeLabel: "النتيجة",
   },
 } as const;
 
@@ -130,6 +151,8 @@ export default async function ProjectsPage({
       return { ...link, href: `${link.href}?lang=${currentLang}` };
     }),
   }));
+  const nowProjects = projects.filter((p) => p.status === "now");
+  const roadmapProjects = projects.filter((p) => p.status !== "now");
   return (
     <div
       className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900 px-4 py-16 sm:px-6 lg:px-8"
@@ -160,15 +183,13 @@ export default async function ProjectsPage({
           </Link>
         </div>
 
-        {/* Live Projects Section */}
+        {/* Shipped Projects Section */}
         <section className="mb-16">
           <h2 className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
-            {t.liveSection}
+            {t.nowSection}
           </h2>
           <div className="grid gap-6 md:grid-cols-2">
-            {projects
-              .filter((p) => p.status === "live")
-              .map((project) => (
+            {nowProjects.map((project) => (
                 <article
                   key={project.title}
                   className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
@@ -188,6 +209,26 @@ export default async function ProjectsPage({
                   <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
                     {project.description}
                   </p>
+                  {project.proof && (
+                    <dl className="mt-4 grid gap-2 rounded-2xl border border-white/20 bg-white/60 p-4 text-xs dark:border-white/10 dark:bg-white/5">
+                      <div>
+                        <dt className="font-semibold text-gray-700 dark:text-gray-200">{t.challengeLabel}</dt>
+                        <dd className="text-gray-600 dark:text-gray-300">{project.proof.challenge}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold text-gray-700 dark:text-gray-200">{t.scopeLabel}</dt>
+                        <dd className="text-gray-600 dark:text-gray-300">{project.proof.scope}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold text-gray-700 dark:text-gray-200">{t.stackLabel}</dt>
+                        <dd className="text-gray-600 dark:text-gray-300">{project.proof.stack}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold text-gray-700 dark:text-gray-200">{t.outcomeLabel}</dt>
+                        <dd className="text-gray-600 dark:text-gray-300">{project.proof.outcome}</dd>
+                      </div>
+                    </dl>
+                  )}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
                       <span
@@ -231,21 +272,19 @@ export default async function ProjectsPage({
           </div>
         </section>
 
-        {/* Planned Projects Section */}
-        {projects.some((p) => p.status === "planned") && (
+        {/* Roadmap Section */}
+        {roadmapProjects.length > 0 && (
           <section>
             <div className="mb-6 flex items-center gap-3">
               <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                {t.plannedSection}
+                {t.roadmapSection}
               </h2>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {t.plannedIntro}
+                {t.roadmapIntro}
               </span>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {projects
-                .filter((p) => p.status === "planned")
-                .map((project) => (
+              {roadmapProjects.map((project) => (
                   <article
                     key={project.title}
                     className="rounded-2xl border border-white/20 bg-white/40 p-5 opacity-70 transition-all duration-300 dark:border-white/10 dark:bg-white/5"
@@ -255,7 +294,7 @@ export default async function ProjectsPage({
                         {project.title}
                       </h3>
                       <span className="rounded-full border border-white/30 bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500 dark:border-white/10 dark:bg-white/10 dark:text-gray-400">
-                        {t.planned}
+                        {project.status === "in_progress" ? t.inProgressLabel : t.plannedLabel}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
@@ -276,6 +315,15 @@ export default async function ProjectsPage({
             </div>
           </section>
         )}
+
+        <div className="mt-12 flex justify-center">
+          <Link
+            href={`/contact?lang=${currentLang}`}
+            className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+          >
+            {t.primaryCta}
+          </Link>
+        </div>
       </div>
     </div>
   );

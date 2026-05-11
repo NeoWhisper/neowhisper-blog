@@ -10,7 +10,7 @@ const translations = {
     label: "About",
     title: "Registered IT Services Business",
     subtitle: "Registered in Japan as an IT services sole proprietorship.",
-    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Founder.",
+    intro: "NEO WHISPER is a registered IT services sole proprietorship based in Minato City, Tokyo, founded in December 2025 by Yousif Alqadi.",
     back: "Back to Home",
     sections: [
       {
@@ -34,7 +34,7 @@ const translations = {
     label: "概要",
     title: "ITサービス個人事業",
     subtitle: "開業届上の職業区分: ITサービス業。",
-    intro: "NEO WHISPERは、2025年12月に東京都港区でFounderが開業したITサービス個人事業です。税務署へ開業届を提出済みです。",
+    intro: "NEO WHISPERは、2025年12月に東京都港区でアルカーディ ヨセフが開業したITサービス個人事業です。税務署へ開業届を提出済みです。",
     back: "ホームへ戻る",
     sections: [
       {
@@ -58,7 +58,7 @@ const translations = {
     label: "نبذة",
     title: "نشاط خدمات تقنية معلومات مسجل",
     subtitle: "نشاط مسجل في اليابان ضمن خدمات تقنية المعلومات.",
-    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل Founder.",
+    intro: "نيو ويسبر (NEO WHISPER) هي مؤسسة فردية مسجلة لخدمات تقنية المعلومات مقرها في مدينة ميناتو، طوكيو، تأسست في ديسمبر 2025 من قبل يوسف القاضي.",
     back: "العودة للرئيسية",
     sections: [
       {

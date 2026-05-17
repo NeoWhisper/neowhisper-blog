@@ -14,6 +14,7 @@ import {
   getDynamicPostsByLocale,
 } from "@/lib/posts-dynamic";
 import type { Post } from "@/types";
+import { isLowValueBriefPost } from "@/lib/brief-quality";
 
 import { isLocalizedSlug } from "@/lib/slug";
 
@@ -176,12 +177,17 @@ export async function getHybridSitemapBlogEntries(): Promise<
     ...entry,
     source: "dynamic" as const,
   }));
-  const staticEntries = getPosts().map((post) => ({
-    slug: post.slug,
-    locale: normalizeLang(getPostLanguage(post.slug)),
-    lastModified: post.date ?? new Date().toISOString(),
-    source: "static" as const,
-  }));
+  const staticEntries = getPosts()
+    .filter(
+      (post) =>
+        !isLowValueBriefPost(post.slug, post.content, post.coverImage),
+    )
+    .map((post) => ({
+      slug: post.slug,
+      locale: normalizeLang(getPostLanguage(post.slug)),
+      lastModified: post.date ?? new Date().toISOString(),
+      source: "static" as const,
+    }));
 
   const combined = [...dynamicEntries, ...staticEntries];
   const seen = new Set<string>();

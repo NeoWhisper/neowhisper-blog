@@ -52,7 +52,7 @@
     "marked": "^18.0.3",
     "next": "^16.2.2",
     "next-mdx-remote": "^6.0.0",
-    "react": "19.2.5",
+    "react": "19.2.6",
     "react-dom": "19.2.5",
     "reading-time": "^1.5.0",
     "rehype-highlight": "^7.0.2",

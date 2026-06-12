@@ -36,3 +36,48 @@ it is not the likely cause of the AdSense rejection.
 - Confirm Privacy, Terms, About, Contact, and Editorial Policy pages are linked
   and localized.
 - Re-run lint, unit tests, and build.
+
+## Security Diagnosis Notes
+
+Last reviewed: 2026-06-02
+
+The お名前.com security diagnosis reported an overall grade of `A` and did not
+identify urgent security risks. Two informational findings should still be
+tracked as hardening items.
+
+### OCSP Stapling
+
+Finding: OCSP Stapling is not enabled.
+
+Risk: If an OCSP response is not obtained during certificate validation, SSL/TLS
+communication may proceed without confirming certificate revocation status. OCSP
+requests can also disclose browser access patterns to the OCSP responder.
+
+Recommended action:
+
+- If the site is self-hosted, enable OCSP Stapling in the web server
+  configuration, for example `SSLUseStapling On` for Apache or
+  `ssl_stapling on` for Nginx.
+- Configure the OCSP responder URL and certificate validation chain correctly.
+- Restart the web server after saving the configuration.
+- Verify OCSP Stapling with browser diagnostics and external TLS test tools.
+- If the site is hosted on a managed platform such as Vercel, confirm whether
+  OCSP Stapling is controlled by the platform or CDN provider rather than this
+  repository.
+
+### Public Subdomain
+
+Finding: `www.neowhisper.net` was detected as a related public subdomain.
+
+Risk: Publicly discoverable subdomains can help attackers identify targets for
+reconnaissance. Unused or dangling DNS records can also increase subdomain
+takeover risk.
+
+Recommended action:
+
+- Confirm that `www.neowhisper.net` is intentional and routes to the expected
+  production site.
+- Remove or restrict any unintended public subdomains.
+- Ensure DNS records do not point to unclaimed hosting resources.
+- Use firewall, DNS, or platform access controls for any private subdomains.
+- Review access logs regularly for unexpected traffic or abnormal connections.

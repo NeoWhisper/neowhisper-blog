@@ -12,7 +12,7 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
   },
   webServer: {
-    command: 'PORT=3000 npm run dev',
+    command: 'PORT=3000 npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
     timeout: 180_000,

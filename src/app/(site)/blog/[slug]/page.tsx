@@ -100,7 +100,11 @@ export async function generateMetadata({
       );
     });
 
-    const noIndex = isLowValueBriefPost(post.slug, post.content);
+    const noIndex = isLowValueBriefPost(
+      post.slug,
+      post.content,
+      post.coverImage,
+    );
     const canonicalUrl = buildPostUrl(post.slug, post.locale, post.source);
     const publishedTime = toIsoDate(post.publishedAt ?? post.date);
     const modifiedTime = toIsoDate(post.updatedAt ?? post.publishedAt ?? post.date);

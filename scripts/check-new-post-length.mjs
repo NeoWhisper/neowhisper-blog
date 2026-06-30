@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const MIN_WORDS_EXCLUSIVE = 700; // Rule: strictly more than 700 words
+const MIN_WORDS_EXCLUSIVE = 900; // Rule: strictly more than 900 words
 const POSTS_DIR = "src/content/posts";
 
 function stripFrontmatter(source) {
@@ -100,7 +100,7 @@ async function main() {
     process.exit(0);
   }
 
-  console.error("Post length rule failed. New posts must be more than 700 words.");
+  console.error("Post length rule failed. New posts must be more than 900 words.");
   for (const failure of failures) {
     console.error(`- ${failure.file}: ${failure.wordCount} words`);
   }

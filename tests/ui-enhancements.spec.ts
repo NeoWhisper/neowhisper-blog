@@ -183,8 +183,10 @@ test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   await page.goto("/blog");
 
   // Click first article and wait for navigation
+  // Sequential click + waitForURL handles Next.js soft navigation correctly
   const firstArticle = page.locator("article a").first();
-  await Promise.all([page.waitForURL(/\/blog\//), firstArticle.click()]);
+  await firstArticle.click();
+  await page.waitForURL(/\/blog\/.+/, { timeout: 15_000 });
 
   // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)
   const prevNextNav = page.locator(

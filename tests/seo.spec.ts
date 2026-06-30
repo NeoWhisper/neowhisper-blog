@@ -148,10 +148,8 @@ test.describe("SEO Metadata", () => {
   });
 
   test("robots meta tag allows indexing for normal posts", async ({ page }) => {
-    await page.goto("/blog");
-
-    const firstArticle = page.locator("article a").first();
-    await firstArticle.click();
+    // Navigate to a known non-brief post to test normal indexing behavior
+    await page.goto("/blog/adsense-ready-multilingual-nextjs");
     await page.waitForLoadState("networkidle");
 
     // Check robots meta (use first() as there may be duplicates)
@@ -160,7 +158,7 @@ test.describe("SEO Metadata", () => {
 
     if (count > 0) {
       const robotsContent = await robotsMeta.getAttribute("content");
-      // Should not contain "noindex"
+      // Normal posts should not have noindex
       expect(robotsContent).not.toContain("noindex");
     }
   });

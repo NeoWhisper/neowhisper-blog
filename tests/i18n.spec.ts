@@ -41,11 +41,8 @@ test.describe("i18n - Internationalization", () => {
 
       if (count > 0) {
         await jaLink.click();
-        await page.waitForLoadState("networkidle");
-
-        // URL should contain lang=ja or the page should be in Japanese
-        const url = page.url();
-        expect(url.includes("lang=ja") || url.includes("/ja/")).toBeTruthy();
+        // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
+        await expect(page).toHaveURL(/lang=ja|\/ja\//, { timeout: 10_000 });
       }
     });
 
@@ -66,10 +63,8 @@ test.describe("i18n - Internationalization", () => {
 
       if (count > 0) {
         await arLink.click();
-        await page.waitForLoadState("networkidle");
-
-        const url = page.url();
-        expect(url.includes("lang=ar") || url.includes("/ar/")).toBeTruthy();
+        // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
+        await expect(page).toHaveURL(/lang=ar|\/ar\//, { timeout: 10_000 });
       }
     });
 
@@ -90,13 +85,9 @@ test.describe("i18n - Internationalization", () => {
 
       if (count > 0) {
         await enLink.click();
-        await page.waitForLoadState("networkidle");
-
-        const url = page.url();
-        expect(
-          url.includes("lang=en") ||
-            (!url.includes("lang=ja") && !url.includes("lang=ar")),
-        ).toBeTruthy();
+        // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
+        await expect(page).not.toHaveURL(/lang=ja|\/ja\//, { timeout: 10_000 });
+        await expect(page).not.toHaveURL(/lang=ar|\/ar\//, { timeout: 10_000 });
       }
     });
   });

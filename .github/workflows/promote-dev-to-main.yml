@@ -1,10 +1,8 @@
 name: Promote Dev to Main PR
 
 on:
-  push:
-    branches:
-      - dev
   workflow_dispatch:
+    description: "Create a release PR from dev → main"
 
 permissions:
   contents: read
@@ -15,10 +13,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ensure-promotion-pr:
+  create-release-pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Ensure open PR from dev to main
+      - name: Create fresh release PR from dev to main
         uses: actions/github-script@v9
         with:
           script: |
@@ -37,11 +35,6 @@ jobs:
               per_page: 100,
             });
 
-            if (existing.length > 0) {
-              core.info(`Existing open promotion PR found: #${existing[0].number}`);
-              return;
-            }
-
             const comparison = await github.rest.repos.compareCommits({
               owner,
               repo,
@@ -54,10 +47,20 @@ jobs:
               return;
             }
 
+            if ((comparison.data.files || []).length === 0) {
+              core.info("No file changes to promote from dev to main.");
+              return;
+            }
+
+            if (existing.length > 0) {
+              core.info(`Existing open release PR found: #${existing[0].number}`);
+              return;
+            }
+
             const created = await github.rest.pulls.create({
               owner,
               repo,
-              title: "chore(release): promote dev to main",
+              title: "chore(release): promote dev to main - one-time snapshot",
               head,
               base,
               body: [
@@ -67,8 +70,9 @@ jobs:
                 "",
                 "## Notes",
                 "",
-                "- Created automatically by `.github/workflows/promote-dev-to-main.yml`.",
-                "- This PR will continue to update as new commits are added to `dev`.",
+                "- Created manually via workflow_dispatch in `.github/workflows/promote-dev-to-main.yml`.",
+                "- This is a one-time snapshot; existing open release PRs are left untouched.",
+                "- Review and merge when ready to release to production.",
               ].join("\n"),
             });
 
@@ -79,7 +83,7 @@ jobs:
                 owner,
                 repo,
                 issue_number: created.data.number,
-                labels: ["automated", "release"],
+                labels: ["release"],
               });
             } catch (error) {
               core.warning(`Could not add labels automatically: ${error.message}`);

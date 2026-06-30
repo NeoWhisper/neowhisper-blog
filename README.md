@@ -135,6 +135,36 @@ author:
 ---
 ```
 
+## AdSense Remediation Mode
+
+The site is currently optimized for a cleaner AdSense re-review corpus:
+
+- AI trend brief posts are conservative by default. Short briefs, and briefs
+  still using `/og-image.jpg`, are served with `noindex` and excluded from the
+  sitemap.
+- New staged posts must be more than 900 words before commit checks pass.
+- Keep generated briefs source-grounded, human-reviewed, and supported by a
+  distinctive cover image before allowing them into the index.
+
+Environment overrides:
+
+```env
+# Default: true. Set to false only after thin/generated briefs are remediated.
+BRIEF_NOINDEX_ENABLED=true
+
+# Default: 900. Hard floor: 600.
+BRIEF_NOINDEX_MIN_WORDS=900
+```
+
+Operational notes from local logs:
+
+- Recent daily content runs failed because local/remote model endpoints were
+  unavailable, overloaded, or too large for available system resources.
+- Treat generated trend posts as drafts until editorial QA confirms depth,
+  citations, image uniqueness, and language quality.
+- Keep `.logs/`, `scripts/logs/*.json`, and local audit reports out of commits;
+  summarize actionable findings in tracked docs instead.
+
 ## 🤖 Daily AI Content Automation (EN/JA/AR)
 
 This repository includes a multilingual draft generator that can run:

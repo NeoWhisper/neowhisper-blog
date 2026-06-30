@@ -54,6 +54,11 @@ jobs:
               return;
             }
 
+            if ((comparison.data.files || []).length === 0) {
+              core.info("No file changes to promote from contents to main.");
+              return;
+            }
+
             const created = await github.rest.pulls.create({
               owner,
               repo,

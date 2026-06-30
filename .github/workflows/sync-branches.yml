@@ -1,9 +1,11 @@
 name: Sync Main to Dev and Contents
 
 on:
-  push:
-    branches:
-      - main
+  # DISABLED push trigger: Only allow manual triggering via workflow_dispatch.
+  # Automatic back-merge to contents on every main push creates noise.
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -25,26 +27,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync main into dev
+      - name: Sync main into dev and contents when needed
         run: |
-          # Checkout dev branch
-          git checkout dev || git checkout -b dev origin/dev
-          
-          # Merge main into dev (preferring main's history logically, though standard merge is fine)
-          git merge origin/main --no-edit -m "chore(sync): automated merge of main into dev"
-          
-          # Push the sync
-          git push origin dev
-        continue-on-error: true # Do not fail the workflow if there are merge conflicts
+          for branch in dev contents; do
+            git checkout "$branch" || git checkout -b "$branch" "origin/$branch"
 
-      - name: Sync main into contents
-        run: |
-          # Checkout contents branch
-          git checkout contents || git checkout -b contents origin/contents
-          
-          # Merge main into contents
-          git merge origin/main --no-edit -m "chore(sync): automated merge of main into contents"
-          
-          # Push the sync
-          git push origin contents
+            if git diff --quiet origin/main "$branch"; then
+              echo "$branch has no file changes compared with main; skipping sync."
+              continue
+            fi
+
+            git merge origin/main --no-edit -m "chore(sync): automated merge of main into $branch"
+            git push origin "$branch"
+          done
         continue-on-error: true

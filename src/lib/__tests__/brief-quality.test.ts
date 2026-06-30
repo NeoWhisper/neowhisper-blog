@@ -75,12 +75,34 @@ Outro text here.`;
       process.env.BRIEF_NOINDEX_ENABLED = originalEnv;
     });
 
-    test("returns false when BRIEF_NOINDEX_ENABLED is false (default)", () => {
-      // When feature flag is disabled, no posts are considered low-value
-      const content = "Short content.";
-      expect(isLowValueBriefPost("ai-trend-brief-2026-01-01", content)).toBe(
-        false,
+    test("returns true for brief posts using the generic cover image", () => {
+      const content = "Substantial content ".repeat(1000);
+      expect(
+        isLowValueBriefPost(
+          "ai-trend-brief-2026-01-01",
+          content,
+          "/og-image.jpg",
+        ),
+      ).toBe(true);
+    });
+
+    test("returns true for short brief posts by default", () => {
+      expect(
+        isLowValueBriefPost("ai-trend-brief-2026-01-01", "Short content."),
+      ).toBe(true);
+    });
+
+    test("returns false for substantial brief posts with a distinctive cover", () => {
+      const content = "Substantial content ".repeat(
+        EFFECTIVE_BRIEF_NOINDEX_THRESHOLD + 10,
       );
+      expect(
+        isLowValueBriefPost(
+          "ai-trend-brief-2026-01-01",
+          content,
+          "/images/distinctive-cover.png",
+        ),
+      ).toBe(false);
     });
 
     test("returns false for non-brief slugs even when enabled", () => {
@@ -112,13 +134,12 @@ Outro text here.`;
       });
     });
 
-    test("threshold defaults to 300 words minimum", () => {
-      expect(EFFECTIVE_BRIEF_NOINDEX_THRESHOLD).toBeGreaterThanOrEqual(300);
+    test("threshold defaults to 900 words minimum", () => {
+      expect(EFFECTIVE_BRIEF_NOINDEX_THRESHOLD).toBeGreaterThanOrEqual(900);
     });
 
-    test("threshold has hard floor of 150 words", () => {
-      // Threshold should never go below 150 even if env var is set lower
-      expect(EFFECTIVE_BRIEF_NOINDEX_THRESHOLD).toBeGreaterThanOrEqual(150);
+    test("threshold has hard floor of 600 words", () => {
+      expect(EFFECTIVE_BRIEF_NOINDEX_THRESHOLD).toBeGreaterThanOrEqual(600);
     });
   });
 

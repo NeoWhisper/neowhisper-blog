@@ -182,19 +182,19 @@ test("Copy link button exists on blog posts", async ({ page, context }) => {
 test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   await page.goto("/blog");
 
-  // Click first article
+  // Click first article and wait for navigation
+  // Sequential click + waitForURL handles Next.js soft navigation correctly
   const firstArticle = page.locator("article a").first();
   await firstArticle.click();
+  await page.waitForURL(/\/blog\/.+/, { timeout: 15_000 });
 
-  await page.waitForTimeout(500);
-
-  // Look for prev/next navigation
+  // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)
   const prevNextNav = page.locator(
-    "nav[class*='navigation'], div[class*='prev'], div[class*='next'], a[class*='prev'], a[class*='next']",
+    "nav >> text=/Previous Article|Next Article|前の記事|次の記事|المقال السابق|المقال التالي/",
   );
   const count = await prevNextNav.count();
 
-  // Navigation should exist
+  // Navigation should exist (first post has no prev, last has no next, but middle posts have both)
   expect(count).toBeGreaterThan(0);
 });
 

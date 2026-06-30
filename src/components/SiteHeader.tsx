@@ -120,29 +120,29 @@ export default function SiteHeader() {
           {/* Language Switcher - Client only to avoid hydration mismatch */}
           {showLangSwitcher && (
             <nav aria-label="Language" className="flex items-center gap-1" data-testid="language-switcher">
-              <Link
+              <a
                 href={currentPathWithoutLang || "/"}
                 className={`px-3 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-sm font-medium rounded transition-colors ${currentLang === "en" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
                 hrefLang="en"
               >
                 EN
-              </Link>
+              </a>
               <span className="text-gray-300 dark:text-gray-600">|</span>
-              <Link
+              <a
                 href={`${currentPathWithoutLang || "/"}?lang=ja`}
                 className={`px-3 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-sm font-medium rounded transition-colors ${currentLang === "ja" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
                 hrefLang="ja"
               >
                 JA
-              </Link>
+              </a>
               <span className="text-gray-300 dark:text-gray-600">|</span>
-              <Link
+              <a
                 href={`${currentPathWithoutLang || "/"}?lang=ar`}
                 className={`px-3 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-sm font-medium rounded transition-colors ${currentLang === "ar" ? "text-purple-600 dark:text-purple-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
                 hrefLang="ar"
               >
                 AR
-              </Link>
+              </a>
             </nav>
           )}
 

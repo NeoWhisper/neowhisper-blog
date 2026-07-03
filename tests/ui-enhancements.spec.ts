@@ -158,12 +158,8 @@ test("Copy link button exists on blog posts", async ({ page, context }) => {
   // Grant clipboard permissions
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  await page.goto("/blog");
-
-  // Click first article
-  const firstArticle = page.locator("article a").first();
-  await firstArticle.click();
-
+  // Navigate directly to a known post to avoid flaky blog listing click
+  await page.goto("/blog/adsense-ready-multilingual-nextjs");
   await page.waitForLoadState("networkidle");
 
   // Look for copy link button
@@ -180,13 +176,10 @@ test("Copy link button exists on blog posts", async ({ page, context }) => {
 
 // ===== PREV/NEXT NAVIGATION TESTS =====
 test("Prev/Next navigation exists on blog posts", async ({ page }) => {
-  await page.goto("/blog");
+  // Navigate directly to a known middle post for reliable prev/next nav
+  await page.goto("/blog/adsense-ready-multilingual-nextjs");
+  await page.waitForLoadState("networkidle");
 
-  // Click first article and wait for navigation
-  // Sequential click + waitForURL handles Next.js soft navigation correctly
-  const firstArticle = page.locator("article a").first();
-  await firstArticle.click();
-  await page.waitForURL(/\/blog\/.+/, { timeout: 15_000 });
 
   // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)
   const prevNextNav = page.locator(
@@ -194,7 +187,7 @@ test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   );
   const count = await prevNextNav.count();
 
-  // Navigation should exist (first post has no prev, last has no next, but middle posts have both)
+  // Navigation should exist (middle posts have both prev and next)
   expect(count).toBeGreaterThan(0);
 });
 

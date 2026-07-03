@@ -180,6 +180,7 @@ test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   await page.goto("/blog/adsense-ready-multilingual-nextjs");
   await page.waitForLoadState("networkidle");
 
+
   // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)
   const prevNextNav = page.locator(
     "nav >> text=/Previous Article|Next Article|前の記事|次の記事|المقال السابق|المقال التالي/",

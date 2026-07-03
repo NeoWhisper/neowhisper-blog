@@ -46,10 +46,8 @@ test.describe("Blog Post Page", () => {
   });
 
   test("displays copy link button", async ({ page }) => {
-    await page.goto("/blog");
-
-    const firstArticle = page.locator("article a").first();
-    await firstArticle.click();
+    // Navigate directly to a known post to avoid flaky blog listing click
+    await page.goto("/blog/adsense-ready-multilingual-nextjs");
     await page.waitForLoadState("networkidle");
 
     // Look for copy link button
@@ -106,13 +104,12 @@ test.describe("Blog Post Page", () => {
       await arLink.click();
       await page.waitForLoadState("networkidle");
 
-      // Wait a moment for client-side script to update direction
-      await page.waitForTimeout(100);
+      // Wait for client-side script to update direction
+      await page.waitForFunction(() => document.documentElement.getAttribute("dir") === "rtl", { timeout: 5000 }).catch(() => {});
 
       // Verify RTL direction for Arabic
       const html = page.locator("html");
       const dir = await html.getAttribute("dir");
-      // Arabic posts should have dir="rtl"
       if (dir) {
         expect(dir).toBe("rtl");
       }
@@ -127,10 +124,8 @@ test.describe("Blog Post Page", () => {
   });
 
   test("post has proper semantic structure", async ({ page }) => {
-    await page.goto("/blog");
-
-    const firstArticle = page.locator("article a").first();
-    await firstArticle.click();
+    // Navigate directly to a known post
+    await page.goto("/blog/adsense-ready-multilingual-nextjs");
     await page.waitForLoadState("networkidle");
 
     // Check for main content landmark

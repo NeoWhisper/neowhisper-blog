@@ -95,9 +95,8 @@ test.describe("Blog Post Page", () => {
     // Navigate to blog and look for Arabic post
     await page.goto("/blog");
 
-    // Look for Arabic language link in the language switcher
-    // This is more reliable than searching for -ar in href
-    const arLink = page.locator('a[href*="lang=ar"]').first();
+    // Look for link with -ar suffix
+    const arLink = page.locator("a[href*='-ar']").first();
     const arLinkCount = await arLink.count();
 
     if (arLinkCount > 0) {

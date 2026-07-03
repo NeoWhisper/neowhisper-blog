@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 concurrency:
@@ -69,6 +69,12 @@ jobs:
                 "## Description",
                 "",
                 "Automated promotion PR to release the latest changes from `contents` into `main`.",
+                "",
+                "## Merge Strategy",
+                "",
+                "**Use Squash and merge** to keep main history clean.",
+                "This PR may contain many individual commits from syncs and incremental changes.",
+                "Squash merging combines them into a single meaningful commit on main.",
                 "",
                 "## Notes",
                 "",

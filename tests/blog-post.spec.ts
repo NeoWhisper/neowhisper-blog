@@ -118,7 +118,7 @@ test.describe("Blog Post Page", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // Check for main content landmark
-    const main = page.locator("main");
+    const main = page.locator("main").first();
     await expect(main).toBeVisible();
 
     // Check for article element (first one, as there may be multiple)

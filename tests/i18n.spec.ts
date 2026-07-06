@@ -178,7 +178,7 @@ test.describe("i18n - Internationalization", () => {
 
       if (count > 0) {
         await firstArticle.click();
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
 
         // URL should still contain the language parameter
         const url = page.url();
@@ -204,7 +204,7 @@ test.describe("i18n - Internationalization", () => {
 
         // Wait for navigation if it's a link
         if (await langSwitcher.getAttribute("href")) {
-          await page.waitForLoadState("networkidle");
+          await page.waitForLoadState("domcontentloaded");
         }
 
         // Title might change based on language

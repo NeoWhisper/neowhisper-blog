@@ -28,7 +28,7 @@ test.describe("SEO Metadata", () => {
     // Navigate to a post
     const firstArticle = page.locator("article a").first();
     await firstArticle.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Check title
     const title = await page.title();
@@ -87,7 +87,7 @@ test.describe("SEO Metadata", () => {
     // Navigate to a post
     const firstArticle = page.locator("article a").first();
     await firstArticle.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Check for JSON-LD script
     const jsonLd = page.locator('script[type="application/ld+json"]');
@@ -127,7 +127,7 @@ test.describe("SEO Metadata", () => {
     // Navigate to a post
     const firstArticle = page.locator("article a").first();
     await firstArticle.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Check Twitter Card title (use first() as there may be duplicates)
     const twitterTitle = page.locator('meta[name="twitter:title"]').first();
@@ -150,7 +150,7 @@ test.describe("SEO Metadata", () => {
   test("robots meta tag allows indexing for normal posts", async ({ page }) => {
     // Navigate to a known non-brief post to test normal indexing behavior
     await page.goto("/blog/adsense-ready-multilingual-nextjs");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Check robots meta (use first() as there may be duplicates)
     const robotsMeta = page.locator('meta[name="robots"]').first();

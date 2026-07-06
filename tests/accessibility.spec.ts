@@ -33,7 +33,7 @@ test.describe("Accessibility - A11y Compliance", () => {
 
       if (count > 0) {
         await firstArticle.click();
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
 
         // Check for h1 in article
         const h1Count = await page.locator("article h1, h1").count();

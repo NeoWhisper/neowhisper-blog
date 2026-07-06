@@ -160,7 +160,7 @@ test("Copy link button exists on blog posts", async ({ page, context }) => {
 
   // Navigate directly to a known post to avoid flaky blog listing click
   await page.goto("/blog/adsense-ready-multilingual-nextjs");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
   // Look for copy link button
   const copyButton = page
@@ -178,7 +178,7 @@ test("Copy link button exists on blog posts", async ({ page, context }) => {
 test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   // Navigate directly to a known middle post for reliable prev/next nav
   await page.goto("/blog/adsense-ready-multilingual-nextjs");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
 
   // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)

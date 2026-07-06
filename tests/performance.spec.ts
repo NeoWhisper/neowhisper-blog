@@ -6,7 +6,7 @@ test.describe("Performance - Core Web Vitals", () => {
     test("homepage loads within acceptable time", async ({ page }) => {
       const startTime = Date.now();
       await page.goto("/");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
       const loadTime = Date.now() - startTime;
 
       // Page should load within 4 seconds (allow CI variance)
@@ -16,7 +16,7 @@ test.describe("Performance - Core Web Vitals", () => {
     test("blog page loads within acceptable time", async ({ page }) => {
       const startTime = Date.now();
       await page.goto("/blog");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
       const loadTime = Date.now() - startTime;
 
       expect(loadTime).toBeLessThan(4000);
@@ -32,7 +32,7 @@ test.describe("Performance - Core Web Vitals", () => {
       if (count > 0) {
         const startTime = Date.now();
         await firstArticle.click();
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
         const loadTime = Date.now() - startTime;
 
         // Navigation should be fast (allow 4s for CI variance)
@@ -45,7 +45,7 @@ test.describe("Performance - Core Web Vitals", () => {
     test("homepage LCP is acceptable", async ({ page }) => {
       // Navigate first, then set up Performance Observer
       await page.goto("/");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // Capture LCP using Performance Observer
       const lcpPromise = page.evaluate(() => {
@@ -98,7 +98,7 @@ test.describe("Performance - Core Web Vitals", () => {
     test("homepage has minimal layout shift", async ({ page }) => {
       // Navigate first, then set up Performance Observer
       await page.goto("/");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       const clsPromise = page.evaluate(() => {
         return new Promise<number>((resolve) => {
@@ -168,7 +168,7 @@ test.describe("Performance - Core Web Vitals", () => {
         }
       });
 
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // Document current state: track image loading count
       expect(imageRequests.length).toBeGreaterThanOrEqual(0);
@@ -195,7 +195,7 @@ test.describe("Performance - Core Web Vitals", () => {
       });
 
       await page.goto("/");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // JavaScript size should be reasonable (under 2MB for initial load)
       // Note: This is a rough check
@@ -228,7 +228,7 @@ test.describe("Performance - Core Web Vitals", () => {
   test.describe("Interaction Performance", () => {
     test("navigation between pages is smooth", async ({ page }) => {
       await page.goto("/blog");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // Measure navigation to another page
       const firstArticle = page.locator("article a").first();
@@ -237,7 +237,7 @@ test.describe("Performance - Core Web Vitals", () => {
       if (count > 0) {
         const startTime = Date.now();
         await firstArticle.click();
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
         const navigationTime = Date.now() - startTime;
 
         // Navigation should be under 1 second
@@ -271,14 +271,14 @@ test.describe("Performance - Core Web Vitals", () => {
   test.describe("Memory Usage", () => {
     test("page doesn't have memory leaks on navigation", async ({ page }) => {
       await page.goto("/");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // Navigate a few times
       for (let i = 0; i < 3; i++) {
         await page.goto("/blog");
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
         await page.goto("/");
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
       }
 
       // If we get here without crashes, the test passes

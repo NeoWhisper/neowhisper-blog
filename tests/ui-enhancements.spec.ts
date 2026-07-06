@@ -181,6 +181,7 @@ test("Prev/Next navigation exists on blog posts", async ({ page }) => {
   await page.waitForLoadState("domcontentloaded");
 
 
+
   // Look for prev/next navigation (PostNavigation renders a <nav> with article title links)
   const prevNextNav = page.locator(
     "nav >> text=/Previous Article|Next Article|前の記事|次の記事|المقال السابق|المقال التالي/",

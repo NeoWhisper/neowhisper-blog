@@ -77,12 +77,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .map((c) => createCategorySlug(c!)),
     ),
   );
-  const categoryUrls = postCategorySlugs.map((slug) => ({
-    url: `${baseUrl}/category/${encodeURIComponent(slug)}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.5,
-  }));
+  const categoryUrls = postCategorySlugs.flatMap((slug) => [
+    {
+      url: `${baseUrl}/category/${encodeURIComponent(slug)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/category/${encodeURIComponent(slug)}?lang=ja`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/category/${encodeURIComponent(slug)}?lang=ar`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }
+  ]);
 
   return [
     {

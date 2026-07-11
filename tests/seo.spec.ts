@@ -149,7 +149,7 @@ test.describe("SEO Metadata", () => {
 
   test("robots meta tag allows indexing for normal posts", async ({ page }) => {
     // Navigate to a known non-brief post to test normal indexing behavior
-    await page.goto("/blog/adsense-ready-multilingual-nextjs");
+    await page.goto("/blog/typescript-best-practices");
     await page.waitForLoadState("domcontentloaded");
 
     // Check robots meta (use first() as there may be duplicates)

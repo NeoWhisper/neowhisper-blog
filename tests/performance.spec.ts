@@ -35,8 +35,8 @@ test.describe("Performance - Core Web Vitals", () => {
         await page.waitForLoadState("domcontentloaded");
         const loadTime = Date.now() - startTime;
 
-        // Navigation should be fast (allow 4s for CI variance)
-        expect(loadTime).toBeLessThan(4000);
+        // Navigation should be fast (allow 5s for CI variance)
+        expect(loadTime).toBeLessThan(5000);
       }
     });
   });

@@ -200,12 +200,86 @@ export default function BlogPostTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pb-12">
       <ScrollProgress />
+      
+      {/* Cinematic Edge-to-Edge Hero Image */}
+      {coverImage && (
+        <div className="relative w-full aspect-[21/9] min-h-[500px] overflow-hidden mb-12 flex flex-col justify-end">
+          <Image
+            src={coverImage}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-1000 ease-out hover:scale-105"
+            priority
+            sizes="100vw"
+          />
+          {/* Deep cinematic gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent dark:from-background dark:via-background/80 dark:to-transparent" />
+          
+          {/* Floating Content over Hero */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12" dir={isRTL ? "rtl" : "ltr"}>
+            <div className="max-w-3xl mx-auto">
+              <Link
+                href={currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`}
+                className={`inline-flex items-center text-sm font-medium text-purple-300 hover:text-purple-200 mb-6 group transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
+              >
+                <svg
+                  className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? "ml-2 rotate-180 group-hover:translate-x-1" : "mr-2"}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                {ui.backToBlog}
+              </Link>
+              
+              <div className={`flex mb-4 ${isRTL ? "justify-start" : "justify-end"}`}>
+                <LanguageSwitcher
+                  availableLanguages={availableLanguages}
+                  mode={languageSwitchMode}
+                  currentLang={lang}
+                />
+              </div>
+
+              <h1 className={`text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg ${isRTL ? "text-right" : "text-left"}`}>
+                {title}
+              </h1>
+
+              {/* Metadata */}
+              <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                <time dateTime={date} className="inline-block text-sm font-medium text-white/90 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                  {formatDate(date)}
+                </time>
+                {readTime && (
+                  <>
+                    <span className="text-white/50">•</span>
+                    <span className="text-sm text-white/80">{readTime}</span>
+                  </>
+                )}
+                {category && (
+                  <>
+                    <span className="text-white/50">•</span>
+                    <Link
+                      href={getCategoryUrl(category, lang)}
+                      className="inline-block text-sm font-medium text-blue-200 bg-blue-900/40 backdrop-blur-md px-4 py-2 rounded-full border border-blue-400/30 hover:bg-blue-800/60 transition-colors"
+                    >
+                      {category}
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <StickyToc isRTL={isRTL} />
-      <div className="max-w-7xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"}>
         <div className="relative">
-          {/* Sticky Share Widget - Hidden on mobile, shown on desktop */}
+          {/* Sticky Share Widget */}
           <div
             className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
             style={{
@@ -215,115 +289,46 @@ export default function BlogPostTemplate({
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4 whitespace-nowrap">
               {isRTL ? "شارك" : "Share"}
             </span>
-            <ShareSocial
-              title={title}
-              url={resolvedCanonicalUrl}
-            />
+            <ShareSocial title={title} url={resolvedCanonicalUrl} />
           </div>
 
           <article className="max-w-3xl mx-auto w-full" lang={currentLang}>
             <SnapResolver />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-            />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
-            {/* Back Button */}
-            <Link
-              href={currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`}
-              className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <svg
-                className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? "ml-2 rotate-180 group-hover:translate-x-1" : "mr-2"}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              {ui.backToBlog}
-            </Link>
-
-            {/* Post Card with Glassmorphism */}
-            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-lg rounded-3xl border border-white/20 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-              {/* Hero Image (if provided) */}
-              {coverImage && (
-                <div className="relative h-64 sm:h-96 w-full overflow-hidden">
-                  <Image
-                    src={coverImage}
-                    alt={title}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 768px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                </div>
-              )}
-
-              {/* Post Header */}
-              <header
-                className={`px-6 sm:px-12 py-8 border-b border-gray-200 dark:border-gray-700 ${isRTL ? "text-right" : "text-left"}`}
-              >
-                {/* Language Switcher - Top Right/Left depending on LTR/RTL */}
-                <div
-                  className={`flex mb-6 ${isRTL ? "justify-start" : "justify-end"}`}
+            {/* If no cover image, fallback header inside the card */}
+            {!coverImage && (
+              <div className="mb-8">
+                <Link
+                  href={currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`}
+                  className={`inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-8 group transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
                 >
-                  <LanguageSwitcher
-                    availableLanguages={availableLanguages}
-                    mode={languageSwitchMode}
-                    currentLang={lang}
-                  />
-                </div>
+                  <svg className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? "ml-2 rotate-180 group-hover:translate-x-1" : "mr-2"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  {ui.backToBlog}
+                </Link>
+                <header className={`px-6 sm:px-12 py-8 bg-white/40 dark:bg-white/5 backdrop-blur-lg rounded-3xl border border-white/20 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-8 ${isRTL ? "text-right" : "text-left"}`}>
+                  <div className={`flex mb-6 ${isRTL ? "justify-start" : "justify-end"}`}>
+                    <LanguageSwitcher availableLanguages={availableLanguages} mode={languageSwitchMode} currentLang={lang} />
+                  </div>
+                  <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight">{title}</h1>
+                  <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                    <time dateTime={date} className="inline-block text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-100/50 dark:bg-purple-900/20 px-4 py-2 rounded-full border border-purple-200/50 dark:border-purple-800/30">{formatDate(date)}</time>
+                    {readTime && <><span className="text-gray-400">•</span><span className="text-sm text-gray-600 dark:text-gray-400">{readTime}</span></>}
+                    {category && <><span className="text-gray-400">•</span><Link href={getCategoryUrl(category, lang)} className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-200/70 transition-colors">{category}</Link></>}
+                  </div>
+                </header>
+              </div>
+            )}
 
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 mt-4 leading-tight">
-                  {title}
-                </h1>
-
-
-                {/* Metadata */}
-                <div
-                  className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  <time
-                    dateTime={date}
-                    className="inline-block text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-100/50 dark:bg-purple-900/20 px-4 py-2 rounded-full border border-purple-200/50 dark:border-purple-800/30"
-                  >
-                    {formatDate(date)}
-                  </time>
-
-                  {readTime && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {readTime}
-                      </span>
-                    </>
-                  )}
-
-                  {category && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <Link
-                        href={getCategoryUrl(category, lang)}
-                        className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-200/70 dark:hover:bg-blue-900/40 transition-colors"
-                      >
-                        {category}
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </header>
-
+            {/* Post Card with Glassmorphism for content */}
+            <div className="relative group animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both delay-300">
+              {/* Ambient Glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000 -z-10" />
+              
+              <div className="relative bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 dark:border-white/5 shadow-2xl overflow-hidden">
               {/* Post Content */}
               <div
                 className={`px-6 sm:px-12 py-8 prose prose-lg dark:prose-invert max-w-none
@@ -524,6 +529,7 @@ export default function BlogPostTemplate({
                   />
                 )}
               </div>
+            </div>
             </div>
 
             {/* Author Bio */}

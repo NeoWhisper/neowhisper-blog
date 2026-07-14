@@ -137,12 +137,12 @@ export default async function ProjectsPage({
       lang={currentLang}
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between cinematic-fade-in">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
               {t.label}
             </p>
-            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white">
+            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               {t.title}
             </h1>
             <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
@@ -161,17 +161,17 @@ export default async function ProjectsPage({
         </div>
 
         {/* Live Projects Section */}
-        <section className="mb-16">
+        <section className="mb-16 animate-fade-up-1">
           <h2 className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
             {t.liveSection}
           </h2>
           <div className="grid gap-6 md:grid-cols-2">
             {projects
               .filter((p) => p.status === "live")
-              .map((project) => (
+              .map((project, index) => (
                 <article
                   key={project.title}
-                  className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
+                  className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 animate-fade-up-${Math.min(index + 2, 4)}`}
                 >
                   <div className="relative mb-4 h-40 w-full overflow-hidden rounded-2xl">
                     <Image
@@ -233,7 +233,7 @@ export default async function ProjectsPage({
 
         {/* Planned Projects Section */}
         {projects.some((p) => p.status === "planned") && (
-          <section>
+          <section className="animate-fade-up-3">
             <div className="mb-6 flex items-center gap-3">
               <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
                 {t.plannedSection}
@@ -245,10 +245,10 @@ export default async function ProjectsPage({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {projects
                 .filter((p) => p.status === "planned")
-                .map((project) => (
+                .map((project, index) => (
                   <article
                     key={project.title}
-                    className="rounded-2xl border border-white/20 bg-white/40 p-5 opacity-70 transition-all duration-300 dark:border-white/10 dark:bg-white/5"
+                    className={`rounded-2xl border border-white/20 bg-white/40 p-5 opacity-70 transition-all duration-300 dark:border-white/10 dark:bg-white/5 animate-fade-up-${Math.min(index + 4, 4)}`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-semibold text-gray-800 dark:text-gray-200">

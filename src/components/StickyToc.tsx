@@ -73,8 +73,9 @@ export function StickyToc({ isRTL = false }: StickyTocProps) {
       aria-label="Table of Contents"
       className={`hidden xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
     >
-      <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm p-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1">
+      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 dark:border-white/10 shadow-2xl p-5 relative overflow-hidden">
+        <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 dark:from-purple-500/5 dark:to-blue-500/5 -z-10" />
+        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600/70 dark:text-purple-400/70 mb-4 px-1">
           On this page
         </p>
         <ul className="space-y-1">
@@ -91,8 +92,8 @@ export function StickyToc({ isRTL = false }: StickyTocProps) {
                   "block text-xs leading-snug py-1 px-2 rounded-lg transition-all duration-150",
                   item.level === 3 ? "pl-4 text-[11px]" : "",
                   activeId === item.id
-                    ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 font-semibold"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/50",
+                    ? "text-purple-700 dark:text-purple-300 bg-purple-500/10 dark:bg-purple-400/10 font-bold shadow-[0_0_15px_rgba(147,51,234,0.15)]"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-500/5",
                 ]
                   .filter(Boolean)
                   .join(" ")}

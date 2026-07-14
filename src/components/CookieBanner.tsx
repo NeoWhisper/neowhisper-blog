@@ -3,45 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { normalizeLang } from "@/lib/i18n";
-
-interface CookieContent {
-  message: string;
-  learnMore: string;
-  accept: string;
-  decline: string;
-}
-
-const content: Record<string, CookieContent> = {
-  en: {
-    message:
-      "We use cookies to enhance your experience, analyze site traffic, and for marketing purposes. By clicking 'Accept', you consent to our use of cookies.",
-    learnMore: "Learn more",
-    accept: "Accept",
-    decline: "Decline",
-  },
-  ja: {
-    message:
-      "当サイトでは、ユーザー体験の向上、サイトトラフィックの分析、マーケティング目的でCookieを使用しています。「同意する」をクリックすると、Cookieの使用に同意したことになります。",
-    learnMore: "詳細を見る",
-    accept: "同意する",
-    decline: "拒否する",
-  },
-  ar: {
-    message:
-      "نستخدم ملفات تعريف الارتباط (Cookies) لتحسين تجربتك وتحليل حركة الموقع ولأغراض التسويق. بالنقر على 'موافق'، فإنك توافق على استخدامنا لملفات تعريف الارتباط.",
-    learnMore: "معرفة المزيد",
-    accept: "موافق",
-    decline: "رفض",
-  },
-};
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const searchParams = useSearchParams();
-  const lang = normalizeLang(searchParams?.get("lang") || "en");
-  const isRTL = lang === "ar";
-  const text = content[lang] || content.en;
+  const currentLang = normalizeLang(searchParams?.get("lang") || "en") as SupportedLang;
+  const isRTL = currentLang === "ar";
+  const t = getDictionary(currentLang);
 
   useEffect(() => {
     // Check if user has already made a choice
@@ -80,12 +50,12 @@ export default function CookieBanner() {
               <p
                 className={`text-sm text-gray-700 dark:text-gray-300 leading-relaxed ${isRTL ? "text-right" : "text-left"}`}
               >
-                {text.message}{" "}
+                {t.cookie.message}{" "}
                 <Link
-                  href={`/privacy?lang=${lang}`}
+                  href={`/privacy?lang=${currentLang}`}
                   className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
                 >
-                  {text.learnMore}
+                  {t.cookie.learnMore}
                 </Link>
               </p>
             </div>
@@ -97,16 +67,16 @@ export default function CookieBanner() {
               <button
                 onClick={handleDecline}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-                aria-label={text.decline}
+                aria-label={t.cookie.decline}
               >
-                {text.decline}
+                {t.cookie.decline}
               </button>
               <button
                 onClick={handleAccept}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
-                aria-label={text.accept}
+                aria-label={t.cookie.accept}
               >
-                {text.accept}
+                {t.cookie.accept}
               </button>
             </div>
           </div>

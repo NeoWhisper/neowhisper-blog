@@ -5,33 +5,16 @@ import Link from "next/link";
 import Fuse from "fuse.js";
 import { Post } from "@/types";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 interface SearchProps {
   posts: Post[];
   lang?: string;
 }
 
-const labels: Record<SupportedLang, { placeholder: string; noResults: string; by: string }> = {
-  en: {
-    placeholder: "Search articles...",
-    noResults: "No articles found",
-    by: "by",
-  },
-  ja: {
-    placeholder: "記事を検索...",
-    noResults: "記事が見つかりません",
-    by: "著者",
-  },
-  ar: {
-    placeholder: "البحث في المقالات...",
-    noResults: "لم يتم العثور على مقالات",
-    by: "بواسطة",
-  },
-};
-
 export default function Search({ posts, lang }: SearchProps) {
   const currentLang = normalizeLang(lang) as SupportedLang;
-  const t = labels[currentLang];
+  const t = getDictionary(currentLang);
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -140,7 +123,7 @@ export default function Search({ posts, lang }: SearchProps) {
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <span className="hidden sm:inline">{t.placeholder}</span>
+        <span className="hidden sm:inline">{t.actions.searchPlaceholder}</span>
         <kbd className="hidden rounded border border-gray-300 bg-gray-100 px-1.5 text-xs text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 md:inline">
           ⌘K
         </kbd>
@@ -149,37 +132,34 @@ export default function Search({ posts, lang }: SearchProps) {
       {/* Search modal */}
       {isOpen && (
         <div role="dialog" aria-modal="true" aria-label="Search" className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[15vh] backdrop-blur-sm">
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+          <div className="relative w-full max-w-xl transform overflow-hidden rounded-2xl border border-white/20 bg-white/40 shadow-2xl transition-all backdrop-blur-3xl dark:border-white/5 dark:bg-black/40">
             {/* Search input */}
-            <div className="flex items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-700">
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="relative border-b border-gray-200/50 dark:border-gray-800/50">
+              <svg className="absolute left-4 top-3.5 h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 ref={inputRef}
                 type="text"
+                className="w-full bg-transparent py-3.5 pl-12 pr-4 text-gray-900 outline-none placeholder:text-gray-500 focus:ring-0 dark:text-white dark:placeholder:text-gray-400 sm:text-sm"
+                placeholder={t.actions.searchPlaceholder}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t.placeholder}
-                className="flex-1 bg-transparent text-lg outline-none placeholder:text-gray-400 dark:text-white"
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSelectedIndex(-1);
+                }}
               />
-              <kbd className="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400">
-                ESC
-              </kbd>
             </div>
 
             {/* Results */}
             <div className="max-h-[50vh] overflow-y-auto p-2">
               {query.trim() === "" ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">{t.placeholder}</p>
-                  <p className="mt-2 text-xs opacity-70">
-                    {currentLang === "ja" ? "検索を開始するには入力してください" : currentLang === "ar" ? "اكتب للبحث" : "Type to search"}
-                  </p>
+                  <p className="text-sm">{t.actions.searchPlaceholder}</p>
                 </div>
               ) : results.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">{t.noResults}</p>
+                  <p className="text-sm">{t.actions.searchNoResults}</p>
                 </div>
               ) : (
                 <ul className="space-y-1" role="listbox">
@@ -238,19 +218,19 @@ export default function Search({ posts, lang }: SearchProps) {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+            <div className="border-t border-white/20 dark:border-white/5 bg-white/10 px-4 py-3 text-xs text-gray-500 dark:bg-black/20 dark:text-gray-400">
               <div className="flex items-center justify-between">
                 <span>
-                  {currentLang === "ja" ? `${results.length} 件の結果` : currentLang === "ar" ? `${results.length} نتيجة` : `${results.length} results`}
+                  {t.actions.searchResults(results.length)}
                 </span>
                 <div className="flex gap-3">
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-gray-300 bg-white px-1 dark:border-gray-600 dark:bg-gray-700">↑↓</kbd>
-                    {currentLang === "ja" ? "選択" : currentLang === "ar" ? "تحديد" : "Navigate"}
+                    <kbd className="rounded border border-gray-300/50 bg-white/50 px-1 dark:border-gray-600/50 dark:bg-gray-700/50">↑↓</kbd>
+                    {t.actions.searchNavigate}
                   </span>
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-gray-300 bg-white px-1 dark:border-gray-600 dark:bg-gray-700">↵</kbd>
-                    {currentLang === "ja" ? "開く" : currentLang === "ar" ? "فتح" : "Open"}
+                    <kbd className="rounded border border-gray-300/50 bg-white/50 px-1 dark:border-gray-600/50 dark:bg-gray-700/50">↵</kbd>
+                    {t.actions.searchOpen}
                   </span>
                 </div>
               </div>

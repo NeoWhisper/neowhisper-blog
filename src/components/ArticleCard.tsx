@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { buildCategorySlug } from '@/lib/categories';
-import { normalizeLang } from '@/lib/i18n';
+import { normalizeLang, type SupportedLang } from '@/lib/i18n';
+import { getDictionary } from '@/lib/dictionaries';
 
 const categoryColors: Record<string, string> = {
     'Next.js': 'bg-black text-white',
@@ -28,14 +29,9 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
     const isRTL = currentLang === "ar";
     const isSuffixLocalizedSlug = isLocalizedSlug(post.slug);
     const shouldUseLangQuery = Boolean(lang && lang !== "en" && !isSuffixLocalizedSlug);
-    const postHref = `/blog/${encodeURIComponent(post.slug)}${shouldUseLangQuery ? `?lang=${encodeURIComponent(currentLang)}` : ""
-        }`;
-    const readArticleLabel =
-        currentLang === "ja"
-            ? "記事を読む"
-            : currentLang === "ar"
-                ? "اقرأ المقال"
-                : "Read Article";
+    const postHref = `/blog/${encodeURIComponent(post.slug)}${shouldUseLangQuery ? `?lang=${encodeURIComponent(currentLang)}` : ""}`;
+    const t = getDictionary(currentLang as SupportedLang);
+    const readArticleLabel = t.actions.readArticle;
 
     const categoryHref = post.category
         ? `/category/${buildCategorySlug(post.category)}${lang ? `?lang=${encodeURIComponent(currentLang)}` : ''

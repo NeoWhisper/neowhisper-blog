@@ -63,7 +63,7 @@ response = client.chat.completions.create(
 )
 ```
 
-### Trade-offs
+### LM Studio Trade-offs
 
 - ✅ **Pros:** Excellent graphical user interface; easy model management and discovery; perfect drop-in replacement for OpenAI API.
 - ❌ **Cons:** Closed-source application; less automation flexibility compared to CLI workflows; heavier system footprint due to the Electron framework.
@@ -76,7 +76,7 @@ It allows you to download and run models with single terminal commands (e.g., `o
 
 Ollama is heavily favored for building local RAG pipelines. It integrates seamlessly into automated workflows and recently introduced native support for generating embeddings (`nomic-embed-text`), enabling fully offline semantic search engines.
 
-### Trade-offs
+### Ollama Trade-offs
 
 - ✅ **Pros:** Excellent for scripting and CI/CD pipelines; robust background service architecture; massive open-source ecosystem; native embedding support for RAG.
 - ❌ **Cons:** Less beginner-friendly due to lack of a native GUI; requires terminal proficiency; API is not strictly 1:1 with OpenAI out of the box (though wrappers exist).
@@ -101,7 +101,7 @@ python -m mlx_lm.lora \
   --adapter-path ./adapters
 ```
 
-### Trade-offs
+### Apple MLX Trade-offs
 
 - ✅ **Pros:** Extremely fast on Apple Silicon; avoids VRAM transfer bottlenecks; excellent for local model fine-tuning and research.
 - ❌ **Cons:** Apple-only ecosystem; requires Python scripting knowledge; not designed as a turnkey chat server for casual users.

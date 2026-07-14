@@ -116,7 +116,7 @@ export default async function RootLayout({
   const dir = lang === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={lang} dir={dir} className={`${outfit.variable} ${geistMono.variable}`}>
+    <html lang={lang} dir={dir} className={`${outfit.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script

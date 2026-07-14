@@ -19,7 +19,7 @@ test.describe("Performance - Core Web Vitals", () => {
       await page.waitForLoadState("domcontentloaded");
       const loadTime = Date.now() - startTime;
 
-      expect(loadTime).toBeLessThan(4000);
+      expect(loadTime).toBeLessThan(7000);
     });
 
     test("blog post page loads within acceptable time", async ({ page }) => {

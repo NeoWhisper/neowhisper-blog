@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 interface TocItem {
   id: string;
@@ -10,11 +12,14 @@ interface TocItem {
 
 interface StickyTocProps {
   isRTL?: boolean;
+  lang?: string;
 }
 
 const TOC_HEADINGS = ["Table of Contents", "目次", "المحتويات"];
 
-export function StickyToc({ isRTL = false }: StickyTocProps) {
+export function StickyToc({ isRTL = false, lang }: StickyTocProps) {
+  const currentLang = normalizeLang(lang) as SupportedLang;
+  const t = getDictionary(currentLang);
   // items is populated once after mount — initialising with empty array is fine;
   // the component is client-only so no SSR mismatch.
   const [items, setItems] = useState<TocItem[]>([]);
@@ -71,12 +76,12 @@ export function StickyToc({ isRTL = false }: StickyTocProps) {
   return (
     <nav
       aria-label="Table of Contents"
-      className={`hidden xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
+      className={`hidden xl:block sticky top-32 self-start w-56 max-h-[70vh] overflow-y-auto z-40 ${isRTL ? "order-first" : ""}`}
     >
       <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 dark:border-white/10 shadow-2xl p-5 relative overflow-hidden">
         <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 dark:from-purple-500/5 dark:to-blue-500/5 -z-10" />
         <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600/70 dark:text-purple-400/70 mb-4 px-1">
-          On this page
+          {t.sections.onThisPage}
         </p>
         <ul className="space-y-1">
           {items.map((item) => (

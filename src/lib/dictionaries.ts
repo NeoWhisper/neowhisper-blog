@@ -38,6 +38,7 @@ export const dictionaries = {
       subscribeHeading: "Subscribe for new posts",
       trustSignals: "Trust Signals",
       links: "Links",
+      onThisPage: "On this page",
     },
     messages: {
       subscribeSuccess: "You are subscribed. New posts will arrive by email.",
@@ -94,6 +95,7 @@ export const dictionaries = {
       subscribeHeading: "新着記事をメールで受け取る",
       trustSignals: "信頼情報",
       links: "リンク",
+      onThisPage: "このページの内容",
     },
     messages: {
       subscribeSuccess: "登録が完了しました。新着記事をメールでお届けします。",
@@ -150,6 +152,7 @@ export const dictionaries = {
       subscribeHeading: "اشترك لاستلام المقالات الجديدة",
       trustSignals: "مؤشرات الثقة",
       links: "الروابط",
+      onThisPage: "محتويات الصفحة",
     },
     messages: {
       subscribeSuccess: "تم الاشتراك بنجاح. سنرسل المقالات الجديدة إلى بريدك.",

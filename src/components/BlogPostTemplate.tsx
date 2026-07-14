@@ -231,14 +231,16 @@ export default function BlogPostTemplate({
               </h1>
 
               {/* Metadata */}
-              <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+              <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse justify-end" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
                 <time dateTime={date} className="inline-block text-sm font-medium text-gray-900/90 dark:text-white/90 bg-white/60 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-gray-300/50 dark:border-white/20">
                   {formatDate(date)}
                 </time>
                 {readTime && (
                   <>
                     <span className="text-gray-400 dark:text-white/50">•</span>
-                    <span className="text-sm text-gray-700 dark:text-white/80">{readTime}</span>
+                    <span className="text-sm text-gray-700 dark:text-white/80">
+                      {isRTL ? readTime.replace(/^min read (\d+)$/, "$1 دقائق للقراءة") : readTime}
+                    </span>
                   </>
                 )}
                 {category && (
@@ -258,12 +260,14 @@ export default function BlogPostTemplate({
         </div>
       )}
 
-      <div className="animate-fade-up-2">
-        <StickyToc isRTL={isRTL} />
-      </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"}>
-        <div className="relative">
+        <div className={`flex gap-8 items-start ${isRTL ? "flex-row-reverse" : ""}`}>
+          {/* Sticky TOC sidebar — anchored to layout grid */}
+          <div className="animate-fade-up-2 hidden xl:block w-56 flex-shrink-0">
+            <StickyToc isRTL={isRTL} lang={lang} />
+          </div>
+
           {/* Sticky Share Widget */}
           <div
             className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
@@ -277,7 +281,7 @@ export default function BlogPostTemplate({
             <ShareSocial title={title} url={resolvedCanonicalUrl} />
           </div>
 
-          <article className="max-w-3xl mx-auto w-full" lang={currentLang}>
+          <article className="min-w-0 flex-1 max-w-3xl mx-auto w-full" lang={currentLang}>
             <SnapResolver />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
@@ -299,9 +303,9 @@ export default function BlogPostTemplate({
                     <LanguageSwitcher availableLanguages={availableLanguages} mode={languageSwitchMode} currentLang={lang} />
                   </div>
                   <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight">{title}</h1>
-                  <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse justify-end" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
                     <time dateTime={date} className="inline-block text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-100/50 dark:bg-purple-900/20 px-4 py-2 rounded-full border border-purple-200/50 dark:border-purple-800/30">{formatDate(date)}</time>
-                    {readTime && <><span className="text-gray-400">•</span><span className="text-sm text-gray-600 dark:text-gray-400">{readTime}</span></>}
+                    {readTime && <><span className="text-gray-400">•</span><span className="text-sm text-gray-600 dark:text-gray-400">{isRTL ? readTime.replace(/^min read (\d+)$/, "$1 دقائق للقراءة") : readTime}</span></>}
                     {category && <><span className="text-gray-400">•</span><Link href={getCategoryUrl(category, lang)} className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-200/70 transition-colors">{category}</Link></>}
                   </div>
                 </header>

@@ -58,7 +58,7 @@ export default function Breadcrumbs({ lang }: { lang?: string }) {
       return;
     }
 
-    // @ts-expect-error - dynamic key access for segments matching nav keys
+
     const label = t.nav[segment as keyof typeof t.nav] ||
       segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 

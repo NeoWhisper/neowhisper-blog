@@ -76,14 +76,14 @@ export function StickyToc({ isRTL = false, lang }: StickyTocProps) {
   return (
     <nav
       aria-label="Table of Contents"
-      className={`hidden xl:block sticky top-32 self-start w-56 max-h-[70vh] overflow-y-auto z-40 ${isRTL ? "order-first" : ""}`}
+      className={`hidden xl:block sticky top-32 self-start w-56 flex-shrink-0 animate-fade-up-2 z-40 ${isRTL ? "order-first" : ""}`}
     >
-      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 dark:border-white/10 shadow-2xl p-5 relative overflow-hidden">
+      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 dark:border-white/10 shadow-2xl p-5 relative overflow-hidden flex flex-col max-h-[70vh]">
         <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 dark:from-purple-500/5 dark:to-blue-500/5 -z-10" />
-        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600/70 dark:text-purple-400/70 mb-4 px-1">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600/70 dark:text-purple-400/70 mb-4 px-1 flex-shrink-0">
           {t.sections.onThisPage}
         </p>
-        <ul className="space-y-1">
+        <ul className="space-y-1 overflow-y-auto pr-1 -mr-1 pb-2">
           {items.map((item) => (
             <li key={item.id}>
               <a

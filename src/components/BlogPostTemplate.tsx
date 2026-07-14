@@ -264,9 +264,7 @@ export default function BlogPostTemplate({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"}>
         <div className={`flex gap-8 items-start ${isRTL ? "flex-row-reverse" : ""}`}>
           {/* Sticky TOC sidebar — anchored to layout grid */}
-          <div className="animate-fade-up-2 hidden xl:block w-56 flex-shrink-0">
-            <StickyToc isRTL={isRTL} lang={lang} />
-          </div>
+          <StickyToc isRTL={isRTL} lang={lang} />
 
           {/* Sticky Share Widget */}
           <div

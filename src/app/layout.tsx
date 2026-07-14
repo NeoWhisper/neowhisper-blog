@@ -176,7 +176,7 @@ export default async function RootLayout({
         </Suspense>
         
         {/* Page Content with transition */}
-        <div className="flex-1 animate-fade-up-1">
+        <div className="flex-1">
           {children}
         </div>
 

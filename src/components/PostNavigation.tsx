@@ -19,17 +19,23 @@ export default function PostNavigation({ prevPost, nextPost, lang }: PostNavigat
   // If both are null, don't render
   if (!prevPost && !nextPost) return null;
 
+  // Determine grid layout based on available posts
+  const hasBoth = prevPost && nextPost;
+  const gridClasses = hasBoth 
+    ? "grid gap-4 sm:grid-cols-2" 
+    : "flex flex-col sm:flex-row gap-4 justify-between";
+
   return (
     <nav
-      className="mt-12 grid gap-4 border-t border-gray-200 pt-8 dark:border-gray-700 sm:grid-cols-2"
+      className={`mt-12 border-t border-gray-200 pt-8 dark:border-gray-700 ${gridClasses}`}
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Previous Post */}
-      <div className={!prevPost ? "hidden sm:block" : ""}>
-        {prevPost ? (
+      {prevPost && (
+        <div className={!hasBoth ? "w-full sm:w-1/2" : ""}>
           <Link
             href={`/blog/${encodeURIComponent(prevPost.slug)}`}
-            className="group flex flex-col rounded-2xl border border-white/20 bg-white/60 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5"
+            className="group flex h-full flex-col rounded-2xl border border-white/20 bg-white/60 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5"
           >
             <span className="mb-2 flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
               <svg
@@ -46,17 +52,15 @@ export default function PostNavigation({ prevPost, nextPost, lang }: PostNavigat
               {prevPost.title}
             </span>
           </Link>
-        ) : (
-          <div />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Next Post */}
-      <div className={!nextPost ? "hidden sm:block" : ""}>
-        {nextPost ? (
+      {nextPost && (
+        <div className={!hasBoth ? "w-full sm:w-1/2 ml-auto" : ""}>
           <Link
             href={`/blog/${encodeURIComponent(nextPost.slug)}`}
-            className="group flex flex-col rounded-2xl border border-white/20 bg-white/60 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 sm:items-end sm:text-right"
+            className="group flex h-full flex-col rounded-2xl border border-white/20 bg-white/60 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 sm:items-end sm:text-right"
           >
             <span className="mb-2 flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 sm:flex-row-reverse">
               {t.actions.nextArticle}
@@ -73,10 +77,8 @@ export default function PostNavigation({ prevPost, nextPost, lang }: PostNavigat
               {nextPost.title}
             </span>
           </Link>
-        ) : (
-          <div />
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }

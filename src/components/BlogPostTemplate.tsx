@@ -261,25 +261,24 @@ export default function BlogPostTemplate({
       )}
 
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"}>
-        <div className={`flex gap-8 items-start ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Sticky TOC sidebar — anchored to layout grid */}
-          <StickyToc isRTL={isRTL} lang={lang} />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"}>
+        {/* Sticky TOC sidebar — anchored to layout grid */}
+        <StickyToc isRTL={isRTL} lang={lang} />
 
-          {/* Sticky Share Widget */}
-          <div
-            className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
-            style={{
-              [isRTL ? "right" : "left"]: "calc((100vw - 1024px) / 2 - 60px)",
-            }}
-          >
-            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4 whitespace-nowrap">
-              {isRTL ? "شارك" : "Share"}
-            </span>
-            <ShareSocial title={title} url={resolvedCanonicalUrl} />
-          </div>
+        {/* Sticky Share Widget */}
+        <div
+          className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
+          style={{
+            [isRTL ? "right" : "left"]: "calc((100vw - 1024px) / 2 - 60px)",
+          }}
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4 whitespace-nowrap">
+            {isRTL ? "شارك" : "Share"}
+          </span>
+          <ShareSocial title={title} url={resolvedCanonicalUrl} />
+        </div>
 
-          <article className="min-w-0 flex-1 max-w-3xl mx-auto w-full" lang={currentLang}>
+        <article className="pb-16" lang={currentLang}>
             <SnapResolver />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
@@ -551,7 +550,6 @@ export default function BlogPostTemplate({
               </div>
             )}
           </article>
-        </div>
 
         {/* Related Posts Section */}
         {relatedPosts.length > 0 && (

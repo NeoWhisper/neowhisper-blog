@@ -15,7 +15,7 @@ think first, show exact changes, then apply only with approval.
 ### AI Agent Workflow Safety (CRITICAL)
 
 - **NEVER push directly to `main` branch.** The AI agent must ONLY work on the `contents` branch in its fork.
-- **ALWAYS create Pull Requests** from `codex/daily-YYYY-MM-DD` → `contents` (upstream).
+- **ALWAYS create Pull Requests** from a branch with a standard prefix (`feature/`, `fix/`, `chore/`) → `contents` (upstream).
 - **Human review is mandatory** - never merge your own PRs without human approval.
 - The AI agent fork has a read-only relationship with upstream `main`.
 

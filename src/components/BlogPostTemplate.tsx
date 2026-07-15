@@ -550,10 +550,12 @@ export default function BlogPostTemplate({
               </div>
             )}
           </article>
+      </div>
 
         {/* Related Posts Section */}
         {relatedPosts.length > 0 && (
-          <section className={`mt-16 animate-fade-up-4 ${isRTL ? "text-right" : "text-left"}`}>
+          <div className={`max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 ${isRTL ? "font-arabic" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
+            <section className={`mt-16 animate-fade-up-4 ${isRTL ? "text-right" : "text-left"}`}>
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl mb-8">
               {ui.sections.relatedPosts}
             </h2>
@@ -563,12 +565,14 @@ export default function BlogPostTemplate({
               ))}
             </div>
           </section>
+        </div>
         )}
 
         {/* Footer: Category Link and Back Button */}
-        <div
-          className={`mt-12 flex flex-col items-center gap-4 ${isRTL ? "text-right" : "text-left"}`}
-        >
+        <div className={`max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 ${isRTL ? "font-arabic" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
+          <div
+            className={`mt-12 flex flex-col items-center gap-4 ${isRTL ? "text-right" : "text-left"}`}
+          >
           {category && (
             <div>
               <Link

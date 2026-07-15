@@ -66,6 +66,11 @@ think first, show exact changes, then apply only with approval.
 - **Early Returns (Guard Clauses):** Avoid deeply nested `if/else` blocks. Return early to keep the main logic un-indented and readable.
 - **Absolute Imports:** Always use absolute import paths (e.g., `import Button from '@/components/Button'`) instead of relative paths.
 - **Component Structure:** Always destructure props directly in the function signature rather than using `props.` throughout the component.
+
+### 🧠 Human-Centric Engineering (DeMarco Principles)
+- **Optimize for the Human Reader:** Code is read by humans far more often than it is written. Avoid overly clever one-liners if they increase cognitive load for the reviewer. If logic is complex, break it down.
+- **Quality Cannot Be Rushed:** Never sacrifice structural quality or test coverage just to get a feature out the door. If a requested change feels like a "hack" or technical debt, pause and propose a proper architectural fix instead.
+- **Reduce Cognitive Overload:** Keep files and functions small and strictly focused on a Single Responsibility. Do not force the human reviewer to hold massive amounts of state in their head to understand a component.
 - Prefer pure functions, explicit inputs/outputs, and small modules.
 - Minimize mutable global state and side-effect-heavy helpers.
 - Centralize constants/config instead of scattering literals.

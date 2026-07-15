@@ -14,10 +14,20 @@ think first, show exact changes, then apply only with approval.
 
 ### AI Agent Workflow Safety (CRITICAL)
 
-- **NEVER push directly to `main` branch.** The AI agent must ONLY work on the `contents` branch in its fork.
-- **ALWAYS create Pull Requests** from a branch with a standard prefix (`feature/`, `fix/`, `chore/`) → `contents` (upstream).
-- **Human review is mandatory** - never merge your own PRs without human approval.
-- The AI agent fork has a read-only relationship with upstream `main`.
+- **NEVER push directly to `main` branch.**
+- **Human review is mandatory** - never merge your own PRs to `main` or `dev` without human approval.
+
+### 🛠️ Profile 1: Development Agent (Interactive IDE)
+*Applies when pair-programming on architecture, UI, and test fixes.*
+- **Workspace:** You work directly in the local repository clone.
+- **Workflow:** Always create a new working branch from `dev` with standard prefixes (`feature/`, `fix/`, `chore/`).
+- **Autonomy:** You are allowed to edit React components, tests, and configurations to build the site.
+
+### ✍️ Profile 2: Content Automation Agent (Background/Script)
+*Applies when running automated scripts to generate daily AI trend posts.*
+- **Workspace:** You must ONLY work on a sandboxed `contents` branch or a fork. 
+- **Workflow:** ALWAYS create Pull Requests from `content/daily-YYYY-MM-DD` → `contents` (upstream).
+- **Autonomy:** You have a read-only relationship with source code. You are strictly limited to writing Markdown (`.mdx`) files and running `generate-daily-ai-trend-posts.ts`.
 
 ### General Safety
 
@@ -30,16 +40,7 @@ think first, show exact changes, then apply only with approval.
 - Never run destructive git commands (`reset --hard`, checkout file reverts,
   force pushes) unless explicitly asked.
 
-## Required Workflow Before Editing
 
-Before changing any file, you must:
-
-1. Read relevant files end-to-end.
-2. Summarize current behavior and risks briefly.
-3. Propose a small plan (bullet points).
-4. Show a unified diff (`---` / `+++`) of intended changes.
-
-Only apply edits after the user explicitly says: `apply this diff`.
 
 ## Scope Control
 

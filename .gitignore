@@ -18,6 +18,7 @@
 /test-results
 /.playwright
 /playwright/.local-browsers
+.playwright-screenshots/
 
 # next.js
 /.next/
@@ -74,3 +75,6 @@ scripts/logs/*.log
 
 # Claude Code local instructions – keep private
 CLAUDE.md
+
+# Scratchpads and local references
+description.md

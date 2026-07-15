@@ -326,6 +326,7 @@ export default async function BlogHome({
           >
             <Link
               href="/blog"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "en"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
@@ -336,6 +337,7 @@ export default async function BlogHome({
             </Link>
             <Link
               href="/blog?lang=ja"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "ja"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
@@ -346,6 +348,7 @@ export default async function BlogHome({
             </Link>
             <Link
               href="/blog?lang=ar"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "ar"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
@@ -358,48 +361,57 @@ export default async function BlogHome({
         </header>
 
         <section className="mb-10">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-sm backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {copy.qualityTitle}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              {copy.qualitySummary}
-            </p>
-            <ul className="mt-4 grid gap-2 text-sm text-gray-700 dark:text-gray-200 md:grid-cols-3">
-              {copy.qualityBullets.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-xl border border-gray-200/70 bg-white/70 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/40"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <div className={`mt-4 ${isRTL ? "text-right" : "text-left"}`}>
-              <Link
-                href={`/editorial-policy?lang=${currentLang}`}
-                className="inline-flex items-center rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-              >
-                {copy.qualityCta}
-              </Link>
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+              <div className="relative z-10">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {copy.qualityTitle}
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  {copy.qualitySummary}
+                </p>
+                <ul className="mt-4 grid gap-2 text-sm text-gray-700 dark:text-gray-200 md:grid-cols-3">
+                  {copy.qualityBullets.map((item) => (
+                    <li
+                      key={item}
+                      className="rounded-xl border border-gray-200/70 bg-white/70 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/40"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className={`mt-4 ${isRTL ? "text-right" : "text-left"}`}>
+                  <Link
+                    href={`/editorial-policy?lang=${currentLang}`}
+                    className="inline-flex items-center rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 shadow-sm"
+                  >
+                    {copy.qualityCta}
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="mb-10">
-          <div
-            className="rounded-3xl border border-white/20 bg-white/60 p-8 shadow-sm backdrop-blur-lg dark:border-white/10 dark:bg-white/5"
-            dir={isRTL ? "rtl" : "ltr"}
-          >
-            <div className={`${isRTL ? "text-right" : "text-left"} mb-6`}>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
-                {copy.subscriptionHeading}
-              </p>
-              <p className="mt-3 text-base text-gray-700 dark:text-gray-200">
-                {copy.subscriptionDescription}
-              </p>
+          <div className="relative group" dir={isRTL ? "rtl" : "ltr"}>
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/40 p-8 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute -bottom-32 -right-32 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+              <div className="relative z-10">
+                <div className={`${isRTL ? "text-right" : "text-left"} mb-6`}>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
+                    {copy.subscriptionHeading}
+                  </p>
+                  <p className="mt-3 text-base text-gray-700 dark:text-gray-200">
+                    {copy.subscriptionDescription}
+                  </p>
+                </div>
+                <EmailSubscriptionForm lang={currentLang} />
+              </div>
             </div>
-            <EmailSubscriptionForm lang={currentLang} />
           </div>
         </section>
 

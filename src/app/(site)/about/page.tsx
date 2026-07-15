@@ -164,12 +164,12 @@ export default async function AboutPage({
       lang={currentLang}
     >
       <div className="mx-auto max-w-5xl">
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between cinematic-fade-in">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
               {t.label}
             </p>
-            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white">
+            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               {t.title}
             </h1>
             <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 italic">
@@ -184,7 +184,7 @@ export default async function AboutPage({
           </Link>
         </div>
 
-        <div className="mb-12 rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+        <div className="mb-12 rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5 animate-fade-up-1">
           <p className="text-lg font-medium leading-relaxed text-gray-900 dark:text-white">
             {t.intro}
           </p>
@@ -194,8 +194,8 @@ export default async function AboutPage({
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {t.sections.map((section) => (
-            <div key={section.title} className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
+          {t.sections.map((section, index) => (
+            <div key={section.title} className={`rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5 animate-fade-up-${Math.min(index + 2, 4)}`}>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 {section.title}
               </h2>
@@ -205,7 +205,7 @@ export default async function AboutPage({
             </div>
           ))}
 
-          <div className="rounded-3xl border border-white/20 bg-purple-600/5 p-8 backdrop-blur-lg dark:border-white/10 md:col-span-3">
+          <div className="rounded-3xl border border-white/20 bg-purple-600/5 p-8 backdrop-blur-lg dark:border-white/10 md:col-span-3 animate-fade-up-4">
             <div className="flex flex-wrap items-center justify-between gap-6">
               <div className="max-w-xl">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">

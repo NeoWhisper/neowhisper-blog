@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './tests',
   timeout: 30_000,
   workers: process.env.CI ? 4 : undefined,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 1 : 2,
   use: {
     baseURL: 'http://localhost:3000',
     channel: process.env.CI ? 'chrome' : undefined,

@@ -4,92 +4,13 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
-
-function getLabel(
-  key: "privacy" | "terms" | "contact" | "editorial",
-  lang: SupportedLang,
-) {
-  const labels: Record<SupportedLang, Record<typeof key, string>> = {
-    en: {
-      privacy: "Privacy",
-      terms: "Terms",
-      contact: "Contact",
-      editorial: "Editorial Policy",
-    },
-    ja: {
-      privacy: "プライバシー",
-      terms: "利用規約",
-      contact: "お問い合わせ",
-      editorial: "編集ポリシー",
-    },
-    ar: {
-      privacy: "الخصوصية",
-      terms: "الشروط",
-      contact: "تواصل",
-      editorial: "سياسة التحرير",
-    },
-  };
-
-  return labels[lang][key];
-}
+import { getDictionary } from "@/lib/dictionaries";
 
 function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
   if (!pathname?.startsWith("/blog/")) return null;
   if (/-ja\/?$/.test(pathname)) return "ja";
   if (/-ar\/?$/.test(pathname)) return "ar";
   return "en";
-}
-
-function getSectionLabel(
-  key: "trustSignals" | "links" | "registration" | "businessType",
-  lang: SupportedLang,
-) {
-  const labels: Record<SupportedLang, Record<typeof key, string>> = {
-    en: {
-      trustSignals: "Trust Signals",
-      links: "Links",
-      registration: "Registered in Minato City, Tokyo",
-      businessType: "Business category: IT services",
-    },
-    ja: {
-      trustSignals: "信頼情報",
-      links: "リンク",
-      registration: "東京都港区を拠点に開業届提出済み",
-      businessType: "職業区分: ITサービス業",
-    },
-    ar: {
-      trustSignals: "مؤشرات الثقة",
-      links: "الروابط",
-      registration: "تسجيل رسمي في ميناتو-كو، طوكيو",
-      businessType: "تصنيف النشاط: خدمات تقنية المعلومات",
-    },
-  };
-
-  return labels[lang][key];
-}
-
-function getBusinessText(lang: SupportedLang) {
-  const content: Record<SupportedLang, { line1: string; line2: string }> = {
-    en: {
-      line1:
-        "Registered sole proprietorship in Japan. Business category: IT services.",
-      line2:
-        "Service scope: software development, game development, app development, web production, web content production, and translation. Based in Minato City, Tokyo.",
-    },
-    ja: {
-      line1: "日本で開業届を提出済みの個人事業主です（職業: ITサービス業）。",
-      line2:
-        "事業概要: ソフトウェア開発・ゲーム開発・アプリ開発・Web制作・Webコンテンツ制作・翻訳などのITサービス提供。拠点は東京都港区です。",
-    },
-    ar: {
-      line1:
-        "مؤسسة فردية مسجّلة في اليابان ضمن نشاط خدمات تقنية المعلومات.",
-      line2:
-        "نطاق الخدمات: تطوير البرمجيات والألعاب والتطبيقات وإنتاج الويب ومحتوى الويب والترجمة. المقر في ميناتو-كو، طوكيو.",
-    },
-  };
-
-  return content[lang];
 }
 
 export default function SiteFooter() {
@@ -108,17 +29,21 @@ export default function SiteFooter() {
   const detectedLang = detectBlogSlugLang(pathname) ?? queryLang;
   // Use "en" during SSR, switch to detected lang only after mount
   const currentLang = mounted ? detectedLang : "en";
-  const business = getBusinessText(currentLang);
+  const t = getDictionary(currentLang);
 
   return (
-    <footer className="border-t border-white/5 bg-zinc-950">
-      <div className="mx-auto max-w-6xl px-4 py-12">
+    <footer className="relative border-t border-white/10 bg-black/80 backdrop-blur-3xl overflow-hidden">
+      {/* Cinematic ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-purple-900/20 blur-[100px] rounded-full pointer-events-none"></div>
+      
+      <div className="relative mx-auto max-w-6xl px-4 py-12 z-10">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-widest text-white">NEO WHISPER</h3>
             <p className="text-xs leading-relaxed text-zinc-400">
-              {business.line1} <br />
-              {business.line2}
+              {t.footer.businessLine1} <br />
+              {t.footer.businessLine2}
             </p>
             <div className="flex gap-4">
               <a href="https://github.com/NeoWhisper" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
@@ -130,36 +55,36 @@ export default function SiteFooter() {
 
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-widest text-white">
-              {getSectionLabel("trustSignals", currentLang)}
+              {t.sections.trustSignals}
             </h3>
             <ul className="space-y-2 text-xs text-zinc-400">
               <li className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                {getSectionLabel("registration", currentLang)}
+                {t.footer.registration}
               </li>
               <li className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                {getSectionLabel("businessType", currentLang)}
+                {t.footer.businessType}
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-widest text-white">
-              {getSectionLabel("links", currentLang)}
+              {t.sections.links}
             </h3>
             <div className="flex flex-col gap-2 text-xs" dir="ltr">
               <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/privacy", currentLang)}>
-                {getLabel("privacy", currentLang)}
+                {t.nav.privacy}
               </Link>
               <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/terms", currentLang)}>
-                {getLabel("terms", currentLang)}
+                {t.nav.terms}
               </Link>
               <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/contact", currentLang)}>
-                {getLabel("contact", currentLang)}
+                {t.nav.contact}
               </Link>
               <Link className="hover:text-white transition-colors text-zinc-500" href={withLang("/editorial-policy", currentLang)}>
-                {getLabel("editorial", currentLang)}
+                {t.nav.editorial}
               </Link>
             </div>
           </div>

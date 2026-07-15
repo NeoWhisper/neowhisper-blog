@@ -2,55 +2,14 @@
 
 import { type FormEvent, useState } from "react";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
-type SubscriptionCopy = {
-  heading: string;
-  button: string;
-  sending: string;
-  success: string;
-  error: string;
-  privacy: string;
-  placeholder: string;
-};
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
-const copyByLang: Record<SupportedLang, SubscriptionCopy> = {
-  en: {
-    heading: "Subscribe for new posts",
-    button: "Subscribe",
-    sending: "Subscribing...",
-    success: "You are subscribed. New posts will arrive by email.",
-    error: "We could not process your request. Please try again later.",
-    privacy:
-      "Emails are sent by NeoWhisper via Resend. Unsubscribe support can be added on request.",
-    placeholder: "you@email.com",
-  },
-  ja: {
-    heading: "新着記事をメールで受け取る",
-    button: "購読する",
-    sending: "送信中...",
-    success: "登録が完了しました。新着記事をメールでお届けします。",
-    error: "登録に失敗しました。時間をおいて再度お試しください。",
-    privacy:
-      "メールはResend経由でNeoWhisperから送信されます。配信停止機能は必要に応じて追加できます。",
-    placeholder: "you@email.com",
-  },
-  ar: {
-    heading: "اشترك لاستلام المقالات الجديدة",
-    button: "اشتراك",
-    sending: "جارٍ الاشتراك...",
-    success: "تم الاشتراك بنجاح. سنرسل المقالات الجديدة إلى بريدك.",
-    error: "تعذر تنفيذ الطلب. يرجى المحاولة لاحقا.",
-    privacy:
-      "تصل الرسائل من NeoWhisper عبر Resend. يمكن إضافة إلغاء الاشتراك عند الحاجة.",
-    placeholder: "you@email.com",
-  },
-};
-
 export default function EmailSubscriptionForm({ lang }: { lang: string }) {
   const currentLang = normalizeLang(lang) as SupportedLang;
-  const copy = copyByLang[currentLang];
+  const t = getDictionary(currentLang);
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
 
@@ -64,7 +23,7 @@ export default function EmailSubscriptionForm({ lang }: { lang: string }) {
 
     if (!email) {
       setState("error");
-      setMessage(copy.error);
+      setMessage(t.messages.subscribeError);
       return;
     }
 
@@ -94,14 +53,10 @@ export default function EmailSubscriptionForm({ lang }: { lang: string }) {
 
       form.reset();
       setState("success");
-      setMessage(copy.success);
-    } catch (error) {
-      const fallback =
-        error instanceof Error && error.message && error.message !== "Request failed"
-          ? error.message
-          : copy.error;
+      setMessage(t.messages.subscribeSuccess);
+    } catch {
       setState("error");
-      setMessage(fallback);
+      setMessage(t.messages.subscribeError);
     }
   };
 
@@ -109,35 +64,40 @@ export default function EmailSubscriptionForm({ lang }: { lang: string }) {
     <form
       className="space-y-3"
       onSubmit={handleSubmit}
-      aria-label={copy.heading}
+      aria-label={t.sections.subscribeHeading}
       dir={currentLang === "ar" ? "rtl" : "ltr"}
     >
-      <label className="sr-only" htmlFor="subscription-email">
-        {copy.heading}
-      </label>
-      <div className="grid gap-3 sm:grid-cols-[2fr,1fr]">
-        <input
-          id="subscription-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          placeholder={copy.placeholder}
-          className="w-full min-w-0 rounded-2xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 shadow-sm transition focus:border-purple-500 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-gray-100"
-        />
-        <button
-          type="submit"
-          disabled={state === "submitting"}
-          className="w-full rounded-2xl bg-purple-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-500 disabled:opacity-60"
-        >
-          {state === "submitting" ? copy.sending : copy.button}
-        </button>
+      <div className="relative z-10">
+        <h3 className="text-xl font-bold tracking-tight text-white sm:text-2xl mb-2">
+          {t.sections.subscribeHeading}
+        </h3>
+        <p className="text-white/70 text-sm mb-6 max-w-md">
+          {t.messages.subscribePrivacy}
+        </p>
+        <div className="grid gap-3 sm:grid-cols-[2fr,1fr]">
+          <input
+            id="subscription-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder={t.actions.subscribePlaceholder}
+            disabled={state === "submitting" || state === "success"}
+            className="w-full min-w-0 flex-auto rounded-full border-0 bg-white/10 px-5 py-3 text-white placeholder:text-white/50 shadow-sm ring-1 ring-inset ring-white/20 focus:ring-2 focus:ring-inset focus:ring-white sm:text-sm sm:leading-6"
+          />
+          <button
+            type="submit"
+            disabled={state === "submitting" || state === "success"}
+            className="flex-none rounded-full bg-white px-8 py-3 text-sm font-semibold text-purple-600 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {state === "submitting" ? t.actions.subscribing : t.actions.subscribe}
+          </button>
+        </div>
       </div>
-      <p className="text-xs text-gray-500 dark:text-gray-400">{copy.privacy}</p>
       {message && (
         <p
           className={`text-sm font-medium ${
-            state === "success" ? "text-green-600" : "text-red-500"
+            state === "success" ? "text-green-400" : "text-red-400"
           }`}
           aria-live="polite"
         >

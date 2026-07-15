@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 interface TocItem {
   id: string;
@@ -10,11 +12,14 @@ interface TocItem {
 
 interface StickyTocProps {
   isRTL?: boolean;
+  lang?: string;
 }
 
 const TOC_HEADINGS = ["Table of Contents", "目次", "المحتويات"];
 
-export function StickyToc({ isRTL = false }: StickyTocProps) {
+export function StickyToc({ isRTL = false, lang }: StickyTocProps) {
+  const currentLang = normalizeLang(lang) as SupportedLang;
+  const t = getDictionary(currentLang);
   // items is populated once after mount — initialising with empty array is fine;
   // the component is client-only so no SSR mismatch.
   const [items, setItems] = useState<TocItem[]>([]);
@@ -71,11 +76,11 @@ export function StickyToc({ isRTL = false }: StickyTocProps) {
   return (
     <nav
       aria-label="Table of Contents"
-      className={`hidden xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
+      className={`hidden 2xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
     >
       <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm p-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1">
-          On this page
+          {t.sections.onThisPage}
         </p>
         <ul className="space-y-1">
           {items.map((item) => (
@@ -95,7 +100,8 @@ export function StickyToc({ isRTL = false }: StickyTocProps) {
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/50",
                 ]
                   .filter(Boolean)
-                  .join(" ")}
+                  .join(" ")
+                }
               >
                 {item.text}
               </a>

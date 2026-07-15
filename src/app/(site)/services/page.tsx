@@ -200,12 +200,12 @@ export default async function ServicesPage({
       lang={currentLang}
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between cinematic-fade-in">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
               {t.label}
             </p>
-            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white">
+            <h1 className="mt-3 text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               {t.title}
             </h1>
             <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
@@ -221,10 +221,10 @@ export default async function ServicesPage({
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {t.cards.map((service) => (
+          {t.cards.map((service, index) => (
             <article
               key={service.title}
-              className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg dark:border-white/10 dark:bg-white/5"
+              className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg dark:border-white/10 dark:bg-white/5 animate-fade-up-${Math.min(index + 1, 4)}`}
             >
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 {service.title}

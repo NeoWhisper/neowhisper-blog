@@ -61,6 +61,11 @@ think first, show exact changes, then apply only with approval.
 
 - Follow existing Next.js App Router + TypeScript patterns already used in
   this repo.
+- **Strict TypeScript:** Never use `any`. Always define strict `interface` types for component props and functions.
+- **Boolean Naming Conventions:** All boolean variables and props must be prefixed with `is`, `has`, `should`, or `can` (e.g., `isVisible`, `hasError`).
+- **Early Returns (Guard Clauses):** Avoid deeply nested `if/else` blocks. Return early to keep the main logic un-indented and readable.
+- **Absolute Imports:** Always use absolute import paths (e.g., `import Button from '@/components/Button'`) instead of relative paths.
+- **Component Structure:** Always destructure props directly in the function signature rather than using `props.` throughout the component.
 - Prefer pure functions, explicit inputs/outputs, and small modules.
 - Minimize mutable global state and side-effect-heavy helpers.
 - Centralize constants/config instead of scattering literals.

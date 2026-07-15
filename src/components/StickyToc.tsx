@@ -76,7 +76,7 @@ export function StickyToc({ isRTL = false, lang }: StickyTocProps) {
   return (
     <nav
       aria-label="Table of Contents"
-      className={`hidden xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
+      className={`hidden 2xl:block fixed top-32 ${isRTL ? "left-8" : "right-8"} w-56 max-h-[70vh] overflow-y-auto z-40`}
     >
       <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm p-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1">

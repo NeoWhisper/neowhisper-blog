@@ -267,7 +267,7 @@ export default function BlogPostTemplate({
 
         {/* Sticky Share Widget */}
         <div
-          className={`hidden lg:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
+          className={`hidden xl:flex fixed top-1/2 transform -translate-y-1/2 z-30 flex-col items-center gap-2`}
           style={{
             [isRTL ? "right" : "left"]: "calc((100vw - 1024px) / 2 - 60px)",
           }}

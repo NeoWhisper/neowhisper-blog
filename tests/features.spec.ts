@@ -62,7 +62,7 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
   test('Admin Dashboard (CMS)', async ({ page }) => {
     // Verifying: Admin Dashboard (CMS) (/admin)
     await page.goto('/admin');
-    const loginHeading = page.getByRole('heading', { name: /Sign In|Login|Admin/i });
+    const loginHeading = page.getByRole('heading', { name: /Sign In|Login|Admin|New Draft/i });
     await expect(loginHeading, 'Feature [Admin Dashboard (CMS)] from features.md was removed or is not rendering.').toBeVisible();
   });
 

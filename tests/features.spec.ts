@@ -89,6 +89,7 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
 
   test('Sticky Table of Contents', async ({ page }) => {
     // Verifying: Sticky Table of Contents
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/blog');
     const firstArticleLink = page.getByRole('article').first().getByRole('link').first();
     await firstArticleLink.click();

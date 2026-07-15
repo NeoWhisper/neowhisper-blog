@@ -310,7 +310,7 @@ export default function BlogPostTemplate({
             )}
 
             {/* Post Card with Glassmorphism for content */}
-            <div className="relative group animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both delay-300">
+            <div className="relative group">
               {/* Ambient Glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000 -z-10" />
               

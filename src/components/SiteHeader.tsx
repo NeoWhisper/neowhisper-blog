@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { normalizeLang, type SupportedLang, withLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 import ThemeToggle from "./ThemeToggle";
 
 type NavKey = "services" | "projects" | "roadmap" | "blog" | "about" | "contact";
@@ -17,32 +18,6 @@ const navItems = [
   { key: "contact", href: "/contact" },
 ] as const satisfies ReadonlyArray<{ key: NavKey; href: string }>;
 
-const navLabels: Record<SupportedLang, Record<NavKey, string>> = {
-  en: {
-    services: "Services",
-    projects: "Projects",
-    roadmap: "Roadmap",
-    blog: "Blog",
-    about: "About",
-    contact: "Contact",
-  },
-  ja: {
-    services: "サービス",
-    projects: "プロジェクト",
-    roadmap: "ロードマップ",
-    blog: "ブログ",
-    about: "概要",
-    contact: "お問い合わせ",
-  },
-  ar: {
-    services: "الخدمات",
-    projects: "المشاريع",
-    roadmap: "خارطة الطريق",
-    blog: "المدونة",
-    about: "نبذة",
-    contact: "تواصل",
-  },
-};
 
 function detectBlogSlugLang(pathname: string | null): SupportedLang | null {
   if (!pathname?.startsWith("/blog/")) return null;
@@ -78,7 +53,7 @@ export default function SiteHeader() {
     return qs ? `?${qs}` : "";
   })();
   const currentPathWithoutLang = `${basePath}${searchWithoutLang}`;
-  const labels = navLabels[currentLang];
+  const t = getDictionary(currentLang);
 
   // Don't render language switcher until mounted to avoid hydration mismatch
   const showLangSwitcher = mounted;
@@ -91,13 +66,16 @@ export default function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl dark:bg-black/30">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 backdrop-blur-2xl shadow-lg shadow-purple-500/5">
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent blur-[1px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent pointer-events-none" />
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 relative z-10">
         <Link
           href={withLang("/", currentLang)}
-          className="text-sm font-extrabold uppercase tracking-[0.2em] text-gray-900 dark:text-white"
+          className="text-sm font-extrabold uppercase tracking-[0.2em] text-gray-900 dark:text-white relative group"
         >
-          NeoWhisper
+          <span className="relative z-10">NeoWhisper</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
         </Link>
 
         <div className="flex items-center gap-3">
@@ -107,12 +85,12 @@ export default function SiteHeader() {
               <Link
                 key={item.href}
                 href={withLang(item.href, currentLang)}
-                className={`rounded-full border px-4 py-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 ${isActive(item.href)
-                  ? "border-purple-500 bg-purple-500 text-white shadow-lg shadow-purple-500/20"
+                className={`rounded-full border px-4 py-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-500/20 ${isActive(item.href)
+                  ? "border-purple-500 bg-purple-500 text-white shadow-lg shadow-purple-500/30"
                   : "border-white/20 bg-white/50 hover:bg-white dark:border-white/10 dark:bg-white/5"
                   }`}
               >
-                {labels[item.key]}
+                {t.nav[item.key]}
               </Link>
             ))}
           </nav>
@@ -160,7 +138,7 @@ export default function SiteHeader() {
                   : "border-white/20 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
                   }`}
               >
-                {labels[item.key]}
+                {t.nav[item.key]}
               </Link>
             ))}
           </div>

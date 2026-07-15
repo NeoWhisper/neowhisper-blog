@@ -317,15 +317,15 @@ export default async function Home({
 
   return (
     <>
-      <div className="pointer-events-none absolute -top-32 -right-20 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-slate-400/10 blur-3xl transition-opacity animate-pulse" />
+      <div className="pointer-events-none absolute -top-32 -right-20 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl ambient-blob" />
+      <div className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-slate-400/10 blur-3xl ambient-blob" style={{ animationDelay: '3s', animationDuration: '18s' }} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" dir={isRTL ? "rtl" : "ltr"} lang={currentLang}>
-        <header className="mb-16 text-center">
+        <header className="mb-16 text-center cinematic-fade-in">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-purple-500">
             {copy.studio}
           </p>
-          <h1 className="mx-auto max-w-3xl text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl tracking-tight">
             {copy.heroTitle}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
@@ -382,23 +382,32 @@ export default async function Home({
           </div>
         </header>
 
-        <section id="services" className="mb-16">
+        <section id="services" className="mb-16 animate-fade-up-1">
           <h2 className="mb-6 text-3xl font-extrabold text-gray-900 dark:text-white">
             {copy.servicesTitle}
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
-            {copy.services.map((item) => (
+            {copy.services.map((item, index) => (
               <div
                 key={item.title}
-                className="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5"
+                className={`relative group animate-fade-up-${Math.min(index + 2, 4)} h-full`}
               >
-                <div className="text-3xl mb-4">{item.icon}</div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                  {item.desc}
-                </p>
+                {/* Ambient Hover Glow */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+                
+                <div className="relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+                  <div className="pointer-events-none absolute -top-24 -right-24 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="text-3xl mb-4">{item.icon}</div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -412,7 +421,7 @@ export default async function Home({
           </div>
         </section>
 
-        <section id="projects" className="mb-16">
+        <section id="projects" className="mb-16 animate-fade-up-2">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
               {copy.projectsTitle}
@@ -425,33 +434,42 @@ export default async function Home({
             </Link>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            {projects.map((item) => (
+            {projects.map((item, index) => (
               <div
                 key={item.title}
-                className={`rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 dark:border-white/10 dark:bg-white/5 ${item.status === "planned"
-                  ? "opacity-60 grayscale"
-                  : "hover:-translate-y-1 hover:shadow-xl"
-                  }`}
+                className={`relative group animate-fade-up-${Math.min(index + 3, 4)} h-full ${item.status === "planned" ? "opacity-60 grayscale" : ""}`}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {item.title}
-                  </h3>
-                  {item.status === "planned" && (
-                    <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
-                      {copy.plannedLabel}
-                    </span>
-                  )}
+                {/* Ambient Hover Glow (only for non-planned items) */}
+                {item.status !== "planned" && (
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+                )}
+                
+                <div className={`relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 dark:border-white/10 dark:bg-white/5 ${item.status !== "planned" ? "group-hover:-translate-y-1 group-hover:shadow-2xl" : ""}`}>
+                  {/* Decorative blob */}
+                  <div className={`pointer-events-none absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl transition-colors duration-700 ${item.status === "planned" ? "bg-gray-400/10 dark:bg-gray-600/10" : "bg-purple-500/10 dark:bg-purple-500/20 group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30"}`} />
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {item.title}
+                      </h3>
+                      {item.status === "planned" && (
+                        <span className="rounded-full border border-white/30 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300 whitespace-nowrap">
+                          {copy.plannedLabel}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                  {item.description}
-                </p>
               </div>
             ))}
           </div>
         </section>
 
-        <section id="blog-preview" className="mb-16">
+        <section id="blog-preview" className="mb-16 animate-fade-up-3">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
               {copy.blogPreviewTitle}
@@ -464,44 +482,58 @@ export default async function Home({
             </Link>
           </div>
           <div className="grid gap-6">
-            {posts.map((post) => (
-              <ArticleCard key={post.slug} post={post} lang={currentLang} />
+            {posts.map((post, index) => (
+              <div key={post.slug} className={`animate-fade-up-${Math.min(index + 4, 4)}`}>
+                <ArticleCard post={post} lang={currentLang} />
+              </div>
             ))}
           </div>
         </section>
 
-        <section id="about" className="mb-16">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-              {copy.aboutTitle}
-            </h2>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
-              {copy.aboutCopy}
-            </p>
+        <section id="about" className="mb-16 animate-fade-up-4">
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/40 p-8 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+              <div className="relative z-10">
+                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                  {copy.aboutTitle}
+                </h2>
+                <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300 max-w-4xl">
+                  {copy.aboutCopy}
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="contact" className="mb-20">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-8 backdrop-blur-lg dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-              {copy.contactTitle}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              {copy.contactCopy}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href={`/contact?lang=${currentLang}`}
-                className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
-              >
-                {copy.contactButton}
-              </Link>
-              <Link
-                href={`/blog?lang=${currentLang}`}
-                className="rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
-              >
-                {copy.readBlog}
-              </Link>
+        <section id="contact" className="mb-20 animate-fade-up-4">
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/40 p-8 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+              <div className="pointer-events-none absolute -bottom-32 -right-32 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+              <div className="relative z-10">
+                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                  {copy.contactTitle}
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                  {copy.contactCopy}
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    href={`/contact?lang=${currentLang}`}
+                    className="rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    {copy.contactButton}
+                  </Link>
+                  <Link
+                    href={`/blog?lang=${currentLang}`}
+                    className="rounded-full border border-white/20 bg-white/70 px-6 py-3 text-sm font-semibold text-gray-800 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+                  >
+                    {copy.readBlog}
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>

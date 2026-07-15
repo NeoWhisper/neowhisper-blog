@@ -1,9 +1,29 @@
 "use client";
 
 import { useTheme } from "./ThemeProvider";
+import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch by rendering a placeholder until mounted
+  if (!mounted) {
+    return (
+      <button
+        className="rounded-full border border-white/20 bg-white/60 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-700 shadow-sm transition-all duration-300 dark:border-white/10 dark:bg-white/10 dark:text-gray-200"
+        aria-label="Toggle theme"
+        title="Toggle theme"
+      >
+        <div className="h-5 w-5" />
+      </button>
+    );
+  }
 
   return (
     <button

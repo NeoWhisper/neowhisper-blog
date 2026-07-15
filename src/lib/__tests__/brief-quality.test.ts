@@ -2,7 +2,7 @@ import {
   countPostWords,
   isLowValueBriefPost,
   EFFECTIVE_BRIEF_NOINDEX_THRESHOLD,
-} from "../brief-quality";
+} from "@/lib/brief-quality";
 
 describe("brief-quality", () => {
   describe("countPostWords", () => {

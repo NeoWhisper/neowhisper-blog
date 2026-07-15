@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { updatePostDetail } from "../../actions";
+import { updatePostDetail } from "@/app/admin/actions";
 import Link from "next/link";
-import { adminStrings } from "../../i18n";
+import { adminStrings } from "@/app/admin/i18n";
 
 type LocaleValue = "en" | "ja" | "ar";
 

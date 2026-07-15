@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { notFound, redirect } from "next/navigation";
-import { adminStrings, normalizeAdminLang } from "../../i18n";
+import { adminStrings, normalizeAdminLang } from "@/app/admin/i18n";
 import EditForm from "./edit-form";
 
 export const dynamic = "force-dynamic";

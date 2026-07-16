@@ -41,6 +41,11 @@ Before changing any file, you must:
 
 Only apply edits after the user explicitly says: `apply this diff`.
 
+## Task Completion & Git Workflow
+
+- When you have completed work on a branch and pushed the changes to the remote repository, you **MUST** immediately create a Pull Request.
+- Never pivot to a new task or end your turn after pushing a branch until the Pull Request is opened and the link is provided to the user.
+
 ## Scope Control
 
 - Change only files directly related to the task.

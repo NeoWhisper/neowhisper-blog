@@ -326,6 +326,7 @@ export default async function BlogHome({
           >
             <Link
               href="/blog"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "en"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
@@ -336,6 +337,7 @@ export default async function BlogHome({
             </Link>
             <Link
               href="/blog?lang=ja"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "ja"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
@@ -346,6 +348,7 @@ export default async function BlogHome({
             </Link>
             <Link
               href="/blog?lang=ar"
+              prefetch={true}
               className={`px-4 py-2 rounded-full transition-all duration-300 border text-sm font-semibold ${
                 currentLang === "ar"
                   ? "bg-purple-600 text-white border-purple-400 shadow-[0_0_20px_rgba(147,51,234,0.3)]"

@@ -5,7 +5,6 @@ on:
     branches:
       - dev
   workflow_dispatch:
-    description: "Create a release PR from dev → main"
 
 permissions:
   contents: write

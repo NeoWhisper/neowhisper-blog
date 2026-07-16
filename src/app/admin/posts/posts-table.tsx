@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { deletePost, updatePostStatus } from "../actions";
+import { deletePost, updatePostStatus } from "@/app/admin/actions";
 
-import { adminStrings } from "../i18n";
+import { adminStrings } from "@/app/admin/i18n";
 
 type Post = {
     id: string;

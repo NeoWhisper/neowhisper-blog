@@ -1,7 +1,7 @@
-import { normalizeLang, withLang } from '../i18n';
-import { getBaseSlug, getPostLanguage } from '../posts';
-import { isLocalizedSlug } from '../slug';
-import { formatDate } from '../utils';
+import { normalizeLang, withLang } from '@/lib/i18n';
+import { getBaseSlug, getPostLanguage } from '@/lib/posts';
+import { isLocalizedSlug } from '@/lib/slug';
+import { formatDate } from '@/lib/utils';
 
 describe('i18n utilities', () => {
     test('normalizeLang should return correct language or default to en', () => {

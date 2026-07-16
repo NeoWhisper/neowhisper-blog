@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
-import { adminStrings, normalizeAdminLang } from "../i18n";
+import { adminStrings, normalizeAdminLang } from "@/app/admin/i18n";
 import PostsTable from "./posts-table";
 
 export const dynamic = "force-dynamic";

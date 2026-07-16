@@ -344,27 +344,31 @@ export default function BlogPostTemplate({
                   <MDXRemote
                     source={displayContent}
                     components={{
-                      h2: (props) => {
-                        const text = flattenText(props.children);
+                      h2: ({ children, ...rest }) => {
+                        const text = flattenText(children);
                         const isToc = ["Table of Contents", "目次", "المحتويات"].includes(text.trim());
                         return (
                           <h2
-                            id={headingToId(props.children)}
+                            id={headingToId(children)}
                             className={
                               isToc
                                 ? "text-xl font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest py-4 border-y border-gray-200 dark:border-gray-800 mt-12 mb-8 scroll-mt-28"
                                 : "text-3xl sm:text-4xl font-bold mt-16 sm:mt-20 mb-12 scroll-mt-28"
                             }
-                            {...props}
-                          />
+                            {...rest}
+                          >
+                            {children}
+                          </h2>
                         );
                       },
-                      h3: (props) => (
+                      h3: ({ children, ...rest }) => (
                         <h3
-                          id={headingToId(props.children)}
+                          id={headingToId(children)}
                           className="text-2xl font-bold mt-20 mb-10 scroll-mt-28"
-                          {...props}
-                        />
+                          {...rest}
+                        >
+                          {children}
+                        </h3>
                       ),
                       hr: (props) => (
                         <hr
@@ -375,11 +379,11 @@ export default function BlogPostTemplate({
                       ol: (props) => (
                         <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />
                       ),
-                      img: (props) => (
+                      img: ({ src = "", alt = "", title }) => (
                         <ImageZoom
-                          src={props.src || ""}
-                          alt={props.alt || ""}
-                          title={props.title}
+                          src={src}
+                          alt={alt}
+                          title={title}
                           className="my-12 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-full h-auto"
                         />
                       ),

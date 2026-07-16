@@ -1,11 +1,9 @@
 name: Sync Main to Dev and Contents
 
 on:
-  # DISABLED push trigger: Only allow manual triggering via workflow_dispatch.
-  # Automatic back-merge to contents on every main push creates noise.
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:

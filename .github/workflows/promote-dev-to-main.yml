@@ -1,6 +1,9 @@
 name: Promote Dev to Main PR
 
 on:
+  push:
+    branches:
+      - dev
   workflow_dispatch:
     description: "Create a release PR from dev → main"
 
@@ -70,13 +73,14 @@ jobs:
                 "",
                 "## Merge Strategy",
                 "",
-                "**Use Squash and merge** to keep main history clean.",
-                "This PR may contain many individual commits from features, fixes, and syncs.",
-                "Squash merging combines them into a single meaningful commit on main.",
+                "**Use a regular Merge Commit.**",
+                "Do NOT use Squash and merge. `dev` is a persistent, long-lived branch.",
+                "Using a standard merge commit ensures that branch histories stay synchronized and future PRs don't show old commits.",
                 "",
                 "## Notes",
                 "",
-                "- Created via workflow_dispatch in `.github/workflows/promote-dev-to-main.yml`.",
+                "- Created automatically by `.github/workflows/promote-dev-to-main.yml`.",
+                "- This PR will automatically update if more commits are pushed to `dev`.",
                 "- Review and merge when ready to release to production.",
               ].join("\n"),
             });

@@ -4,6 +4,8 @@ import path from "path";
 const screenshotDir = path.join(__dirname, "../.playwright-screenshots");
 
 test.describe("Visual Design Review - Articles", () => {
+  test.setTimeout(120000); // 2 minutes for slow CI compilation
+  
   test("Blog listing - article cards layout", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/blog");

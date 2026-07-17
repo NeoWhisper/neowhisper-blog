@@ -3,57 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { normalizeLang, type SupportedLang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 interface BreadcrumbItem {
   label: string;
   href: string;
 }
 
-const labels: Record<SupportedLang, Record<string, string>> = {
-  en: {
-    services: "Services",
-    projects: "Projects",
-    roadmap: "Roadmap",
-    blog: "Blog",
-    about: "About",
-    contact: "Contact",
-    category: "Category",
-    privacy: "Privacy",
-    terms: "Terms",
-    editorial: "Editorial Policy",
-    faq: "FAQ",
-  },
-  ja: {
-    services: "サービス",
-    projects: "プロジェクト",
-    roadmap: "ロードマップ",
-    blog: "ブログ",
-    about: "概要",
-    contact: "お問い合わせ",
-    category: "カテゴリ",
-    privacy: "プライバシー",
-    terms: "利用規約",
-    editorial: "編集ポリシー",
-    faq: "よくある質問",
-  },
-  ar: {
-    services: "الخدمات",
-    projects: "المشاريع",
-    roadmap: "خارطة الطريق",
-    blog: "المدونة",
-    about: "نبذة",
-    contact: "تواصل",
-    category: "التصنيف",
-    privacy: "الخصوصية",
-    terms: "الشروط",
-    editorial: "سياسة التحرير",
-    faq: "الأسئلة الشائعة",
-  },
-};
-
 export default function Breadcrumbs({ lang }: { lang?: string }) {
   const pathname = usePathname();
   const currentLang = normalizeLang(lang) as SupportedLang;
+  const t = getDictionary(currentLang);
   const isRTL = currentLang === "ar";
 
   if (!pathname || pathname === "/") {
@@ -65,7 +25,7 @@ export default function Breadcrumbs({ lang }: { lang?: string }) {
 
   // Home is always first
   items.push({
-    label: currentLang === "ja" ? "ホーム" : currentLang === "ar" ? "الرئيسية" : "Home",
+    label: t.nav.home,
     href: currentLang === "en" ? "/" : `/?lang=${currentLang}`,
   });
 
@@ -77,7 +37,7 @@ export default function Breadcrumbs({ lang }: { lang?: string }) {
     // Skip if it's a blog post slug (we show "Blog" instead)
     if (segment === "blog" && segments[index + 1] && !segments[index + 2]) {
       items.push({
-        label: labels[currentLang].blog,
+        label: t.nav.blog,
         href: currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`,
       });
       return;
@@ -92,13 +52,14 @@ export default function Breadcrumbs({ lang }: { lang?: string }) {
     // For category pages
     if (segment === "category" && segments[index + 1]) {
       items.push({
-        label: labels[currentLang].category,
+        label: t.nav.category,
         href: currentLang === "en" ? "/blog" : `/blog?lang=${currentLang}`,
       });
       return;
     }
 
-    const label = labels[currentLang][segment] ||
+
+    const label = t.nav[segment as keyof typeof t.nav] ||
       segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
     items.push({

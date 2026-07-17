@@ -3,7 +3,7 @@ import {
   withLang,
   supportedLangs,
   type SupportedLang,
-} from "../i18n";
+} from "@/lib/i18n";
 
 describe("i18n utilities", () => {
   describe("supportedLangs", () => {

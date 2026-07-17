@@ -58,9 +58,9 @@
 }
 
 .dark {
-    --background: oklch(0.141 0.005 285.823);
+    --background: oklch(0.13 0.01 285);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
+    --card: oklch(0.18 0.01 285);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.21 0.006 285.885);
     --popover-foreground: oklch(0.985 0 0);
@@ -127,10 +127,12 @@
         transform: scale(0.96);
         box-shadow: 0 0 0 rgba(147, 51, 234, 0);
     }
+
     50% {
         transform: scale(1.03);
         box-shadow: 0 18px 50px rgba(147, 51, 234, 0.25);
     }
+
     100% {
         transform: scale(1);
         box-shadow: 0 12px 35px rgba(147, 51, 234, 0.18);
@@ -146,6 +148,7 @@
         opacity: 0;
         transform: translateY(100%);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -162,9 +165,10 @@
 
 /* ── Dark mode code block contrast boost ────────────────────────────────── */
 .dark .prose pre {
-    background-color: #0d1117 !important;   /* GitHub-dark true black */
-    border-color: rgba(255,255,255,0.08) !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+    background-color: #0d1117 !important;
+    /* GitHub-dark true black */
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
 .dark .prose code:not(pre code) {
@@ -183,7 +187,7 @@
 
 .prose img:hover {
     transform: scale(1.015);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
 }
 
 /* Full-screen lightbox via :target trick */
@@ -194,8 +198,325 @@
     width: 100vw;
     height: 100vh;
     object-fit: contain;
-    background: rgba(0,0,0,0.88);
+    background: rgba(0, 0, 0, 0.88);
     cursor: zoom-out;
     border-radius: 0;
     transform: none;
+}
+
+/* Cinematic Utilities */
+.bg-grain {
+    position: relative;
+}
+
+.bg-grain::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.dark .bg-grain::before {
+    opacity: 0.03;
+}
+
+/* Volumetric Light Rays */
+.volumetric-light {
+    position: relative;
+    overflow: hidden;
+}
+
+.volumetric-light::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 45deg at 50% 50%,
+            transparent 0deg,
+            rgba(147, 51, 234, 0.02) 60deg,
+            transparent 120deg,
+            rgba(236, 72, 153, 0.02) 180deg,
+            transparent 240deg,
+            rgba(59, 130, 246, 0.02) 300deg,
+            transparent 360deg);
+    animation: rotate-light 30s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate-light {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Cinematic Vignette */
+.cinematic-vignette {
+    position: relative;
+}
+
+.cinematic-vignette::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 40;
+    background: radial-gradient(ellipse at center,
+            transparent 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.08) 100%);
+}
+
+.dark .cinematic-vignette::before {
+    background: radial-gradient(ellipse at center,
+            transparent 0%,
+            transparent 40%,
+            rgba(0, 0, 0, 0.25) 100%);
+}
+
+/* ── Deep Cinematic Animations ────────────────────────────────────────────── */
+@keyframes ambient-glow {
+    0% {
+        opacity: 0.3;
+        transform: scale(1) translate(0, 0);
+    }
+
+    33% {
+        opacity: 0.5;
+        transform: scale(1.1) translate(2%, 3%);
+    }
+
+    66% {
+        opacity: 0.4;
+        transform: scale(0.95) translate(-1%, -2%);
+    }
+
+    100% {
+        opacity: 0.3;
+        transform: scale(1) translate(0, 0);
+    }
+}
+
+.ambient-blob {
+    animation: ambient-glow 15s ease-in-out infinite alternate;
+}
+
+/* Ken Burns Effect for Hero Images */
+@keyframes ken-burns {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+
+    50% {
+        transform: scale(1.05) translate(-0.5%, 0.5%);
+    }
+
+    100% {
+        transform: scale(1.08) translate(0.5%, -0.5%);
+    }
+}
+
+.ken-burns {
+    animation: ken-burns 30s ease-in-out infinite alternate;
+}
+
+/* Parallax Scroll Effect */
+@keyframes parallax-float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.parallax-float {
+    animation: parallax-float 8s ease-in-out infinite;
+}
+
+/* Dramatic Fade In */
+@keyframes cinematic-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.cinematic-fade-in {
+    animation: cinematic-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered Cinematic Reveal */
+@keyframes fade-up-stagger {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-up-1 {
+    animation: fade-up-stagger 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.animate-fade-up-2 {
+    animation: fade-up-stagger 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.animate-fade-up-3 {
+    animation: fade-up-stagger 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.animate-fade-up-4 {
+    animation: fade-up-stagger 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+/* Cinematic Glow on Hover */
+@keyframes cinematic-glow {
+    0% {
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(147, 51, 234, 0.3), 0 0 80px rgba(236, 72, 153, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.1);
+    }
+}
+
+.cinematic-glow-hover:hover {
+    animation: cinematic-glow 2s ease-in-out infinite;
+}
+
+/* Scroll Triggered Reveal */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Parallax Scroll Effect */
+.parallax-scroll {
+    will-change: transform;
+}
+
+/* Magnetic Button Effect */
+.magnetic-button {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Text Reveal Animation */
+@keyframes text-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-reveal {
+    animation: text-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Card Tilt Effect */
+.card-tilt {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-style: preserve-3d;
+}
+
+.card-tilt:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+}
+
+/* Smooth Page Transition */
+.page-transition {
+    animation: page-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes page-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Image Parallax */
+.image-parallax {
+    transition: transform 0.1s linear;
+}
+
+/* Loading Animation */
+@keyframes cinematic-loading {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.cinematic-loading {
+    animation: cinematic-loading 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Micro-interactions */
+.micro-hover {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.micro-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

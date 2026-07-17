@@ -1,4 +1,4 @@
-import { categories, buildCategorySlug, type Category } from "../categories";
+import { categories, buildCategorySlug, type Category } from "@/lib/categories";
 
 describe("categories", () => {
   describe("categories array", () => {

@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const MIN_WORDS_EXCLUSIVE = 900; // Rule: strictly more than 900 words
+const MIN_WORDS_THRESHOLD = 900; // Exclusive threshold: posts must be > 900 words (901+)
 const POSTS_DIR = "src/content/posts";
 
 function stripFrontmatter(source) {
@@ -88,7 +88,7 @@ async function main() {
     const lang = getLanguageFromPostFile(relativeFile);
     const wordCount = countWords(body, lang);
 
-    if (wordCount <= MIN_WORDS_EXCLUSIVE) {
+    if (wordCount <= MIN_WORDS_THRESHOLD) {
       failures.push({
         file: relativeFile,
         wordCount,

@@ -1,5 +1,5 @@
-import { getPostLanguage, getBaseSlug } from "../posts";
-import { isLocalizedSlug } from "../slug";
+import { getPostLanguage, getBaseSlug } from "@/lib/posts";
+import { isLocalizedSlug } from "@/lib/slug";
 
 // Mock fs module to avoid reading actual files
 jest.mock("fs", () => ({

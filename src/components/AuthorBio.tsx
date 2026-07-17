@@ -69,11 +69,15 @@ export default function AuthorBio({
   const text = content[lang] || content.en;
 
   return (
-    <section
-      className="mt-12 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10 backdrop-blur-sm rounded-2xl border border-purple-200/30 dark:border-purple-800/30 overflow-hidden"
-      dir={isRTL ? "rtl" : "ltr"}
-    >
-      <div className="p-6 sm:p-8">
+    <section className="mt-12 relative group" dir={isRTL ? "rtl" : "ltr"}>
+      {/* Ambient Hover Glow */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10 backdrop-blur-2xl rounded-3xl border border-purple-200/30 dark:border-purple-800/30 shadow-lg group-hover:shadow-2xl transition-all duration-500">
+        {/* Subtle decorative blob */}
+        <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
+        
+        <div className="relative z-10 p-6 sm:p-8">
         {/* Header */}
         <div
           className={`flex items-start gap-6 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -209,6 +213,7 @@ export default function AuthorBio({
               />
             </svg>
           </Link>
+        </div>
         </div>
       </div>
     </section>

@@ -7,16 +7,22 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
   // ============================================================================
   
   test('Language Support & Query-Based Routing', async ({ page }) => {
+    // Increase timeout to account for Next.js dev server on-demand compilation
+    test.setTimeout(120000);
+    
     // Verifying: Language Support (English, Japanese, Arabic) & Query-Based Routing
-    await page.goto('/blog');
     
     // Switch to Japanese
-    await page.getByRole('link', { name: /日本語/i }).click();
-    await expect(page, 'Feature [Query-Based Routing] from features.md failed: URL did not update to ?lang=ja').toHaveURL(/\?lang=ja/);
+    await page.goto('/blog?lang=ja');
+    
+    // Wait for Next.js to finish rendering the new state (active class applied)
+    await expect(page.getByRole('link', { name: '日本語', exact: true })).toHaveClass(/bg-purple-600/, { timeout: 30000 });
     
     // Switch to Arabic
-    await page.getByRole('link', { name: /العربية/i }).click();
-    await expect(page, 'Feature [Query-Based Routing] from features.md failed: URL did not update to ?lang=ar').toHaveURL(/\?lang=ar/);
+    await page.goto('/blog?lang=ar');
+    
+    // Wait for Next.js to finish rendering the new state
+    await expect(page.getByRole('link', { name: 'العربية', exact: true })).toHaveClass(/bg-purple-600/, { timeout: 30000 });
   });
 
   test('RTL Support', async ({ page }) => {

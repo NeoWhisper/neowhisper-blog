@@ -8,8 +8,7 @@ test.describe("Visual Design Review - Articles", () => {
   
   test("Blog listing - article cards layout", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/blog");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(800); // let animations settle
 
     await page.screenshot({
@@ -26,8 +25,7 @@ test.describe("Visual Design Review - Articles", () => {
 
   test("Blog post - hero area and body", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1000);
 
     // Hero (above the fold)
@@ -55,8 +53,7 @@ test.describe("Visual Design Review - Articles", () => {
 
   test("Blog post - Arabic RTL layout", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx-ar");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx-ar", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1000);
 
     await page.screenshot({
@@ -74,8 +71,7 @@ test.describe("Visual Design Review - Articles", () => {
 
   test("Blog post - Japanese layout", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx-ja");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx-ja", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1000);
 
     await page.screenshot({
@@ -93,8 +89,7 @@ test.describe("Visual Design Review - Articles", () => {
 
   test("Mobile view - article card layout", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 }); // iPhone 14
-    await page.goto("/blog");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(800);
 
     await page.screenshot({
@@ -105,8 +100,7 @@ test.describe("Visual Design Review - Articles", () => {
 
   test("Mobile view - blog post", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/blog/local-llm-tools-lm-studio-ollama-mlx", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(800);
 
     await page.screenshot({

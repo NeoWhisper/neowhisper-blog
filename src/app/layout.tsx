@@ -162,7 +162,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#0a0a0e] bg-grain cinematic-vignette overflow-x-clip selection:bg-purple-500/30">
+      <body className="font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#0a0a0e] bg-grain cinematic-vignette selection:bg-purple-500/30">
         {/* Cinematic Ambient Background */}
         <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden">
           <div className="ambient-blob absolute -top-[20%] -left-[10%] h-[70vh] w-[70vw] rounded-full bg-purple-600/10 dark:bg-purple-900/20 blur-[120px] mix-blend-screen" />

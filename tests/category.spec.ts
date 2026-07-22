@@ -15,15 +15,18 @@ async function expectCategorySummaryToMatchCards(page: Page) {
 }
 
 test('encoded slug redirects to canonical and shows articles', async ({ page }) => {
-  // Visit encoded variant which previously behaved inconsistently
+  // Visit encoded variant which previously behaved inconsistently.
+  // On production builds, Next.js redirect() renders a meta-refresh shell
+  // page (no h1). We must wait for the redirect to complete.
   await page.goto('/category/art-%26-design', { waitUntil: 'domcontentloaded' });
 
-  // Wait for the meta-refresh redirect to complete (Next.js uses meta refresh
-  // for server-side redirects in WebKit). Accept both the encoded and canonical
-  // URL forms — WebKit CI sometimes doesn't follow the meta-refresh redirect.
-  await expect(page).toHaveURL(/\/category\/art-(?:design|%26-design)(\?.*)?$/, { timeout: 15000 });
+  // Wait for the meta-refresh redirect to actually complete.
+  // The redirect target URL contains "art-design" (canonical slug).
+  // Use waitForURL with a generous timeout since meta-refresh has a 1s delay
+  // plus the target page needs to load.
+  await page.waitForURL(/\/category\/art-design/, { timeout: 20000 });
 
-  // Page should show the canonical title and the expected article count
+  // Now the canonical page should be loaded with the h1
   await expect(page.locator('h1')).toHaveText('Art & Design', { timeout: 15000 });
   await expectCategorySummaryToMatchCards(page);
 });

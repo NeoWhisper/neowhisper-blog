@@ -69,22 +69,18 @@ test.describe("Dark Mode", () => {
 
 // ===== SEARCH TESTS =====
 test.describe("Search", () => {
-  // Helper: open search modal by clicking the search button natively.
-  // WebKit's KeyboardEvent constructor doesn't propagate metaKey/ctrlKey,
-  // and Playwright's .click() can fail on WebKit if the button is obscured.
-  // Native element.click() via page.evaluate is the most reliable approach.
+  // Helper: open search modal by clicking the search button via Playwright's
+  // accessible role locator. This approach waits for the button to exist in the
+  // DOM (i.e. React has rendered), waits for hydration to attach event handlers,
+  // then clicks with force:true to bypass any obscured-element checks on WebKit.
   async function openSearchModal(page: import("@playwright/test").Page) {
-    await page.waitForLoadState("domcontentloaded");
-    // Wait for React hydration so the Search component mounts its onClick
-    await page.waitForTimeout(1000);
-    await page.evaluate(() => {
-      const btn =
-        document.querySelector<HTMLButtonElement>('button[aria-label*="Search" i]') ??
-        document.querySelector<HTMLButtonElement>('button[aria-label*="検索"]') ??
-        document.querySelector<HTMLButtonElement>('button[aria-label*="البحث"]');
-      if (btn) btn.click();
-    });
-    await page.waitForTimeout(300);
+    const searchButton = page.getByRole("button", { name: /search|検索|البحث/i });
+    // Wait for the button to be in the DOM (React hydration creates it)
+    await searchButton.waitFor({ state: "attached", timeout: 15000 });
+    // Extra wait for React to attach event handlers after rendering the element
+    await page.waitForTimeout(2000);
+    await searchButton.click({ force: true });
+    await page.waitForTimeout(500);
   }
 
   test("Search modal opens with Cmd+K", async ({ page }) => {

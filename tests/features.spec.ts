@@ -191,19 +191,21 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
     // UN-TESTABLE RELIABLY VIA UI CLICKS: Ads are injected asynchronously by Google and often blocked by ad-blockers or headless environments. Strict rules forbid class selectors, making it untestable here.
   });
 
-  test('Cookie Banner', async ({ page }) => {
+  test('Cookie Banner', async ({ browser }) => {
     // Verifying: Cookie Banner (Consent modal)
-    // Clear cookie-consent BEFORE the page loads via addInitScript.
-    // This runs before any React code, ensuring the CookieBanner useEffect
-    // sees a clean localStorage and triggers its 1s timer to show the banner.
-    await page.addInitScript(() => {
-      window.localStorage.removeItem('cookie-consent');
-    });
+    // Use a fresh browser context to guarantee clean localStorage.
+    // Shared contexts from previous tests may have cookie-consent pre-set.
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-    // The CookieBanner component has a 1000ms setTimeout delay before appearing
+    // The CookieBanner component has a 1000ms setTimeout delay before appearing.
+    // On CI production builds, React hydration can take several seconds.
     const cookieBannerText = page.getByText(/cookie|consent/i).first();
-    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 15000 });
+    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 20000 });
+
+    await context.close();
   });
 
   // ============================================================================

@@ -111,6 +111,17 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
   test('Dark/Light Mode', async ({ page }) => {
     // Verifying: Dark/Light Mode (ThemeToggle)
     await page.goto('/');
+
+    // On mobile viewports, the theme toggle is inside the mobile navigation drawer
+    const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+    if (isMobile) {
+      const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+      if (await menuButton.isVisible()) {
+        await menuButton.click();
+        await page.waitForTimeout(300);
+      }
+    }
+
     const themeToggle = page.getByRole('button', { name: /Toggle theme|Switch to dark mode|Switch to light mode/i });
     await expect(themeToggle, 'Feature [Dark/Light Mode] from features.md was removed or is not rendering.').toBeVisible();
   });
@@ -186,9 +197,10 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
     // Clear any prior consent so the banner appears
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('cookie-consent'));
-    await page.reload();
+    await page.reload({ waitUntil: 'networkidle' });
+    // The CookieBanner component has a 1000ms setTimeout delay before appearing
     const cookieBannerText = page.getByText(/cookie|consent/i).first();
-    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 5000 });
+    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 8000 });
   });
 
   // ============================================================================

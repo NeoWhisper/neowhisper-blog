@@ -9,11 +9,21 @@ test.describe("i18n - Internationalization", () => {
       // Wait for hydration to complete - language switcher renders after client mount
       await page.waitForTimeout(100);
 
+      // On mobile viewports, the language switcher is inside the mobile navigation drawer
+      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+      if (isMobile) {
+        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+        if (await menuButton.isVisible()) {
+          await menuButton.click();
+          await page.waitForTimeout(300);
+        }
+      }
+
       // Check for visible language-related elements (could be dropdown, links, or buttons)
-      // Note: Only target visible UI elements, not <link> meta tags in <head>
+      // Desktop uses data-testid="language-switcher", mobile uses nav[aria-label="Mobile language"]
       const langElements = page
         .locator(
-          '[data-testid="language-switcher"] a, nav[aria-label="Language"] a',
+          '[data-testid="language-switcher"] a, nav[aria-label="Language"] a, nav[aria-label="Mobile language"] a',
         )
         .first();
       const count = await langElements.count();

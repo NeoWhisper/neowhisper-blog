@@ -183,10 +183,12 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
 
   test('Cookie Banner', async ({ page }) => {
     // Verifying: Cookie Banner (Consent modal)
+    // Clear any prior consent so the banner appears
     await page.goto('/');
-    await page.waitForTimeout(1200); // Account for CookieBanner's 1000ms setTimeout delay
+    await page.evaluate(() => localStorage.removeItem('cookie-consent'));
+    await page.reload();
     const cookieBannerText = page.getByText(/cookie|consent/i).first();
-    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible();
+    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 5000 });
   });
 
   // ============================================================================

@@ -11,7 +11,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Suspense fallback={null}>
                 <SiteHeader />
             </Suspense>
-            <main className="flex-1 relative overflow-hidden">
+            <main className="flex-1 relative">
                 {children}
             </main>
             {/* SiteFooter reads search params via useSearchParams for language persistence. */}

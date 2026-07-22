@@ -50,10 +50,10 @@ test.describe("Dark Mode", () => {
       }
     }
 
-    // Look for visible theme toggle button
+    // Look for visible theme toggle button (after opening mobile drawer, both instances exist but only one is visible)
     const toggle = page.locator(
       "button[aria-label*='theme' i], button[aria-label*='dark' i], button[aria-label*='light' i]",
-    ).filter({ hasNotClass: /hidden/ });
+    ).filter({ visible: true });
     await expect(toggle.first()).toBeVisible();
   });
 });

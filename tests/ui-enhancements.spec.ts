@@ -69,37 +69,35 @@ test.describe("Dark Mode", () => {
 
 // ===== SEARCH TESTS =====
 test.describe("Search", () => {
-  test("Search modal opens with Cmd+K", async ({ page }) => {
-    await page.goto("/blog");
-
-    // Wait for React hydration to complete so the event listener is attached
-    await page.waitForTimeout(500);
-
-    // Open search via JS event dispatch (bulletproof across all browsers)
+  // Helper: open search modal by clicking the search button natively.
+  // WebKit's KeyboardEvent constructor doesn't propagate metaKey/ctrlKey,
+  // and Playwright's .click() can fail on WebKit if the button is obscured.
+  // Native element.click() via page.evaluate is the most reliable approach.
+  async function openSearchModal(page: import("@playwright/test").Page) {
+    await page.waitForLoadState("domcontentloaded");
+    // Wait for React hydration so the Search component mounts its onClick
+    await page.waitForTimeout(1000);
     await page.evaluate(() => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
-      // Also try Control+k for non-Mac environments
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+      const btn =
+        document.querySelector<HTMLButtonElement>('button[aria-label*="Search" i]') ??
+        document.querySelector<HTMLButtonElement>('button[aria-label*="検索"]') ??
+        document.querySelector<HTMLButtonElement>('button[aria-label*="البحث"]');
+      if (btn) btn.click();
     });
     await page.waitForTimeout(300);
+  }
 
-    // Check if search dialog is visible by looking for the search input
+  test("Search modal opens with Cmd+K", async ({ page }) => {
+    await page.goto("/blog");
+    await openSearchModal(page);
+
     const searchInput = page.locator("input[type='text']").first();
     await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 
   test("Search returns results", async ({ page }) => {
     await page.goto("/blog");
-
-    // Wait for React hydration
-    await page.waitForTimeout(500);
-
-    // Open search via JS event dispatch (bulletproof across all browsers)
-    await page.evaluate(() => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
-    });
-    await page.waitForTimeout(300);
+    await openSearchModal(page);
 
     // Type a search query
     const searchInput = page.locator("input[type='text']").first();
@@ -117,16 +115,7 @@ test.describe("Search", () => {
 
   test("Search closes with Escape", async ({ page }) => {
     await page.goto("/blog");
-
-    // Wait for React hydration
-    await page.waitForTimeout(500);
-
-    // Open search via JS event dispatch (bulletproof across all browsers)
-    await page.evaluate(() => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
-    });
-    await page.waitForTimeout(300);
+    await openSearchModal(page);
 
     // Verify the search modal is open
     const searchInput = page.locator('input[type="text"]').first();

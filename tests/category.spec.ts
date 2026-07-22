@@ -28,13 +28,13 @@ test('encoded slug redirects to canonical and shows articles', async ({ page }) 
 });
 
 test('canonical category page shows expected articles', async ({ page }) => {
-  await page.goto('/category/art-design');
+  await page.goto('/category/art-design', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1')).toHaveText('Art & Design', { timeout: 10000 });
   await expectCategorySummaryToMatchCards(page);
 });
 
 test('Next.js category shows articles with matching summary count', async ({ page }) => {
-  await page.goto('/category/next.js');
+  await page.goto('/category/next.js', { waitUntil: 'domcontentloaded' });
   // Title comes from the first post's category field which is "Next.js"
   await expect(page.locator('h1')).toHaveText('Next.js', { timeout: 10000 });
   await expectCategorySummaryToMatchCards(page);

@@ -24,13 +24,20 @@ test.describe("i18n - Internationalization", () => {
       const langElements = page
         .locator(
           '[data-testid="language-switcher"] a, nav[aria-label="Language"] a, nav[aria-label="Mobile language"] a',
-        )
-        .first();
+        );
       const count = await langElements.count();
 
       // Language switcher may not exist on every page, that's okay
       if (count > 0) {
-        await expect(langElements).toBeVisible();
+        // Find any visible language link (desktop links are hidden on mobile viewports)
+        let hasVisibleLang = false;
+        for (let i = 0; i < count; i++) {
+          if (await langElements.nth(i).isVisible()) {
+            hasVisibleLang = true;
+            break;
+          }
+        }
+        expect(hasVisibleLang, "Language switcher links should be visible").toBe(true);
       }
     });
 

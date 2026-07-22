@@ -70,25 +70,23 @@ test.describe("Dark Mode", () => {
 // ===== SEARCH TESTS =====
 test.describe("Search", () => {
   test("Search modal opens with Cmd+K", async ({ page }) => {
-    await page.goto("/blog");
+    await page.goto("/blog", { waitUntil: "domcontentloaded" });
 
-    // Click the search button (aria-label is always present, even when text is hidden on mobile)
-    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
-    await searchButton.click();
-    await page.waitForTimeout(200);
+    // Open search via keyboard shortcut (most reliable across all browsers)
+    await page.keyboard.press("Control+k");
+    await page.waitForTimeout(300);
 
     // Check if search dialog is visible by looking for the search input
     const searchInput = page.locator("input[type='text']").first();
-    await expect(searchInput).toBeVisible();
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 
   test("Search returns results", async ({ page }) => {
-    await page.goto("/blog");
+    await page.goto("/blog", { waitUntil: "domcontentloaded" });
 
-    // Open search by clicking button (aria-label is always present, even when text is hidden on mobile)
-    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
-    await searchButton.click();
-    await page.waitForTimeout(200);
+    // Open search via keyboard shortcut (most reliable across all browsers)
+    await page.keyboard.press("Control+k");
+    await page.waitForTimeout(300);
 
     // Type a search query
     const searchInput = page.locator("input[type='text']").first();
@@ -105,24 +103,18 @@ test.describe("Search", () => {
   });
 
   test("Search closes with Escape", async ({ page }) => {
-    await page.goto("/blog");
+    await page.goto("/blog", { waitUntil: "domcontentloaded" });
 
-    // Open search (aria-label is always present, even when text is hidden on mobile)
-    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
-    await searchButton.click();
-    await page.waitForTimeout(100);
+    // Open search via keyboard shortcut (most reliable across all browsers)
+    await page.keyboard.press("Control+k");
+    await page.waitForTimeout(300);
 
-    // Focus the search input
+    // Verify the search modal is open
     const searchInput = page.locator('input[type="text"]').first();
-    await searchInput.focus();
-    await page.waitForTimeout(100);
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
 
-    // Close with Escape - dispatch directly to ensure handler receives it
-    await page.evaluate(() => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-      );
-    });
+    // Close with Escape
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(300);
 
     // Search modal should be closed (hidden or removed from DOM)

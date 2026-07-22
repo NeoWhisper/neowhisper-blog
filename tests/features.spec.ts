@@ -96,11 +96,10 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
   test('Sticky Table of Contents', async ({ page }) => {
     // Verifying: Sticky Table of Contents
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto('/blog');
-    const firstArticleLink = page.getByRole('article').first().getByRole('link').first();
-    await firstArticleLink.click();
+    // Navigate directly to a post that has a ToC (more reliable across browsers)
+    await page.goto('/blog/nextjs-core-web-vitals', { waitUntil: 'domcontentloaded' });
     const tocHeading = page.getByText(/Table of Contents|On this page|目次|المحتويات/i).first();
-    await expect(tocHeading, 'Feature [Sticky Table of Contents] from features.md was removed or is not rendering.').toBeVisible();
+    await expect(tocHeading, 'Feature [Sticky Table of Contents] from features.md was removed or is not rendering.').toBeVisible({ timeout: 10000 });
   });
 
   test('Scroll Progress Bar', async () => {

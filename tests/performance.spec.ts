@@ -248,6 +248,16 @@ test.describe("Performance - Core Web Vitals", () => {
     test("theme toggle is responsive", async ({ page }) => {
       await page.goto("/");
 
+      // On mobile viewports, the theme toggle is inside the mobile navigation drawer
+      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+      if (isMobile) {
+        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+        if (await menuButton.isVisible()) {
+          await menuButton.click();
+          await page.waitForTimeout(300);
+        }
+      }
+
       // Look for theme toggle
       const themeToggle = page
         .locator(

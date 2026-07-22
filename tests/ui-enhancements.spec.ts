@@ -72,8 +72,8 @@ test.describe("Search", () => {
   test("Search modal opens with Cmd+K", async ({ page }) => {
     await page.goto("/blog");
 
-    // Click the search button (use SVG path selector since text is hidden on mobile viewports)
-    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
+    // Click the search button (aria-label is always present, even when text is hidden on mobile)
+    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
     await searchButton.click();
     await page.waitForTimeout(200);
 
@@ -85,8 +85,8 @@ test.describe("Search", () => {
   test("Search returns results", async ({ page }) => {
     await page.goto("/blog");
 
-    // Open search by clicking button (use SVG path selector since text is hidden on mobile viewports)
-    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
+    // Open search by clicking button (aria-label is always present, even when text is hidden on mobile)
+    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
     await searchButton.click();
     await page.waitForTimeout(200);
 
@@ -107,8 +107,8 @@ test.describe("Search", () => {
   test("Search closes with Escape", async ({ page }) => {
     await page.goto("/blog");
 
-    // Open search (use SVG path selector since text is hidden on mobile viewports)
-    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
+    // Open search (aria-label is always present, even when text is hidden on mobile)
+    const searchButton = page.locator("button[aria-label*='Search' i], button[aria-label*='検索' i], button[aria-label*='البحث' i]").first();
     await searchButton.click();
     await page.waitForTimeout(100);
 

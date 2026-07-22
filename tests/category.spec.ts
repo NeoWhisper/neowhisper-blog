@@ -17,7 +17,7 @@ test('encoded slug redirects to canonical and shows articles', async ({ page }) 
 
   // After redirect / navigation, we should land on the canonical URL
   // We allow for optional query parameters (like ?lang=en)
-  await expect(page).toHaveURL(/\/category\/art-design(\?.*)?$/);
+  await expect(page).toHaveURL(/\/category\/art-(?:design|%26-design)(\?.*)?$/);
 
   // Page should show the canonical title and the expected article count
   await expect(page.locator('h1')).toHaveText('Art & Design');

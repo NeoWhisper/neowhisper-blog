@@ -41,11 +41,20 @@ test.describe("Dark Mode", () => {
   test("ThemeToggle button is visible", async ({ page }) => {
     await page.goto("/");
 
-    // Look for theme toggle button (aria-label contains "theme" or "dark" or "light")
+    // On mobile viewports, theme toggle is inside the mobile menu drawer
+    const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+    if (isMobile) {
+      const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+      if (await menuButton.isVisible()) {
+        await menuButton.click();
+      }
+    }
+
+    // Look for visible theme toggle button
     const toggle = page.locator(
       "button[aria-label*='theme' i], button[aria-label*='dark' i], button[aria-label*='light' i]",
-    );
-    await expect(toggle).toBeVisible();
+    ).filter({ hasNotClass: /hidden/ });
+    await expect(toggle.first()).toBeVisible();
   });
 });
 
@@ -155,8 +164,12 @@ test("Scroll-to-top button appears after scrolling", async ({ page }) => {
 
 // ===== COPY LINK BUTTON TESTS =====
 test("Copy link button exists on blog posts", async ({ page, context }) => {
-  // Grant clipboard permissions
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  // Grant clipboard permissions if supported by browser engine
+  try {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  } catch {
+    // Unsupported by Firefox/WebKit in Playwright
+  }
 
   // Navigate directly to a known post to avoid flaky blog listing click
   await page.goto("/blog/adsense-ready-multilingual-nextjs");

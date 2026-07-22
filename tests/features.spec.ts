@@ -184,6 +184,7 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
   test('Cookie Banner', async ({ page }) => {
     // Verifying: Cookie Banner (Consent modal)
     await page.goto('/');
+    await page.waitForTimeout(1200); // Account for CookieBanner's 1000ms setTimeout delay
     const cookieBannerText = page.getByText(/cookie|consent/i).first();
     await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible();
   });

@@ -47,7 +47,7 @@ export default function ArticleCard({ post, lang }: ArticleCardProps) {
                 <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors duration-700" />
                 
                 {post.coverImage && (
-                    <Link href={postHref} className="block relative h-48 w-full overflow-hidden">
+                    <Link href={postHref} className="block relative h-48 w-full">
                         <Image
                             src={post.coverImage}
                             alt={post.title}

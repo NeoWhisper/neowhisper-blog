@@ -50,11 +50,20 @@ test.describe("Dark Mode", () => {
       }
     }
 
-    // Look for visible theme toggle button (after opening mobile drawer, both instances exist but only one is visible)
+    // Look for visible theme toggle button
     const toggle = page.locator(
       "button[aria-label*='theme' i], button[aria-label*='dark' i], button[aria-label*='light' i]",
-    ).filter({ visible: true });
-    await expect(toggle.first()).toBeVisible();
+    );
+    // Multiple toggle instances may exist (header + mobile drawer), pick the first visible one
+    const count = await toggle.count();
+    let found = false;
+    for (let i = 0; i < count; i++) {
+      if (await toggle.nth(i).isVisible()) {
+        found = true;
+        break;
+      }
+    }
+    expect(found, "ThemeToggle button should be visible").toBe(true);
   });
 });
 
@@ -63,10 +72,8 @@ test.describe("Search", () => {
   test("Search modal opens with Cmd+K", async ({ page }) => {
     await page.goto("/blog");
 
-    // Click the search button (more reliable than keyboard shortcut across platforms)
-    const searchButton = page
-      .locator("button")
-      .filter({ hasText: /Search|検索/ });
+    // Click the search button (use SVG path selector since text is hidden on mobile viewports)
+    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
     await searchButton.click();
     await page.waitForTimeout(200);
 
@@ -78,10 +85,8 @@ test.describe("Search", () => {
   test("Search returns results", async ({ page }) => {
     await page.goto("/blog");
 
-    // Open search by clicking button
-    const searchButton = page
-      .locator("button")
-      .filter({ hasText: /Search|検索/ });
+    // Open search by clicking button (use SVG path selector since text is hidden on mobile viewports)
+    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
     await searchButton.click();
     await page.waitForTimeout(200);
 
@@ -102,10 +107,8 @@ test.describe("Search", () => {
   test("Search closes with Escape", async ({ page }) => {
     await page.goto("/blog");
 
-    // Open search
-    const searchButton = page
-      .locator("button")
-      .filter({ hasText: /Search|検索/ });
+    // Open search (use SVG path selector since text is hidden on mobile viewports)
+    const searchButton = page.locator("button:has(svg path[d*='21l-6-6'])").first();
     await searchButton.click();
     await page.waitForTimeout(100);
 

@@ -352,7 +352,8 @@ export default async function Home({
             className="mt-10 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400"
             dir="ltr"
           >
-            <Link
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a
               href="/"
               className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "en"
                 ? "border-purple-400 bg-purple-600 text-white"
@@ -360,8 +361,9 @@ export default async function Home({
                 }`}
             >
               English
-            </Link>
-            <Link
+            </a>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a
               href="/?lang=ja"
               className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ja"
                 ? "border-purple-400 bg-purple-600 text-white"
@@ -369,8 +371,9 @@ export default async function Home({
                 }`}
             >
               日本語
-            </Link>
-            <Link
+            </a>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a
               href="/?lang=ar"
               className={`rounded-full border px-3 py-1 font-semibold transition-all duration-300 ${currentLang === "ar"
                 ? "border-purple-400 bg-purple-600 text-white"
@@ -378,7 +381,7 @@ export default async function Home({
                 }`}
             >
               العربية
-            </Link>
+            </a>
           </div>
         </header>
 
@@ -395,7 +398,7 @@ export default async function Home({
                 {/* Ambient Hover Glow */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
                 
-                <div className="relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+                <Link href={`/services?lang=${currentLang}`} className="relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
                   <div className="pointer-events-none absolute -top-24 -right-24 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors duration-700" />
                   
                   <div className="relative z-10 flex flex-col h-full">
@@ -407,7 +410,7 @@ export default async function Home({
                       {item.desc}
                     </p>
                   </div>
-                </div>
+                </Link>
               </div>
             ))}
           </div>
@@ -444,7 +447,7 @@ export default async function Home({
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-blue-600/30 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
                 )}
                 
-                <div className={`relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 dark:border-white/10 dark:bg-white/5 ${item.status !== "planned" ? "group-hover:-translate-y-1 group-hover:shadow-2xl" : ""}`}>
+                <Link href={`/projects?lang=${currentLang}`} className={`relative overflow-hidden flex flex-col h-full rounded-3xl border border-white/20 bg-white/40 p-6 shadow-lg backdrop-blur-xl transition-all duration-500 dark:border-white/10 dark:bg-white/5 ${item.status !== "planned" ? "group-hover:-translate-y-1 group-hover:shadow-2xl" : ""}`}>
                   {/* Decorative blob */}
                   <div className={`pointer-events-none absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl transition-colors duration-700 ${item.status === "planned" ? "bg-gray-400/10 dark:bg-gray-600/10" : "bg-purple-500/10 dark:bg-purple-500/20 group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30"}`} />
                   
@@ -463,7 +466,7 @@ export default async function Home({
                       {item.description}
                     </p>
                   </div>
-                </div>
+                </Link>
               </div>
             ))}
           </div>

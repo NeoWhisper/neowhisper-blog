@@ -52,7 +52,7 @@ function buildCsp({
     connectSrc.push(supabaseOrigin);
   }
   if (isDev) {
-    connectSrc.push("ws://127.0.0.1:*", "ws://localhost:*");
+    connectSrc.push("ws://127.0.0.1:*", "ws://localhost:*", "ws:");
   }
 
   const scriptSrc = [
@@ -71,7 +71,7 @@ function buildCsp({
     scriptSrc.push("'unsafe-eval'");
   }
 
-  return [
+  const rules = [
     "default-src 'self'",
     `script-src ${scriptSrc.join(" ")}`,
     `style-src 'self' ${isDev ? "'unsafe-inline'" : `'nonce-${nonce}'`}`,
@@ -86,8 +86,13 @@ function buildCsp({
     "frame-ancestors 'none'",
     "manifest-src 'self'",
     "worker-src 'self' blob:",
-    "upgrade-insecure-requests",
-  ].join("; ");
+  ];
+
+  if (!isDev) {
+    rules.push("upgrade-insecure-requests");
+  }
+
+  return rules.join("; ");
 }
 
 function applySecurityHeaders(response: NextResponse, csp: string) {
@@ -160,9 +165,19 @@ function redirectWithSecurityHeaders({
 
 function shouldSkipCanonicalRedirect(host: string): boolean {
   const normalized = host.toLowerCase();
+  const hostname = normalized.startsWith("[")
+    ? normalized.slice(1, normalized.indexOf("]"))
+    : normalized.split(":")[0];
+
   return CANONICAL_REDIRECT_SKIP_HOSTS.some((pattern) => {
     const p = pattern.toLowerCase();
-    return p.startsWith(".") ? normalized.endsWith(p) : normalized.includes(p);
+    if (p.startsWith(".")) {
+      return hostname.endsWith(p);
+    }
+    if (p.endsWith(".")) {
+      return hostname.startsWith(p);
+    }
+    return hostname === p;
   });
 }
 

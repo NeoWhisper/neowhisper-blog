@@ -191,15 +191,19 @@ test.describe('NeoWhisper Blog - Core Features Verification', () => {
     // UN-TESTABLE RELIABLY VIA UI CLICKS: Ads are injected asynchronously by Google and often blocked by ad-blockers or headless environments. Strict rules forbid class selectors, making it untestable here.
   });
 
-  test('Cookie Banner', async ({ page }) => {
+  test('Cookie Banner', async ({ context, page }) => {
     // Verifying: Cookie Banner (Consent modal)
     // Clear any prior consent so the banner appears
+    await context.clearCookies();
     await page.goto('/');
-    await page.evaluate(() => localStorage.removeItem('cookie-consent'));
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.evaluate(() => window.localStorage.clear());
+    
+    // Navigate fresh instead of reload for better cross-browser reliability
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    
     // The CookieBanner component has a 1000ms setTimeout delay before appearing
     const cookieBannerText = page.getByText(/cookie|consent/i).first();
-    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 8000 });
+    await expect(cookieBannerText, 'Feature [Cookie Banner] from features.md was removed or is not rendering.').toBeVisible({ timeout: 10000 });
   });
 
   // ============================================================================

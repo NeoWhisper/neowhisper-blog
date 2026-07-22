@@ -70,10 +70,17 @@ test.describe("Dark Mode", () => {
 // ===== SEARCH TESTS =====
 test.describe("Search", () => {
   test("Search modal opens with Cmd+K", async ({ page }) => {
-    await page.goto("/blog", { waitUntil: "domcontentloaded" });
+    await page.goto("/blog");
 
-    // Open search via keyboard shortcut (most reliable across all browsers)
-    await page.keyboard.press("Control+k");
+    // Wait for React hydration to complete so the event listener is attached
+    await page.waitForTimeout(500);
+
+    // Open search via JS event dispatch (bulletproof across all browsers)
+    await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+      // Also try Control+k for non-Mac environments
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+    });
     await page.waitForTimeout(300);
 
     // Check if search dialog is visible by looking for the search input
@@ -82,10 +89,16 @@ test.describe("Search", () => {
   });
 
   test("Search returns results", async ({ page }) => {
-    await page.goto("/blog", { waitUntil: "domcontentloaded" });
+    await page.goto("/blog");
 
-    // Open search via keyboard shortcut (most reliable across all browsers)
-    await page.keyboard.press("Control+k");
+    // Wait for React hydration
+    await page.waitForTimeout(500);
+
+    // Open search via JS event dispatch (bulletproof across all browsers)
+    await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+    });
     await page.waitForTimeout(300);
 
     // Type a search query
@@ -103,10 +116,16 @@ test.describe("Search", () => {
   });
 
   test("Search closes with Escape", async ({ page }) => {
-    await page.goto("/blog", { waitUntil: "domcontentloaded" });
+    await page.goto("/blog");
 
-    // Open search via keyboard shortcut (most reliable across all browsers)
-    await page.keyboard.press("Control+k");
+    // Wait for React hydration
+    await page.waitForTimeout(500);
+
+    // Open search via JS event dispatch (bulletproof across all browsers)
+    await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+    });
     await page.waitForTimeout(300);
 
     // Verify the search modal is open

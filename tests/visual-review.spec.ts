@@ -13,7 +13,8 @@ test.describe("Visual Design Review - Articles", () => {
 
     await page.screenshot({
       path: `${screenshotDir}/01-blog-listing-full.png`,
-      fullPage: true,
+      fullPage: false,
+      clip: { x: 0, y: 0, width: 1440, height: 8000 },
     });
 
     // Also capture just the hero area / above the fold

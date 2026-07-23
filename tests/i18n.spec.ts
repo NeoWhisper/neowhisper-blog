@@ -1,46 +1,70 @@
 import { test, expect } from "@playwright/test";
 
+// Helper: opens the mobile navigation drawer if on a mobile viewport (< 640px)
+async function openMobileDrawerIfMobile(page: import("@playwright/test").Page) {
+  const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+  if (isMobile) {
+    const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+    try {
+      await menuButton.waitFor({ state: "visible", timeout: 5000 });
+      await menuButton.click();
+      await page.waitForTimeout(300);
+    } catch {
+      // Button not found or drawer already open
+    }
+  }
+}
+
 // Test suite for internationalization (i18n) functionality
 test.describe("i18n - Internationalization", () => {
   test.describe("Language Switching", () => {
     test("homepage shows language switcher or links", async ({ page }) => {
       await page.goto("/");
-
-      // Wait for hydration to complete - language switcher renders after client mount
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Check for visible language-related elements (could be dropdown, links, or buttons)
-      // Note: Only target visible UI elements, not <link> meta tags in <head>
+      // Desktop uses data-testid="language-switcher", mobile uses nav[aria-label="Mobile language"]
       const langElements = page
         .locator(
-          '[data-testid="language-switcher"] a, nav[aria-label="Language"] a',
-        )
-        .first();
+          '[data-testid="language-switcher"] a, nav[aria-label="Language"] a, nav[aria-label="Mobile language"] a',
+        );
       const count = await langElements.count();
 
       // Language switcher may not exist on every page, that's okay
       if (count > 0) {
-        await expect(langElements).toBeVisible();
+        // Find any visible language link (desktop links are hidden on mobile viewports)
+        let hasVisibleLang = false;
+        for (let i = 0; i < count; i++) {
+          if (await langElements.nth(i).isVisible()) {
+            hasVisibleLang = true;
+            break;
+          }
+        }
+        expect(hasVisibleLang, "Language switcher links should be visible").toBe(true);
       }
     });
 
     test("can navigate to Japanese version", async ({ page }) => {
       await page.goto("/blog");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible Japanese language option in the UI
-      // Target the language switcher nav specifically, not hreflang meta tags
-      const jaLink = page
+      const jaLinks = page
         .locator(
-          'nav[aria-label="Language"] a[href*="lang=ja"], [data-testid="language-switcher"] a[href*="lang=ja"]',
-        )
-        .first();
-      const count = await jaLink.count();
+          'nav[aria-label="Language"] a[href*="lang=ja"], [data-testid="language-switcher"] a[href*="lang=ja"], nav[aria-label="Mobile language"] a[href*="lang=ja"]',
+        );
+      const count = await jaLinks.count();
 
       if (count > 0) {
-        await jaLink.click();
+        // Find the first visible JA link (desktop links are hidden on mobile)
+        for (let i = 0; i < count; i++) {
+          if (await jaLinks.nth(i).isVisible()) {
+            await jaLinks.nth(i).click();
+            break;
+          }
+        }
         // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
         await expect(page).toHaveURL(/lang=ja|\/ja\//, { timeout: 10_000 });
       }
@@ -48,21 +72,24 @@ test.describe("i18n - Internationalization", () => {
 
     test("can navigate to Arabic version", async ({ page }) => {
       await page.goto("/blog");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible Arabic language option in the UI
-      // Target the language switcher nav specifically, not hreflang meta tags
-      const arLink = page
+      const arLinks = page
         .locator(
-          'nav[aria-label="Language"] a[href*="lang=ar"], [data-testid="language-switcher"] a[href*="lang=ar"]',
-        )
-        .first();
-      const count = await arLink.count();
+          'nav[aria-label="Language"] a[href*="lang=ar"], [data-testid="language-switcher"] a[href*="lang=ar"], nav[aria-label="Mobile language"] a[href*="lang=ar"]',
+        );
+      const count = await arLinks.count();
 
       if (count > 0) {
-        await arLink.click();
+        // Find the first visible AR link (desktop links are hidden on mobile)
+        for (let i = 0; i < count; i++) {
+          if (await arLinks.nth(i).isVisible()) {
+            await arLinks.nth(i).click();
+            break;
+          }
+        }
         // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
         await expect(page).toHaveURL(/lang=ar|\/ar\//, { timeout: 10_000 });
       }
@@ -70,21 +97,25 @@ test.describe("i18n - Internationalization", () => {
 
     test("can navigate back to English version", async ({ page }) => {
       await page.goto("/blog?lang=ja");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible English language option in the UI
       // Target the language switcher nav specifically, not hreflang meta tags
-      const enLink = page
+      const enLinks = page
         .locator(
-          'nav[aria-label="Language"] a[hreflang="en"], [data-testid="language-switcher"] a[hreflang="en"]',
-        )
-        .first();
-      const count = await enLink.count();
+          'nav[aria-label="Language"] a[hreflang="en"], [data-testid="language-switcher"] a[hreflang="en"], nav[aria-label="Mobile language"] a[hreflang="en"]',
+        );
+      const count = await enLinks.count();
 
       if (count > 0) {
-        await enLink.click();
+        // Find the first visible EN link (desktop links are hidden on mobile)
+        for (let i = 0; i < count; i++) {
+          if (await enLinks.nth(i).isVisible()) {
+            await enLinks.nth(i).click();
+            break;
+          }
+        }
         // toHaveURL auto-retries and resolves immediately upon match without waiting for load events
         await expect(page).not.toHaveURL(/lang=ja|\/ja\//, { timeout: 10_000 });
         await expect(page).not.toHaveURL(/lang=ar|\/ar\//, { timeout: 10_000 });

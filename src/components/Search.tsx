@@ -118,6 +118,7 @@ export default function Search({ posts, lang }: SearchProps) {
           setIsOpen(true);
           setTimeout(() => inputRef.current?.focus(), 100);
         }}
+        aria-label={t.actions.searchPlaceholder}
         className="flex items-center gap-2 rounded-full border border-white/20 bg-white/60 px-4 py-2 text-sm text-gray-600 transition-all duration-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-gray-300"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,23 +1,27 @@
 import { test, expect } from "@playwright/test";
 
+// Helper: opens the mobile navigation drawer if on a mobile viewport (< 640px)
+async function openMobileDrawerIfMobile(page: import("@playwright/test").Page) {
+  const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
+  if (isMobile) {
+    const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
+    try {
+      await menuButton.waitFor({ state: "visible", timeout: 5000 });
+      await menuButton.click();
+      await page.waitForTimeout(300);
+    } catch {
+      // Button not found or drawer already open
+    }
+  }
+}
+
 // Test suite for internationalization (i18n) functionality
 test.describe("i18n - Internationalization", () => {
   test.describe("Language Switching", () => {
     test("homepage shows language switcher or links", async ({ page }) => {
       await page.goto("/");
-
-      // Wait for hydration to complete - language switcher renders after client mount
-      await page.waitForTimeout(100);
-
-      // On mobile viewports, the language switcher is inside the mobile navigation drawer
-      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
-      if (isMobile) {
-        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
-        if (await menuButton.isVisible()) {
-          await menuButton.click();
-          await page.waitForTimeout(300);
-        }
-      }
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Check for visible language-related elements (could be dropdown, links, or buttons)
       // Desktop uses data-testid="language-switcher", mobile uses nav[aria-label="Mobile language"]
@@ -43,19 +47,8 @@ test.describe("i18n - Internationalization", () => {
 
     test("can navigate to Japanese version", async ({ page }) => {
       await page.goto("/blog");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
-
-      // On mobile viewports, the language switcher is inside the mobile navigation drawer
-      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
-      if (isMobile) {
-        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
-        if (await menuButton.isVisible()) {
-          await menuButton.click();
-          await page.waitForTimeout(300);
-        }
-      }
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible Japanese language option in the UI
       const jaLinks = page
@@ -79,19 +72,8 @@ test.describe("i18n - Internationalization", () => {
 
     test("can navigate to Arabic version", async ({ page }) => {
       await page.goto("/blog");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
-
-      // On mobile viewports, the language switcher is inside the mobile navigation drawer
-      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
-      if (isMobile) {
-        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
-        if (await menuButton.isVisible()) {
-          await menuButton.click();
-          await page.waitForTimeout(300);
-        }
-      }
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible Arabic language option in the UI
       const arLinks = page
@@ -115,19 +97,8 @@ test.describe("i18n - Internationalization", () => {
 
     test("can navigate back to English version", async ({ page }) => {
       await page.goto("/blog?lang=ja");
-
-      // Wait for hydration - language switcher renders after client mount
-      await page.waitForTimeout(100);
-
-      // On mobile viewports, the language switcher is inside the mobile navigation drawer
-      const isMobile = (page.viewportSize()?.width ?? 1024) < 640;
-      if (isMobile) {
-        const menuButton = page.locator("button[aria-label*='navigation menu' i]").first();
-        if (await menuButton.isVisible()) {
-          await menuButton.click();
-          await page.waitForTimeout(300);
-        }
-      }
+      await page.waitForTimeout(300);
+      await openMobileDrawerIfMobile(page);
 
       // Look for visible English language option in the UI
       // Target the language switcher nav specifically, not hreflang meta tags

@@ -14,8 +14,12 @@ export default function CookieBanner() {
   const t = getDictionary(currentLang);
 
   useEffect(() => {
-    // Check if user has already made a choice
-    const consent = localStorage.getItem("cookie-consent");
+    let consent: string | null = null;
+    try {
+      consent = localStorage.getItem("cookie-consent");
+    } catch {
+      consent = null;
+    }
     if (!consent) {
       // Show banner after a short delay (better UX)
       const timer = setTimeout(() => setIsVisible(true), 1000);
@@ -24,12 +28,20 @@ export default function CookieBanner() {
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem("cookie-consent", "accepted");
+    try {
+      localStorage.setItem("cookie-consent", "accepted");
+    } catch {
+      // Ignore storage errors
+    }
     setIsVisible(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem("cookie-consent", "declined");
+    try {
+      localStorage.setItem("cookie-consent", "declined");
+    } catch {
+      // Ignore storage errors
+    }
     setIsVisible(false);
   };
 

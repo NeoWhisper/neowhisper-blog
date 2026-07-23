@@ -162,9 +162,9 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#0a0a0e] bg-grain cinematic-vignette overflow-x-clip selection:bg-purple-500/30">
+      <body className="font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#0a0a0e] bg-grain cinematic-vignette selection:bg-purple-500/30">
         {/* Cinematic Ambient Background */}
-        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <div className="ambient-blob absolute -top-[20%] -left-[10%] h-[70vh] w-[70vw] rounded-full bg-purple-600/10 dark:bg-purple-900/20 blur-[120px] mix-blend-screen" />
           <div className="ambient-blob absolute top-[40%] -right-[20%] h-[60vh] w-[60vw] rounded-full bg-pink-600/10 dark:bg-pink-900/20 blur-[120px] mix-blend-screen" style={{ animationDelay: '2s', animationDuration: '18s' }} />
           <div className="ambient-blob absolute -bottom-[20%] left-[20%] h-[80vh] w-[80vw] rounded-full bg-blue-600/10 dark:bg-indigo-900/20 blur-[120px] mix-blend-screen" style={{ animationDelay: '5s', animationDuration: '22s' }} />
@@ -176,7 +176,7 @@ export default async function RootLayout({
         </Suspense>
         
         {/* Page Content with transition */}
-        <div className="flex-1">
+        <div className="flex-1 relative z-10 flex flex-col">
           {children}
         </div>
 

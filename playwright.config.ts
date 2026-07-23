@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
@@ -7,11 +7,31 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 2,
   use: {
     baseURL: 'http://localhost:3000',
-    channel: process.env.CI ? 'chrome' : undefined,
     headless: true,
-    viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
   },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
   webServer: {
     command: 'PORT=3000 npm run start',
     url: 'http://localhost:3000',

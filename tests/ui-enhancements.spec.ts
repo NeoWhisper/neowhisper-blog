@@ -70,25 +70,29 @@ test.describe("Dark Mode", () => {
 // ===== SEARCH TESTS =====
 test.describe("Search", () => {
   // Helper: open search modal by clicking the search button via Playwright's
-  // accessible role locator. This approach waits for the button to exist in the
-  // DOM (i.e. React has rendered), waits for hydration to attach event handlers,
-  // then clicks with force:true to bypass any obscured-element checks on WebKit.
+  // accessible role locator. We use expect.toPass to automatically retry the
+  // click until the search input is actually visible, seamlessly handling
+  // React hydration race conditions on slower CI environments.
   async function openSearchModal(page: import("@playwright/test").Page) {
     const searchButton = page.getByRole("button", { name: /search|検索|البحث/i });
-    // Wait for the button to be in the DOM (React hydration creates it)
-    await searchButton.waitFor({ state: "attached", timeout: 15000 });
-    // Extra wait for React to attach event handlers after rendering the element
-    await page.waitForTimeout(2000);
-    await searchButton.click({ force: true });
-    await page.waitForTimeout(500);
+    const searchInput = page.locator("input[type='text']").first();
+
+    await expect(async () => {
+      // Ensure the button is at least in the DOM before attempting clicks
+      await searchButton.waitFor({ state: "attached", timeout: 5000 });
+      await searchButton.click({ force: true });
+      // If the modal opens, this will pass. If not, the block retries.
+      await expect(searchInput).toBeVisible({ timeout: 1500 });
+    }).toPass({
+      timeout: 15000,
+      intervals: [500, 1000, 2000],
+    });
   }
 
   test("Search modal opens with Cmd+K", async ({ page }) => {
     await page.goto("/blog");
     await openSearchModal(page);
-
-    const searchInput = page.locator("input[type='text']").first();
-    await expect(searchInput).toBeVisible({ timeout: 5000 });
+    // Modal is guaranteed open by the helper
   });
 
   test("Search returns results", async ({ page }) => {

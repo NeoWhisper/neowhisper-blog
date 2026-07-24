@@ -74,6 +74,8 @@
 - [ ] Add scripts for repo health checks (content lint + link checks + metadata sanity).
 - [ ] Reduce repetitive copy/translations via shared dictionaries where practical.
 - [ ] Improve CI feedback ergonomics (clear failing summaries and remediation hints).
+- [ ] Migrate syntax highlighting from `highlight.js` to `shiki` for zero-JS, build-time VSCode themes.
+- [ ] Migrate legacy API Routes (`/api/contact`) to React 19 Server Actions and `useActionState` hooks for native progressive enhancement.
 
 ---
 

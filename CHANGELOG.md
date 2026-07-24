@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.16.0...v1.17.0) (2026-07-24)
+
+
+### Features
+
+* **content:** add custom cinematic cover images ([#235](https://github.com/NeoWhisper/neowhisper-blog/issues/235)) ([39b8090](https://github.com/NeoWhisper/neowhisper-blog/commit/39b8090184fa7a64435a8b8216595de02618c2ba))
+
 # [1.16.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.15.1...v1.16.0) (2026-07-23)
 
 

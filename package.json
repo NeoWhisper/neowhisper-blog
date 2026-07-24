@@ -76,7 +76,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/he": "^1.2.3",
     "@types/jest": "^30.0.0",
-    "@types/mdx": "^2.0.13",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",

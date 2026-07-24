@@ -252,31 +252,10 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
   }
 
   const { post, languageVariants, relatedPosts, renderedHtml, prevPost, nextPost } = data;
+  let BlogPostTemplate;
   try {
-    const { default: BlogPostTemplate } = await import(
-      "@/components/BlogPostTemplate"
-    );
-
-    return (
-      <BlogPostTemplate
-        slug={post.slug}
-        title={post.title}
-        date={post.date}
-        content={post.content}
-        renderedHtml={renderedHtml}
-        coverImage={post.coverImage}
-        category={post.category}
-        readTime={post.readTime}
-        isRTL={post.locale === "ar"}
-        availableLanguages={languageVariants.map((variant) => variant.lang)}
-        relatedPosts={relatedPosts}
-        prevPost={prevPost}
-        nextPost={nextPost}
-        lang={post.locale}
-        languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
-        canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}
-      />
-    );
+    const TemplateModule = await import("@/components/BlogPostTemplate");
+    BlogPostTemplate = TemplateModule.default;
   } catch (templateErr) {
     console.error("[BlogPost] Template import error:", templateErr);
     return (
@@ -287,4 +266,25 @@ export default async function BlogPost({ params, searchParams }: PageProps) {
       </article>
     );
   }
+
+  return (
+    <BlogPostTemplate
+      slug={post.slug}
+      title={post.title}
+      date={post.date}
+      content={post.content}
+      renderedHtml={renderedHtml}
+      coverImage={post.coverImage}
+      category={post.category}
+      readTime={post.readTime}
+      isRTL={post.locale === "ar"}
+      availableLanguages={languageVariants.map((variant) => variant.lang)}
+      relatedPosts={relatedPosts}
+      prevPost={prevPost}
+      nextPost={nextPost}
+      lang={post.locale}
+      languageSwitchMode={post.source === "dynamic" ? "query" : "suffix"}
+      canonicalUrl={buildPostUrl(post.slug, post.locale, post.source)}
+    />
+  );
 }

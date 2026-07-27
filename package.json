@@ -89,7 +89,7 @@
     "tailwindcss": "^4",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^7"
   },
   "overrides": {
     "tar": ">=7.5.8"

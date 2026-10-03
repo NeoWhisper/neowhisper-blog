@@ -9,6 +9,16 @@ const RESEND_FROM = RESEND_FROM_RAW.trim().includes("@")
   : "onboarding@resend.dev"; // Fallback to Resend's test email
 const RESEND_TO = process.env.RESEND_TO || "neowhisperhq@gmail.com";
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+// Startup validation: Turnstile must be configured in production
+if (IS_PRODUCTION && !TURNSTILE_SECRET_KEY) {
+  console.error(
+    "[CONTACT API] CRITICAL: TURNSTILE_SECRET_KEY is not set in production. " +
+      "Turnstile verification is mandatory. Requests will be rejected with 503."
+  );
+}
+
 const MAX_LENGTH = {
   name: 120,
   email: 254,
@@ -174,7 +184,19 @@ export async function POST(request: Request) {
       );
     }
 
-    if (TURNSTILE_SECRET_KEY) {
+    // Enforce Turnstile in production — if secret is missing, reject with 503
+    if (IS_PRODUCTION && !TURNSTILE_SECRET_KEY) {
+      console.error(
+        "[CONTACT API] Rejected request: TURNSTILE_SECRET_KEY not configured in production"
+      );
+      if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
+      return NextResponse.json(
+        { ok: false, message: "Security verification is not configured." },
+        { status: 503 }
+      );
+    }
+
+    if (TURNSTILE_SECRET_KEY || IS_PRODUCTION) {
       if (!turnstileToken) {
         if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
         return NextResponse.json(
@@ -184,7 +206,7 @@ export async function POST(request: Request) {
       }
 
       const verifyBody = new URLSearchParams({
-        secret: TURNSTILE_SECRET_KEY,
+        secret: TURNSTILE_SECRET_KEY!,
         response: String(turnstileToken),
       });
       const clientIp = getClientIp(request);

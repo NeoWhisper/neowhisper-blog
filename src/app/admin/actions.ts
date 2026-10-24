@@ -208,10 +208,15 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
 
   if (fetchErr || !post) return { error: "Failed to find post." };
 
-  await supabase
+  const { error: groupUpdateError } = await supabase
     .from("translation_groups")
     .update({ slug })
     .eq("id", post.translation_group_id);
+
+  if (groupUpdateError) {
+    await logger.error("Admin:UpdateDetail", "groupUpdateError", groupUpdateError);
+    return { error: `Failed to update translation group: ${groupUpdateError.message}` };
+  }
 
   const { error } = await supabase
     .from("posts_dynamic")

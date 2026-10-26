@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { logger } from "@/lib/logger";
+import { sanitizeErrorMessage } from "@/lib/sanitize";
 
 type PostLocale = "en" | "ja" | "ar";
 
@@ -78,7 +79,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
 
   if (groupFetchError) {
     await logger.error("Admin:CreatePost", "groupFetchError", groupFetchError);
-    return { error: `Failed to check translation group: ${groupFetchError.message}` };
+    return { error: `Failed to check translation group: ${sanitizeErrorMessage(groupFetchError.message)}` };
   }
 
   let groupId = existingGroup?.id as string | undefined;
@@ -93,7 +94,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     if (createGroupError || !createdGroup) {
       await logger.error("Admin:CreatePost", "createGroupError", createGroupError);
       return {
-        error: `Failed to create translation group: ${createGroupError?.message ?? "unknown error"}`,
+        error: `Failed to create translation group: ${sanitizeErrorMessage(createGroupError?.message ?? "unknown error")}`,
       };
     }
 
@@ -118,7 +119,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
   if (createPostError || !post) {
     await logger.error("Admin:CreatePost", "createPostError", createPostError);
     return {
-      error: `Failed to create post: ${createPostError?.message ?? "unknown error"}`,
+      error: `Failed to create post: ${sanitizeErrorMessage(createPostError?.message ?? "unknown error")}`,
     };
   }
 
@@ -147,7 +148,7 @@ export async function updatePostStatus(postId: string, status: "draft" | "publis
 
   if (error) {
     await logger.error("Admin:UpdateStatus", "error", error);
-    return { error: `Failed to update status: ${error.message}` };
+    return { error: `Failed to update status: ${sanitizeErrorMessage(error.message)}` };
   }
 
   revalidatePath("/blog");
@@ -170,7 +171,7 @@ export async function deletePost(postId: string): Promise<ActionResult> {
 
   if (error) {
     await logger.error("Admin:DeletePost", "error", error);
-    return { error: `Failed to delete post: ${error.message}` };
+    return { error: `Failed to delete post: ${sanitizeErrorMessage(error.message)}` };
   }
 
   revalidatePath("/blog");
@@ -215,7 +216,7 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
 
   if (groupUpdateError) {
     await logger.error("Admin:UpdateDetail", "groupUpdateError", groupUpdateError);
-    return { error: `Failed to update translation group: ${groupUpdateError.message}` };
+    return { error: `Failed to update translation group: ${sanitizeErrorMessage(groupUpdateError.message)}` };
   }
 
   const { error } = await supabase
@@ -231,7 +232,7 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
 
   if (error) {
     await logger.error("Admin:UpdateDetail", "error", error);
-    return { error: `Failed to update post: ${error.message}` };
+    return { error: `Failed to update post: ${sanitizeErrorMessage(error.message)}` };
   }
 
   revalidatePath("/blog");

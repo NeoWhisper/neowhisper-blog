@@ -100,6 +100,8 @@ describe("admin/actions — createPost", () => {
       locale: "en",
     });
     expect(result.error).toContain("Failed to check translation group");
+    expect(result.error).not.toContain("<script>");
+    expect(result.error).not.toContain("<script>");
     expect(mockLoggerError).toHaveBeenCalledWith("Admin:CreatePost", "groupFetchError", expect.anything());
   });
 
@@ -132,6 +134,8 @@ describe("admin/actions — createPost", () => {
       locale: "en",
     });
     expect(result.error).toContain("Failed to create translation group");
+    expect(result.error).not.toContain("<script>");
+    expect(result.error).not.toContain("<script>");
   });
 
   it("should successfully create a draft post", async () => {
@@ -205,6 +209,7 @@ describe("admin/actions — createPost", () => {
       locale: "en",
     });
     expect(result.error).toContain("Failed to create post");
+    expect(result.error).not.toContain("<script>");
   });
 
   it("should return error when slug is empty after normalization", async () => {
@@ -215,6 +220,42 @@ describe("admin/actions — createPost", () => {
       locale: "en",
     });
     expect(result).toEqual({ error: "Slug is invalid after normalization." });
+  });
+
+  it("should sanitize error messages to prevent XSS", async () => {
+    // Mock error with script tag
+    const fromMock = jest.fn();
+
+    fromMock.mockReturnValueOnce({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: { id: "group-1" },
+        error: null,
+      }),
+    });
+
+    fromMock.mockReturnValueOnce({
+      insert: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: null,
+        error: { message: "<script>alert('XSS')</script>Failed to create post" },
+      }),
+    });
+
+    mockSupabase.from = fromMock;
+
+    const result = await createPost({
+      title: "Test",
+      slug: "test-post",
+      content: "content",
+      locale: "en",
+    });
+
+    // Verify script tags are removed from returned error
+    expect(result.error).not.toContain("<script>");
+    expect(result.error).toContain("Failed to create post");
   });
 
   it("should return not authenticated when getUser errors", async () => {
@@ -286,6 +327,7 @@ describe("admin/actions — updatePostStatus", () => {
 
     const result = await updatePostStatus("post-1", "draft");
     expect(result.error).toContain("Failed to update status");
+    expect(result.error).not.toContain("<script>");
     expect(mockLoggerError).toHaveBeenCalled();
   });
 
@@ -342,6 +384,7 @@ describe("admin/actions — deletePost", () => {
 
     const result = await deletePost("post-1");
     expect(result.error).toContain("Failed to delete post");
+    expect(result.error).not.toContain("<script>");
     expect(mockLoggerError).toHaveBeenCalled();
   });
 });
@@ -439,6 +482,7 @@ describe("admin/actions — updatePostDetail", () => {
       content: "Updated content",
     });
     expect(result.error).toContain("Failed to update post");
+    expect(result.error).not.toContain("<script>");
   });
 
   it("should deny access for non-admin email", async () => {

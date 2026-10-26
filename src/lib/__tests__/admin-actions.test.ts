@@ -27,26 +27,22 @@ jest.mock("next/cache", () => ({
   unstable_cache: jest.fn(),
 }));
 
-jest.mock("next/server", () => ({
-  NextResponse: {
-    json: (data: unknown, init?: { status?: number; headers?: Record<string, string> }) => ({ data, init }),
-    redirect: (url: string, status?: number) => ({ redirect: url, status }),
-  },
-}));
-
 // Import mocks after jest.mock calls
-// `__mock` only exists on the mocked module, so fetch it via requireMock (keeps tsc happy)
+// `__mock` only exists on the mocked module, so fetch via requireMock (keeps tsc happy)
 type MockSupabase = { auth: { getUser: jest.Mock }; from: jest.Mock };
 const { __mock: mockSupabase } = jest.requireMock<{ __mock: MockSupabase }>("@/lib/supabase-ssr");
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { logger } from "@/lib/logger";
 import { revalidatePath } from "next/cache";
+import { getGenericErrorMessage, GENERIC_MESSAGES } from "@/lib/sanitize";
 
 const mockRevalidatePath = revalidatePath as jest.Mock;
 const mockLoggerError = logger.error as jest.Mock;
 
 // Import after mocks (jest hoists mocks, so these resolve after mock factories)
 import { createPost, updatePostStatus, deletePost, updatePostDetail } from "@/app/admin/actions";
+
+// Generic error messages are imported from sanitize.ts
 
 describe("admin/actions — createPost", () => {
   const mockUser = { id: "user-1", email: "admin@neowhisper.dev" };
@@ -62,28 +58,28 @@ describe("admin/actions — createPost", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(true);
   });
 
-  it("should return validation error for missing required fields", async () => {
-    const result = await createPost({
+  it("should return validation error for missing required fields", () => {
+    const result = createPost({
       title: "",
       slug: "test-post",
       content: "content",
       locale: "en",
     });
-    expect(result).toEqual({ error: "Title, slug, locale, and content are required." });
+    return expect(result).resolves.toEqual({ error: "Title, slug, locale, and content are required." });
   });
 
-  it("should return access denied for non-admin email", async () => {
+  it("should return access denied for non-admin email", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(false);
-    const result = await createPost({
+    const result = createPost({
       title: "Test",
       slug: "test-post",
       content: "content",
       locale: "en",
     });
-    expect(result).toEqual({ error: "Access denied." });
+    return expect(result).resolves.toEqual({ error: "Access denied." });
   });
 
-  it("should handle translation group fetch error", async () => {
+  it("should handle translation group fetch error with generic message", async () => {
     mockSupabase.from.mockReturnValue({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
@@ -99,13 +95,12 @@ describe("admin/actions — createPost", () => {
       content: "content",
       locale: "en",
     });
-    expect(result.error).toContain("Failed to check translation group");
-    expect(result.error).not.toContain("<script>");
-    expect(result.error).not.toContain("<script>");
+
+    expect(result.error).toBe(GENERIC_MESSAGES.groupFetchError);
     expect(mockLoggerError).toHaveBeenCalledWith("Admin:CreatePost", "groupFetchError", expect.anything());
   });
 
-  it("should handle group creation error", async () => {
+  it("should handle group creation error with generic message", async () => {
     // First call: existing group lookup returns no group
     // Second call: group creation fails
     const fromMock = jest.fn();
@@ -133,9 +128,9 @@ describe("admin/actions — createPost", () => {
       content: "content",
       locale: "en",
     });
-    expect(result.error).toContain("Failed to create translation group");
-    expect(result.error).not.toContain("<script>");
-    expect(result.error).not.toContain("<script>");
+
+    expect(result.error).toBe(GENERIC_MESSAGES.createGroupError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:CreatePost", "createGroupError", expect.anything());
   });
 
   it("should successfully create a draft post", async () => {
@@ -179,7 +174,7 @@ describe("admin/actions — createPost", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/admin");
   });
 
-  it("should return post creation error from DB", async () => {
+  it("should return post creation error with generic message", async () => {
     const fromMock = jest.fn();
 
     fromMock.mockReturnValueOnce({
@@ -208,24 +203,23 @@ describe("admin/actions — createPost", () => {
       content: "content",
       locale: "en",
     });
-    expect(result.error).toContain("Failed to create post");
-    expect(result.error).not.toContain("<script>");
+
+    expect(result.error).toBe(GENERIC_MESSAGES.createPostError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:CreatePost", "createPostError", expect.anything());
   });
 
-  it("should return error when slug is empty after normalization", async () => {
-    const result = await createPost({
+  it("should return error when slug is empty after normalization", () => {
+    const result = createPost({
       title: "Test",
       slug: "!!!",
       content: "content",
       locale: "en",
     });
-    expect(result).toEqual({ error: "Slug is invalid after normalization." });
+    return expect(result).resolves.toEqual({ error: "Slug is invalid." });
   });
 
-  it("should sanitize error messages to prevent XSS", async () => {
-    // Mock error with script tag
+  it("should return error when post is not found", async () => {
     const fromMock = jest.fn();
-
     fromMock.mockReturnValueOnce({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
@@ -240,7 +234,7 @@ describe("admin/actions — createPost", () => {
       select: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
         data: null,
-        error: { message: "<script>alert('XSS')</script>Failed to create post" },
+        error: { message: "Post not found" },
       }),
     });
 
@@ -253,9 +247,8 @@ describe("admin/actions — createPost", () => {
       locale: "en",
     });
 
-    // Verify script tags are removed from returned error
-    expect(result.error).not.toContain("<script>");
-    expect(result.error).toContain("Failed to create post");
+    expect(result.error).toBe(GENERIC_MESSAGES.createPostError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:CreatePost", "createPostError", expect.anything());
   });
 
   it("should return not authenticated when getUser errors", async () => {
@@ -263,13 +256,12 @@ describe("admin/actions — createPost", () => {
       data: { user: null },
       error: { message: "JWT expired" },
     });
-    const result = await createPost({
+    await expect(createPost({
       title: "Test",
       slug: "test-post",
       content: "content",
       locale: "en",
-    });
-    expect(result).toEqual({ error: "Not authenticated." });
+    })).resolves.toEqual({ error: "Not authenticated." });
     expect(mockSupabase.from).not.toHaveBeenCalled();
   });
 });
@@ -288,14 +280,14 @@ describe("admin/actions — updatePostStatus", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(true);
   });
 
-  it("should deny access for non-authenticated users", async () => {
+  it("should deny access for non-authenticated users", () => {
     mockSupabase.auth.getUser.mockResolvedValue({
       data: { user: null },
       error: null,
     });
 
-    const result = await updatePostStatus("post-1", "published");
-    expect(result).toEqual({ error: "Access denied." });
+    const result = updatePostStatus("post-1", "published");
+    return expect(result).resolves.toEqual({ error: "Access denied." });
   });
 
   it("should update post status successfully", async () => {
@@ -316,7 +308,7 @@ describe("admin/actions — updatePostStatus", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/posts");
   });
 
-  it("should return error if DB update fails", async () => {
+  it("should return error if DB update fails with generic message", async () => {
     const fromMock = jest.fn();
     fromMock.mockReturnValueOnce({
       update: jest.fn().mockReturnThis(),
@@ -326,15 +318,15 @@ describe("admin/actions — updatePostStatus", () => {
     mockSupabase.from = fromMock;
 
     const result = await updatePostStatus("post-1", "draft");
-    expect(result.error).toContain("Failed to update status");
-    expect(result.error).not.toContain("<script>");
-    expect(mockLoggerError).toHaveBeenCalled();
+
+    expect(result.error).toBe(GENERIC_MESSAGES.statusUpdateError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:UpdateStatus", "error", expect.anything());
   });
 
-  it("should deny access for non-admin email", async () => {
+  it("should deny access for non-admin email", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(false);
-    const result = await updatePostStatus("post-1", "published");
-    expect(result).toEqual({ error: "Access denied." });
+    const result = updatePostStatus("post-1", "published");
+    return expect(result).resolves.toEqual({ error: "Access denied." });
   });
 });
 
@@ -352,10 +344,10 @@ describe("admin/actions — deletePost", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(true);
   });
 
-  it("should deny access for non-admin emails", async () => {
+  it("should deny access for non-admin emails", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(false);
-    const result = await deletePost("post-1");
-    expect(result).toEqual({ error: "Access denied." });
+    const result = deletePost("post-1");
+    return expect(result).resolves.toEqual({ error: "Access denied." });
   });
 
   it("should delete post successfully", async () => {
@@ -373,7 +365,7 @@ describe("admin/actions — deletePost", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/posts");
   });
 
-  it("should return error if delete fails", async () => {
+  it("should return error if delete fails with generic message", async () => {
     const fromMock = jest.fn();
     fromMock.mockReturnValueOnce({
       delete: jest.fn().mockReturnThis(),
@@ -383,9 +375,9 @@ describe("admin/actions — deletePost", () => {
     mockSupabase.from = fromMock;
 
     const result = await deletePost("post-1");
-    expect(result.error).toContain("Failed to delete post");
-    expect(result.error).not.toContain("<script>");
-    expect(mockLoggerError).toHaveBeenCalled();
+
+    expect(result.error).toBe(GENERIC_MESSAGES.deleteError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:DeletePost", "error", expect.anything());
   });
 });
 
@@ -403,18 +395,18 @@ describe("admin/actions — updatePostDetail", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(true);
   });
 
-  it("should return error for invalid slug after normalization", async () => {
-    const result = await updatePostDetail({
+  it("should return error for invalid slug after normalization", () => {
+    const result = updatePostDetail({
       postId: "post-1",
       title: "Test",
       slug: "!!!",
       locale: "en",
       content: "content",
     });
-    expect(result).toEqual({ error: "Slug is invalid after normalization." });
+    return expect(result).resolves.toEqual({ error: "Slug is invalid." });
   });
 
-  it("should return error if translation_groups update fails", async () => {
+  it("should return error if translation_groups update fails with generic message", async () => {
     const fromMock = jest.fn();
 
     // First query: get post
@@ -443,14 +435,14 @@ describe("admin/actions — updatePostDetail", () => {
       content: "Updated content",
     });
 
-    expect(result).toEqual({ error: "Failed to update translation group: Update failed" });
+    expect(result.error).toBe(GENERIC_MESSAGES.groupUpdateError);
     expect(mockLoggerError).toHaveBeenCalledWith("Admin:UpdateDetail", "groupUpdateError", expect.anything());
     // posts_dynamic must not be touched after the group update fails
     expect(fromMock).toHaveBeenCalledTimes(2);
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 
-  it("should return error if posts_dynamic update fails", async () => {
+  it("should return error if posts_dynamic update fails with generic message", async () => {
     const fromMock = jest.fn();
 
     fromMock.mockReturnValueOnce({
@@ -481,20 +473,21 @@ describe("admin/actions — updatePostDetail", () => {
       locale: "en",
       content: "Updated content",
     });
-    expect(result.error).toContain("Failed to update post");
-    expect(result.error).not.toContain("<script>");
+
+    expect(result.error).toBe(GENERIC_MESSAGES.detailUpdateError);
+    expect(mockLoggerError).toHaveBeenCalledWith("Admin:UpdateDetail", "error", expect.anything());
   });
 
-  it("should deny access for non-admin email", async () => {
+  it("should deny access for non-admin email", () => {
     (isAllowedAdminEmail as jest.Mock).mockReturnValue(false);
-    const result = await updatePostDetail({
+    const result = updatePostDetail({
       postId: "post-1",
       title: "Test",
       slug: "test-post",
       locale: "en",
       content: "content",
     });
-    expect(result).toEqual({ error: "Access denied." });
+    return expect(result).resolves.toEqual({ error: "Access denied." });
   });
 
   it("should return error when post is not found", async () => {
@@ -518,7 +511,7 @@ describe("admin/actions — updatePostDetail", () => {
       content: "Updated content",
     });
 
-    expect(result).toEqual({ error: "Failed to find post." });
+    expect(result.error).toBe(GENERIC_MESSAGES.postNotFoundError);
   });
 
   it("should successfully update post detail", async () => {
@@ -563,5 +556,13 @@ describe("admin/actions — updatePostDetail", () => {
     });
     expect(mockRevalidatePath).toHaveBeenCalledWith("/blog");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/posts");
+  });
+});
+
+describe("sanitize — getGenericErrorMessage", () => {
+  it("returns the configured generic message for every error key", () => {
+    for (const key of Object.keys(GENERIC_MESSAGES) as Array<keyof typeof GENERIC_MESSAGES>) {
+      expect(getGenericErrorMessage(key)).toBe(GENERIC_MESSAGES[key]);
+    }
   });
 });

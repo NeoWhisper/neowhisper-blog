@@ -10,7 +10,61 @@ permissions:
   contents: read
 
 jobs:
+  e2e_filter:
+    name: Decide whether E2E is needed
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.filter.outputs.should_run || steps.push.outputs.should_run }}
+    steps:
+      - name: Checkout pull request
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run E2E on pushes
+        if: github.event_name == 'push'
+        id: push
+        run: echo "should_run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check changed files
+        if: github.event_name == 'pull_request'
+        id: filter
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed_files="$(git diff --name-only "$BASE_SHA...HEAD")"
+
+          # If Git cannot determine the diff, run E2E to fail safe.
+          if [ -z "$changed_files" ]; then
+            echo "No changed files detected; running E2E as a precaution."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          should_run=false
+          while IFS= read -r file; do
+            case "$file" in
+              docs/*|README.md|CHANGELOG.md|CONTRIBUTING.md|CODE_OF_CONDUCT.md|SECURITY.md|LICENSE|LICENSE.*|BRANCH-WORKFLOW.md)
+                ;;
+              *.md)
+                # Only root-level Markdown files are treated as documentation.
+                if [[ "$file" == */* ]]; then
+                  should_run=true
+                fi
+                ;;
+              *)
+                should_run=true
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+
   e2e:
+    needs: e2e_filter
+    # Run if the filter fails; only a successful docs-only classification skips E2E.
+    if: ${{ always() && (needs.e2e_filter.result != 'success' || needs.e2e_filter.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

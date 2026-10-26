@@ -47,7 +47,7 @@
     "clsx": "^2.1.1",
     "fuse.js": "^7.5.0",
     "gray-matter": "^4.0.3",
-    "he": "^1.2.0",
+    "he": "^2.0.0",
     "highlight.js": "^11.11.1",
     "isomorphic-dompurify": "^3.19.0",
     "lucide-react": "^1.26.0",

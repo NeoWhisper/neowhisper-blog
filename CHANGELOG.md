@@ -1,3 +1,16 @@
+# [1.19.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.18.0...v1.19.0) (2026-10-27)
+
+
+### Bug Fixes
+
+* allow A8 Link Manager config request ([44e5826](https://github.com/NeoWhisper/neowhisper-blog/commit/44e58269f4ff1481115cb1eaa44ca21be5fefc99))
+* **ci:** keep dev synchronized with main ([7b7795c](https://github.com/NeoWhisper/neowhisper-blog/commit/7b7795ce5120db7b4f4d7e5a7305557fe065e74c))
+
+
+### Features
+
+* add A8 Link Manager ([3436f55](https://github.com/NeoWhisper/neowhisper-blog/commit/3436f55f0e4397ae1839632ad31f7d3a045f6ac4))
+
 # [1.18.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.17.1...v1.18.0) (2026-10-27)
 
 

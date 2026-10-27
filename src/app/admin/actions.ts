@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isAllowedAdminEmail } from "@/lib/admin-auth";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { logger } from "@/lib/logger";
+import { getGenericErrorMessage } from "@/lib/sanitize";
 
 type PostLocale = "en" | "ja" | "ar";
 
@@ -65,7 +66,7 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
 
   const slug = normalizeSlug(input.slug);
   if (!slug) {
-    return { error: "Slug is invalid after normalization." };
+    return { error: "Slug is invalid." };
   }
 
   const locale = normalizeLocale(input.locale);
@@ -77,8 +78,9 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .maybeSingle();
 
   if (groupFetchError) {
+    // Log specific error on server, return generic message to client
     await logger.error("Admin:CreatePost", "groupFetchError", groupFetchError);
-    return { error: `Failed to check translation group: ${groupFetchError.message}` };
+    return { error: getGenericErrorMessage("groupFetchError") };
   }
 
   let groupId = existingGroup?.id as string | undefined;
@@ -91,10 +93,9 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
       .single();
 
     if (createGroupError || !createdGroup) {
+      // Log specific error on server, return generic message to client
       await logger.error("Admin:CreatePost", "createGroupError", createGroupError);
-      return {
-        error: `Failed to create translation group: ${createGroupError?.message ?? "unknown error"}`,
-      };
+      return { error: getGenericErrorMessage("createGroupError") };
     }
 
     groupId = createdGroup.id;
@@ -116,10 +117,9 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
     .single();
 
   if (createPostError || !post) {
+    // Log specific error on server, return generic message to client
     await logger.error("Admin:CreatePost", "createPostError", createPostError);
-    return {
-      error: `Failed to create post: ${createPostError?.message ?? "unknown error"}`,
-    };
+    return { error: getGenericErrorMessage("createPostError") };
   }
 
   revalidatePath("/blog");
@@ -146,8 +146,9 @@ export async function updatePostStatus(postId: string, status: "draft" | "publis
     .eq("id", postId);
 
   if (error) {
+    // Log specific error on server, return generic message to client
     await logger.error("Admin:UpdateStatus", "error", error);
-    return { error: `Failed to update status: ${error.message}` };
+    return { error: getGenericErrorMessage("statusUpdateError") };
   }
 
   revalidatePath("/blog");
@@ -169,8 +170,9 @@ export async function deletePost(postId: string): Promise<ActionResult> {
     .eq("id", postId);
 
   if (error) {
+    // Log specific error on server, return generic message to client
     await logger.error("Admin:DeletePost", "error", error);
-    return { error: `Failed to delete post: ${error.message}` };
+    return { error: getGenericErrorMessage("deleteError") };
   }
 
   revalidatePath("/blog");
@@ -197,7 +199,7 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
   }
 
   const slug = normalizeSlug(input.slug);
-  if (!slug) return { error: "Slug is invalid after normalization." };
+  if (!slug) return { error: "Slug is invalid." };
   const locale = normalizeLocale(input.locale);
 
   const { data: post, error: fetchErr } = await supabase
@@ -206,12 +208,18 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
     .eq("id", input.postId)
     .single();
 
-  if (fetchErr || !post) return { error: "Failed to find post." };
+  if (fetchErr || !post) return { error: "Post not found." };
 
-  await supabase
+  const { error: groupUpdateError } = await supabase
     .from("translation_groups")
     .update({ slug })
     .eq("id", post.translation_group_id);
+
+  if (groupUpdateError) {
+    // Log specific error on server, return generic message to client
+    await logger.error("Admin:UpdateDetail", "groupUpdateError", groupUpdateError);
+    return { error: getGenericErrorMessage("groupUpdateError") };
+  }
 
   const { error } = await supabase
     .from("posts_dynamic")
@@ -225,8 +233,9 @@ export async function updatePostDetail(input: UpdatePostInput): Promise<ActionRe
     .eq("id", input.postId);
 
   if (error) {
+    // Log specific error on server, return generic message to client
     await logger.error("Admin:UpdateDetail", "error", error);
-    return { error: `Failed to update post: ${error.message}` };
+    return { error: getGenericErrorMessage("detailUpdateError") };
   }
 
   revalidatePath("/blog");

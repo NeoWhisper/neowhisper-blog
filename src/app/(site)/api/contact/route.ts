@@ -9,6 +9,16 @@ const RESEND_FROM = RESEND_FROM_RAW.trim().includes("@")
   : "onboarding@resend.dev"; // Fallback to Resend's test email
 const RESEND_TO = process.env.RESEND_TO || "neowhisperhq@gmail.com";
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+// Startup validation: Turnstile must be configured in production
+if (IS_PRODUCTION && !TURNSTILE_SECRET_KEY) {
+  console.error(
+    "[CONTACT API] CRITICAL: TURNSTILE_SECRET_KEY is not set in production. " +
+      "Turnstile verification is mandatory. Requests will be rejected with 503."
+  );
+}
+
 const MAX_LENGTH = {
   name: 120,
   email: 254,
@@ -112,6 +122,19 @@ function getClientIp(request: Request): string | undefined {
   return realIp || undefined;
 }
 
+// In-memory rate limiter for contact API
+// Author: @security-engineer (t_8a3f)
+// Rationale: Prevent spam bots and DoS attacks on contact endpoint.
+// Uses simple sliding window (1 request/minute/IP cap at 10 requests).
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const contactRateLimiter = new Map<string, RateLimitEntry>();
+
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   const accept = request.headers.get("accept") ?? "";
@@ -122,6 +145,40 @@ export async function POST(request: Request) {
     NextResponse.redirect(new URL(path, origin), 303);
 
   const toStr = (value: unknown) => (typeof value === "string" ? value : undefined);
+
+  // Rate limiting — IP-based sliding window
+  // Author: @security-engineer (per t_8a3f)
+  const clientIp = getClientIp(request);
+  if (clientIp) {
+    const now = Date.now();
+    const existing = contactRateLimiter.get(clientIp);
+
+    if (existing && existing.resetTime > now) {
+      existing.count += 1;
+      if (existing.count > RATE_LIMIT_MAX_REQUESTS) {
+        console.warn(
+          `[CONTACT API] Rate limit exceeded for IP: ${clientIp} (${existing.count} requests in window)`
+        );
+        if (wantsHtml) return redirect(`/contact?error=2`);
+        return NextResponse.json(
+          { ok: false, message: "Too many requests. Please try again later." },
+          { status: 429, headers: { "Retry-After": "60" } }
+        );
+      }
+    } else {
+      contactRateLimiter.set(clientIp, {
+        count: 1,
+        resetTime: now + RATE_LIMIT_WINDOW_MS,
+      });
+    }
+
+    // Memory cleanup — remove expired entries
+    if (contactRateLimiter.size > 1000) {
+      for (const [ip, entry] of contactRateLimiter.entries()) {
+        if (entry.resetTime <= now) contactRateLimiter.delete(ip);
+      }
+    }
+  }
 
   try {
     let body: Record<string, unknown>;
@@ -174,7 +231,19 @@ export async function POST(request: Request) {
       );
     }
 
-    if (TURNSTILE_SECRET_KEY) {
+    // Enforce Turnstile in production — if secret is missing, reject with 503
+    if (IS_PRODUCTION && !TURNSTILE_SECRET_KEY) {
+      console.error(
+        "[CONTACT API] Rejected request: TURNSTILE_SECRET_KEY not configured in production"
+      );
+      if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
+      return NextResponse.json(
+        { ok: false, message: "Security verification is not configured." },
+        { status: 503 }
+      );
+    }
+
+    if (TURNSTILE_SECRET_KEY || IS_PRODUCTION) {
       if (!turnstileToken) {
         if (wantsHtml) return redirect(`/contact?lang=${lang}&error=1`);
         return NextResponse.json(
@@ -184,7 +253,7 @@ export async function POST(request: Request) {
       }
 
       const verifyBody = new URLSearchParams({
-        secret: TURNSTILE_SECRET_KEY,
+        secret: TURNSTILE_SECRET_KEY!,
         response: String(turnstileToken),
       });
       const clientIp = getClientIp(request);

@@ -5,13 +5,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
 
+concurrency:
+  group: sync-main-to-dev-and-contents
+  cancel-in-progress: false
+
 jobs:
   backmerge:
-    if: github.repository == 'NeoWhisper/neowhisper-blog'
+    if: >-
+      github.repository == 'NeoWhisper/neowhisper-blog' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,12 +40,11 @@ jobs:
           for branch in dev contents; do
             git checkout "$branch" || git checkout -b "$branch" "origin/$branch"
 
-            if git diff --quiet origin/main "$branch"; then
-              echo "$branch has no file changes compared with main; skipping sync."
+            if git merge-base --is-ancestor origin/main "$branch"; then
+              echo "$branch already contains main; skipping sync."
               continue
             fi
 
             git merge origin/main --no-edit -m "chore(sync): automated merge of main into $branch"
             git push origin "$branch"
           done
-        continue-on-error: true

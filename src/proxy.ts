@@ -66,6 +66,7 @@ function buildCsp({
     "https://challenges.cloudflare.com",
     "https://tpc.googlesyndication.com",
     "https://googleads.g.doubleclick.net",
+    "https://statics.8me.jp",
   ];
   if (isDev) {
     scriptSrc.push("'unsafe-eval'");

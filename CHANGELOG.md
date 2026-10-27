@@ -1,3 +1,19 @@
+# [1.18.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.17.1...v1.18.0) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** upgrade next to 16.4.3 and patch audited dependencies ([0a086be](https://github.com/NeoWhisper/neowhisper-blog/commit/0a086bedee221f9b4390d0bd4d5acd59fac1e136))
+* enforce Turnstile verification in production (t_7d1c) ([b14cac4](https://github.com/NeoWhisper/neowhisper-blog/commit/b14cac468f2d2dfcb300bb9ef278800708a11fde))
+* sanitize admin action error responses (t_7da1) ([46625f4](https://github.com/NeoWhisper/neowhisper-blog/commit/46625f494e8baafbb4d65529eb0c7dc0ed1a3232))
+* sanitize error messages in admin actions (t_7da1) ([27994f0](https://github.com/NeoWhisper/neowhisper-blog/commit/27994f0b7e60000b6852cbfebd72495ff09d175a))
+
+
+### Features
+
+* add rate limiting to contact and subscribe API endpoints (t_8a3f) ([5740ddc](https://github.com/NeoWhisper/neowhisper-blog/commit/5740ddc8437c9e06064a26fd9fa1c3d56afd6c35))
+* add rate limiting to contact and subscribe API endpoints (t_8a3f) ([3eddf62](https://github.com/NeoWhisper/neowhisper-blog/commit/3eddf62156ebf7eb346f428b2eba39e1351e7070))
+
 ## [1.17.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.17.0...v1.17.1) (2026-10-26)
 
 

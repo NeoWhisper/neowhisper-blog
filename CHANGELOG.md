@@ -1,3 +1,11 @@
+## [1.17.1](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.17.0...v1.17.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** make TypeScript 7 toolchain compatible ([76f4554](https://github.com/NeoWhisper/neowhisper-blog/commit/76f455436f866200cbed271d1ebf9eb83a7366b4))
+* **deps:** sync npm 11 lockfile metadata ([cde6aed](https://github.com/NeoWhisper/neowhisper-blog/commit/cde6aed6166699229c2f6e5a09484bceda89e5f3))
+
 # [1.17.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.16.0...v1.17.0) (2026-07-24)
 
 

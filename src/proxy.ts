@@ -38,6 +38,7 @@ function buildCsp({
     "'self'",
     "https://www.google-analytics.com",
     "https://region1.google-analytics.com",
+    "https://linkmgr.8me.jp",
     "https://www.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
     "https://googleads.g.doubleclick.net",
@@ -66,6 +67,7 @@ function buildCsp({
     "https://challenges.cloudflare.com",
     "https://tpc.googlesyndication.com",
     "https://googleads.g.doubleclick.net",
+    "https://statics.8me.jp",
   ];
   if (isDev) {
     scriptSrc.push("'unsafe-eval'");

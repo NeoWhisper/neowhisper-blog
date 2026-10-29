@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 declare global {
     interface Window {
@@ -13,7 +13,23 @@ type Props = {
 };
 
 export function AdSenseAd({ slot }: Props) {
+    const [consented, setConsented] = useState(false);
+
     useEffect(() => {
+        const check = () => {
+            try {
+                setConsented(localStorage.getItem("cookie-consent") === "accepted");
+            } catch {
+                setConsented(false);
+            }
+        };
+        check();
+        window.addEventListener("storage", check);
+        return () => window.removeEventListener("storage", check);
+    }, []);
+
+    useEffect(() => {
+        if (!consented) return;
         try {
             // Check if the ad is already initialized to prevent duplicate push calls (common in React Strict Mode)
             const adElement = document.querySelector(`ins[data-ad-slot="${slot}"]`);
@@ -23,13 +39,13 @@ export function AdSenseAd({ slot }: Props) {
 
             (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
-            console.error("AdSense error:", err);
+            if (process.env.NODE_ENV !== "production") console.error("AdSense error:", err);
         }
-    }, [slot]);
+    }, [slot, consented]);
 
     const adClientId = process.env.NEXT_PUBLIC_ADSENSE_ID;
 
-    if (!adClientId) {
+    if (!adClientId || !consented) {
         return null;
     }
 

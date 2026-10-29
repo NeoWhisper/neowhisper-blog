@@ -119,19 +119,23 @@ export default async function RootLayout({
   return (
     <html lang={lang} dir={dir} className={`${outfit.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
-        <Script
-          src="https://statics.8me.jp/a8link/a8linkmgr.js"
-          strategy="beforeInteractive"
-          nonce={nonce}
-        />
-        <Script
-          id="a8linkmgr-config"
-          strategy="beforeInteractive"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `a8linkmgr({ "config_id": "VBUDjG2on1VGlT5LlAsa" });`,
-          }}
-        />
+        {process.env.NEXT_PUBLIC_A8_CONFIG_ID && (
+          <>
+            <Script
+              src="https://statics.8me.jp/a8link/a8linkmgr.js"
+              strategy="beforeInteractive"
+              nonce={nonce}
+            />
+            <Script
+              id="a8linkmgr-config"
+              strategy="beforeInteractive"
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `a8linkmgr({ "config_id": ${JSON.stringify(process.env.NEXT_PUBLIC_A8_CONFIG_ID)} });`,
+              }}
+            />
+          </>
+        )}
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
           <script
             nonce={nonce}

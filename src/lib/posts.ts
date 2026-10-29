@@ -16,7 +16,12 @@ import { Post } from "@/types";
 import { buildCategorySlug } from "@/lib/categories";
 
 function sanitizeMdxContent(content: unknown): string {
-  return String(content ?? "").replace(/<(?=\s*\d)/g, "&lt;");
+  return String(content ?? "")
+    .replace(/<(?=\s*\d)/g, "&lt;")
+    .replace(
+      /<img\b([^>]*\bsrc=["']https?:\/\/[^"']*\.a8\.net\/[^"']*["'][^>]*?)(?<!\/)>/gi,
+      "<img$1 />",
+    );
 }
 
 function safeFrontmatterString(value: unknown, fallback = ""): string {

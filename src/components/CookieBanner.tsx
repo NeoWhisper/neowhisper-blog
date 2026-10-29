@@ -30,6 +30,7 @@ export default function CookieBanner() {
   const handleAccept = () => {
     try {
       localStorage.setItem("cookie-consent", "accepted");
+      window.dispatchEvent(new Event("storage"));
     } catch {
       // Ignore storage errors
     }
@@ -39,6 +40,7 @@ export default function CookieBanner() {
   const handleDecline = () => {
     try {
       localStorage.setItem("cookie-consent", "declined");
+      window.dispatchEvent(new Event("storage"));
     } catch {
       // Ignore storage errors
     }

@@ -35,7 +35,19 @@ const ALLOWED_TAGS = [
   "ul",
 ];
 
-const ALLOWED_ATTR = ["alt", "class", "href", "rel", "src", "target", "title"];
+const ALLOWED_ATTR = [
+  "alt",
+  "border",
+  "class",
+  "height",
+  "href",
+  "referrerpolicy",
+  "rel",
+  "src",
+  "target",
+  "title",
+  "width",
+];
 
 export function renderMarkdownToSafeHtml(markdown: string): string {
   const rawHtml = marked.parse(markdown ?? "") as string;

@@ -157,7 +157,7 @@ export async function POST(request: Request) {
       existing.count += 1;
       if (existing.count > RATE_LIMIT_MAX_REQUESTS) {
         console.warn(
-          `[CONTACT API] Rate limit exceeded for IP: ${clientIp} (${existing.count} requests in window)`
+          `[CONTACT API] Rate limit exceeded (${existing.count} requests in window)`
         );
         if (wantsHtml) return redirect(`/contact?error=2`);
         return NextResponse.json(

@@ -190,6 +190,24 @@
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
 }
 
+.prose a img {
+    cursor: pointer;
+}
+
+.prose img[width="1"][height="1"] {
+    display: inline-block;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    cursor: default;
+    pointer-events: none;
+    transform: none;
+}
+
 /* Full-screen lightbox via :target trick */
 .prose img:focus {
     position: fixed;

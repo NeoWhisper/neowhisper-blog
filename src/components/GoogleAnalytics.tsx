@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
-import { useEffect, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 
 import { GA_TRACKING_ID, pageview } from '@/lib/gtag'
 
@@ -20,7 +20,22 @@ function AnalyticsLogic() {
 }
 
 export default function GoogleAnalytics({ nonce }: { nonce?: string }) {
-    if (!GA_TRACKING_ID) {
+    const [consented, setConsented] = useState(false)
+
+    useEffect(() => {
+        const check = () => {
+            try {
+                setConsented(localStorage.getItem("cookie-consent") === "accepted")
+            } catch {
+                setConsented(false)
+            }
+        }
+        check()
+        window.addEventListener("storage", check)
+        return () => window.removeEventListener("storage", check)
+    }, [])
+
+    if (!GA_TRACKING_ID || !consented) {
         return null
     }
 

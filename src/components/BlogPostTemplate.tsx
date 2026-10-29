@@ -6,6 +6,7 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { formatDate } from "@/lib/utils";
 import { AdSenseAd } from "@/components/AdSenseAd";
+import AffiliateAd from "@/components/AffiliateAd";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Post } from "@/types";
 import ArticleCard from "@/components/ArticleCard";
@@ -379,27 +380,61 @@ export default function BlogPostTemplate({
                       ol: (props) => (
                         <ol className="list-decimal pl-6 mt-12 mb-12" {...props} />
                       ),
-                      img: ({ src = "", alt = "", title }) => (
-                        <ImageZoom
-                          src={src}
-                          alt={alt}
-                          title={title}
-                          className="my-12 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-full h-auto"
-                        />
-                      ),
+                      img: ({ src = "", alt = "", title, width, height }) => {
+                        const isTrackingPixel =
+                          (String(width) === "1" && String(height) === "1") ||
+                          /\.a8\.net\/0\.gif/i.test(src);
+                        if (isTrackingPixel) {
+                          return (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={src}
+                              alt={alt}
+                              width={1}
+                              height={1}
+                              className="inline-block w-px h-px border-0 m-0 p-0 align-baseline pointer-events-none"
+                            />
+                          );
+                        }
+                        if (/\.a8\.net\b/i.test(src)) {
+                          return (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={src}
+                              alt={alt}
+                              title={title}
+                              width={width}
+                              height={height}
+                              className="my-6 max-w-full h-auto rounded-lg"
+                            />
+                          );
+                        }
+                        return (
+                          <ImageZoom
+                            src={src}
+                            alt={alt}
+                            title={title}
+                            className="my-12 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-full h-auto"
+                          />
+                        );
+                      },
                       a: ({ href, children, ...props }) => {
                         const isExternal = href?.startsWith("http");
+                        const isA8Link = Boolean(href && /\.a8\.net\b/i.test(href));
                         return (
                           <a
                             href={href}
                             className="animated-link text-purple-600 dark:text-purple-400 font-medium inline-flex items-center group"
                             {...(isExternal
-                              ? { target: "_blank", rel: "noopener noreferrer" }
+                              ? {
+                                  target: "_blank",
+                                  rel: isA8Link ? "nofollow noopener" : "noopener noreferrer",
+                                }
                               : {})}
                             {...props}
                           >
                             <span className="relative">{children}</span>
-                            {isExternal && (
+                            {isExternal && !isA8Link && (
                               <svg
                                 className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0"
                                 fill="none"
@@ -520,6 +555,7 @@ export default function BlogPostTemplate({
                     }}
                   />
                 )}
+                {showAd && <AffiliateAd category={category} lang={currentLang} />}
               </div>
             </div>
             </div>

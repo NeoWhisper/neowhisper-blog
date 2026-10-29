@@ -1,3 +1,17 @@
+# [1.20.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.19.0...v1.20.0) (2026-10-29)
+
+
+### Bug Fixes
+
+* gate adsbygoogle.js script loading on cookie consent ([c507421](https://github.com/NeoWhisper/neowhisper-blog/commit/c5074210479a6c08e037872121ffb73f1af326d5))
+* pass normalized currentLang to AffiliateAd in BlogPostTemplate ([3ed65eb](https://github.com/NeoWhisper/neowhisper-blog/commit/3ed65eb31109790787bcb0c948c1f81747228273))
+
+
+### Features
+
+* add category-based A8 affiliate ad component for blog posts ([e35ead9](https://github.com/NeoWhisper/neowhisper-blog/commit/e35ead9269ef89f0ad4c9ccf0a410b032fb1e5fe))
+* gate analytics/ads on cookie consent and support A8 affiliate links ([bac2e74](https://github.com/NeoWhisper/neowhisper-blog/commit/bac2e74d387f4a2d86cf40283c908a9431af8304))
+
 # [1.19.0](https://github.com/NeoWhisper/neowhisper-blog/compare/v1.18.0...v1.19.0) (2026-10-27)
 
 

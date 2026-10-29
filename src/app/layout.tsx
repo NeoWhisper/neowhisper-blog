@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import Script from "next/script";
 import { headers } from "next/headers";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { AdSenseScript } from "@/components/AdSenseAd";
 import CookieBanner from "@/components/CookieBanner";
 import AuthCodeRedirect from "@/components/AuthCodeRedirect";
 
@@ -137,12 +138,9 @@ export default async function RootLayout({
           </>
         )}
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
-          <script
-            nonce={nonce}
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
-            crossOrigin="anonymous"
-            suppressHydrationWarning
+          <meta
+            name="google-adsense-account"
+            content={process.env.NEXT_PUBLIC_ADSENSE_ID}
           />
         )}
         {/* Client-side RTL direction updater for client-side navigation */}
@@ -189,6 +187,7 @@ export default async function RootLayout({
         </div>
         
         <GoogleAnalytics nonce={nonce} />
+        <AdSenseScript nonce={nonce} />
         <Suspense fallback={null}>
           <AuthCodeRedirect />
         </Suspense>

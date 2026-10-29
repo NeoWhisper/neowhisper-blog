@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import { useEffect, useState } from "react";
 
 declare global {
@@ -12,7 +13,7 @@ type Props = {
     slot: string;
 };
 
-export function AdSenseAd({ slot }: Props) {
+function useCookieConsent() {
     const [consented, setConsented] = useState(false);
 
     useEffect(() => {
@@ -27,6 +28,32 @@ export function AdSenseAd({ slot }: Props) {
         window.addEventListener("storage", check);
         return () => window.removeEventListener("storage", check);
     }, []);
+
+    return consented;
+}
+
+export function AdSenseScript({ nonce }: { nonce?: string }) {
+    const consented = useCookieConsent();
+    const adClientId = process.env.NEXT_PUBLIC_ADSENSE_ID;
+
+    if (!adClientId || !consented) {
+        return null;
+    }
+
+    return (
+        <Script
+            id="adsense-script"
+            nonce={nonce}
+            strategy="afterInteractive"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClientId}`}
+            crossOrigin="anonymous"
+        />
+    );
+}
+
+export function AdSenseAd({ slot }: Props) {
+    const consented = useCookieConsent();
 
     useEffect(() => {
         if (!consented) return;

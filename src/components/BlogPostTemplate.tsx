@@ -555,7 +555,7 @@ export default function BlogPostTemplate({
                     }}
                   />
                 )}
-                {showAd && <AffiliateAd category={category} lang={lang} />}
+                {showAd && <AffiliateAd category={category} lang={currentLang} />}
               </div>
             </div>
             </div>
